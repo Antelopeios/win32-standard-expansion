@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-21
-// Version:	1.0.0004.1546
+// Date:	2011-02-25
+// Version:	1.0.0005.0106
+//
+// History:
+//	- 1.0.0005.0106(2011-02-25)	= 以模板的形式为一般类型做更为通用的泛型算法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Hash_h__
@@ -49,24 +52,18 @@
 class CHash
 {
 public:
-	inline static DWORD HashKey(DWORD Key)
+	template<typename KeyT>
+	inline static DWORD HashKey(KeyT Key)
 	{
 		return (DWORD)(DWORD_PTR)(Key);
 	}
-	inline static DWORD HashKey(LPCSTR Key)
+	template<typename AryT>
+	inline static DWORD HashAry(AryT Ary)
 	{
-		if (!Key) return 0;
+		if (!Ary) return 0;
 		DWORD hash = 0;
-		while (*Key)
-			hash = (hash << 5) + hash + *Key++;
-		return hash;
-	}
-	inline static DWORD HashKey(LPCWSTR Key)
-	{
-		if (!Key) return 0;
-		DWORD hash = 0;
-		while (*Key)
-			hash = (hash << 5) + hash + *Key++;
+		while (*Ary)
+			hash = (hash << 5) + hash + *Ary++;
 		return hash;
 	}
 };

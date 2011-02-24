@@ -34,10 +34,12 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-24
-// Version:	1.0.0004.1600
+// Version:	1.0.0005.2230
 //
 // History:
-//	- 1.0.0004.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
+//	- 1.0.0005.2230(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
+//								+ 添加CMapT::Del(iterator_t&)接口,支持由迭代器定位并删除结点
+//								+ 添加CMapT::Null()接口,支持彻底清空CMapT
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Map_h__
@@ -47,9 +49,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Algorithm/Hash.h"
 #include "Container/Array.h"
 #include "Container/List.h"
+#include "Algorithm/Hash.h"
 
 EXP_BEG
 
@@ -89,7 +91,7 @@ protected:
 	// 定位
 	bool Locate(_in_ const key_t& Key, _ot_ ite_t& Iter, _ot_ DWORD* pHash = NULL)
 	{
-		DWORD hash = hash_t::HashKey(Key);
+		DWORD hash = hash_t::HashKey<key_t>(Key);
 		DWORD indx = hash % GetSize();
 		bool ret = false;
 		ite_t ite = (m_Table[indx] + 1);
@@ -119,11 +121,7 @@ public:
 	void SetSize(DWORD nSize = PolicyT::s_nDefSize)
 	{
 		if (nSize == 0 || GetSize() == nSize) return;
-		// 清空Table与链表
-		for(ite_t ite = m_Assoc.Head(); ite != m_Assoc.Tail(); ++ite)
-			if (ite->Val()) ite->Val()->Free();
-		m_Assoc.Clear();
-		m_Table.Clear();
+		Null();
 		m_Table.SetSize(nSize);
 		// 初始化链表
 		for(DWORD i = 0; i < nSize; ++i)
@@ -142,6 +140,14 @@ public:
 		DWORD size = GetSize();
 		m_Table.Clear();
 		SetSize(size);
+	}
+	void Null()
+	{
+		// 清空 Table 与 Assoc
+		for(ite_t ite = m_Assoc.Head(); ite != m_Assoc.Tail(); ++ite)
+			if (ite->Val()) ite->Val()->Free();
+		m_Assoc.Clear();
+		m_Table.Clear();
 	}
 
 	type_t& operator[](const key_t& Key)
@@ -225,6 +231,14 @@ public:
 		}
 		else
 			return false;
+	}
+	bool Del(iterator_t& Iter)
+	{
+		if (Empty()) return true;
+		if (!(Iter->InThis(this))) return false;
+		if (!(Iter->Index())) return false;
+		Iter->nIndx->Val()->Free();
+		return m_Assoc.Del(Iter->nIndx);
 	}
 };
 

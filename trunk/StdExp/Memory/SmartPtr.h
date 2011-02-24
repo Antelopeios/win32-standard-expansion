@@ -34,7 +34,7 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-24
-// Version:	1.2.0018.1500
+// Version:	1.3.0019.2100
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -63,6 +63,7 @@
 //	- 1.2.0018.1500(2011-02-24)	# 将SmartPtr整合进StdExp之后,SmartPtr::Release()没有调用alloc_t释放ptr资源
 //								# 修正简化改写CReferPtrT时没有将内部的protected成员改为public成员引起的编译错误
 //								+ 添加SmartPtr::Inc()与SmartPtr::Dec()接口,用于循环引用等特殊情况时手动调整引用计数
+//	- 1.3.0019.2100(2011-02-24)	= 改变引用计数的管理方式,还原为开始的Manager类统一管理(便于与GC协同工作)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -73,110 +74,218 @@
 #endif // _MSC_VER > 1000
 
 #include "Memory/MemAlloc.h"
+#include "Container/Map.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-// 计数指针类模板
-template <typename TypeT, typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
-class CReferPtrT
+template <typename RefAllocT = DefMemAlloc>
+class CReferPtrManagerT : CNonCopyable
 {
-public:
-	typedef AllocT alloc_t;
-
-	// 成员变量
 protected:
-	TypeT*	p_ptr;
-	volatile long n_ref;
+	// 计数指针接口
+	class IReferPtr
+	{
+	protected:
+		void*		  p_ptr;
+		volatile long n_ref;
 
-	// 构造/析构
+	public:
+		IReferPtr()
+			: p_ptr(NULL)
+			, n_ref(0)
+		{}
+		virtual ~IReferPtr()
+		{}
+
+	public:
+		void InitPtr(void* pt)
+		{
+			p_ptr = pt;
+			n_ref = 1;
+		}
+
+		long GetRefCount()
+		{ return n_ref; }
+		void* GetPtr()
+		{ return p_ptr; }
+
+		bool operator==(void* pt) const
+		{ return (p_ptr == pt); }
+		bool operator!=(void* pt) const
+		{ return (p_ptr != pt); }
+
+		virtual void Inc() = 0;
+		virtual bool Dec() = 0;
+
+		virtual void Free() = 0;
+	};
+	// 计数指针类
+	template <typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
+	class CReferPtrT : public IReferPtr
+	{
+	public:
+		typedef AllocT alloc_t;
+		typedef ModelT model_t;
+
+	public:
+		CReferPtrT()
+			: IReferPtr()
+		{}
+		~CReferPtrT()
+		{ alloc_t::Free(p_ptr); }
+
+	public:
+		void Inc()
+		{
+			model_t::Inc(&n_ref);
+		}
+		bool Dec()
+		{
+			if (model_t::Dec(&n_ref) <= 0)
+			{
+				Free();
+				return true;
+			}
+			else
+				return false;
+		}
+
+		static CReferPtrT* Alloc()
+		{ return alloc_t::Alloc<CReferPtrT>(); }
+		void Free()
+		{ alloc_t::Free(this); }
+	};
+	// 自动垃圾回收
+	class CAutoRecycle
+	{
+	public:
+		~CAutoRecycle()
+		{
+			// 当程序退出时可以自动清理 ReferPtr Map
+			CReferPtrManagerT::Clear();
+		}
+	};
+
 public:
-	CReferPtrT()
-		: p_ptr(NULL)
-		, n_ref(0)
-	{}
-	~CReferPtrT()
-	{ alloc_t::Free(p_ptr); }
+	typedef RefAllocT ref_alloc_t;
+	typedef CMapT<void*, IReferPtr*, _MapPolicyT<CHash, ref_alloc_t> > ptr_map;
 
-	// 操作
+protected:
+	static ptr_map		m_ReferPtrs;
+	static CAutoRecycle m_AutoRecyc;
+
 public:
-	void InitPtr(TypeT* pt)
+	// 获取指针引用计数
+	static long Get(void* pPtr)
 	{
-		p_ptr = pt;
-		n_ref = 1;
+		if (!pPtr) return 0;
+		ptr_map::iterator_t ite = m_ReferPtrs.Locate(pPtr);
+		if (ite == m_ReferPtrs.Tail()) return 0;
+		IReferPtr* ref_ptr = ite->Val();
+		if (ref_ptr && ref_ptr->GetPtr())
+			return ref_ptr->GetRefCount();
+		else
+			return 0;
 	}
-
-	long GetRefCount()
-	{ return n_ref; }
-	TypeT* GetPtr()
-	{ return p_ptr; }
-
-	//////////////////////////////////
-
-	bool operator==(TypeT* pt) const
-	{ return (p_ptr == pt); }
-	bool operator!=(TypeT* pt) const
-	{ return (p_ptr != pt); }
-
-	void operator++()
+	// 添加指针引用计数
+	template <typename AllocT, typename ModelT>
+	static void Add(void* pPtr)
 	{
-		ModelT::Inc(&n_ref);
+		if (!pPtr) return;
+		IReferPtr* ref_ptr = NULL;
+		ptr_map::iterator_t ite = m_ReferPtrs.Locate(pPtr);
+		if (ite == m_ReferPtrs.Tail())
+		{
+			ref_ptr = CReferPtrT<AllocT, ModelT>::Alloc();
+			ref_ptr->InitPtr(pPtr);
+			m_ReferPtrs.Add(pPtr, ref_ptr);
+		}
+		else
+		{
+			ref_ptr = ite->Val();
+			if (ref_ptr && ref_ptr->GetPtr())
+				ref_ptr->Inc();
+			else
+			{
+				if (ref_ptr) ref_ptr->Free();
+				m_ReferPtrs.Del(ite);
+			}
+		}
 	}
-	void operator--()
+	// 删除指针引用计数
+	static void Del(void* pPtr, bool bRelease = false)
 	{
-		if (ModelT::Dec(&n_ref) <= 0)
-			alloc_t::Free(this);
+		if (!pPtr) return;
+		ptr_map::iterator_t ite = m_ReferPtrs.Locate(pPtr);
+		if (ite == m_ReferPtrs.Tail()) return;
+		IReferPtr* ref_ptr = ite->Val();
+		if (!bRelease && ref_ptr && ref_ptr->GetPtr())
+		{
+			if (ref_ptr->Dec())
+				m_ReferPtrs.Del(ite);
+		}
+		else
+		{
+			if (ref_ptr) ref_ptr->Free();
+			m_ReferPtrs.Del(ite);
+		}
 	}
-
-	operator TypeT*()
-	{ return p_ptr; }
+	// 清空指针记录表
+	static void Clear()
+	{
+		for(ptr_map::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)
+		{
+			IReferPtr* ref_ptr = ite->Val();
+			if (ref_ptr) ref_ptr->Free();
+		}
+		m_ReferPtrs.Clear();
+	}
 };
-// 计数指针类模板 结束
+
+template <typename RefAllocT>
+typename CReferPtrManagerT<RefAllocT>::ptr_map CReferPtrManagerT<RefAllocT>::m_ReferPtrs(1021);
+template <typename RefAllocT>
+typename CReferPtrManagerT<RefAllocT>::CAutoRecycle CReferPtrManagerT<RefAllocT>::m_AutoRecyc;
+
+typedef CReferPtrManagerT<> CReferPtrManager;
 
 //////////////////////////////////////////////////////////////////
 
 // 智能指针类模板
-template <typename TypeT, typename RefPtrT = CReferPtrT<TypeT> >
+template <typename TypeT, typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
 class CSmartPtrT
 {
 public:
-	typedef RefPtrT ref_ptr_t;
-	typedef typename ref_ptr_t::alloc_t alloc_t;
+	typedef AllocT alloc_t;
+	typedef ModelT model_t;
 
 	// 成员变量
 protected:
-	ref_ptr_t* m_ptr;
+	TypeT* m_Ptr;
 
 	// 构造/析构
 public:
 	CSmartPtrT(void)
-		: m_ptr(NULL)
+		: m_Ptr(NULL)
 	{}
-	CSmartPtrT(TypeT* pt)
-		: m_ptr(NULL)
-	{
-		if( !pt ) return ;
-		m_ptr = alloc_t::Alloc<ref_ptr_t>();
-		m_ptr->InitPtr(pt);
-	}
+	CSmartPtrT(TypeT* ptr)
+		: m_Ptr(NULL)
+	{ (*this) = ptr; }
 	CSmartPtrT(const CSmartPtrT& ptr)
-		: m_ptr(NULL)
+		: m_Ptr(NULL)
 	{ (*this) = ptr; }
 
 	//////////////////////////////////
 
 	template <typename Type2T>
-	CSmartPtrT(Type2T* pt)
-		: m_ptr(NULL)
-	{
-		if( !pt ) return ;
-		m_ptr = alloc_t::Alloc<ref_ptr_t>();
-		m_ptr->InitPtr((TypeT*)pt);
-	}
+	CSmartPtrT(Type2T* ptr)
+		: m_Ptr(NULL)
+	{ (*this) = ptr; }
 	template <typename Type2T>
 	CSmartPtrT(const CSmartPtrT<Type2T>& ptr)
-		: m_ptr(NULL)
+		: m_Ptr(NULL)
 	{ (*this) = ptr; }
 
 	//////////////////////////////////
@@ -187,25 +296,17 @@ public:
 	// 操作
 public:
 	long GetRefCount()
-	{
-		if( m_ptr )
-			return m_ptr->GetRefCount();
-		else
-			return 0;
-	}
+	{ return CReferPtrManager::Get(m_Ptr); }
 
 	void Inc()
-	{ if( m_ptr ) ++ (*m_ptr); }
+	{ CReferPtrManager::Add(m_Ptr); }
 	void Dec()
-	{ if( m_ptr ) -- (*m_ptr); }
+	{ CReferPtrManager::Del(m_Ptr); }
 
 	void Release()
 	{
-		if( m_ptr )
-		{
-			alloc_t::Free(m_ptr);
-			m_ptr = NULL;
-		}
+		CReferPtrManager::Del(m_Ptr, true);
+		m_Ptr = NULL;
 	}
 
 	//////////////////////////////////
@@ -213,43 +314,44 @@ public:
 	CSmartPtrT& operator=(const CSmartPtrT& ptr)
 	{
 		if( (*this) == ptr ) return (*this);
-		if( m_ptr ) -- (*m_ptr);
-		m_ptr = ptr.m_ptr;
-		if( m_ptr ) ++ (*m_ptr);
+		Dec();
+		m_Ptr = ptr.m_Ptr;
+		Inc();
 		return (*this);
 	}
-	bool operator==(TypeT* pt) const
+
+	bool operator==(TypeT* ptr) const
 	{
-		if( m_ptr )
-			return ((*m_ptr) == (TypeT*)pt);
-		else if( !pt )
+		if( m_Ptr )
+			return (m_Ptr == ptr);
+		else if( !ptr )
 			return true;
 		else
 			return false;
 	}
 	bool operator==(const CSmartPtrT& ptr) const
-	{ return (m_ptr == (ref_ptr_t*)ptr); }
-	bool operator!=(TypeT* pt) const
+	{ return (m_Ptr == ptr.m_Ptr); }
+	bool operator!=(TypeT* ptr) const
 	{
-		if( m_ptr )
-			return ((*m_ptr) != (TypeT*)pt);
-		else if( pt )
+		if( m_Ptr )
+			return (m_Ptr != ptr);
+		else if( ptr )
 			return true;
 		else
 			return false;
 	}
 	bool operator!=(const CSmartPtrT& ptr) const
-	{ return (m_ptr != (ref_ptr_t*)ptr); }
+	{ return (m_Ptr != ptr.m_Ptr); }
 
 	TypeT* operator+(DWORD offset) const
-	{ return (m_ptr + offset); }
+	{ return (m_Ptr + offset); }
 	TypeT* operator-(DWORD offset) const
-	{ return (m_ptr - offset); }
+	{ return (m_Ptr - offset); }
 
 	TypeT* operator->() const
-	{ return m_ptr->GetPtr(); }
+	{ return m_Ptr; }
 	operator TypeT*() const
-	{ return m_ptr->GetPtr(); }
+	{ return m_Ptr; }
 
 	//////////////////////////////////
 
@@ -257,38 +359,29 @@ public:
 	CSmartPtrT& operator=(const CSmartPtrT<Type2T>& ptr)
 	{
 		if( (*this) == ptr ) return (*this);
-		if( m_ptr ) -- (*m_ptr);
-		m_ptr = (ref_ptr_t*)(CSmartPtrT<Type2T>::ref_ptr_t*)ptr;
-		if( m_ptr ) ++ (*m_ptr);
+		Dec();
+		m_Ptr = (TypeT*)ptr.m_Ptr;
+		Inc();
 		return (*this);
 	}
 
 	template <typename Type2T>
-	bool operator==(Type2T* pt) const
-	{ return ((*this) == (TypeT*)pt); }
-
+	bool operator==(Type2T* ptr) const
+	{ return ((*this) == (TypeT*)ptr); }
 	template <typename Type2T>
 	bool operator==(const CSmartPtrT<Type2T>& ptr) const
-	{ return (m_ptr == (ref_ptr_t*)(CSmartPtrT<Type2T>::ref_ptr_t*)ptr); }
-
+	{ return (m_Ptr == (TypeT*)ptr.m_Ptr); }
 	template <typename Type2T>
-	bool operator!=(Type2T* pt) const
-	{ return ((*this) != (TypeT*)pt); }
-
+	bool operator!=(Type2T* ptr) const
+	{ return ((*this) != (TypeT*)ptr); }
 	template <typename Type2T>
 	bool operator!=(const CSmartPtrT<Type2T>& ptr) const
-	{ return (m_ptr != (ref_ptr_t*)(CSmartPtrT<Type2T>::ref_ptr_t*)ptr); }
+	{ return (m_Ptr != (TypeT*)ptr.m_Ptr); }
 
 	template <typename Type2T>
 	operator Type2T*() const
-	{ return (Type2T*)(m_ptr->GetPtr()); }
-
-	//////////////////////////////////
-
-	operator ref_ptr_t*() const
-	{ return m_ptr; }
+	{ return (Type2T*)m_Ptr; }
 };
-// 智能指针类模板 结束
 
 //////////////////////////////////////////////////////////////////
 

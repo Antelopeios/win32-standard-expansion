@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.0.0013.1600
+// Date:	2011-02-25
+// Version:	1.0.0014.0106
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
+//	- 1.0.0014.0106(2011-02-25)	+ 为String添加用于Hash的DWORD_PTR重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -48,6 +49,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Container/Array.h"
+#include "Algorithm/Hash.h"
 
 EXP_BEG
 
@@ -92,6 +94,9 @@ public:
 
 	~CStringT()
 	{}
+
+	operator DWORD_PTR()
+	{ return CHash::HashAry<type_t*>(m_Array); }
 
 public:
 	DWORD GetSize()

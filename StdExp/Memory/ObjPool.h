@@ -44,6 +44,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Algorithm/NonCopyable.h"
 #include "Debugging/Assertion.h"
 #include "Pattern/Singleton.h"
 #include "Thread/ThreadModel.h"

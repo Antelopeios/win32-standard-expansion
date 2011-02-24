@@ -34,10 +34,11 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-24
-// Version:	1.1.0012.1500
+// Version:	1.1.0013.2300
 //
 // History:
-//	- 1.1.0012.1500(2011-02-24)	^ 优化CGCT::Free()的实现
+//	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
+//								+ 支持与SmartPtr智能指针同时使用
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -47,8 +48,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Debugging/Assertion.h"
-#include "Memory/MemAlloc.h"
+#include "Memory/SmartPtr.h"
 
 EXP_BEG
 
@@ -82,6 +82,14 @@ public:
 	{
 		Clear();
 		alloc_t::Free(m_BlockArray);
+	}
+
+protected:
+	void CheckFree(void* pPtr)
+	{
+		// 有引用计数时不自动释放指针
+		if (CReferPtrManager::Get(pPtr) <= 0)
+			alloc_t::Free(pPtr);
 	}
 
 public:
@@ -157,7 +165,7 @@ public:
 		{
 			if (pPtr = m_BlockArray[i])
 			{
-				alloc_t::Free(pPtr);
+				CheckFree(pPtr);
 				memmove((void*)(m_BlockArray + i), (void*)(m_BlockArray + i + 1), sizeof(void*) * (m_nIndx - i - 1));
 				break;
 			}
@@ -171,8 +179,8 @@ public:
 		if (!m_nIndx) return;
 		// 后进先出
 		for(DWORD i = (m_nIndx - 1); i > 0; --i)
-			alloc_t::Free(m_BlockArray[i]);
-		alloc_t::Free(m_BlockArray[0]);
+			CheckFree(m_BlockArray[i]);
+		CheckFree(m_BlockArray[0]);
 		m_nIndx = 0;
 	}
 };

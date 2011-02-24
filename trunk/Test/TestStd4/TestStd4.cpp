@@ -31,6 +31,8 @@ DWORD WINAPI Proc(LPVOID lpParam)
 			}
 			Sleep(5);
 		}
+		ExLock(g_mutex, true, CShrMutex);
+		ExCPrintf(g_str);
 	}
 	return 0;
 }

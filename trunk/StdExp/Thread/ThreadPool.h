@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.0.0003.0010
+// Date:	2011-02-25
+// Version:	1.0.0004.0400
+//
+// History:
+//	- 1.0.0004.0400(2011-02-25)	^ 简化CallProc中锁的调用
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadPool_h__
@@ -57,9 +60,9 @@ template <typename CreatorT = CThreadHeapCreator, typename AllocT = DefMemAlloc>
 struct _ThreadPoolPolicyT
 {
 	typedef typename CreatorT::creator_t creator_t;
-	typedef typename AllocT alloc_t;
-	typedef typename _MultiModel model_t;
-	typedef typename model_t::_ShrPolicy mutex_policy_t;
+	typedef AllocT alloc_t;
+	typedef _MultiModel model_t;
+	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
 	inline static DWORD DefSize()
@@ -166,24 +169,18 @@ protected:
 			if (wr == WAIT_OBJECT_0 + 1)
 				break;
 			// 响应用户调用事件
-			ExLock(ths->m_Mutex, true, mutex_t); // 自动读锁
+			ExLock(ths->m_Mutex, false, mutex_t);
 			if(!ths->m_TskList.Empty())
 			{
-				ths->m_Mutex.Lock(false);	// 加写锁
 				tsk_t tsk = ths->m_TskList.HeadItem();
 				ths->m_TskList.Del(ths->m_TskList.Head());
 				++(ths->m_nUseSize);
 				if (tsk.hdlR) (*(tsk.hdlR)) = hdl;
 				ths->m_Mutex.Unlock(false);	// 解写锁
-				ths->m_Mutex.Unlock(true);	// 解读锁
-
 				if (tsk.evtR) tsk.evtR->Set();
 				tsk.pCal(tsk.pPar);			// 用户调用
-
 				ths->m_Mutex.Lock(false);	// 加写锁
 				--(ths->m_nUseSize);
-				ths->m_Mutex.Lock(true);	// 加读锁
-				ths->m_Mutex.Unlock(false);	// 解写锁
 			}
 			// 检查是否超出线程池大小
 			if (ths->m_nMaxSize < ths->m_TrdList.GetCount())
@@ -194,16 +191,14 @@ protected:
 		ths->m_Creator.Close(hdl);
 		ths->m_Mutex.Lock(false);		// 加写锁
 		ths->m_TrdList.Del(par->tIte);
-		ths->m_Mutex.Lock(true);		// 加读锁
-		ths->m_Mutex.Unlock(false);		// 解写锁
 		if (ths->m_TrdList.GetCount() == 0)
 		{
-			ths->m_Mutex.Unlock(true);	// 解读锁
+			ths->m_Mutex.Unlock(false);	// 解写锁
 			ths->m_ComplEvt.Set();
 			ths->m_ClearEvt.Reset();
 		}
 		else
-			ths->m_Mutex.Unlock(true);	// 解读锁
+			ths->m_Mutex.Unlock(false);	// 解写锁
 		alloc_t::Free(par);
 		return 0;
 	}

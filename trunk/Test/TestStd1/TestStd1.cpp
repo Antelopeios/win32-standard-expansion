@@ -15,7 +15,7 @@ int _tmain(int argc, _TCHAR* argv[])
 #else /*_DEBUG*/
 	const int TestCont = 1000;
 	const int TestLast = 1000;
-	const int TestSize = 10000;
+	const int TestSize = 100000;
 #endif/*_DEBUG*/
 	unsigned int tStart = 0, tEnd = 0;
 	void* Test[TestLast];

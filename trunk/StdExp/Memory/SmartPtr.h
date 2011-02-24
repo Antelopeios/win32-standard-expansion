@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.3.0019.2100
+// Date:	2011-02-25
+// Version:	1.3.0020.0400
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -64,6 +64,7 @@
 //								# 修正简化改写CReferPtrT时没有将内部的protected成员改为public成员引起的编译错误
 //								+ 添加SmartPtr::Inc()与SmartPtr::Dec()接口,用于循环引用等特殊情况时手动调整引用计数
 //	- 1.3.0019.2100(2011-02-24)	= 改变引用计数的管理方式,还原为开始的Manager类统一管理(便于与GC协同工作)
+//	- 1.3.0020.0400(2011-02-25)	# 当使用多线程模型时,PtrManager与DefMemAlloc的静态初始化发生冲突
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -80,8 +81,8 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename RefAllocT = DefMemAlloc>
-class CReferPtrManagerT : CNonCopyable
+template <typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
+class CPtrManagerT : CNonCopyable
 {
 protected:
 	// 计数指针接口
@@ -122,12 +123,12 @@ protected:
 		virtual void Free() = 0;
 	};
 	// 计数指针类
-	template <typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
+	template <typename RefAllocT = DefMemAlloc, typename RefModelT = DefThreadModel>
 	class CReferPtrT : public IReferPtr
 	{
 	public:
-		typedef AllocT alloc_t;
-		typedef ModelT model_t;
+		typedef RefAllocT alloc_t;
+		typedef RefModelT model_t;
 
 	public:
 		CReferPtrT()
@@ -157,31 +158,40 @@ protected:
 		void Free()
 		{ alloc_t::Free(this); }
 	};
-	// 自动垃圾回收
-	class CAutoRecycle
-	{
-	public:
-		~CAutoRecycle()
-		{
-			// 当程序退出时可以自动清理 ReferPtr Map
-			CReferPtrManagerT::Clear();
-		}
-	};
 
 public:
-	typedef RefAllocT ref_alloc_t;
-	typedef CMapT<void*, IReferPtr*, _MapPolicyT<CHash, ref_alloc_t> > ptr_map;
+	typedef AllocT alloc_t;
+	typedef ModelT model_t;
+	typedef typename model_t::_LockPolicy mutex_policy_t;
+	typedef CLockT<mutex_policy_t> mutex_t;
+	typedef CMapT<void*, IReferPtr*, _MapPolicyT<CHash, alloc_t> > ptr_map_t;
 
 protected:
-	static ptr_map		m_ReferPtrs;
-	static CAutoRecycle m_AutoRecyc;
+	mutex_t		m_Mutex;
+	ptr_map_t	m_ReferPtrs;
+
+public:
+	CPtrManagerT()
+		: m_ReferPtrs(1021)
+	{}
+	~CPtrManagerT()
+	{ Clear(); }
+
+public:
+	static CPtrManagerT& Instance()
+	{
+		ExLockThis(model_t::_ExcPolicy);
+		static CPtrManagerT instance;
+		return instance;
+	}
 
 public:
 	// 获取指针引用计数
-	static long Get(void* pPtr)
+	long Get(void* pPtr)
 	{
 		if (!pPtr) return 0;
-		ptr_map::iterator_t ite = m_ReferPtrs.Locate(pPtr);
+		ExLock(m_Mutex, true, mutex_t);
+		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail()) return 0;
 		IReferPtr* ref_ptr = ite->Val();
 		if (ref_ptr && ref_ptr->GetPtr())
@@ -190,15 +200,16 @@ public:
 			return 0;
 	}
 	// 添加指针引用计数
-	template <typename AllocT, typename ModelT>
-	static void Add(void* pPtr)
+	template <typename RefAllocT, typename RefModelT>
+	void Add(void* pPtr)
 	{
 		if (!pPtr) return;
 		IReferPtr* ref_ptr = NULL;
-		ptr_map::iterator_t ite = m_ReferPtrs.Locate(pPtr);
+		ExLock(m_Mutex, false, mutex_t);
+		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail())
 		{
-			ref_ptr = CReferPtrT<AllocT, ModelT>::Alloc();
+			ref_ptr = CReferPtrT<RefAllocT, RefModelT>::Alloc();
 			ref_ptr->InitPtr(pPtr);
 			m_ReferPtrs.Add(pPtr, ref_ptr);
 		}
@@ -215,10 +226,11 @@ public:
 		}
 	}
 	// 删除指针引用计数
-	static void Del(void* pPtr, bool bRelease = false)
+	void Del(void* pPtr, bool bRelease = false)
 	{
 		if (!pPtr) return;
-		ptr_map::iterator_t ite = m_ReferPtrs.Locate(pPtr);
+		ExLock(m_Mutex, false, mutex_t);
+		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail()) return;
 		IReferPtr* ref_ptr = ite->Val();
 		if (!bRelease && ref_ptr && ref_ptr->GetPtr())
@@ -233,9 +245,10 @@ public:
 		}
 	}
 	// 清空指针记录表
-	static void Clear()
+	void Clear()
 	{
-		for(ptr_map::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)
+		ExLock(m_Mutex, false, mutex_t);
+		for(ptr_map_t::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)
 		{
 			IReferPtr* ref_ptr = ite->Val();
 			if (ref_ptr) ref_ptr->Free();
@@ -244,12 +257,7 @@ public:
 	}
 };
 
-template <typename RefAllocT>
-typename CReferPtrManagerT<RefAllocT>::ptr_map CReferPtrManagerT<RefAllocT>::m_ReferPtrs(1021);
-template <typename RefAllocT>
-typename CReferPtrManagerT<RefAllocT>::CAutoRecycle CReferPtrManagerT<RefAllocT>::m_AutoRecyc;
-
-typedef CReferPtrManagerT<> CReferPtrManager;
+typedef CPtrManagerT<> CPtrManager;
 
 //////////////////////////////////////////////////////////////////
 
@@ -296,16 +304,16 @@ public:
 	// 操作
 public:
 	long GetRefCount()
-	{ return CReferPtrManager::Get(m_Ptr); }
+	{ return CPtrManager::Instance().Get(m_Ptr); }
 
 	void Inc()
-	{ CReferPtrManager::Add(m_Ptr); }
+	{ CPtrManager::Instance().Add(m_Ptr); }
 	void Dec()
-	{ CReferPtrManager::Del(m_Ptr); }
+	{ CPtrManager::Instance().Del(m_Ptr); }
 
 	void Release()
 	{
-		CReferPtrManager::Del(m_Ptr, true);
+		CPtrManager::Instance().Del(m_Ptr, true);
 		m_Ptr = NULL;
 	}
 

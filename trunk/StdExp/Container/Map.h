@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-01-29
-// Version:	1.0.0003.2330
+// Date:	2011-02-24
+// Version:	1.0.0004.1600
+//
+// History:
+//	- 1.0.0004.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Map_h__
@@ -162,7 +165,8 @@ public:
 
 	iterator_t& Locate(const key_t& Key)
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		ite_t ite;
 		if (Locate(Key, ite))
 		{
@@ -175,7 +179,8 @@ public:
 
 	iterator_t& Head()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_Assoc.Head();
 		if (iter->nIndx != m_Assoc.Tail() && !iter->nIndx->Val())
 			++ iter;
@@ -183,13 +188,15 @@ public:
 	}
 	iterator_t& Tail()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_Assoc.Tail();
 		return iter;
 	}
 	iterator_t& Last()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_Assoc.Last();
 		if (iter->nIndx != m_Assoc.Tail() && !iter->nIndx->Val())
 			-- iter;

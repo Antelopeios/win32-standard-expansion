@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-22
-// Version:	1.0.0009.2350
+// Date:	2011-02-24
+// Version:	1.0.0010.1600
+//
+// History:
+//	- 1.0.0010.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __List_h__
@@ -159,19 +162,22 @@ public:
 
 	iterator_t& Head()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_pHead;
 		return iter;
 	}
 	iterator_t& Tail()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = NULL;
 		return iter;
 	}
 	iterator_t& Last()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_pLast;
 		return iter;
 	}

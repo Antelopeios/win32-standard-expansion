@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-22
-// Version:	1.1.0011.1100
+// Date:	2011-02-24
+// Version:	1.1.0012.1500
+//
+// History:
+//	- 1.1.0012.1500(2011-02-24)	^ 优化CGCT::Free()的实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -149,19 +152,17 @@ public:
 	{
 		if (!pPtr) return;
 		ExLock(m_Mutex, false, mutex_t);
-		DWORD s = m_nIndx;
-		for(DWORD i = 0; i < m_nIndx; ++i)
+		DWORD i = 0;
+		for(; i < m_nIndx; ++i)
 		{
-			if (i > s)
-				m_BlockArray[i] = m_BlockArray[i + 1];
 			if (pPtr = m_BlockArray[i])
 			{
 				alloc_t::Free(pPtr);
-				s = i;
-				m_BlockArray[i] = m_BlockArray[i + 1];
+				memmove((void*)(m_BlockArray + i), (void*)(m_BlockArray + i + 1), sizeof(void*) * (m_nIndx - i - 1));
+				break;
 			}
 		}
-		if (s < m_nIndx) --m_nIndx;
+		if (i < m_nIndx) --m_nIndx;
 	}
 	// 清空GC
 	void Clear()

@@ -88,7 +88,7 @@ protected:
 	void CheckFree(void* pPtr)
 	{
 		// 有引用计数时不自动释放指针
-		if (CReferPtrManager::Get(pPtr) <= 0)
+		if (CPtrManager::Instance().Get(pPtr) <= 0)
 			alloc_t::Free(pPtr);
 	}
 
@@ -221,7 +221,7 @@ struct _GCPolicyT
 {
 	typedef AllocT alloc_t;
 	typedef ModelT model_t;
-	typedef typename model_t::_ShrPolicy mutex_policy_t;
+	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
 	static const DWORD s_nDefSize = 100;

@@ -634,7 +634,7 @@ struct _MemPoolPolicy
 {
 	typedef AllocT alloc_t;
 	typedef ModelT model_t;
-	typedef typename model_t::_ShrPolicy mutex_policy_t;
+	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
 	static const DWORD	s_nDefSize = 1024 * 1024;		// ≥ı º¥Û–°1M

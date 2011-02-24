@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-16
-// Version:	1.2.0010.1520
+// Date:	2011-02-25
+// Version:	1.2.0011.0400
+//
+// History:
+//	- 1.2.0011.0400(2011-02-25)	# 移除_LockPolicy宏,避免在使用ThreadModel::_LockPolicy时出现C3083错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Lock_h__
@@ -50,11 +53,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#ifndef _LockPolicy
-#define _LockPolicy DefThreadModel::_LockPolicy
-#endif/*_LockPolicy*/
-
-template <typename PolicyT = _LockPolicy>
+template <typename PolicyT = DefThreadModel::_LockPolicy>
 class CLockT : CNonCopyable
 {
 public:

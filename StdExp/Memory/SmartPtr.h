@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-15
-// Version:	1.2.0017.1620
+// Date:	2011-02-24
+// Version:	1.2.0018.1500
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -60,6 +60,9 @@
 //	- 1.1.0008.1255(2009-08-25)	# 修正TSmartPtr类bool operator==()与bool operator!=()对NULL指针的判断错误
 //	- 1.1.0009.1353(2009-08-27)	= 调整TPtr与TSmartPtr类模板TYPE参数的默认值为CDelFunc::_Ptr
 //	- 1.1.0010.1200(2009-08-31)	# 修正当使用类指针,智能指针析构时不会调用其析构函数的bug
+//	- 1.2.0018.1500(2011-02-24)	# 将SmartPtr整合进StdExp之后,SmartPtr::Release()没有调用alloc_t释放ptr资源
+//								# 修正简化改写CReferPtrT时没有将内部的protected成员改为public成员引起的编译错误
+//								+ 添加SmartPtr::Inc()与SmartPtr::Dec()接口,用于循环引用等特殊情况时手动调整引用计数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -69,7 +72,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Thread/ThreadModel.h"
 #include "Memory/MemAlloc.h"
 
 EXP_BEG
@@ -80,7 +82,7 @@ EXP_BEG
 template <typename TypeT, typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
 class CReferPtrT
 {
-protected:
+public:
 	typedef AllocT alloc_t;
 
 	// 成员变量
@@ -89,7 +91,7 @@ protected:
 	volatile long n_ref;
 
 	// 构造/析构
-protected:
+public:
 	CReferPtrT()
 		: p_ptr(NULL)
 		, n_ref(0)
@@ -98,7 +100,7 @@ protected:
 	{ alloc_t::Free(p_ptr); }
 
 	// 操作
-protected:
+public:
 	void InitPtr(TypeT* pt)
 	{
 		p_ptr = pt;
@@ -127,8 +129,6 @@ protected:
 			alloc_t::Free(this);
 	}
 
-	TypeT& operator*()
-	{ return *p_ptr; }
 	operator TypeT*()
 	{ return p_ptr; }
 };
@@ -182,7 +182,7 @@ public:
 	//////////////////////////////////
 
 	~CSmartPtrT(void)
-	{ if( m_ptr ) -- (*m_ptr); }
+	{ Dec(); }
 
 	// 操作
 public:
@@ -194,10 +194,18 @@ public:
 			return 0;
 	}
 
+	void Inc()
+	{ if( m_ptr ) ++ (*m_ptr); }
+	void Dec()
+	{ if( m_ptr ) -- (*m_ptr); }
+
 	void Release()
 	{
-		if( m_ptr ) delete m_ptr;
-		m_ptr = NULL;
+		if( m_ptr )
+		{
+			alloc_t::Free(m_ptr);
+			m_ptr = NULL;
+		}
 	}
 
 	//////////////////////////////////
@@ -240,10 +248,6 @@ public:
 
 	TypeT* operator->() const
 	{ return m_ptr->GetPtr(); }
-	TypeT& operator*()
-	{ return *(*m_ptr); }
-	TypeT& operator[](DWORD inx)
-	{ return (m_ptr->GetPtr())[inx]; }
 	operator TypeT*() const
 	{ return m_ptr->GetPtr(); }
 

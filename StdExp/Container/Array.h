@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-01-28
-// Version:	1.0.0014.0150
+// Date:	2011-02-24
+// Version:	1.0.0015.1600
+//
+// History:
+//	- 1.0.0015.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
+//								# 修正CArrayT::Clear()可能出现的元素重复析构问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Array_h__
@@ -131,6 +135,7 @@ public:
 	{
 		if (m_Array)
 		{
+			InitElements(m_Array + GetCount(), GetSize() - GetCount());
 			alloc_t::Free(m_Array);
 			m_Array = NULL;
 		}
@@ -212,19 +217,22 @@ public:
 
 	iterator_t& Head()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = 0;
 		return iter;
 	}
 	iterator_t& Tail()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_nCont;
 		return iter;
 	}
 	iterator_t& Last()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = m_nCont - 1;
 		return iter;
 	}

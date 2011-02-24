@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-01-28
-// Version:	1.0.0012.0150
+// Date:	2011-02-24
+// Version:	1.0.0013.1600
+//
+// History:
+//	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -250,19 +253,22 @@ public:
 
 	iterator_t& Head() const
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = 0;
 		return iter;
 	}
 	iterator_t& Tail() const
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = GetLength() + 1;
 		return iter;
 	}
 	iterator_t& Last()
 	{
-		static iterator_t iter(node_t(this));
+		static iterator_t iter;
+		iter = node_t(this);
 		iter->nIndx = GetLength();
 		return iter;
 	}

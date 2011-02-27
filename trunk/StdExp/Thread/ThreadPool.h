@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-25
-// Version:	1.0.0004.0400
+// Date:	2011-02-27
+// Version:	1.0.0005.2136
 //
 // History:
 //	- 1.0.0004.0400(2011-02-25)	^ 简化CallProc中锁的调用
+//	- 1.0.0005.2136(2011-02-27)	+ CThreadPoolT::Create()支持返回线程ID
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadPool_h__
@@ -108,12 +109,14 @@ public:
 		LPVOID pPar;
 		CEvent* evtR;	// 任务执行信号量
 		handle_t* hdlR;	// 任务执行返回值
+		LPDWORD tidR;
 
 		_Tsk(call_t cal = NULL, LPVOID par = NULL)
 			: pCal(cal)
 			, pPar(par)
 			, evtR(NULL)
 			, hdlR(NULL)
+			, tidR(NULL)
 		{}
 	} tsk_t;
 	typedef CListT<tsk_t, _ListPolicyT<alloc_t> > tsk_list_t;
@@ -176,6 +179,7 @@ protected:
 				ths->m_TskList.Del(ths->m_TskList.Head());
 				++(ths->m_nUseSize);
 				if (tsk.hdlR) (*(tsk.hdlR)) = hdl;
+				if (tsk.tidR) (*(tsk.tidR)) = GetCurrentThreadId();
 				ths->m_Mutex.Unlock(false);	// 解写锁
 				if (tsk.evtR) tsk.evtR->Set();
 				tsk.pCal(tsk.pPar);			// 用户调用
@@ -278,6 +282,7 @@ public:
 				evt->Create();
 				tsk.evtR = evt;
 				tsk.hdlR = &hdl;
+				tsk.tidR = lpIDThread;
 			}
 			m_TskList.Add(tsk);
 			m_TaskSmph.Release();

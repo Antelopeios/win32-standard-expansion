@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-25
-// Version:	1.3.0020.0400
+// Date:	2011-02-28
+// Version:	1.3.0021.1723
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -65,6 +65,7 @@
 //								+ 添加SmartPtr::Inc()与SmartPtr::Dec()接口,用于循环引用等特殊情况时手动调整引用计数
 //	- 1.3.0019.2100(2011-02-24)	= 改变引用计数的管理方式,还原为开始的Manager类统一管理(便于与GC协同工作)
 //	- 1.3.0020.0400(2011-02-25)	# 当使用多线程模型时,PtrManager与DefMemAlloc的静态初始化发生冲突
+//	- 1.3.0021.1723(2011-02-28)	+ 添加SmartPtr::operator!()操作符重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -355,6 +356,9 @@ public:
 	{ return (m_Ptr + offset); }
 	TypeT* operator-(DWORD offset) const
 	{ return (m_Ptr - offset); }
+
+	bool operator!() const
+	{ return !m_Ptr; }
 
 	TypeT* operator->() const
 	{ return m_Ptr; }

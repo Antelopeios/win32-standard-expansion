@@ -47,7 +47,6 @@
 #include "Algorithm/NonCopyable.h"
 #include "Debugging/Assertion.h"
 #include "Pattern/Singleton.h"
-#include "Thread/ThreadModel.h"
 #include "Thread/Lock.h"
 #include "Memory/MemHeap.h"
 

@@ -1,4 +1,4 @@
-// Copyright 2010, 木头云
+// Copyright 2011, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-04
-// Version:	1.2.0004.1751
+// Date:	2011-03-01
+// Version:	1.2.0005.2345
+//
+// History:
+//	- 1.2.0005.2345(2011-03-01)	= 调整ExDebugBreak定义为ExDebugBreak()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Assertion_h__
@@ -49,9 +52,9 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 #ifdef _X86_
-#define ExDebugBreak	_asm { int 3 }
+#define ExDebugBreak()	_asm { int 3 }
 #else
-#define ExDebugBreak	__noop
+#define ExDebugBreak()	__noop
 #endif
 
 inline void ExMBA(PCSTR csMsg, UINT uType = MB_ICONERROR)
@@ -77,7 +80,7 @@ inline void ExMBW(PCWSTR wsMsg, UINT uType = MB_ICONERROR)
 inline void ExFail(PSTR csMsg)
 {
 	ExMBA(csMsg);
-	ExDebugBreak;
+	ExDebugBreak();
 }
 
 inline void ExAssertFail(PCSTR csFile, int iLine, PCSTR csExpr)

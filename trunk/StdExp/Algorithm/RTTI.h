@@ -142,224 +142,224 @@ public:
 };
 
 // 向工厂注册 TypeInfo 指针
-#define REG_TYPEINFO(key, inf)	CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
+#define EXP_REG_TYPEINFO(key, inf)	CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
 // 从工厂得到 TypeInfo 指针
-#define GET_TYPEINFO(key)		CTypeInfoFactory::Instance().GetTypeInfo(key)
+#define EXP_GET_TYPEINFO(key)		CTypeInfoFactory::Instance().GetTypeInfo(key)
 
 //////////////////////////////////////////////////////////////////
 
 // Base Typedef 宏定义
 
-#define DEF_BASETYPE(base_name)															\
-public:																					\
+#define EXP_DEF_BASETYPE(base_name)															\
+public:																						\
 	typedef base_name Base;
 
-#define DEF_BASETYPE2(base_name)														\
-public:																					\
+#define EXP_DEF_BASETYPE2(base_name)														\
+public:																						\
 	typedef base_name Base2;
 
-#define DEF_BASETYPE3(base_name)														\
-public:																					\
+#define EXP_DEF_BASETYPE3(base_name)														\
+public:																						\
 	typedef base_name Base3;
 
-#define DEF_MULTTYPE(mult_name)															\
-public:																					\
+#define EXP_DEF_MULTTYPE(mult_name)															\
+public:																						\
 	typedef mult_name Mult;
 
 //////////////////////////////////////////////////////////////////
 
 // TYPEINFO 类型信息宏定义
 
-#define TYPEINFO_OF_CLS(cls_name)		(cls_name::GetTypeInfoClass())
-#define TYPEINFO_OF_OBJ(obj_name)		(obj_name.GetTypeInfo())
-#define TYPEINFO_OF_PTR(ptr_name)		(ptr_name->GetTypeInfo())
+#define EXP_TYPEINFO_OF_CLS(cls_name)		(cls_name::GetTypeInfoClass())
+#define EXP_TYPEINFO_OF_OBJ(obj_name)		(obj_name.GetTypeInfo())
+#define EXP_TYPEINFO_OF_PTR(ptr_name)		(ptr_name->GetTypeInfo())
 
-#define TYPEINFO_MEMBER(cls_name)		rttiTypeInfo
+#define EXP_TYPEINFO_MEMBER(cls_name)		rttiTypeInfo
 
 //////////////////////////////////////////////////////////////////
 
 // 类的 RTTI 宏定义
 
-#define DECLARE_TYPEINFO(cls_name)														\
-public:																					\
-	virtual int GetTypeID()				{ return TYPEINFO_MEMBER(cls_name).type_id; }	\
-	virtual LPCTSTR GetTypeName()		{ return TYPEINFO_MEMBER(cls_name).className; }	\
-	virtual TypeInfo& GetTypeInfo()		{ return TYPEINFO_MEMBER(cls_name); }			\
-	static TypeInfo& GetTypeInfoClass()	{ return TYPEINFO_MEMBER(cls_name); }			\
-private:																				\
-	static TypeInfo TYPEINFO_MEMBER(cls_name);											\
+#define EXP_DECLARE_TYPEINFO(cls_name)														\
+public:																						\
+	virtual int GetTypeID()				{ return EXP_TYPEINFO_MEMBER(cls_name).type_id; }	\
+	virtual LPCTSTR GetTypeName()		{ return EXP_TYPEINFO_MEMBER(cls_name).className; }	\
+	virtual TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER(cls_name); }			\
+	static TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER(cls_name); }			\
+private:																					\
+	static TypeInfo EXP_TYPEINFO_MEMBER(cls_name);											\
 
-#define DECLARE_TYPEINFO_CLS(cls_name, base_name)										\
-	DEF_MULTTYPE(cls_name)																\
-	DEF_BASETYPE(base_name)																\
-	DECLARE_TYPEINFO(cls_name)
+#define EXP_DECLARE_TYPEINFO_CLS(cls_name, base_name)										\
+	EXP_DEF_MULTTYPE(cls_name)																\
+	EXP_DEF_BASETYPE(base_name)																\
+	EXP_DECLARE_TYPEINFO(cls_name)
 
-#define DECLARE_TYPEINFO_MULT(cls_name, base_name)										\
-	DEF_MULTTYPE(base_name::Mult)														\
-	DEF_BASETYPE(base_name)																\
-	DECLARE_TYPEINFO(cls_name)
+#define EXP_DECLARE_TYPEINFO_MULT(cls_name, base_name)										\
+	EXP_DEF_MULTTYPE(base_name::Mult)														\
+	EXP_DEF_BASETYPE(base_name)																\
+	EXP_DECLARE_TYPEINFO(cls_name)
 
-#define DECLARE_TYPEINFO_MULT2(cls_name, base_name, base_name2)							\
-	DEF_MULTTYPE(base_name::Mult)														\
-	DEF_BASETYPE(base_name)																\
-	DEF_BASETYPE2(base_name2)															\
-	DECLARE_TYPEINFO(cls_name)
+#define EXP_DECLARE_TYPEINFO_MULT2(cls_name, base_name, base_name2)							\
+	EXP_DEF_MULTTYPE(base_name::Mult)														\
+	EXP_DEF_BASETYPE(base_name)																\
+	EXP_DEF_BASETYPE2(base_name2)															\
+	EXP_DECLARE_TYPEINFO(cls_name)
 
-#define DECLARE_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3)				\
-	DEF_MULTTYPE(base_name::Mult)														\
-	DEF_BASETYPE(base_name)																\
-	DEF_BASETYPE2(base_name2)															\
-	DEF_BASETYPE3(base_name3)															\
-	DECLARE_TYPEINFO(cls_name)
+#define EXP_DECLARE_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3)				\
+	EXP_DEF_MULTTYPE(base_name::Mult)														\
+	EXP_DEF_BASETYPE(base_name)																\
+	EXP_DEF_BASETYPE2(base_name2)															\
+	EXP_DEF_BASETYPE3(base_name3)															\
+	EXP_DECLARE_TYPEINFO(cls_name)
 
-#define DECLARE_TYPEINFO_NULL(cls_name)													\
-	DEF_MULTTYPE(cls_name)																\
-	DECLARE_TYPEINFO(cls_name)															\
-public:																					\
+#define EXP_DECLARE_TYPEINFO_NULL(cls_name)													\
+	EXP_DEF_MULTTYPE(cls_name)																\
+	EXP_DECLARE_TYPEINFO(cls_name)															\
+public:																						\
 	bool IsKindOf(TypeInfo& cls);
 
 // dynamically typeinfo
 
-#define DECLARE_DYNAMIC_CLS(cls_name, base_name)										\
-	DECLARE_TYPEINFO_CLS(cls_name, base_name)
+#define EXP_DECLARE_DYNAMIC_CLS(cls_name, base_name)										\
+	EXP_DECLARE_TYPEINFO_CLS(cls_name, base_name)
 
-#define DECLARE_DYNAMIC_MULT(cls_name, base_name)										\
-	DECLARE_TYPEINFO_MULT(cls_name, base_name)
+#define EXP_DECLARE_DYNAMIC_MULT(cls_name, base_name)										\
+	EXP_DECLARE_TYPEINFO_MULT(cls_name, base_name)
 
-#define DECLARE_DYNAMIC_MULT2(cls_name, base_name, base_name2)							\
-	DECLARE_TYPEINFO_MULT2(cls_name, base_name, base_name2)
+#define EXP_DECLARE_DYNAMIC_MULT2(cls_name, base_name, base_name2)							\
+	EXP_DECLARE_TYPEINFO_MULT2(cls_name, base_name, base_name2)
 
-#define DECLARE_DYNAMIC_MULT3(cls_name, base_name, base_name2, base_name3)				\
-	DECLARE_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3)
+#define EXP_DECLARE_DYNAMIC_MULT3(cls_name, base_name, base_name2, base_name3)				\
+	EXP_DECLARE_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3)
 
-#define DECLARE_DYNAMIC_NULL(cls_name)													\
-	DECLARE_TYPEINFO_NULL(cls_name)
+#define EXP_DECLARE_DYNAMIC_NULL(cls_name)													\
+	EXP_DECLARE_TYPEINFO_NULL(cls_name)
 
 // dynamically constructable
 
-#define DECLARE_DYNCREATE_C(cls_name)													\
-public:																					\
-	static CBaseObject* CreateObject(CGC& gc);											\
-private:																				\
+#define EXP_DECLARE_DYNCREATE_C(cls_name)													\
+public:																						\
+	static CBaseObject* CreateObject(CGC& gc);												\
+private:																					\
 	static bool m_bRegSuccess;
 
-#define DECLARE_DYNCREATE_CLS(cls_name, base_name)										\
-	DECLARE_DYNAMIC_CLS(cls_name, base_name)											\
-	DECLARE_DYNCREATE_C(cls_name)
+#define EXP_DECLARE_DYNCREATE_CLS(cls_name, base_name)										\
+	EXP_DECLARE_DYNAMIC_CLS(cls_name, base_name)											\
+	EXP_DECLARE_DYNCREATE_C(cls_name)
 
-#define DECLARE_DYNCREATE_MULT(cls_name, base_name)										\
-	DECLARE_DYNAMIC_MULT(cls_name, base_name)											\
-	DECLARE_DYNCREATE_C(cls_name)
+#define EXP_DECLARE_DYNCREATE_MULT(cls_name, base_name)										\
+	EXP_DECLARE_DYNAMIC_MULT(cls_name, base_name)											\
+	EXP_DECLARE_DYNCREATE_C(cls_name)
 
-#define DECLARE_DYNCREATE_MULT2(cls_name, base_name, base_name2)						\
-	DECLARE_DYNAMIC_MULT2(cls_name, base_name, base_name2)								\
-	DECLARE_DYNCREATE_C(cls_name)
+#define EXP_DECLARE_DYNCREATE_MULT2(cls_name, base_name, base_name2)						\
+	EXP_DECLARE_DYNAMIC_MULT2(cls_name, base_name, base_name2)								\
+	EXP_DECLARE_DYNCREATE_C(cls_name)
 
-#define DECLARE_DYNCREATE_MULT3(cls_name, base_name, base_name2, base_name3)			\
-	DECLARE_DYNAMIC_MULT3(cls_name, base_name, base_name2, base_name3)					\
-	DECLARE_DYNCREATE_C(cls_name)
+#define EXP_DECLARE_DYNCREATE_MULT3(cls_name, base_name, base_name2, base_name3)			\
+	EXP_DECLARE_DYNAMIC_MULT3(cls_name, base_name, base_name2, base_name3)					\
+	EXP_DECLARE_DYNCREATE_C(cls_name)
 
-#define DECLARE_DYNCREATE_NULL(cls_name)												\
-	DECLARE_DYNAMIC_NULL(cls_name)														\
-	DECLARE_DYNCREATE_C(cls_name)
+#define EXP_DECLARE_DYNCREATE_NULL(cls_name)												\
+	EXP_DECLARE_DYNAMIC_NULL(cls_name)														\
+	EXP_DECLARE_DYNCREATE_C(cls_name)
 
 	/////////////////////////////////
 
-#define IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)						\
-	tmp																					\
-	TypeInfo cls_name::TYPEINFO_MEMBER(cls_name) =										\
-	{																					\
-		_T(#cls_name), 																	\
-		CBaseObject::TypeInfoOrder++, 													\
-		{&TYPEINFO_OF_CLS(base_name), NULL, NULL}, 										\
-		pfn_new																			\
+#define EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)						\
+	tmp																						\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	{																						\
+		_T(#cls_name), 																		\
+		CBaseObject::TypeInfoOrder++, 														\
+		{&EXP_TYPEINFO_OF_CLS(base_name), NULL, NULL}, 										\
+		pfn_new																				\
 	};
 
-#define IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, pfn_new, tmp)						\
-	IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)
+#define EXP_IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, pfn_new, tmp)						\
+	EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)
 
-#define IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, pfn_new, tmp)			\
-	tmp																					\
-	TypeInfo cls_name::TYPEINFO_MEMBER(cls_name) =										\
-	{																					\
-		_T(#cls_name), 																	\
-		CBaseObject::TypeInfoOrder++, 													\
-		{&TYPEINFO_OF_CLS(base_name), &TYPEINFO_OF_CLS(base_name2), NULL}, 				\
-		pfn_new																			\
+#define EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, pfn_new, tmp)			\
+	tmp																						\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	{																						\
+		_T(#cls_name), 																		\
+		CBaseObject::TypeInfoOrder++, 														\
+		{&EXP_TYPEINFO_OF_CLS(base_name), &EXP_TYPEINFO_OF_CLS(base_name2), NULL}, 			\
+		pfn_new																				\
 	};
 
-#define IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, pfn_new, tmp)	\
-	tmp																					\
-	TypeInfo cls_name::TYPEINFO_MEMBER(cls_name) =										\
-	{																					\
-		_T(#cls_name), 																	\
-		CBaseObject::TypeInfoOrder++, 													\
-		{&TYPEINFO_OF_CLS(base_name), &TYPEINFO_OF_CLS(base_name2), &TYPEINFO_OF_CLS(base_name3)}, \
-		pfn_new																			\
+#define EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, pfn_new, tmp)	\
+	tmp																						\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	{																						\
+		_T(#cls_name), 																		\
+		CBaseObject::TypeInfoOrder++, 														\
+		{&EXP_TYPEINFO_OF_CLS(base_name), &EXP_TYPEINFO_OF_CLS(base_name2), &EXP_TYPEINFO_OF_CLS(base_name3)}, \
+		pfn_new																				\
 	};
 
-#define IMPLEMENT_TYPEINFO_NULL(cls_name, pfn_new, tmp)									\
-	tmp																					\
-	TypeInfo cls_name::TYPEINFO_MEMBER(cls_name) =										\
-	{																					\
-		_T(#cls_name), 																	\
-		CBaseObject::TypeInfoOrder++, 													\
-		{NULL, NULL, NULL}, 															\
-		pfn_new																			\
-	};																					\
-	tmp																					\
-	bool cls_name::IsKindOf(TypeInfo& cls)												\
-	{																					\
-		TypeInfo* p = &(this->GetTypeInfo());											\
-		return (p ? p->IsKindOf(cls) : false);											\
+#define EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, pfn_new, tmp)									\
+	tmp																						\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	{																						\
+		_T(#cls_name), 																		\
+		CBaseObject::TypeInfoOrder++, 														\
+		{NULL, NULL, NULL}, 																\
+		pfn_new																				\
+	};																						\
+	tmp																						\
+	bool cls_name::IsKindOf(TypeInfo& cls)													\
+	{																						\
+		TypeInfo* p = &(this->GetTypeInfo());												\
+		return (p ? p->IsKindOf(cls) : false);												\
 	}
 
 // dynamically typeinfo
 
-#define IMPLEMENT_DYNAMIC_CLS(cls_name, base_name, tmp)									\
-	IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, NULL, tmp)
+#define EXP_IMPLEMENT_DYNAMIC_CLS(cls_name, base_name, tmp)									\
+	EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, NULL, tmp)
 
-#define IMPLEMENT_DYNAMIC_MULT(cls_name, base_name, tmp)								\
-	IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, NULL, tmp)
+#define EXP_IMPLEMENT_DYNAMIC_MULT(cls_name, base_name, tmp)								\
+	EXP_IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, NULL, tmp)
 
-#define IMPLEMENT_DYNAMIC_MULT2(cls_name, base_name, base_name2, tmp)					\
-	IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, NULL, tmp)
+#define EXP_IMPLEMENT_DYNAMIC_MULT2(cls_name, base_name, base_name2, tmp)					\
+	EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, NULL, tmp)
 
-#define IMPLEMENT_DYNAMIC_MULT3(cls_name, base_name, base_name2, base_name3, tmp)		\
-	IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, NULL, tmp)
+#define EXP_IMPLEMENT_DYNAMIC_MULT3(cls_name, base_name, base_name2, base_name3, tmp)		\
+	EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, NULL, tmp)
 
-#define IMPLEMENT_DYNAMIC_NULL(cls_name, tmp)											\
-	IMPLEMENT_TYPEINFO_NULL(cls_name, NULL, tmp)
+#define EXP_IMPLEMENT_DYNAMIC_NULL(cls_name, tmp)											\
+	EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, NULL, tmp)
 
 // dynamically constructable
 
-#define IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
-	tmp																					\
-	CBaseObject* cls_name::CreateObject(CGC& gc)										\
-	{ return (base_name*)ExGC::Alloc<cls_name>(gc); }									\
-	tmp																					\
-	bool cls_name::m_bRegSuccess =														\
-		REG_TYPEINFO( _T(#cls_name), &(cls_name::TYPEINFO_MEMBER(cls_name)) );
+#define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
+	tmp																						\
+	CBaseObject* cls_name::CreateObject(CGC& gc)											\
+	{ return (base_name*)ExGC::Alloc<cls_name>(gc); }										\
+	tmp																						\
+	bool cls_name::m_bRegSuccess =															\
+		EXP_REG_TYPEINFO( _T(#cls_name), &(cls_name::EXP_TYPEINFO_MEMBER(cls_name)) );
 
-#define IMPLEMENT_DYNCREATE_CLS(cls_name, base_name, tmp)								\
-	IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, cls_name::CreateObject, tmp)			\
-	IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)
+#define EXP_IMPLEMENT_DYNCREATE_CLS(cls_name, base_name, tmp)								\
+	EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, cls_name::CreateObject, tmp)			\
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)
 
-#define IMPLEMENT_DYNCREATE_MULT(cls_name, base_name, tmp)								\
-	IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, cls_name::CreateObject, tmp)			\
-	IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
+#define EXP_IMPLEMENT_DYNCREATE_MULT(cls_name, base_name, tmp)								\
+	EXP_IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, cls_name::CreateObject, tmp)			\
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
 
-#define IMPLEMENT_DYNCREATE_MULT2(cls_name, base_name, base_name2, tmp)					\
-	IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, cls_name::CreateObject, tmp) \
-	IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
+#define EXP_IMPLEMENT_DYNCREATE_MULT2(cls_name, base_name, base_name2, tmp)					\
+	EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, cls_name::CreateObject, tmp) \
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
 
-#define IMPLEMENT_DYNCREATE_MULT3(cls_name, base_name, base_name2, base_name3, tmp)		\
-	IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, cls_name::CreateObject, tmp) \
-	IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
+#define EXP_IMPLEMENT_DYNCREATE_MULT3(cls_name, base_name, base_name2, base_name3, tmp)		\
+	EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, cls_name::CreateObject, tmp) \
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
 
-#define IMPLEMENT_DYNCREATE_NULL(cls_name, tmp)											\
-	IMPLEMENT_TYPEINFO_NULL(cls_name, cls_name::CreateObject, tmp)						\
-	IMPLEMENT_DYNCREATE_C(cls_name, CBaseObject, tmp)
+#define EXP_IMPLEMENT_DYNCREATE_NULL(cls_name, tmp)											\
+	EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, cls_name::CreateObject, tmp)						\
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, CBaseObject, tmp)
 
 //////////////////////////////////////////////////////////////////
 
@@ -367,14 +367,14 @@ private:																				\
 template <int IntT/* = 0*/>
 class CBaseObjectT
 {
-	DECLARE_DYNCREATE_NULL(CBaseObjectT)
+	EXP_DECLARE_DYNCREATE_NULL(CBaseObjectT)
 
 public:
 	// type_id 自增量
 	static int TypeInfoOrder;
 };
 
-IMPLEMENT_DYNCREATE_NULL(CBaseObjectT<IntT>, template <int IntT>)
+EXP_IMPLEMENT_DYNCREATE_NULL(CBaseObjectT<IntT>, template <int IntT>)
 
 template <int IntT>
 int CBaseObjectT<IntT>::TypeInfoOrder = IntT;
@@ -386,7 +386,7 @@ inline bool ExDynCheck(LPCTSTR c_key, CBaseObject* ptr)
 {
 	if( ptr )
 	{
-		TypeInfo* inf = GET_TYPEINFO(c_key);
+		TypeInfo* inf = EXP_GET_TYPEINFO(c_key);
 		if( inf )
 			return ptr->IsKindOf(*inf);
 		else
@@ -401,7 +401,7 @@ template <class TypeT>
 inline TypeT* ExDynCast(void* ptr)
 {
 	if( ptr )
-		return ((TypeT::Mult*)ptr)->IsKindOf(TYPEINFO_OF_CLS(TypeT)) ? (TypeT*)(TypeT::Mult*)ptr : NULL;
+		return ((TypeT::Mult*)ptr)->IsKindOf(EXP_TYPEINFO_OF_CLS(TypeT)) ? (TypeT*)(TypeT::Mult*)ptr : NULL;
 	else
 		return NULL;
 }
@@ -411,7 +411,7 @@ template <class TypeT>
 inline TypeT* ExDynCreate(LPCTSTR c_key, CGC& gc)
 {
 	if( c_key == NULL ) return NULL;
-	TypeInfo* inf = GET_TYPEINFO(c_key);
+	TypeInfo* inf = EXP_GET_TYPEINFO(c_key);
 	if( inf )
 		return ExDynCast<TypeT>(inf->CreateObject(gc));
 	else

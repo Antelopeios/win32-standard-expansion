@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-28
-// Version:	1.3.0021.1723
+// Date:	2011-03-01
+// Version:	1.3.0022.2000
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -66,6 +66,7 @@
 //	- 1.3.0019.2100(2011-02-24)	= 改变引用计数的管理方式,还原为开始的Manager类统一管理(便于与GC协同工作)
 //	- 1.3.0020.0400(2011-02-25)	# 当使用多线程模型时,PtrManager与DefMemAlloc的静态初始化发生冲突
 //	- 1.3.0021.1723(2011-02-28)	+ 添加SmartPtr::operator!()操作符重载
+//	- 1.3.0022.2000(2011-03-01)	# 修正SmartPtr::Inc()内部的模板调用错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -82,7 +83,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
+template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 class CPtrManagerT : CNonCopyable
 {
 protected:
@@ -124,7 +125,7 @@ protected:
 		virtual void Free() = 0;
 	};
 	// 计数指针类
-	template <typename RefAllocT = DefMemAlloc, typename RefModelT = DefThreadModel>
+	template <typename RefAllocT = EXP_MEMORY_ALLOC, typename RefModelT = EXP_THREAD_MODEL>
 	class CReferPtrT : public IReferPtr
 	{
 	public:
@@ -136,7 +137,7 @@ protected:
 			: IReferPtr()
 		{}
 		~CReferPtrT()
-		{ alloc_t::Free(p_ptr); }
+		{ if (p_ptr) alloc_t::Free(p_ptr); }
 
 	public:
 		void Inc()
@@ -263,7 +264,7 @@ typedef CPtrManagerT<> CPtrManager;
 //////////////////////////////////////////////////////////////////
 
 // 智能指针类模板
-template <typename TypeT, typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
+template <typename TypeT, typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 class CSmartPtrT
 {
 public:
@@ -308,7 +309,7 @@ public:
 	{ return CPtrManager::Instance().Get(m_Ptr); }
 
 	void Inc()
-	{ CPtrManager::Instance().Add(m_Ptr); }
+	{ CPtrManager::Instance().Add<alloc_t, model_t>(m_Ptr); }
 	void Dec()
 	{ CPtrManager::Instance().Del(m_Ptr); }
 

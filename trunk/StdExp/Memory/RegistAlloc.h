@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-21
-// Version:	1.0.0014.0025
+// Date:	2011-03-01
+// Version:	1.0.0015.2359
+//
+// History:
+//	- 1.0.0015.2359(2011-03-01)	# CRegistAllocT::Free()一个空指针时会引发内存异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RegistAlloc_h__
@@ -112,12 +115,14 @@ public:
 	template <typename TypeT>
 	inline TypeT* Construct(void* pPtr)
 	{
+		ExAssert(pPtr);
 		_Regist* real = (_Regist*)RealPtr(pPtr);
 		real->destruct = (traitor_t)(CTraitsT<TypeT>::Destruct);
 		return CTraitsT<TypeT>::Construct(pPtr, (m_Alloc.Size(real) - HeadSize));
 	}
 	inline void* Destruct(void* pPtr)
 	{
+		ExAssert(pPtr);
 		_Regist* real = (_Regist*)RealPtr(pPtr);
 		if (real->destruct)
 		{
@@ -152,6 +157,7 @@ public:
 	}
 	void Free(void* pPtr)
 	{
+		if (!pPtr) return;
 		m_Alloc.Free(Destruct(pPtr));
 	}
 };

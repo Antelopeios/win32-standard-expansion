@@ -53,7 +53,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename PolicyT = DefThreadModel::_LockPolicy>
+template <typename PolicyT = EXP_THREAD_MODEL::_LockPolicy>
 class CLockT : CNonCopyable
 {
 public:
@@ -80,9 +80,9 @@ public:
 };
 
 typedef CLockT<> CMutex;
-typedef CLockT<DefThreadModel::_ExcPolicy> CExcMutex;
-typedef CLockT<DefThreadModel::_CriPolicy> CCriMutex;
-typedef CLockT<DefThreadModel::_ShrPolicy> CShrMutex;
+typedef CLockT<EXP_THREAD_MODEL::_ExcPolicy> CExcMutex;
+typedef CLockT<EXP_THREAD_MODEL::_CriPolicy> CCriMutex;
+typedef CLockT<EXP_THREAD_MODEL::_ShrPolicy> CShrMutex;
 
 //////////////////////////////////////////////////////////////////
 

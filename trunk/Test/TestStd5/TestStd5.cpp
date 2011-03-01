@@ -7,38 +7,38 @@
 
 class CTest1 : public CBaseObject
 {
-	DECLARE_DYNCREATE_CLS(CTest1, CBaseObject)
+	EXP_DECLARE_DYNCREATE_CLS(CTest1, CBaseObject)
 
 protected:
 	int i;
 };
 
-IMPLEMENT_DYNCREATE_CLS(CTest1, CBaseObject)
+EXP_IMPLEMENT_DYNCREATE_CLS(CTest1, CBaseObject)
 
 //////////////////////////////////////////////////////////////////
 
 class CTest2 : public CTest1
 {
-	DECLARE_DYNCREATE_CLS(CTest2, CTest1)
+	EXP_DECLARE_DYNCREATE_CLS(CTest2, CTest1)
 
 protected:
 	char c;
 };
 
-IMPLEMENT_DYNCREATE_CLS(CTest2, CTest1)
+EXP_IMPLEMENT_DYNCREATE_CLS(CTest2, CTest1)
 
 //////////////////////////////////////////////////////////////////
 
 template <typename TestT>
 class CTest3 : public TestT
 {
-	DECLARE_DYNCREATE_CLS(CTest3, TestT)
+	EXP_DECLARE_DYNCREATE_CLS(CTest3, TestT)
 
 protected:
 	CString s;
 };
 
-IMPLEMENT_DYNCREATE_CLS(CTest3<TestT>, TestT, template <typename TestT>)
+EXP_IMPLEMENT_DYNCREATE_CLS(CTest3<TestT>, TestT, template <typename TestT>)
 
 //////////////////////////////////////////////////////////////////
 

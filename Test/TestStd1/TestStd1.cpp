@@ -89,7 +89,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = CMemAdapterT<_MemHeap>::Alloc(TestSize);
 		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemHeap>::Free(Test[TestLast - 1 - j]);
+			CMemAdapterT<_MemHeap>::Free(Test[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -97,7 +97,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
 	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
-	CMemAdapterT<_MemPool>::GetAlloc().SetAutoOrder(true);
 
 	ExCPrintf(_T("Start for _MemPool...\t\t"));
 	timeBeginPeriod(1);
@@ -107,25 +106,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = CMemAdapterT<_MemPool>::Alloc(TestSize);
 		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemPool>::Free(Test[TestLast - 1 - j]);
-	}
-	tEnd = timeGetTime();
-	timeEndPeriod(1);
-	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
-
-	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
-	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
-	CMemAdapterT<_MemPool>::GetAlloc().SetAutoOrder(false);
-
-	ExCPrintf(_T("Start for _MemPool(NoOrder)...\t"));
-	timeBeginPeriod(1);
-	tStart = timeGetTime();
-	for(int i = 0; i < TestCont; i++)
-	{
-		for(int j = 0; j < TestLast; j++)
-			Test[j] = CMemAdapterT<_MemPool>::Alloc(TestSize);
-		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemPool>::Free(Test[TestLast - 1 - j]);
+			CMemAdapterT<_MemPool>::Free(Test[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -151,7 +132,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
 	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
-	CMemAdapterT<_MemPool>::GetAlloc().SetAutoOrder(true);
 
 	ExCPrintf(_T("Start for GCPool...\t\t"));
 	timeBeginPeriod(1);
@@ -159,24 +139,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		CPoolGC gc;
-		for(int j = 0; j < TestLast; j++)
-			CGCAllocT<CPoolGC>::Alloc<BYTE>(gc, TestSize);
-	}
-	tEnd = timeGetTime();
-	timeEndPeriod(1);
-	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
-
-	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
-	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
-	CMemAdapterT<_MemPool>::GetAlloc().SetAutoOrder(false);
-
-	ExCPrintf(_T("Start for GCPool(NoOrder)...\t"));
-	timeBeginPeriod(1);
-	tStart = timeGetTime();
-	for(int i = 0; i < TestCont; i++)
-	{
-		CPoolGC gc;
-		for(int j = 0; j < TestLast; j++)
+		for(int j = 0; j < 1/*TestLast*/; j++)
 			CGCAllocT<CPoolGC>::Alloc<BYTE>(gc, TestSize);
 	}
 	tEnd = timeGetTime();
@@ -195,11 +158,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = pool.Alloc();
 		for(int j = 0; j < TestLast; j++)
-			pool.Free(Test[TestLast - 1 - j]);
+			pool.Free(Test[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
-	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
 
 	/////////////////////////////////
 

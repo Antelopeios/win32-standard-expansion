@@ -57,7 +57,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename HashT = CHash, typename AllocT = DefMemAlloc>
+template <typename HashT = CHash, typename AllocT = EXP_MEMORY_ALLOC>
 struct _MapPolicyT;
 
 template <typename KeyT, typename TypeT, typename PolicyT = _MapPolicyT<> >
@@ -244,7 +244,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <typename HashT/* = CHash*/, typename AllocT/* = DefMemAlloc*/>
+template <typename HashT/* = CHash*/, typename AllocT/* = EXP_MEMORY_ALLOC*/>
 struct _MapPolicyT
 {
 	typedef AllocT alloc_t;

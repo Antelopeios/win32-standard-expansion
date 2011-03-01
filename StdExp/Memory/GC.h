@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.1.0013.2300
+// Date:	2011-03-01
+// Version:	1.1.0014.2000
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
 //								+ 支持与SmartPtr智能指针同时使用
+//	- 1.1.0014.2000(2011-03-01)	# 在GC内部也调用引用计数机制,而不是忽略计数;否则当SmartPtr释放指针后,GC将再次释放同一个指针
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -54,7 +55,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = DefMemAlloc, typename ModelT = DefThreadModel>
+template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 struct _GCPolicyT;
 
 template <typename PolicyT = _GCPolicyT<> >
@@ -85,12 +86,15 @@ public:
 	}
 
 protected:
-	void CheckFree(void* pPtr)
+	template <typename TypeT>
+	TypeT* CheckAlloc(DWORD nCount = 1)
 	{
-		// 有引用计数时不自动释放指针
-		if (CPtrManager::Instance().Get(pPtr) <= 0)
-			alloc_t::Free(pPtr);
+		TypeT* ptr = alloc_t::Alloc<TypeT>(nCount);
+		CPtrManager::Instance().Add<alloc_t, model_t>(ptr);
+		return ptr;
 	}
+	void CheckFree(void* pPtr)
+	{ CPtrManager::Instance().Del(pPtr); }
 
 public:
 	template <typename TypeT>
@@ -146,7 +150,7 @@ public:
 		ExLock(m_Mutex, false, mutex_t);
 		if (GetGCSize() == m_nIndx)
 			SetGCSize(PolicyT::Expan(GetGCSize()));
-		m_BlockArray[m_nIndx] = alloc_t::Alloc<TypeT>(nCount);
+		m_BlockArray[m_nIndx] = CheckAlloc<TypeT>(nCount);
 		ExAssert(m_BlockArray[m_nIndx]);
 		return ((TypeT*)(m_BlockArray[m_nIndx++]));
 	}
@@ -216,7 +220,7 @@ typedef CGCAlloc ExGC;
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT/* = DefMemAlloc*/, typename ModelT/* = DefThreadModel*/>
+template <typename AllocT/* = EXP_MEMORY_ALLOC*/, typename ModelT/* = EXP_THREAD_MODEL*/>
 struct _GCPolicyT
 {
 	typedef AllocT alloc_t;

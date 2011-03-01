@@ -54,7 +54,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = _MemHeap, typename ModelT = DefThreadModel>
+template <typename AllocT = _MemHeap, typename ModelT = EXP_THREAD_MODEL>
 struct _ObjPoolPolicyT;
 
 template <typename TypeT, typename PolicyT = _ObjPoolPolicyT<> >
@@ -209,7 +209,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT, typename AllocT, typename ModelT = DefThreadModel>
+template <typename TypeT, typename AllocT, typename ModelT = EXP_THREAD_MODEL>
 class CPoolTypeT
 {
 public:
@@ -227,7 +227,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT/* = _MemHeap*/, typename ModelT/* = DefThreadModel*/>
+template <typename AllocT/* = _MemHeap*/, typename ModelT/* = EXP_THREAD_MODEL*/>
 struct _ObjPoolPolicyT
 {
 	typedef AllocT alloc_t;

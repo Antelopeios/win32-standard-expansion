@@ -55,7 +55,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = DefMemAlloc>
+template <typename AllocT = EXP_MEMORY_ALLOC>
 struct _StringPolicyT;
 
 template <typename TypeT = TCHAR, typename PolicyT = _StringPolicyT<> >
@@ -347,7 +347,7 @@ typedef CStringT<> CString;
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT/* = DefMemAlloc*/>
+template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
 struct _StringPolicyT : public _ArrayPolicyT<AllocT>
 {
 	template <typename TypeT>

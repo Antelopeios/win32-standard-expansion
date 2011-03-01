@@ -34,10 +34,11 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-01
-// Version:	1.2.0015.1734
+// Version:	1.2.0016.2345
 //
 // History:
-//	- 1.2.0015.1734(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
+//	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
+//								+ MemPool支持Clear时进行简单的内存泄漏检测
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -49,6 +50,7 @@
 
 #include "Algorithm/NonCopyable.h"
 #include "Debugging/Assertion.h"
+#include "Debugging/Trace.h"
 #include "Pattern/Singleton.h"
 #include "Thread/Lock.h"
 #include "Memory/MemHeap.h"
@@ -57,7 +59,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = CMemHeapAlloc, typename ModelT = DefThreadModel>
+template <typename AllocT = CMemHeapAlloc, typename ModelT = EXP_THREAD_MODEL>
 struct _MemPoolPolicy;
 
 template <typename PolicyT = _MemPoolPolicy<> >
@@ -312,7 +314,7 @@ public:
 		: m_nMaxSize(PolicyT::s_nMaxSize)
 	{ SetPoolSize(nSize); }
 	~CMemPoolT()
-	{ Clear(); }
+	{ Clear(PolicyT::s_bDumpMemLeaks); }
 
 public:
 	// 内存池大小设置
@@ -381,11 +383,8 @@ public:
 		// 标记空闲内存块
 		if( block )
 		{	// 找到合适的内存块
-			if( block->nSize > nSize )
-			{	// 内存块需要分割
+			if( block->nSize > nSize ) // 内存块需要分割
 				block = m_MemList.Cut(nSize, block);
-				block->bUsed = true;
-			}
 			m_FreList.Pop(m_Alloc.FreBlock(block));
 		} else
 		{	// 分配新的内存块
@@ -393,6 +392,9 @@ public:
 			// 添加内存记录块
 			m_MemList.Push(block);
 		}
+		ExAssert(block && !(block->bUsed));
+		if(!block || block->bUsed) return NULL;
+		block->bUsed = true;
 		// 返回分配的内存
 		return m_Alloc.PtrBlock(block);
 	}
@@ -428,14 +430,46 @@ public:
 				m_FreList.Pop(m_Alloc.FreBlock(next));
 		}
 	}
+
+#ifdef	_DEBUG
+#ifndef	EXP_DUMPING_MEMLEAKS
+#define	EXP_DUMPING_MEMLEAKS
+#endif/*EXP_DUMPING_MEMLEAKS*/
+#endif/*_DEBUG*/
+
 	// 清空内存池
-	void Clear()
+	void Clear(bool bDump = true)
 	{
 		ExLock(m_Mutex, false, mutex_t);
 		// 清理内存记录链表
+#ifdef	EXP_DUMPING_MEMLEAKS
+		DWORD dump_counter = 0;
+		if (bDump)
+			ExDPrintf(_T("\nDumping memory leaks...\n"));
+#endif/*EXP_DUMPING_MEMLEAKS*/
 		if( !m_MemList.Empty() )
 		{
+			// 第一次遍历,移除非头结点
 			mem_block_t* item = static_cast<mem_block_t*>(m_MemList.Head());
+			do
+			{
+				mem_block_t* temp = static_cast<mem_block_t*>(item->pNext);
+#ifdef	EXP_DUMPING_MEMLEAKS
+				if (bDump && item->bUsed && ++dump_counter)
+				{
+					BYTE* ptr = (BYTE*)m_Alloc.PtrBlock(item);
+					ExDPrintf(_T("\nMemory leak at 0x%08X, %d bytes long.\nData:"), ptr, item->nSize);
+					ExDPrintf(
+						_T("%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n"), 
+						ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7], 
+						ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+				}
+#endif/*EXP_DUMPING_MEMLEAKS*/
+				if (!(item->bHead)) m_MemList.Pop(item);
+				item = temp;
+			} while( item != m_MemList.Tail() );
+			// 第二次遍历,清理数据
+			item = static_cast<mem_block_t*>(m_MemList.Head());
 			do
 			{
 				mem_block_t* temp = static_cast<mem_block_t*>(item->pNext);
@@ -445,6 +479,19 @@ public:
 			m_MemList.Clear();
 			m_FreList.Clear();
 		}
+#ifdef	EXP_DUMPING_MEMLEAKS
+		if (bDump)
+		{
+			if (dump_counter == 0)
+				ExDPrintf(_T("No memory leak has been found!\n"));
+			else
+			if (dump_counter == 1)
+				ExDPrintf(_T("\n1 memory leak has been found!\n"));
+			else
+				ExDPrintf(_T("\n%d memory leaks have been found!\n"), dump_counter);
+			ExDPrintf(_T("Complete memory leak detection.\n"));
+		}
+#endif/*EXP_DUMPING_MEMLEAKS*/
 	}
 };
 
@@ -462,7 +509,7 @@ typedef CRegistAllocT<CMemPoolAlloc> _MemPool;
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT/* = CMemHeapAlloc*/, typename ModelT/* = DefThreadModel*/>
+template <typename AllocT/* = CMemHeapAlloc*/, typename ModelT/* = EXP_THREAD_MODEL*/>
 struct _MemPoolPolicy
 {
 	typedef AllocT alloc_t;
@@ -472,6 +519,7 @@ struct _MemPoolPolicy
 
 	static const DWORD	s_nDefSize = 1024 * 1024;		// 初始大小1M
 	static const DWORD	s_nMaxSize = 1024 * 1024 * 100;	// 最大大小100M
+	static const bool	s_bDumpMemLeaks = true;
 };
 
 //////////////////////////////////////////////////////////////////

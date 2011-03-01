@@ -44,7 +44,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Pattern/Singleton.h"
 #include "Memory/MemPool.h"
 
 EXP_BEG
@@ -83,11 +82,11 @@ public:
 	{ GetPolicy().Free(pPtr); }
 };
 
-#ifndef DefMemAlloc
-#define DefMemAlloc CMemAdapterT<>
-#endif/*DefMemAlloc*/
+#ifndef EXP_MEMORY_ALLOC
+#define EXP_MEMORY_ALLOC CMemAdapterT<>
+#endif/*EXP_MEMORY_ALLOC*/
 
-typedef DefMemAlloc ExMem;
+typedef EXP_MEMORY_ALLOC ExMem;
 
 //////////////////////////////////////////////////////////////////
 

@@ -57,7 +57,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename CreatorT = CThreadHeapCreator, typename AllocT = DefMemAlloc>
+template <typename CreatorT = CThreadHeapCreator, typename AllocT = EXP_MEMORY_ALLOC>
 struct _ThreadPoolPolicyT
 {
 	typedef typename CreatorT::creator_t creator_t;

@@ -267,13 +267,13 @@ struct _MultiModel
 
 //////////////////////////////////////////////////////////////////
 
-#ifndef DefThreadModel
+#ifndef EXP_THREAD_MODEL
 #ifdef	_MT
-#define DefThreadModel _MultiModel
+#define EXP_THREAD_MODEL _MultiModel
 #else /*_MT*/
-#define DefThreadModel _SingleModel
+#define EXP_THREAD_MODEL _SingleModel
 #endif/*_MT*/
-#endif/*DefThreadModel*/
+#endif/*EXP_THREAD_MODEL*/
 
 //////////////////////////////////////////////////////////////////
 

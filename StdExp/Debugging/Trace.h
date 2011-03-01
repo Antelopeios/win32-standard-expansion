@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-11
-// Version:	1.0.0002.1720
+// Date:	2011-03-01
+// Version:	1.0.0003.2359
+//
+// History:
+//	- 1.0.0003.2359(2011-03-01)	= ExPrintfT()内部的内存分配不使用ExMem(),直接采用CMemHeapAlloc完成
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Trace_h__
@@ -44,7 +47,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/MemAlloc.h"
+#include "Memory/MemHeap.h"
 #include "Thread/Lock.h"
 
 EXP_BEG
@@ -62,14 +65,14 @@ inline void __cdecl ExPrintfT(LPCTSTR lpFormat, ...)
 	va_start(args, lpFormat);
 
 	size_t len = _vsctprintf(lpFormat, args) + 1;
-	TCHAR* buf = ExMem::Alloc<TCHAR>(len);
+	TCHAR* buf = (TCHAR*)CMemHeapAlloc::Alloc(len * sizeof(TCHAR));
 	if (!buf) return;
 	HRESULT r = StringCchVPrintf(buf, len, lpFormat, args);
 
 	va_end(args);
 
 	if( r == S_OK ) PolicyT::Output(buf);
-	if (buf) ExMem::Free(buf);
+	if (buf) CMemHeapAlloc::Free(buf);
 }
 
 //////////////////////////////////////////////////////////////////
@@ -110,11 +113,15 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+#undef	ExDPrintf
 #define ExDPrintf	ExPrintfT<PrintfPolicy_Debug>
+#undef	ExCPrintf
 #define ExCPrintf	ExPrintfT<PrintfPolicy_Console>
+#undef	ExMPrintf
 #define ExMPrintf	ExPrintfT<PrintfPolicy_Message>
 
-#ifdef _DEBUG
+#undef	ExTrace
+#ifdef	_DEBUG
 #define ExTrace		ExDPrintf
 #else /*_DEBUG*/
 #define ExTrace		__noop

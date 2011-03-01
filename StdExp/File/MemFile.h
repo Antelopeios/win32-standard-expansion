@@ -50,7 +50,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = DefMemAlloc>
+template <typename AllocT = EXP_MEMORY_ALLOC>
 class CMemFileT : public IFileObject
 {
 public:

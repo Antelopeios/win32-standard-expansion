@@ -78,11 +78,11 @@ public:
 	{ return GetCreator().Terminate(hTrd, dwExitCode); }
 };
 
-#ifndef DefThreadCreator
-#define DefThreadCreator CThreadAdapterT<>
-#endif/*DefThreadCreator*/
+#ifndef EXP_THREAD_CREATOR
+#define EXP_THREAD_CREATOR CThreadAdapterT<>
+#endif/*EXP_THREAD_CREATOR*/
 
-typedef DefThreadCreator ExThread;
+typedef EXP_THREAD_CREATOR ExThread;
 
 //////////////////////////////////////////////////////////////////
 

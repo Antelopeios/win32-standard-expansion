@@ -5,5 +5,7 @@
 
 #pragma once
 
-#define DefThreadModel _SingleModel
+#define	EXP_DUMPING_MEMLEAKS
+#define EXP_THREAD_MODEL _SingleModel
+
 #include "../../StdExp/StdExp.h"

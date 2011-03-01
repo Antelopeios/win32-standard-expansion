@@ -139,7 +139,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		CPoolGC gc;
-		for(int j = 0; j < 1/*TestLast*/; j++)
+		for(int j = 0; j < TestLast; j++)
 			CGCAllocT<CPoolGC>::Alloc<BYTE>(gc, TestSize);
 	}
 	tEnd = timeGetTime();

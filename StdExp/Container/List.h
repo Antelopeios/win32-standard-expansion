@@ -54,7 +54,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = DefMemAlloc>
+template <typename AllocT = EXP_MEMORY_ALLOC>
 struct _ListPolicyT;
 
 template <typename TypeT, typename PolicyT = _ListPolicyT<> >
@@ -328,7 +328,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT/* = DefMemAlloc*/>
+template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
 struct _ListPolicyT
 {
 	typedef AllocT alloc_t;

@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-01
-// Version:	1.2.0016.2345
+// Date:	2011-03-02
+// Version:	1.2.0017.1202
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
 //								+ MemPool支持Clear时进行简单的内存泄漏检测
+//	- 1.2.0017.1202(2011-03-02)	= 将static_cast的指针转换改为C语言的强制转换方式
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -184,13 +185,13 @@ protected:
 	public:
 		block_t* Push(block_t* pItem, block_t* pLast = NULL)
 		{
-			if (pItem = static_cast<block_t*>(blk_list_t::Push(pItem, pLast)))
+			if (pItem = (block_t*)(blk_list_t::Push(pItem, pLast)))
 				m_nSize += pItem->nSize;
 			return pItem;
 		}
 		block_t* Pop(block_t* pItem = NULL)
 		{
-			if (pItem = static_cast<block_t*>(blk_list_t::Pop(pItem)))
+			if (pItem = (block_t*)(blk_list_t::Pop(pItem)))
 				m_nSize -= pItem->nSize;
 			return pItem;
 		}
@@ -221,7 +222,7 @@ protected:
 		block_t* Merger(block_t* pMerg)
 		{
 			if(!pMerg || pMerg->bUsed ) return NULL;
-			block_t* mer_pblk = static_cast<block_t*>(pMerg->pPrev);
+			block_t* mer_pblk = (block_t*)(pMerg->pPrev);
 			if(!mer_pblk || mer_pblk->bUsed || mer_pblk == pMerg ) return NULL;
 			// 合并到后面
 			if( pMerg->bHead ) return NULL;
@@ -425,7 +426,7 @@ public:
 				block = prev;
 			else
 				m_FreList.Push(m_Alloc.FreBlock(block));
-			mem_block_t* next = static_cast<mem_block_t*>(block->pNext);
+			mem_block_t* next = (mem_block_t*)(block->pNext);
 			if (m_MemList.Merger(next))						// 向后合并
 				m_FreList.Pop(m_Alloc.FreBlock(next));
 		}
@@ -450,10 +451,10 @@ public:
 		if( !m_MemList.Empty() )
 		{
 			// 第一次遍历,移除非头结点
-			mem_block_t* item = static_cast<mem_block_t*>(m_MemList.Head());
+			mem_block_t* item = (mem_block_t*)(m_MemList.Head());
 			do
 			{
-				mem_block_t* temp = static_cast<mem_block_t*>(item->pNext);
+				mem_block_t* temp = (mem_block_t*)(item->pNext);
 #ifdef	EXP_DUMPING_MEMLEAKS
 				if (bDump && item->bUsed && ++dump_counter)
 				{
@@ -469,10 +470,10 @@ public:
 				item = temp;
 			} while( item != m_MemList.Tail() );
 			// 第二次遍历,清理数据
-			item = static_cast<mem_block_t*>(m_MemList.Head());
+			item = (mem_block_t*)(m_MemList.Head());
 			do
 			{
-				mem_block_t* temp = static_cast<mem_block_t*>(item->pNext);
+				mem_block_t* temp = (mem_block_t*)(item->pNext);
 				m_Alloc.Free(item);
 				item = temp;
 			} while( item != m_MemList.Tail() );

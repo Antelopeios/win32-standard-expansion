@@ -63,7 +63,7 @@ public:
 	typedef void (*traitor_t)(void*, DWORD);
 
 public:
-	static TypeT* Construct(void* pPtr, DWORD nSize = sizeof(TypeT))
+	EXP_INLINE static TypeT* Construct(void* pPtr, DWORD nSize = sizeof(TypeT))
 	{
 		DWORD count = (nSize / sizeof(TypeT));
 		if (count == 0) return NULL;
@@ -74,7 +74,7 @@ public:
 	#pragma pop_macro("new")
 		return (TypeT*)pPtr;
 	}
-	static TypeT* Destruct(void* pPtr, DWORD nSize = sizeof(TypeT))
+	EXP_INLINE static TypeT* Destruct(void* pPtr, DWORD nSize = sizeof(TypeT))
 	{
 		DWORD count = (nSize / sizeof(TypeT));
 		if (count == 0) return NULL;
@@ -103,24 +103,24 @@ protected:
 	alloc_t m_Alloc;
 
 protected:
-	inline void* RealPtr(void* pPtr)
+	EXP_INLINE void* RealPtr(void* pPtr)
 	{
 		_Regist* real = (((_Regist*)pPtr) - 1);
 		return real;
 	}
 
 public:
-	inline alloc_t& GetAlloc() { return m_Alloc; }
+	EXP_INLINE alloc_t& GetAlloc() { return m_Alloc; }
 
 	template <typename TypeT>
-	inline TypeT* Construct(void* pPtr)
+	EXP_INLINE TypeT* Construct(void* pPtr)
 	{
 		ExAssert(pPtr);
 		_Regist* real = (_Regist*)RealPtr(pPtr);
 		real->destruct = (traitor_t)(CTraitsT<TypeT>::Destruct);
 		return CTraitsT<TypeT>::Construct(pPtr, (m_Alloc.Size(real) - HeadSize));
 	}
-	inline void* Destruct(void* pPtr)
+	EXP_INLINE void* Destruct(void* pPtr)
 	{
 		ExAssert(pPtr);
 		_Regist* real = (_Regist*)RealPtr(pPtr);
@@ -133,29 +133,29 @@ public:
 	}
 
 public:
-	bool Valid(void* pPtr)
+	EXP_INLINE bool Valid(void* pPtr)
 	{
 		return m_Alloc.Valid(RealPtr(pPtr));
 	}
-	DWORD Size(void* pPtr)
+	EXP_INLINE DWORD Size(void* pPtr)
 	{
 		void* real = RealPtr(pPtr);
 		return (m_Alloc.Size(real) - HeadSize);
 	}
 	template <typename TypeT>
-	TypeT* Alloc(DWORD nCount = 1)
+	EXP_INLINE TypeT* Alloc(DWORD nCount = 1)
 	{
 		if (nCount == 0) return NULL;
 		_Regist* real = (_Regist*)m_Alloc.Alloc(HeadSize + (sizeof(TypeT) * nCount));
 		return Construct<TypeT>(real + 1);
 	}
-	void* Alloc(DWORD nSize)
+	EXP_INLINE void* Alloc(DWORD nSize)
 	{
 		if (nSize == 0) return NULL;
 		ExAssert(nSize <= ((DWORD)~0 - HeadSize));
 		return (void*)Alloc<BYTE>(nSize);
 	}
-	void Free(void* pPtr)
+	EXP_INLINE void Free(void* pPtr)
 	{
 		if (!pPtr) return;
 		m_Alloc.Free(Destruct(pPtr));

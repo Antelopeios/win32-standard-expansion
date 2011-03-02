@@ -103,20 +103,20 @@ protected:
 		{}
 
 	public:
-		void InitPtr(void* pt)
+		EXP_INLINE void InitPtr(void* pt)
 		{
 			p_ptr = pt;
 			n_ref = 1;
 		}
 
-		long GetRefCount()
+		EXP_INLINE long GetRefCount()
 		{ return n_ref; }
-		void* GetPtr()
+		EXP_INLINE void* GetPtr()
 		{ return p_ptr; }
 
-		bool operator==(void* pt) const
+		EXP_INLINE bool operator==(void* pt) const
 		{ return (p_ptr == pt); }
-		bool operator!=(void* pt) const
+		EXP_INLINE bool operator!=(void* pt) const
 		{ return (p_ptr != pt); }
 
 		virtual void Inc() = 0;
@@ -155,7 +155,7 @@ protected:
 				return false;
 		}
 
-		static CReferPtrT* Alloc()
+		EXP_INLINE static CReferPtrT* Alloc()
 		{ return alloc_t::Alloc<CReferPtrT>(); }
 		void Free()
 		{ alloc_t::Free(this); }
@@ -180,7 +180,7 @@ public:
 	{ Clear(); }
 
 public:
-	static CPtrManagerT& Instance()
+	EXP_INLINE static CPtrManagerT& Instance()
 	{
 		ExLockThis(model_t::_ExcPolicy);
 		static CPtrManagerT instance;
@@ -189,7 +189,7 @@ public:
 
 public:
 	// 获取指针引用计数
-	long Get(void* pPtr)
+	EXP_INLINE long Get(void* pPtr)
 	{
 		if (!pPtr) return 0;
 		ExLock(m_Mutex, true, mutex_t);
@@ -203,7 +203,7 @@ public:
 	}
 	// 添加指针引用计数
 	template <typename RefAllocT, typename RefModelT>
-	void Add(void* pPtr)
+	EXP_INLINE void Add(void* pPtr)
 	{
 		if (!pPtr) return;
 		IReferPtr* ref_ptr = NULL;
@@ -228,7 +228,7 @@ public:
 		}
 	}
 	// 删除指针引用计数
-	void Del(void* pPtr, bool bRelease = false)
+	EXP_INLINE void Del(void* pPtr, bool bRelease = false)
 	{
 		if (!pPtr) return;
 		ExLock(m_Mutex, false, mutex_t);
@@ -247,7 +247,7 @@ public:
 		}
 	}
 	// 清空指针记录表
-	void Clear()
+	EXP_INLINE void Clear()
 	{
 		ExLock(m_Mutex, false, mutex_t);
 		for(ptr_map_t::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)

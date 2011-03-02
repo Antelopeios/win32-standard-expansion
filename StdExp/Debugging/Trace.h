@@ -55,7 +55,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename PolicyT>
-inline void __cdecl ExPrintfT(LPCTSTR lpFormat, ...)
+EXP_INLINE void __cdecl ExPrintfT(LPCTSTR lpFormat, ...)
 {
 	if (!lpFormat) return;
 

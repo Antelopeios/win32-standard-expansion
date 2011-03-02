@@ -89,7 +89,7 @@ protected:
 	table_t m_Table;
 
 	// ¶¨Î»
-	bool Locate(_in_ const key_t& Key, _ot_ ite_t& Iter, _ot_ DWORD* pHash = NULL)
+	bool Locate(_IN_ const key_t& Key, _OT_ ite_t& Iter, _OT_ DWORD* pHash = NULL)
 	{
 		DWORD hash = hash_t::HashKey<key_t>(Key);
 		DWORD indx = hash % GetSize();

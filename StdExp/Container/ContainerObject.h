@@ -65,9 +65,9 @@ public:
 	typedef CFinderT<container_t> finder_t;
 
 private:
-	inline container_t* This()
+	EXP_INLINE container_t* This()
 	{ return (container_t*)this; }
-	inline const container_t* This() const
+	EXP_INLINE const container_t* This() const
 	{ return (const container_t*)this; }
 
 public:

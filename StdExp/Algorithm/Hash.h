@@ -53,12 +53,12 @@ class CHash
 {
 public:
 	template<typename KeyT>
-	inline static DWORD HashKey(KeyT Key)
+	EXP_INLINE static DWORD HashKey(KeyT Key)
 	{
 		return (DWORD)(DWORD_PTR)(Key);
 	}
 	template<typename AryT>
-	inline static DWORD HashAry(AryT Ary)
+	EXP_INLINE static DWORD HashAry(AryT Ary)
 	{
 		if (!Ary) return 0;
 		DWORD hash = 0;

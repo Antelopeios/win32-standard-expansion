@@ -73,9 +73,9 @@ public:
 	~CLockT()
 	{ PolicyT::DelLock(m_Lock); }
 
-	void Lock(bool bRead = false)
+	EXP_INLINE void Lock(bool bRead = false)
 	{ PolicyT::Lock(m_Lock, bRead); }
-	void Unlock(bool bRead = false)
+	EXP_INLINE void Unlock(bool bRead = false)
 	{ PolicyT::Unlock(m_Lock, bRead); }
 };
 

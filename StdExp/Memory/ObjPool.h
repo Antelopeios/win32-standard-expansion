@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-22
-// Version:	1.0.0011.1100
+// Date:	2011-03-02
+// Version:	1.0.0012.1202
+//
+// History:
+//	- 1.2.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -134,12 +137,14 @@ public:
 	// 内存效验
 	bool Valid(void* pPtr)
 	{
-		return m_Alloc.Valid(pPtr);
+		block_t<TypeT>* pBlock = (block_t<TypeT>*)((BYTE*)pPtr - block_t<TypeT>::HeadSize);
+		return m_Alloc.Valid(pBlock);
 	}
 	// 内存大小
 	DWORD Size(void* pPtr)
 	{
-		return m_Alloc.Size(pPtr);
+		block_t<TypeT>* pBlock = (block_t<TypeT>*)((BYTE*)pPtr - block_t<TypeT>::HeadSize);
+		return m_Alloc.Size(pBlock) - block_t<TypeT>::HeadSize;
 	}
 	// 分配内存
 	template <typename Type2T>

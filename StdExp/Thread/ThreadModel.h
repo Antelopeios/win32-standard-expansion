@@ -56,45 +56,45 @@ struct _SingleModel
 	{
 		typedef volatile LONG lock_t;
 
-		static void IntLock(lock_t& /*lc*/)
+		EXP_INLINE static void IntLock(lock_t& /*lc*/)
 		{ __noop; }
-		static void DelLock(lock_t& /*lc*/)
+		EXP_INLINE static void DelLock(lock_t& /*lc*/)
 		{ __noop; }
-		static void Lock(lock_t& /*lc*/, bool /*bRead*/)
+		EXP_INLINE static void Lock(lock_t& /*lc*/, bool /*bRead*/)
 		{ __noop; }
-		static void Unlock(lock_t& /*lc*/, bool /*bRead*/)
+		EXP_INLINE static void Unlock(lock_t& /*lc*/, bool /*bRead*/)
 		{ __noop; }
 	};
 	typedef _ExcPolicy _CriPolicy;
 	typedef _ExcPolicy _ShrPolicy;
 	typedef _ExcPolicy _LockPolicy;
 
-	inline static void Switch()
+	EXP_INLINE static void Switch()
 	{ __noop; }
 
-	inline static LONG Inc(volatile LONG* lpAddend)
+	EXP_INLINE static LONG Inc(volatile LONG* lpAddend)
 	{
 		ExAssert(lpAddend);
 		return ++(*lpAddend);
 	}
-	inline static LONG Dec(volatile LONG* lpAddend)
+	EXP_INLINE static LONG Dec(volatile LONG* lpAddend)
 	{
 		ExAssert(lpAddend);
 		return --(*lpAddend);
 	}
-	inline static LONG Add(volatile LONG* lpAddend, LONG lValue)
+	EXP_INLINE static LONG Add(volatile LONG* lpAddend, LONG lValue)
 	{
 		ExAssert(lpAddend);
 		return (*lpAddend) += lValue;
 	}
-	inline static LONG Exc(volatile LONG* lpTarget, LONG lValue)
+	EXP_INLINE static LONG Exc(volatile LONG* lpTarget, LONG lValue)
 	{
 		ExAssert(lpTarget);
 		LONG tmp(*lpTarget);
 		(*lpTarget) = lValue;
 		return tmp;
 	}
-	inline static bool CAS(volatile LONG* lpTarget, LONG lComperand, LONG lValue)
+	EXP_INLINE static bool CAS(volatile LONG* lpTarget, LONG lComperand, LONG lValue)
 	{
 		ExAssert(lpTarget);
 		if ((*lpTarget) == lComperand)
@@ -114,29 +114,29 @@ struct _MultiModel
 	{	// 不可重入的自旋锁
 		typedef volatile LONG lock_t;
 
-		static void IntLock(lock_t& lc)
+		EXP_INLINE static void IntLock(lock_t& lc)
 		{ _MultiModel::Exc(&lc, 0); }
-		static void DelLock(lock_t& lc)
+		EXP_INLINE static void DelLock(lock_t& lc)
 		{}
-		static void Lock(lock_t& lc, bool /*bRead*/)
+		EXP_INLINE static void Lock(lock_t& lc, bool /*bRead*/)
 		{
 			while( _MultiModel::Exc(&lc, 1) )
 				_MultiModel::Switch();
 		}
-		static void Unlock(lock_t& lc, bool /*bRead*/)
+		EXP_INLINE static void Unlock(lock_t& lc, bool /*bRead*/)
 		{ _MultiModel::Exc(&lc, 0); }
 	};
 	struct _CriPolicy
 	{	// 临界区
 		typedef CRITICAL_SECTION lock_t;
 
-		static void IntLock(lock_t& lc)
+		EXP_INLINE static void IntLock(lock_t& lc)
 		{ InitializeCriticalSectionAndSpinCount(&lc, 4000); }
-		static void DelLock(lock_t& lc)
+		EXP_INLINE static void DelLock(lock_t& lc)
 		{ DeleteCriticalSection(&lc); }
-		static void Lock(lock_t& lc, bool /*bRead*/)
+		EXP_INLINE static void Lock(lock_t& lc, bool /*bRead*/)
 		{ EnterCriticalSection(&lc); }
-		static void Unlock(lock_t& lc, bool /*bRead*/)
+		EXP_INLINE static void Unlock(lock_t& lc, bool /*bRead*/)
 		{ LeaveCriticalSection(&lc); }
 	};
 	struct _ShrPolicy
@@ -150,19 +150,19 @@ struct _MultiModel
 			policy_t::lock_t rc_lock;	// 状态锁
 		} lock_t;
 
-		static void IntLock(lock_t& lc)
+		EXP_INLINE static void IntLock(lock_t& lc)
 		{
 			lc.rw_event.Create(true, true);
 			lc.rc_r = lc.rc_w = 0;
 			lc.id = 0;
 			policy_t::IntLock(lc.rc_lock);
 		}
-		static void DelLock(lock_t& lc)
+		EXP_INLINE static void DelLock(lock_t& lc)
 		{
 			lc.rw_event.Close();
 			policy_t::DelLock(lc.rc_lock);
 		}
-		static void Lock(lock_t& lc, bool bRead)
+		EXP_INLINE static void Lock(lock_t& lc, bool bRead)
 		{
 			policy_t::Lock(lc.rc_lock, false);
 			if (bRead)
@@ -202,7 +202,7 @@ struct _MultiModel
 			}
 			policy_t::Unlock(lc.rc_lock, false);
 		}
-		static void Unlock(lock_t& lc, bool bRead)
+		EXP_INLINE static void Unlock(lock_t& lc, bool bRead)
 		{
 			policy_t::Lock(lc.rc_lock, false);
 			if (bRead)
@@ -234,7 +234,7 @@ struct _MultiModel
 	};
 	typedef _CriPolicy _LockPolicy;
 
-	inline static void Switch()
+	EXP_INLINE static void Switch()
 	{
 	#if (_WIN32_WINNT >= 0x0400) && !defined(_WIN32_WCE)
 		SwitchToThread();
@@ -243,23 +243,23 @@ struct _MultiModel
 	#endif/*(_WIN32_WINNT >= 0x0400)*/
 	}
 
-	inline static LONG Inc(volatile LONG* lpAddend)
+	EXP_INLINE static LONG Inc(volatile LONG* lpAddend)
 	{
 		return ::InterlockedIncrement(lpAddend);
 	}
-	inline static LONG Dec(volatile LONG* lpAddend)
+	EXP_INLINE static LONG Dec(volatile LONG* lpAddend)
 	{
 		return ::InterlockedDecrement(lpAddend);
 	}
-	inline static LONG Add(volatile LONG* lpAddend, LONG lValue)
+	EXP_INLINE static LONG Add(volatile LONG* lpAddend, LONG lValue)
 	{
 		return ::InterlockedExchangeAdd(lpAddend, lValue);
 	}
-	inline static LONG Exc(volatile LONG* lpTarget, LONG lValue)
+	EXP_INLINE static LONG Exc(volatile LONG* lpTarget, LONG lValue)
 	{
 		return ::InterlockedExchange(lpTarget, lValue);
 	}
-	inline static bool CAS(volatile LONG* lpTarget, LONG lComperand, LONG lValue)
+	EXP_INLINE static bool CAS(volatile LONG* lpTarget, LONG lComperand, LONG lValue)
 	{
 		return (lComperand == ::InterlockedCompareExchange(lpTarget, lValue, lComperand));
 	}

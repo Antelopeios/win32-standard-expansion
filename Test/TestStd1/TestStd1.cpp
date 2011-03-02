@@ -45,7 +45,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = new BYTE[TestSize];
 		for(int j = 0; j < TestLast; j++)
-			delete [] (Test[j]);
+			delete [] (Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -59,7 +59,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = malloc(TestSize);
 		for(int j = 0; j < TestLast; j++)
-			free(Test[j]);
+			free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -73,7 +73,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = CMemHeapAlloc::Alloc(TestSize);
 		for(int j = 0; j < TestLast; j++)
-			CMemHeapAlloc::Free(Test[j]);
+			CMemHeapAlloc::Free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -89,7 +89,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = CMemAdapterT<_MemHeap>::Alloc(TestSize);
 		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemHeap>::Free(Test[j]);
+			CMemAdapterT<_MemHeap>::Free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -106,7 +106,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = CMemAdapterT<_MemPool>::Alloc(TestSize);
 		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemPool>::Free(Test[j]);
+			CMemAdapterT<_MemPool>::Free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -158,7 +158,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = pool.Alloc();
 		for(int j = 0; j < TestLast; j++)
-			pool.Free(Test[j]);
+			pool.Free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);

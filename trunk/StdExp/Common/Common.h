@@ -111,8 +111,8 @@ typedef __int64				int64_t;
 #define ExLoLong(x)			((long)(((int64_t)(x)) & 0xffffffff))
 #define ExHiLong(x)			((long)((((int64_t)(x)) >> 32) & 0xffffffff))
 
-#define ExRandom(num)	((num) ? (rand() % (num)) : 0)
-#define ExRandomize()	srand((unsigned)time(NULL))
+#define ExRandom(num)		((num) ? (rand() % (num)) : 0)
+#define ExRandomize()		srand((unsigned)time(NULL))
 
 //////////////////////////////////////////////////////////////////
 

@@ -71,12 +71,12 @@ struct TypeInfo
 	TypeInfo*	pBaseClass[3];
 	creator_t	m_Creator;	// NULL => abstract class
 
-	inline CBaseObject* CreateObject(CGC& gc)
+	EXP_INLINE CBaseObject* CreateObject(CGC& gc)
 	{
 		if (!m_Creator) return NULL;
 		return (*m_Creator)(gc);
 	}
-	inline bool IsKindOf(TypeInfo& cls)
+	EXP_INLINE bool IsKindOf(TypeInfo& cls)
 	{
 		if( type_id == cls.type_id )
 			return true;
@@ -88,9 +88,9 @@ struct TypeInfo
 		}
 		return false;
 	}
-	inline bool operator==(const TypeInfo& info)
+	EXP_INLINE bool operator==(const TypeInfo& info)
 	{ return this == &info; }
-	inline bool operator!=(const TypeInfo& info)
+	EXP_INLINE bool operator!=(const TypeInfo& info)
 	{ return this != &info; }
 };
 
@@ -382,7 +382,7 @@ int CBaseObjectT<IntT>::TypeInfoOrder = IntT;
 //////////////////////////////////////////////////////////////////
 
 // 动态指针效验函数
-inline bool ExDynCheck(LPCTSTR c_key, CBaseObject* ptr)
+EXP_INLINE bool ExDynCheck(LPCTSTR c_key, CBaseObject* ptr)
 {
 	if( ptr )
 	{
@@ -398,7 +398,7 @@ inline bool ExDynCheck(LPCTSTR c_key, CBaseObject* ptr)
 
 // 动态指针转换函数模板
 template <class TypeT>
-inline TypeT* ExDynCast(void* ptr)
+EXP_INLINE TypeT* ExDynCast(void* ptr)
 {
 	if( ptr )
 		return ((TypeT::Mult*)ptr)->IsKindOf(EXP_TYPEINFO_OF_CLS(TypeT)) ? (TypeT*)(TypeT::Mult*)ptr : NULL;
@@ -408,7 +408,7 @@ inline TypeT* ExDynCast(void* ptr)
 
 // 动态对象创建函数
 template <class TypeT>
-inline TypeT* ExDynCreate(LPCTSTR c_key, CGC& gc)
+EXP_INLINE TypeT* ExDynCreate(LPCTSTR c_key, CGC& gc)
 {
 	if( c_key == NULL ) return NULL;
 	TypeInfo* inf = EXP_GET_TYPEINFO(c_key);

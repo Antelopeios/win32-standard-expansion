@@ -87,23 +87,23 @@ public:
 
 protected:
 	template <typename TypeT>
-	TypeT* CheckAlloc(DWORD nCount = 1)
+	EXP_INLINE TypeT* CheckAlloc(DWORD nCount = 1)
 	{
 		TypeT* ptr = alloc_t::Alloc<TypeT>(nCount);
 		CPtrManager::Instance().Add<alloc_t, model_t>(ptr);
 		return ptr;
 	}
-	void CheckFree(void* pPtr)
+	EXP_INLINE void CheckFree(void* pPtr)
 	{ CPtrManager::Instance().Del(pPtr); }
 
 public:
 	template <typename TypeT>
-	inline TypeT* Construct(void* pPtr)
+	EXP_INLINE TypeT* Construct(void* pPtr)
 	{
 		ExLock(m_Mutex, false, mutex_t);
 		return alloc_t::Construct<TypeT>(pPtr);
 	}
-	inline void* Destruct(void* pPtr)
+	EXP_INLINE void* Destruct(void* pPtr)
 	{
 		ExLock(m_Mutex, false, mutex_t);
 		return alloc_t::Destruct(pPtr);

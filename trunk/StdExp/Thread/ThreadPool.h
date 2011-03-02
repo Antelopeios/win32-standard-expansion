@@ -66,13 +66,13 @@ struct _ThreadPoolPolicyT
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	inline static DWORD DefSize()
+	EXP_INLINE static DWORD DefSize()
 	{
 		SYSTEM_INFO system_info = {0};
 		GetSystemInfo(&system_info);
 		return (system_info.dwNumberOfProcessors * 2 + 2);
 	}
-	inline static DWORD MaxSize()
+	EXP_INLINE static DWORD MaxSize()
 	{ return DefSize(); }
 };
 
@@ -151,7 +151,7 @@ protected:
 protected:
 	static DWORD __stdcall CallProc(LPVOID lpParam)
 	{
-		par_t* par = static_cast<par_t*>(lpParam);
+		par_t* par = (par_t*)(lpParam);
 		ExAssert(par);
 		CThreadPoolT* ths = par->pThs;
 		ExAssert(ths);
@@ -261,11 +261,11 @@ public:
 	}
 
 	// 创建线程
-	handle_t Create(_in_ call_t lpStartAddr, 
-					_in_ LPVOID lpParam = NULL, 
-					_in_ DWORD dwFlag = 0, 
-					_ot_ LPDWORD lpIDThread = NULL, 
-					_in_ DWORD dwWaitTime = 100)
+	handle_t Create(_IN_ call_t lpStartAddr, 
+					_IN_ LPVOID lpParam = NULL, 
+					_IN_ DWORD dwFlag = 0, 
+					_OT_ LPDWORD lpIDThread = NULL, 
+					_IN_ DWORD dwWaitTime = 100)
 	{
 		handle_t hdl = NULL;
 		if (lpStartAddr)

@@ -63,67 +63,67 @@ public:
 	{ (*this) = rNode; }
 
 public:
-	NodeT& Node()
+	EXP_INLINE NodeT& Node()
 	{ return m_Node; }
-	NodeT* operator->()
+	EXP_INLINE NodeT* operator->()
 	{ return &m_Node; }
 
-	CIteratorT& operator=(const CIteratorT& rIte)
+	EXP_INLINE CIteratorT& operator=(const CIteratorT& rIte)
 	{ m_Node = rIte.m_Node; return (*this); }
-	CIteratorT& operator=(const NodeT& rNode)
+	EXP_INLINE CIteratorT& operator=(const NodeT& rNode)
 	{ m_Node = rNode; return (*this); }
 
-	bool operator==(const CIteratorT& rIte)
+	EXP_INLINE bool operator==(const CIteratorT& rIte)
 	{ return m_Node == rIte.m_Node; }
-	bool operator==(const NodeT& rNode)
+	EXP_INLINE bool operator==(const NodeT& rNode)
 	{ return m_Node == rNode; }
-	bool operator!=(const CIteratorT& rIte)
+	EXP_INLINE bool operator!=(const CIteratorT& rIte)
 	{ return m_Node != rIte.m_Node; }
-	bool operator!=(const NodeT& rNode)
+	EXP_INLINE bool operator!=(const NodeT& rNode)
 	{ return m_Node != rNode; }
 
-	CIteratorT& operator++()
+	EXP_INLINE CIteratorT& operator++()
 	{
 		m_Node.Next();
 		return (*this);
 	}
-	CIteratorT operator++(int)
+	EXP_INLINE CIteratorT operator++(int)
 	{
 		CIteratorT tmp(*this);
 		m_Node.Next();
 		return tmp;
 	}
-	CIteratorT& operator--()
+	EXP_INLINE CIteratorT& operator--()
 	{
 		m_Node.Prev();
 		return (*this);
 	}
-	CIteratorT operator--(int)
+	EXP_INLINE CIteratorT operator--(int)
 	{
 		CIteratorT tmp(*this);
 		m_Node.Prev();
 		return tmp;
 	}
-	CIteratorT& operator+=(long nOff)
+	EXP_INLINE CIteratorT& operator+=(long nOff)
 	{
 		if (nOff == 0) return (*this);
 		m_Node.Next(nOff);
 		return (*this);
 	}
-	CIteratorT& operator-=(long nOff)
+	EXP_INLINE CIteratorT& operator-=(long nOff)
 	{
 		if (nOff == 0) return (*this);
 		m_Node.Prev(nOff);
 		return (*this);
 	}
-	CIteratorT operator+(long nOff) const
+	EXP_INLINE CIteratorT operator+(long nOff) const
 	{
 		if (nOff == 0) return (*this);
 		CIteratorT tmp(*this);
 		tmp->Next(nOff);
 		return tmp;
 	}
-	CIteratorT operator-(long nOff) const
+	EXP_INLINE CIteratorT operator-(long nOff) const
 	{
 		if (nOff == 0) return (*this);
 		CIteratorT tmp(*this);

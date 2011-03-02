@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-02-21
-// Version:	1.2.0005.1700
+// Date:	2010-03-02
+// Version:	1.2.0006.1150
+//
+// History:
+//	- 1.2.0006.1150(2010-03-02)	= 调整部分宏定义,定义并使用EXP_INLINE宏
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Common_h__
@@ -56,10 +59,10 @@
 
 // namespace 定义
 
-#define EXP			StdExp
-#define EXP_BEG		namespace EXP {
-#define EXP_END		}
-#define USING_EXP	using namespace EXP;
+#define EXP					StdExp
+#define EXP_BEG				namespace EXP {
+#define EXP_END				}
+#define EXP_USING_NAMESPACE	using namespace EXP;
 
 EXP_BEG
 
@@ -84,27 +87,29 @@ typedef __int64				int64_t;
 
 // 功能定义
 
-#ifndef _in_
-#define _in_
+#ifndef _IN_
+#define _IN_
 #endif
 
-#ifndef _ot_
-#define _ot_
+#ifndef _OT_
+#define _OT_
 #endif
 
-#ifndef _in_ot_
-#define _in_ot_
+#ifndef _IN_OT_
+#define _IN_OT_
 #endif
 
-#define ExMakeWord			MAKEWORD
-#define ExMakeLong			MAKELONG
+#define EXP_INLINE			__forceinline
+
+#define ExMakeWord(a, b)	MAKEWORD(a, b)
+#define ExMakeLong(a, b)	MAKELONG(a, b)
 #define ExMakeInt64(a, b)	((int64_t)(((int32_t)(a)) | ((int64_t)((int32_t)(b))) << 32))
-#define ExLoWord			LOWORD
-#define ExHiWord			HIWORD
-#define ExLoByte			LOBYTE
-#define ExHiByte			HIBYTE
-#define ExLoLong(l)			((long)(((int64_t)(l)) & 0xffffffff))
-#define ExHiLong(l)			((long)((((int64_t)(l)) >> 32) & 0xffffffff))
+#define ExLoWord(x)			LOWORD(x)
+#define ExHiWord(x)			HIWORD(x)
+#define ExLoByte(x)			LOBYTE(x)
+#define ExHiByte(x)			HIBYTE(x)
+#define ExLoLong(x)			((long)(((int64_t)(x)) & 0xffffffff))
+#define ExHiLong(x)			((long)((((int64_t)(x)) >> 32) & 0xffffffff))
 
 #define ExRandom(num)	((num) ? (rand() % (num)) : 0)
 #define ExRandomize()	srand((unsigned)time(NULL))

@@ -57,28 +57,28 @@ class CMemAdapterT : public CSingletonT<AllocT>
 public:
 	typedef AllocT alloc_t;
 
-	inline static alloc_t& GetPolicy()
+	EXP_INLINE static alloc_t& GetPolicy()
 	{ return Instance(); }
-	inline static typename alloc_t::alloc_t& GetAlloc()
+	EXP_INLINE static typename alloc_t::alloc_t& GetAlloc()
 	{ return GetPolicy().GetAlloc(); }
 
 	template <typename TypeT>
-	inline TypeT* Construct(void* pPtr)
+	EXP_INLINE TypeT* Construct(void* pPtr)
 	{ return GetPolicy().Construct<TypeT>(pPtr); }
-	inline void* Destruct(void* pPtr)
+	EXP_INLINE void* Destruct(void* pPtr)
 	{ return GetPolicy().Destruct(pPtr); }
 
 public:
-	static bool Valid(void* pPtr)
+	EXP_INLINE static bool Valid(void* pPtr)
 	{ return GetPolicy().Valid(pPtr); }
-	static DWORD Size(void* pPtr)
+	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return GetPolicy().Size(pPtr); }
 	template <typename TypeT>
-	static TypeT* Alloc(DWORD nCount = 1)
+	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
 	{ return GetPolicy().Alloc<TypeT>(nCount); }
-	static void* Alloc(DWORD nSize)
+	EXP_INLINE static void* Alloc(DWORD nSize)
 	{ return GetPolicy().Alloc(nSize); }
-	static void Free(void* pPtr)
+	EXP_INLINE static void Free(void* pPtr)
 	{ GetPolicy().Free(pPtr); }
 };
 

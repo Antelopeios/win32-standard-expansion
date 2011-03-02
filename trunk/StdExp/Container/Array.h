@@ -67,13 +67,13 @@ protected:
 	DWORD	m_nCont;
 
 protected:
-	inline void InitElements(type_t* pDst, DWORD nCount)
+	EXP_INLINE void InitElements(type_t* pDst, DWORD nCount)
 	{
 		if (!pDst || nCount == 0) return;
 		ZeroMemory(pDst, sizeof(type_t) * nCount);
 		CTraitsT<type_t>::Construct(pDst, sizeof(type_t) * nCount);
 	}
-	inline void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
+	EXP_INLINE void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
 	{
 		if (!pDst || !pSrc || nCount == 0) return;
 		while (nCount--) *pDst++ = *pSrc++;

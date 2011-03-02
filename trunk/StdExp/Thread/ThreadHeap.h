@@ -56,10 +56,10 @@ public:
 	typedef DWORD (__stdcall* call_t)(LPVOID);
 
 public:
-	static handle_t Create(_in_ call_t lpStartAddr, 
-						   _in_ LPVOID lpParam = NULL, 
-						   _in_ DWORD dwFlag = 0, 
-						   _ot_ LPDWORD lpIDThread = NULL)
+	static handle_t Create(_IN_ call_t lpStartAddr, 
+						   _IN_ LPVOID lpParam = NULL, 
+						   _IN_ DWORD dwFlag = 0, 
+						   _OT_ LPDWORD lpIDThread = NULL)
 	{ return CreateThread(NULL, 0, lpStartAddr, lpParam, dwFlag, lpIDThread); }
 	static bool Close(handle_t hTrd)
 	{ return CloseHandle(hTrd); }

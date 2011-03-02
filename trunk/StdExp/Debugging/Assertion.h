@@ -57,14 +57,14 @@ EXP_BEG
 #define ExDebugBreak()	__noop
 #endif
 
-inline void ExMBA(PCSTR csMsg, UINT uType = MB_ICONERROR)
+EXP_INLINE void ExMBA(PCSTR csMsg, UINT uType = MB_ICONERROR)
 {
 	char c_title[MAX_PATH];
 	GetModuleFileNameA(NULL, c_title, _countof(c_title));
 	MessageBoxA(NULL, csMsg, c_title, MB_OK | uType);
 }
 
-inline void ExMBW(PCWSTR wsMsg, UINT uType = MB_ICONERROR)
+EXP_INLINE void ExMBW(PCWSTR wsMsg, UINT uType = MB_ICONERROR)
 {
 	WCHAR wc_title[MAX_PATH];
 	GetModuleFileNameW(NULL, wc_title, _countof(wc_title));
@@ -77,13 +77,13 @@ inline void ExMBW(PCWSTR wsMsg, UINT uType = MB_ICONERROR)
 #define ExMB	ExMBA
 #endif/*_UNICODE*/
 
-inline void ExFail(PSTR csMsg)
+EXP_INLINE void ExFail(PSTR csMsg)
 {
 	ExMBA(csMsg);
 	ExDebugBreak();
 }
 
-inline void ExAssertFail(PCSTR csFile, int iLine, PCSTR csExpr)
+EXP_INLINE void ExAssertFail(PCSTR csFile, int iLine, PCSTR csExpr)
 {
 	char c_str[MAX_PATH];
 	StringCchPrintfA(c_str, _countof(c_str), "ÎÄ¼þ: %s\nÐÐºÅ: %d\nÓï¾ä: %s", csFile, iLine, csExpr);

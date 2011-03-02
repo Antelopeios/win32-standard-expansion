@@ -55,7 +55,7 @@ public:
 	static TypeT m_Type;
 
 public:
-	static TypeT& Instance()
+	EXP_INLINE static TypeT& Instance()
 	{ return m_Type; }
 };
 
@@ -63,7 +63,7 @@ template <typename TypeT>
 TypeT CSingletonT<TypeT>::m_Type;
 
 template <typename TypeT>
-inline TypeT& ExSingleton() { return CSingletonT<TypeT>::Instance(); }
+EXP_INLINE TypeT& ExSingleton() { return CSingletonT<TypeT>::Instance(); }
 
 //////////////////////////////////////////////////////////////////
 

@@ -34,12 +34,13 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-02
-// Version:	1.2.0017.1202
+// Version:	1.2.0018.1520
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
 //								+ MemPool支持Clear时进行简单的内存泄漏检测
-//	- 1.2.0017.1202(2011-03-02)	= 将static_cast的指针转换改为C语言的强制转换方式
+//	- 1.2.0018.1520(2011-03-02)	= 将static_cast的指针转换改为C语言的强制转换方式
+//								+ 添加一些关键位置的inline定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -98,7 +99,7 @@ protected:
 		{ /*析构不做任何清理工作*/ }
 
 	public:
-		block_t* Push(block_t* pItem, block_t* pLast = NULL)
+		EXP_INLINE block_t* Push(block_t* pItem, block_t* pLast = NULL)
 		{	// 默认从尾部插入结点
 			if( !pItem ) return NULL;
 			if( (pItem->pPrev && pItem->pPrev->pNext == pItem) && 
@@ -122,7 +123,7 @@ protected:
 			++m_nCont;
 			return pItem;
 		}
-		block_t* Pop(block_t* pItem = NULL)
+		EXP_INLINE block_t* Pop(block_t* pItem = NULL)
 		{	// 默认从头部弹出结点
 			if(!pItem ) pItem = m_pList;
 			if( pItem )
@@ -139,22 +140,22 @@ protected:
 			return pItem;
 		}
 
-		void Clear()
+		EXP_INLINE void Clear()
 		{	// 直接置空,不做任何清理动作
 			m_pList = NULL;
 			m_nCont = 0;
 		}
 
-		bool Empty()
+		EXP_INLINE bool Empty()
 		{ return (m_pList == NULL); }
-		DWORD Count()
+		EXP_INLINE DWORD Count()
 		{ return m_nCont; }
 
-		block_t* Head()
+		EXP_INLINE block_t* Head()
 		{ return m_pList; }
-		block_t* Tail()
+		EXP_INLINE block_t* Tail()
 		{ return m_pList; }
-		block_t* Last()
+		EXP_INLINE block_t* Last()
 		{ return m_pList ? m_pList->pPrev : NULL; }
 	} blk_list_t;
 	typedef typename blk_list_t::block_t block_t;
@@ -183,19 +184,19 @@ protected:
 		DWORD	 m_nSize;	// 链表大小
 
 	public:
-		block_t* Push(block_t* pItem, block_t* pLast = NULL)
+		EXP_INLINE block_t* Push(block_t* pItem, block_t* pLast = NULL)
 		{
 			if (pItem = (block_t*)(blk_list_t::Push(pItem, pLast)))
 				m_nSize += pItem->nSize;
 			return pItem;
 		}
-		block_t* Pop(block_t* pItem = NULL)
+		EXP_INLINE block_t* Pop(block_t* pItem = NULL)
 		{
 			if (pItem = (block_t*)(blk_list_t::Pop(pItem)))
 				m_nSize -= pItem->nSize;
 			return pItem;
 		}
-		block_t* Cut(DWORD nCutSize, block_t* pItem = m_pList)
+		EXP_INLINE block_t* Cut(DWORD nCutSize, block_t* pItem = m_pList)
 		{
 			if(!nCutSize ) return NULL;
 			// 默认从头部分割结点
@@ -219,7 +220,7 @@ protected:
 				cut_pblk = pItem;
 			return cut_pblk;
 		}
-		block_t* Merger(block_t* pMerg)
+		EXP_INLINE block_t* Merger(block_t* pMerg)
 		{
 			if(!pMerg || pMerg->bUsed ) return NULL;
 			block_t* mer_pblk = (block_t*)(pMerg->pPrev);
@@ -236,13 +237,13 @@ protected:
 			return mer_pblk;
 		}
 
-		void Clear()
+		EXP_INLINE void Clear()
 		{
 			blk_list_t::Clear();
 			m_nSize = 0;
 		}
 
-		DWORD Size()
+		EXP_INLINE DWORD Size()
 		{ return m_nSize; }
 	} mem_list_t;
 	typedef typename mem_list_t::block_t mem_block_t;
@@ -255,37 +256,37 @@ protected:
 
 	public:
 		// 获得内存记录块对应的指针
-		void* PtrReal(void* pPtr)
+		EXP_INLINE void* PtrReal(void* pPtr)
 		{ return pPtr ? (((BYTE*)pPtr) + mem_list_t::HeadSize) : NULL; }
-		void* PtrBlock(mem_block_t* pPtr)
+		EXP_INLINE void* PtrBlock(mem_block_t* pPtr)
 		{ return PtrReal((void*)pPtr); }
 
 		// 获得指针对应的内存记录块
-		void* RealPtr(void* pPtr)
+		EXP_INLINE void* RealPtr(void* pPtr)
 		{ return pPtr ? (((BYTE*)pPtr) - mem_list_t::HeadSize) : NULL; }
-		mem_block_t* BlockPtr(void* pPtr)
+		EXP_INLINE mem_block_t* BlockPtr(void* pPtr)
 		{ return (mem_block_t*)RealPtr(pPtr); }
 
 		// 空闲记录块与内存记录块的转换
-		mem_block_t* BlockFre(fre_block_t* pFre)
+		EXP_INLINE mem_block_t* BlockFre(fre_block_t* pFre)
 		{ return pFre ? (mem_block_t*)(((BYTE*)pFre) - mem_list_t::MemBSize) : NULL; }
-		fre_block_t* FreBlock(mem_block_t* pBlk)
+		EXP_INLINE fre_block_t* FreBlock(mem_block_t* pBlk)
 		{ return pBlk ? &(pBlk->fBlock) : NULL; }
 
 		// 内存校验
-		bool Valid(void* pPtr)
+		EXP_INLINE bool Valid(void* pPtr)
 		{
 			mem_block_t* block = BlockPtr(pPtr);
 			return block ? block->bUsed : false;
 		}
-		DWORD Size(void* pPtr)
+		EXP_INLINE DWORD Size(void* pPtr)
 		{
 			mem_block_t* block = BlockPtr(pPtr);
 			return block ? block->nSize : 0;
 		}
 
 		// 内存分配
-		mem_block_t* Alloc(DWORD nSize)
+		EXP_INLINE mem_block_t* Alloc(DWORD nSize)
 		{
 			if(!nSize ) return NULL;
 			mem_block_t* pBlock = (mem_block_t*)ZeroMemory(
@@ -294,7 +295,7 @@ protected:
 			pBlock->bHead = true;
 			return pBlock;
 		}
-		void Free(mem_block_t* pBlock)
+		EXP_INLINE void Free(mem_block_t* pBlock)
 		{
 			if(!pBlock || !(pBlock->bHead) ) return;
 			m_Alloc.Free(pBlock);

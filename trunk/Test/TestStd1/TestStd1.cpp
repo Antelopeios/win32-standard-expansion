@@ -148,7 +148,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	/////////////////////////////////
 
-	CObjPoolT<BYTE[TestSize], _ObjPoolPolicyT<CMemAdapterT<_MemPool> > > pool;
+	CObjPoolT<BYTE[TestSize]> pool;
 
 	ExCPrintf(_T("Start for ObjPool...\t\t"));
 	timeBeginPeriod(1);

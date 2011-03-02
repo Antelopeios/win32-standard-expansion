@@ -33,12 +33,14 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-27
-// Version:	1.0.0005.2136
+// Date:	2011-03-02
+// Version:	1.0.0006.1520
 //
 // History:
 //	- 1.0.0004.0400(2011-02-25)	^ 简化CallProc中锁的调用
 //	- 1.0.0005.2136(2011-02-27)	+ CThreadPoolT::Create()支持返回线程ID
+//	- 1.0.0006.1520(2011-03-02)	+ 支持通过策略控制CThreadPoolT是否限制最大线程数
+//								# 修正当线程数为空时,CThreadPoolT::Clear(INFINITE)死锁的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadPool_h__
@@ -74,6 +76,8 @@ struct _ThreadPoolPolicyT
 	}
 	EXP_INLINE static DWORD MaxSize()
 	{ return DefSize(); }
+
+	static const bool s_bLimitMax = true;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -271,11 +275,17 @@ public:
 		if (lpStartAddr)
 		{	// 给用户分配线程
 			m_Mutex.Lock(false);
+			bool is_limited = false;
 			if (m_nUseSize >= m_TrdList.GetCount())
-				hdl = AddTrd(dwFlag, lpIDThread);
+			{
+				if (m_nMaxSize <= m_TrdList.GetCount())
+					is_limited = true;
+				else
+					hdl = AddTrd(dwFlag, lpIDThread);
+			}
 			// 添加任务
 			tsk_t tsk(lpStartAddr, lpParam);
-			if (hdl == NULL && dwWaitTime)
+			if (!is_limited && hdl == NULL && dwWaitTime)
 			{
 				CEvent* evt = alloc_t::Alloc<CEvent>();
 				ExAssert(evt);
@@ -286,14 +296,20 @@ public:
 			}
 			m_TskList.Add(tsk);
 			m_TaskSmph.Release();
-			// 等待线程响应
-			if (hdl == NULL && dwWaitTime)
-			{
-				m_Mutex.Unlock(false);
-				ExAssert(tsk.evtR);
-				tsk.evtR->Wait(dwWaitTime);
-				alloc_t::Free(tsk.evtR);
+			if (!is_limited)
+			{	// 等待线程响应
+				if (hdl == NULL && dwWaitTime)
+				{
+					m_Mutex.Unlock(false);
+					ExAssert(tsk.evtR);
+					tsk.evtR->Wait(dwWaitTime);
+					alloc_t::Free(tsk.evtR);
+				}
+				else
+					m_Mutex.Unlock(false);
 			}
+			else
+				m_Mutex.Unlock(false);
 		}
 		else
 		{	// 为池增加线程
@@ -307,6 +323,7 @@ public:
 	// 清空池
 	bool Clear(DWORD dwWaitTime = INFINITE)
 	{
+		if (GetPoolSize() == 0) return true;
 		m_ClearEvt.Set();
 		return (m_ComplEvt.Wait(dwWaitTime) == WAIT_OBJECT_0);
 	}

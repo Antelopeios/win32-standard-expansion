@@ -43,9 +43,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	HANDLE hdl = NULL;
 	hdl = CThreadAdapterT<_ThreadPool>::Create(Proc, (LPVOID)0);
-	hdl = CThreadAdapterT<_ThreadPool>::Create(Proc, (LPVOID)500);
-	hdl = ExThread::Create(Proc, (LPVOID)0);
-	hdl = ExThread::Create(Proc, (LPVOID)500);
+	for (int i = 0; i < 100; ++i)
+		hdl = CThreadAdapterT<_ThreadPool>::Create(Proc, (LPVOID)1);
+	//hdl = ExThread::Create(Proc, (LPVOID)0);
+	//hdl = ExThread::Create(Proc, (LPVOID)1);
+
+	CThreadAdapterT<_ThreadPool>::GetCreator().Clear();
 
 	_tsystem(_T("pause"));
 	return 0;

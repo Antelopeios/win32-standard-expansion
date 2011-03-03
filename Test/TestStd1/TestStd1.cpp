@@ -10,7 +10,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 #ifdef	_DEBUG
 	const int TestCont = 100;
-	const int TestLast = 1000;
+	const int TestLast = 100;
 	const int TestSMin = 1;
 	const int TestSMax = 10000;
 #else /*_DEBUG*/
@@ -35,7 +35,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	ExRandomize();
 
 	/////////////////////////////////
-/*
+
 	ExCPrintf(_T("\nStart for new/delete...\t\t"));
 	timeBeginPeriod(1);
 	tStart = timeGetTime();
@@ -93,7 +93,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
 	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
-*/
+
 	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
 	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
 
@@ -103,9 +103,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = CMemAdapterT<_MemPool>::Alloc(TestSMax/*ExRandom(TestSMax) + TestSMin*/);
+			Test[j] = CMemAdapterT<_MemPool>::Alloc(ExRandom(TestSMax) + TestSMin);
 		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemPool>::Free(Test[TestLast - 1 - j]);
+			CMemAdapterT<_MemPool>::Free(Test[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);

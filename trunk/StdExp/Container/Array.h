@@ -71,7 +71,7 @@ protected:
 	{
 		if (!pDst || nCount == 0) return;
 		ZeroMemory(pDst, sizeof(type_t) * nCount);
-		CTraitsT<type_t>::Construct(pDst, sizeof(type_t) * nCount);
+		CTraits::Construct<type_t>(pDst, sizeof(type_t) * nCount);
 	}
 	EXP_INLINE void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
 	{
@@ -298,7 +298,7 @@ public:
 		type_t* ptr_array = m_Array + inx_node;
 		ExAssert(ptr_array);
 		// É¾³ýÔªËØ
-		CTraitsT<type_t>::Destruct(ptr_array - nLen, sizeof(type_t) * nLen);
+		CTraits::Destruct<type_t>(ptr_array - nLen, sizeof(type_t) * nLen);
 		m_nCont -= nLen;
 		// ÒÆ¶¯ÔªËØ
 		if (inx_size)

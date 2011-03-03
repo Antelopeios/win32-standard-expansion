@@ -34,11 +34,11 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-03
-// Version:	1.0.0013.1734
+// Version:	1.0.0014.2140
 //
 // History:
 //	- 1.0.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
-//	- 1.0.0013.1734(2011-03-03)	= 调整CObjPoolT为内存块分配器,而不是类型分配器.以通用的方法提供类型分配的支持.
+//	- 1.0.0014.2140(2011-03-03)	+ CObjPoolT支持对任意大小进行分配
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -61,7 +61,7 @@ EXP_BEG
 template <typename AllocT = CMemHeapAlloc, typename ModelT = EXP_THREAD_MODEL>
 struct _ObjPoolPolicyT;
 
-template <DWORD SizeT, typename PolicyT = _ObjPoolPolicyT<> >
+template <typename TypeT, typename PolicyT = _ObjPoolPolicyT<> >
 class CObjPoolT : CNonCopyable
 {
 public:
@@ -76,13 +76,14 @@ protected:
 
 		block_t* pNext;	// 下一个结点
 		bool	 bFree;	// 是否已清理
-		BYTE	 Buff[SizeT];	// 内存块
+		TypeT	 Buff;	// 内存块
 
 		block_t()
 			: pNext(NULL)
 			, bFree(false)
-		{ ZeroMemory(Buff, SizeT); }
-		~block_t() { bFree = true; pNext = NULL; }
+		{}
+		~block_t()
+		{ bFree = true; pNext = NULL; }
 	};
 
 	alloc_t		m_Alloc;
@@ -151,29 +152,26 @@ public:
 		return m_Alloc.Size(block) - block_t::HeadSize;
 	}
 	// 分配内存
-	void* Alloc(DWORD nSize)
+	TypeT* Alloc(DWORD nSize = sizeof(TypeT))
 	{
+		if (nSize == 0) return NULL;
 		ExLock(m_Mutex, false, mutex_t);
 		block_t* block = NULL;
-		if (nSize <= SizeT)
+		if (nSize <= sizeof(TypeT))
 		{
 			if (m_FreeList)
-			{
-				block_t* block = m_FreeList;
+			{	// 提取内存块
+				block = m_FreeList;
 				m_FreeList = block->pNext;
 				--m_nFreSize;
-			} else
-			{
+			} else // 分配新内存块
 				block = (block_t*)m_Alloc.Alloc(sizeof(block_t));
-				block->block_t::block_t();
-			}
-		} else
-		{
+		} else // 分配任意大小内存块
 			block = (block_t*)m_Alloc.Alloc(block_t::HeadSize + nSize);
-			block->block_t::block_t();
-		}
 		ExAssert(block);
-		return block ? block->Buff : NULL;
+		// 构造=>返回内存
+		block->block_t::block_t();
+		return block ? &(block->Buff) : NULL;
 	}
 	// 回收内存
 	void Free(void* pPtr)
@@ -183,15 +181,15 @@ public:
 		block_t* block = (block_t*)((BYTE*)pPtr - block_t::HeadSize);
 		ExAssert(!block->bFree);
 		if (block->bFree) return;
+		// 析构=>归还/释放内存
 		block->block_t::~block_t();
-		if (m_nFreSize >= m_nMaxSize)
-			m_Alloc.Free(block);
-		else
+		if (m_nFreSize < m_nMaxSize)
 		{
 			block->pNext = m_FreeList;
 			m_FreeList = block;
 			++m_nFreSize;
-		}
+		} else
+			m_Alloc.Free(block);
 	}
 	// 清空内存
 	void Clear()
@@ -201,7 +199,9 @@ public:
 		{
 			block_t* block = m_FreeList;
 			m_FreeList = block->pNext;
-			block->block_t::~block_t();
+			// 析构=>释放内存
+			if(!block->bFree)
+				block->block_t::~block_t();
 			m_Alloc.Free(block);
 		}
 		m_FreeList = NULL;
@@ -211,23 +211,11 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <DWORD SizeT, typename PolicyT = _ObjPoolPolicyT<> >
-class CObjPoolAllocT
-{
-public:
-	typedef CObjPoolT<SizeT, PolicyT> alloc_t;
-};
-
-template <DWORD SizeT, typename PolicyT = _ObjPoolPolicyT<> >
-class _ObjPoolT : public CRegistAllocT<CObjPoolAllocT<SizeT, PolicyT> > {};
-
-//////////////////////////////////////////////////////////////////
-
 template <typename TypeT, typename AllocT, typename ModelT = EXP_THREAD_MODEL>
 class CPoolTypeT
 {
 public:
-	typedef _ObjPoolT<sizeof(TypeT), _ObjPoolPolicyT<AllocT, ModelT> > alloc_t;
+	typedef CObjPoolT<TypeT, _ObjPoolPolicyT<AllocT, ModelT> > alloc_t;
 
 	static alloc_t& GetAlloc()
 	{ return ExSingleton<alloc_t>(); }

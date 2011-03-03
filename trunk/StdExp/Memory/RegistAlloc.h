@@ -34,11 +34,12 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-03
-// Version:	1.0.0016.1400
+// Version:	1.0.0017.2130
 //
 // History:
 //	- 1.0.0015.2359(2011-03-01)	# CRegistAllocT::Free()一个空指针时会引发内存异常
-//	- 1.0.0016.1400(2011-03-03)	# CTraitsT::Construct()与CTraitsT::Destruct()添加分配异常断言
+//	- 1.0.0017.2130(2011-03-03)	# CTraitsT::Construct()与CTraitsT::Destruct()添加分配异常断言
+//								= CTraitsT<TypeT>改为CTraits,将模板放入成员函数中处理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RegistAlloc_h__
@@ -57,13 +58,13 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 // 构造/析构函数萃取器
 
-template <typename TypeT>
-class CTraitsT
+class CTraits
 {
 public:
 	typedef void (*traitor_t)(void*, DWORD);
 
 public:
+	template <typename TypeT>
 	EXP_INLINE static TypeT* Construct(void* pPtr, DWORD nSize = sizeof(TypeT))
 	{
 		DWORD count = (nSize / sizeof(TypeT));
@@ -76,6 +77,7 @@ public:
 	#pragma pop_macro("new")
 		return (TypeT*)pPtr;
 	}
+	template <typename TypeT>
 	EXP_INLINE static TypeT* Destruct(void* pPtr, DWORD nSize = sizeof(TypeT))
 	{
 		DWORD count = (nSize / sizeof(TypeT));
@@ -94,7 +96,7 @@ template <typename AllocT>
 class CRegistAllocT
 {
 public:
-	typedef CTraitsT<BYTE>::traitor_t traitor_t;
+	typedef CTraits::traitor_t traitor_t;
 	typedef typename AllocT::alloc_t alloc_t;
 
 protected:
@@ -120,8 +122,8 @@ public:
 	{
 		ExAssert(pPtr);
 		_Regist* real = (_Regist*)RealPtr(pPtr);
-		real->destruct = (traitor_t)(CTraitsT<TypeT>::Destruct);
-		return CTraitsT<TypeT>::Construct(pPtr, (m_Alloc.Size(real) - HeadSize));
+		real->destruct = (traitor_t)(CTraits::Destruct<TypeT>);
+		return CTraits::Construct<TypeT>(pPtr, (m_Alloc.Size(real) - HeadSize));
 	}
 	EXP_INLINE void* Destruct(void* pPtr)
 	{
@@ -131,7 +133,7 @@ public:
 		{
 			real->destruct(pPtr, (m_Alloc.Size(real) - HeadSize));
 			real->destruct = NULL;	// 仅允许析构一次,防止高层调用时意外的重复析构
-		}							// 若需要重复析构,需手动调用CTraitsT<TypeT>::Destruct
+		}							// 若需要重复析构,需手动调用CTraits::Destruct<TypeT>
 		return real;
 	}
 

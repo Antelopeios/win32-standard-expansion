@@ -67,7 +67,6 @@ public:
 	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
-	typedef typename PolicyT::pool_policy_t pool_policy_t;
 
 protected:
 	// 块链表基类
@@ -410,38 +409,35 @@ public:
 		// 标记使用内存块
 		block->bUsed = false;
 		// 释放空间
-		if( m_MemList.Size() > m_nMaxSize )
+		if( m_MemList.Size() > m_nMaxSize && 
+			block->bHead && ((mem_block_t*)(block->pNext))->bHead)
 		{	// 释放掉能够释放的内存块
-			if( block->bHead )
-			{
-				m_MemList.Pop(block);
-				m_Alloc.Free(block);
-			}
+			m_MemList.Pop(block);
+			m_Alloc.Free(block);
 		} else
-		{
-			// 整理归还内存
+		{	// 整理归还内存
 			mem_block_t* prev = m_MemList.Merger(block);		// 向前合并
 			if (prev)
 				block = prev;
-			else
-			{
-				fre_block_t* item = NULL;
-				if( !m_FreList.Empty() )
-				{
-					item = m_FreList.Head();
-					do
-					{
-						mem_block_t* temp = m_Alloc.BlockFre(item);
-						if( temp->nSize <= block->nSize )
-							break;
-						item = item->pNext;
-					} while( item != m_FreList.Tail() );
-				}
-				m_FreList.Push(m_Alloc.FreBlock(block), item);
-			}
 			mem_block_t* next = (mem_block_t*)(block->pNext);	// 向后合并
 			if (m_MemList.Merger(next))
 				m_FreList.Pop(m_Alloc.FreBlock(next));
+			// 弹出被合并影响到的结点
+			m_FreList.Pop(m_Alloc.FreBlock(block));
+			// 对链表顺序插入
+			fre_block_t* item = NULL;
+			if( !m_FreList.Empty() )
+			{
+				item = m_FreList.Head();
+				do
+				{
+					mem_block_t* temp = m_Alloc.BlockFre(item);
+					if( temp->nSize <= block->nSize )
+						break;
+					item = item->pNext;
+				} while( item != m_FreList.Tail() );
+			}
+			m_FreList.Push(m_Alloc.FreBlock(block), item);
 		}
 	}
 
@@ -530,8 +526,9 @@ struct _MemPoolPolicy
 	typedef ModelT model_t;
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
-	typedef _ObjPoolPolicyT<AllocT, ModelT> pool_policy_t;
 
+	static const DWORD	s_nDefSize = 1024 * 1024;		// 初始大小1M
+	static const DWORD	s_nMaxSize = 1024 * 1024 * 100;	// 最大大小100M
 	static const bool	s_bDumpMemLeaks = true;
 };
 

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-01
-// Version:	1.0.0015.2359
+// Date:	2011-03-03
+// Version:	1.0.0016.1400
 //
 // History:
 //	- 1.0.0015.2359(2011-03-01)	# CRegistAllocT::Free()一个空指针时会引发内存异常
+//	- 1.0.0016.1400(2011-03-03)	# CTraitsT::Construct()与CTraitsT::Destruct()添加分配异常断言
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RegistAlloc_h__
@@ -66,6 +67,7 @@ public:
 	EXP_INLINE static TypeT* Construct(void* pPtr, DWORD nSize = sizeof(TypeT))
 	{
 		DWORD count = (nSize / sizeof(TypeT));
+		ExAssert(count);
 		if (count == 0) return NULL;
 	#pragma push_macro("new")
 	#undef new
@@ -77,6 +79,7 @@ public:
 	EXP_INLINE static TypeT* Destruct(void* pPtr, DWORD nSize = sizeof(TypeT))
 	{
 		DWORD count = (nSize / sizeof(TypeT));
+		ExAssert(count);
 		if (count == 0) return NULL;
 		for (DWORD i = 0; i < count; ++i)
 			((TypeT*)pPtr)[i].TypeT::~TypeT();

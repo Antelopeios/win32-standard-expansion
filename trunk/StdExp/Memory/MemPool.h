@@ -50,12 +50,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Algorithm/NonCopyable.h"
-#include "Debugging/Assertion.h"
 #include "Debugging/Trace.h"
-#include "Pattern/Singleton.h"
-#include "Thread/Lock.h"
-#include "Memory/MemHeap.h"
+#include "Memory/ObjPool.h"
 
 EXP_BEG
 
@@ -71,6 +67,7 @@ public:
 	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
+	typedef typename PolicyT::pool_policy_t pool_policy_t;
 
 protected:
 	// 块链表基类
@@ -336,7 +333,19 @@ public:
 		// 添加内存记录块
 		m_MemList.Push(block);
 		// 添加空闲记录块
-		m_FreList.Push(m_Alloc.FreBlock(block));
+		fre_block_t* item = NULL;
+		if( !m_FreList.Empty() )
+		{
+			item = m_FreList.Head();
+			do
+			{
+				mem_block_t* temp = m_Alloc.BlockFre(item);
+				if( temp->nSize <= block->nSize )
+					break;
+				item = item->pNext;
+			} while( item != m_FreList.Tail() );
+		}
+		m_FreList.Push(m_Alloc.FreBlock(block), item);
 	}
 	DWORD GetMaxSize()
 	{
@@ -368,20 +377,9 @@ public:
 		mem_block_t* block = NULL;
 		ExLock(m_Mutex, false, mutex_t);
 		// 查找空闲内存块
-		if( !m_FreList.Empty() )
-		{
-			fre_block_t* item = m_FreList.Head();
-			do
-			{
-				mem_block_t* temp = m_Alloc.BlockFre(item);
-				if( temp->nSize >= nSize )
-				{	// 找到合适的内存块
-					block = temp;
-					break;
-				}
-				item = item->pNext;
-			} while( item != m_FreList.Tail() );
-		}
+		block = m_Alloc.BlockFre(m_FreList.Head());
+		if (block && block->nSize < nSize)
+			block = NULL;
 		// 标记空闲内存块
 		if( block )
 		{	// 找到合适的内存块
@@ -422,13 +420,27 @@ public:
 		} else
 		{
 			// 整理归还内存
-			mem_block_t* prev = m_MemList.Merger(block);	// 向前合并
+			mem_block_t* prev = m_MemList.Merger(block);		// 向前合并
 			if (prev)
 				block = prev;
 			else
-				m_FreList.Push(m_Alloc.FreBlock(block));
-			mem_block_t* next = (mem_block_t*)(block->pNext);
-			if (m_MemList.Merger(next))						// 向后合并
+			{
+				fre_block_t* item = NULL;
+				if( !m_FreList.Empty() )
+				{
+					item = m_FreList.Head();
+					do
+					{
+						mem_block_t* temp = m_Alloc.BlockFre(item);
+						if( temp->nSize <= block->nSize )
+							break;
+						item = item->pNext;
+					} while( item != m_FreList.Tail() );
+				}
+				m_FreList.Push(m_Alloc.FreBlock(block), item);
+			}
+			mem_block_t* next = (mem_block_t*)(block->pNext);	// 向后合并
+			if (m_MemList.Merger(next))
 				m_FreList.Pop(m_Alloc.FreBlock(next));
 		}
 	}
@@ -518,9 +530,8 @@ struct _MemPoolPolicy
 	typedef ModelT model_t;
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
+	typedef _ObjPoolPolicyT<AllocT, ModelT> pool_policy_t;
 
-	static const DWORD	s_nDefSize = 1024 * 1024;		// 初始大小1M
-	static const DWORD	s_nMaxSize = 1024 * 1024 * 100;	// 最大大小100M
 	static const bool	s_bDumpMemLeaks = true;
 };
 

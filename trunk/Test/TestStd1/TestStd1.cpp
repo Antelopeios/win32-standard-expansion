@@ -9,10 +9,10 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 #ifdef	_DEBUG
-	const int TestCont = 100;
-	const int TestLast = 100;
+	const int TestCont = 1;
+	const int TestLast = 1000;
 	const int TestSMin = 1;
-	const int TestSMax = 10000;
+	const int TestSMax = 100000;
 #else /*_DEBUG*/
 	const int TestCont = 1000;
 	const int TestLast = 1000;
@@ -20,19 +20,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	const int TestSMax = 100000;
 #endif/*_DEBUG*/
 	unsigned int tStart = 0, tEnd = 0;
-	void* Test[TestLast];
+	void* Test[TestLast] = {NULL};
+	DWORD Size[TestLast] = {0};
+	int nMax = TestSMax - TestSMin + 1;
 
 	/////////////////////////////////
 
 	ExCPrintf(_T("循环次数:%d, 分配次数:%d, 分配大小:%dB-%.1fKB\n"), 
 		TestCont, TestLast, TestSMin, (float)TestSMax / 1024.0f);
-	ExCPrintf(_T("内存池大小:%.1fMB, 内存池上限:%.1fMB\n\n"), 
-		(float)CMemAdapterT<_MemPool>::GetAlloc().GetPoolSize() / (float)(1024 * 1024), 
-		(float)CMemAdapterT<_MemPool>::GetAlloc().GetMaxSize() / (float)(1024 * 1024));
+	//ExCPrintf(_T("内存池大小:%.1fMB, 内存池上限:%.1fMB\n\n"), 
+	//	(float)CMemAdapterT<_MemPool>::GetAlloc().GetPoolSize() / (float)(1024 * 1024), 
+	//	(float)CMemAdapterT<_MemPool>::GetAlloc().GetMaxSize() / (float)(1024 * 1024));
 
 	_tsystem(_T("pause"));
 
 	ExRandomize();
+	for(int j = 0; j < TestLast; j++)
+		Size[j] = TestSMax/*ExRandom(nMax) + TestSMin*/;
 
 	/////////////////////////////////
 
@@ -42,7 +46,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = new BYTE[ExRandom(TestSMax) + TestSMin];
+			Test[j] = new BYTE[Size[j]];
 		for(int j = 0; j < TestLast; j++)
 			delete [] (Test[TestLast - 1 - j]);
 	}
@@ -56,7 +60,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = malloc(ExRandom(TestSMax) + TestSMin);
+			Test[j] = malloc(Size[j]);
 		for(int j = 0; j < TestLast; j++)
 			free(Test[TestLast - 1 - j]);
 	}
@@ -70,7 +74,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = CMemHeapAlloc::Alloc(ExRandom(TestSMax) + TestSMin);
+			Test[j] = CMemHeapAlloc::Alloc(Size[j]);
 		for(int j = 0; j < TestLast; j++)
 			CMemHeapAlloc::Free(Test[TestLast - 1 - j]);
 	}
@@ -86,7 +90,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = CMemAdapterT<_MemHeap>::Alloc(ExRandom(TestSMax) + TestSMin);
+			Test[j] = CMemAdapterT<_MemHeap>::Alloc(Size[j]);
 		for(int j = 0; j < TestLast; j++)
 			CMemAdapterT<_MemHeap>::Free(Test[TestLast - 1 - j]);
 	}
@@ -103,7 +107,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = CMemAdapterT<_MemPool>::Alloc(ExRandom(TestSMax) + TestSMin);
+			Test[j] = CMemAdapterT<_MemPool>::Alloc(Size[j]);
 		for(int j = 0; j < TestLast; j++)
 			CMemAdapterT<_MemPool>::Free(Test[j]);
 	}
@@ -123,7 +127,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		CHeapGC gc;
 		for(int j = 0; j < TestLast; j++)
-			CGCAllocT<CHeapGC>::Alloc<BYTE>(gc, ExRandom(TestSMax) + TestSMin);
+			CGCAllocT<CHeapGC>::Alloc<BYTE>(gc, Size[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -139,7 +143,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		CPoolGC gc;
 		for(int j = 0; j < TestLast; j++)
-			CGCAllocT<CPoolGC>::Alloc<BYTE>(gc, ExRandom(TestSMax) + TestSMin);
+			CGCAllocT<CPoolGC>::Alloc<BYTE>(gc, Size[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);

@@ -192,28 +192,24 @@ protected:
 				m_nSize -= pItem->nSize;
 			return pItem;
 		}
-		EXP_INLINE block_t* Cut(DWORD nCutSize, block_t* pItem = m_pList)
+		EXP_INLINE block_t* Split(DWORD nCutSize, block_t*& pItem = m_pList)
 		{
 			if(!nCutSize ) return NULL;
 			// 默认从头部分割结点
 			if(!pItem ) return NULL;
-			block_t* cut_pblk = NULL;
-			if (pItem->nSize > ((HeadSize << 1) + nCutSize))	// 切割时不能残留过于细小的内存碎片
-			{
-				// 从现有内存块的尾部切割内存块
-				pItem->nSize -= (HeadSize + nCutSize);
-				cut_pblk = (block_t*)(((BYTE*)pItem) + HeadSize + pItem->nSize);
-				ZeroMemory(cut_pblk, HeadSize);
+			block_t* cut_pblk = pItem;
+			DWORD cut_size = (HeadSize + nCutSize);
+			if (pItem->nSize > cut_size)
+			{	// 从现有内存块的头部切割内存块,移动pItem
+				pItem = (block_t*)(((BYTE*)pItem) + cut_size);
+				ZeroMemory(pItem, HeadSize);
+				pItem->nSize = cut_pblk->nSize - cut_size;
 				cut_pblk->nSize = nCutSize;
-				cut_pblk->pPrev = pItem;
-				cut_pblk->pNext = pItem->pNext;
-				if (pItem->pNext)
-					pItem->pNext->pPrev = cut_pblk;
-				pItem->pNext = cut_pblk;
-				m_nSize -= HeadSize;
-				++m_nCont;
-			} else
-				cut_pblk = pItem;
+				m_nSize -= (HeadSize + pItem->nSize);
+				Push(pItem, (block_t*)(cut_pblk->pNext));
+			}
+			else
+				pItem = NULL;
 			return cut_pblk;
 		}
 		EXP_INLINE block_t* Merger(block_t* pMerg)
@@ -307,6 +303,25 @@ protected:
 
 	DWORD		m_nMaxSize;	// 内存池大小上限
 
+protected:
+	EXP_INLINE fre_block_t* FrePushOrder(mem_block_t* pItem)
+	{
+		if (!pItem) return NULL;
+		fre_block_t* item = NULL;
+		if( !m_FreList.Empty() )
+		{
+			item = m_FreList.Head();
+			do
+			{
+				mem_block_t* temp = m_Alloc.BlockFre(item);
+				if( temp->nSize <= pItem->nSize )
+					break;
+				item = item->pNext;
+			} while( item != m_FreList.Tail() );
+		}
+		return m_FreList.Push(m_Alloc.FreBlock(pItem), item);
+	}
+
 public:
 	CMemPoolT(DWORD nSize = PolicyT::s_nDefSize)
 		: m_nMaxSize(PolicyT::s_nMaxSize)
@@ -332,19 +347,7 @@ public:
 		// 添加内存记录块
 		m_MemList.Push(block);
 		// 添加空闲记录块
-		fre_block_t* item = NULL;
-		if( !m_FreList.Empty() )
-		{
-			item = m_FreList.Head();
-			do
-			{
-				mem_block_t* temp = m_Alloc.BlockFre(item);
-				if( temp->nSize <= block->nSize )
-					break;
-				item = item->pNext;
-			} while( item != m_FreList.Tail() );
-		}
-		m_FreList.Push(m_Alloc.FreBlock(block), item);
+		FrePushOrder(block);
 	}
 	DWORD GetMaxSize()
 	{
@@ -376,15 +379,34 @@ public:
 		mem_block_t* block = NULL;
 		ExLock(m_Mutex, false, mutex_t);
 		// 查找空闲内存块
-		block = m_Alloc.BlockFre(m_FreList.Head());
-		if (block && block->nSize < nSize)
-			block = NULL;
+		if( !m_FreList.Empty() )
+		{
+			fre_block_t* item = m_FreList.Head();
+			do
+			{
+				mem_block_t* temp = m_Alloc.BlockFre(item);
+				if( temp->nSize >= nSize )
+				{
+					block = temp;
+					break;
+				}
+				item = item->pNext;
+			} while( item != m_FreList.Tail() );
+		}
 		// 标记空闲内存块
 		if( block )
 		{	// 找到合适的内存块
-			if( block->nSize > nSize ) // 内存块需要分割
-				block = m_MemList.Cut(nSize, block);
+			mem_block_t* left = NULL;
+			// 内存块需要分割
+			if( block->nSize > nSize )
+			{
+				left = block;
+				block = m_MemList.Split(nSize, left);
+			}
+			// 弹出割下来的内存块
 			m_FreList.Pop(m_Alloc.FreBlock(block));
+			// 对链表顺序插入
+			FrePushOrder(left);
 		} else
 		{	// 分配新的内存块
 			block = m_Alloc.Alloc(nSize);
@@ -424,20 +446,8 @@ public:
 				m_FreList.Pop(m_Alloc.FreBlock(next));
 			// 弹出被合并影响到的结点
 			m_FreList.Pop(m_Alloc.FreBlock(block));
-			// 对链表顺序插入
-			fre_block_t* item = NULL;
-			if( !m_FreList.Empty() )
-			{
-				item = m_FreList.Head();
-				do
-				{
-					mem_block_t* temp = m_Alloc.BlockFre(item);
-					if( temp->nSize <= block->nSize )
-						break;
-					item = item->pNext;
-				} while( item != m_FreList.Tail() );
-			}
-			m_FreList.Push(m_Alloc.FreBlock(block), item);
+			// 对链表重新顺序插入
+			FrePushOrder(block);
 		}
 	}
 

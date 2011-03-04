@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-21
-// Version:	1.0.0003.0025
+// Date:	2011-03-04
+// Version:	1.0.0004.2110
+//
+// History:
+//	- 1.0.0004.2110(2011-03-04)	^ CMemHeapAlloc的接口添加EXP_INLINE提高效率
+//								+ 添加ExCheckMem()内存正确性检查接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __HeapAlloc_h__
@@ -56,15 +60,33 @@ public:
 	typedef CMemHeapAlloc alloc_t;
 
 public:
-	static bool Valid(void* pPtr)
+	EXP_INLINE static bool Valid(void* pPtr)
 	{ return HeapValidate(GetProcessHeap(), 0, pPtr); }
-	static DWORD Size(void* pPtr)
+	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return HeapSize(GetProcessHeap(), 0, pPtr); }
-	static void* Alloc(DWORD nSize)
+	EXP_INLINE static void* Alloc(DWORD nSize)
 	{ return HeapAlloc(GetProcessHeap(), 0, nSize); }
-	static void Free(void* pPtr)
+	EXP_INLINE static void Free(void* pPtr)
 	{ HeapFree(GetProcessHeap(), 0, pPtr); }
+
+	EXP_INLINE static void Check()
+	{
+		static const int HEAP_NUMBER = 1024;
+		HANDLE heaps_hdl[HEAP_NUMBER];
+		int heaps_siz = GetProcessHeaps(HEAP_NUMBER, heaps_hdl);
+		if (heaps_siz > 0)
+			for (int i = 0; i < heaps_siz; ++i)
+				ExAssert(HeapValidate(heaps_hdl[i], 0, NULL));
+	}
 };
+
+#ifndef ExCheckMem
+#ifdef _DEBUG
+#define ExCheckMem	CMemHeapAlloc::Check
+#else
+#define ExCheckMem	__noop
+#endif
+#endif
 
 typedef CRegistAllocT<CMemHeapAlloc> _MemHeap;
 

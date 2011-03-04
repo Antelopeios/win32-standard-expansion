@@ -9,10 +9,10 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 #ifdef	_DEBUG
-	const int TestCont = 1;
-	const int TestLast = 1000;
+	const int TestCont = 100;
+	const int TestLast = 100;
 	const int TestSMin = 1;
-	const int TestSMax = 100000;
+	const int TestSMax = 10000;
 #else /*_DEBUG*/
 	const int TestCont = 1000;
 	const int TestLast = 1000;
@@ -26,7 +26,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	/////////////////////////////////
 
-	ExCPrintf(_T("循环次数:%d, 分配次数:%d, 分配大小:%dB-%.1fKB\n"), 
+	ExCPrintf(_T("循环次数:%d, 分配次数:%d, 分配大小:%dByte-%.1fKB\n"), 
 		TestCont, TestLast, TestSMin, (float)TestSMax / 1024.0f);
 	//ExCPrintf(_T("内存池大小:%.1fMB, 内存池上限:%.1fMB\n\n"), 
 	//	(float)CMemAdapterT<_MemPool>::GetAlloc().GetPoolSize() / (float)(1024 * 1024), 
@@ -36,7 +36,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	ExRandomize();
 	for(int j = 0; j < TestLast; j++)
-		Size[j] = TestSMax/*ExRandom(nMax) + TestSMin*/;
+		Size[j] = /*TestSMax*/ExRandom(nMax) + TestSMin;
 
 	/////////////////////////////////
 
@@ -151,7 +151,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	/////////////////////////////////
 
-	CObjPoolT<BYTE[TestSMax], _ObjPoolPolicyT<CMemAdapterT<_MemPool> > > pool;
+	CObjPoolT<BYTE[TestSMax]> pool;
 
 	ExCPrintf(_T("Start for ObjPool...\t\t"));
 	timeBeginPeriod(1);

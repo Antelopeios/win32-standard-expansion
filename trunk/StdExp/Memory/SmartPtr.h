@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-01
-// Version:	1.3.0022.2000
+// Date:	2011-03-04
+// Version:	1.3.0023.2110
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -67,6 +67,8 @@
 //	- 1.3.0020.0400(2011-02-25)	# 当使用多线程模型时,PtrManager与DefMemAlloc的静态初始化发生冲突
 //	- 1.3.0021.1723(2011-02-28)	+ 添加SmartPtr::operator!()操作符重载
 //	- 1.3.0022.2000(2011-03-01)	# 修正SmartPtr::Inc()内部的模板调用错误
+//	- 1.3.0023.2110(2011-03-04)	= CPtrManagerT::CReferPtrT本身的内存由CPtrManagerT的AllocT构建
+//								+ CPtrManagerT::Clear()支持传参定义是否完全清理CPtrManagerT::m_ReferPtrs的所有内存
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -129,24 +131,20 @@ protected:
 	class CReferPtrT : public IReferPtr
 	{
 	public:
-		typedef RefAllocT alloc_t;
-		typedef RefModelT model_t;
-
-	public:
 		CReferPtrT()
 			: IReferPtr()
 		{}
 		~CReferPtrT()
-		{ if (p_ptr) alloc_t::Free(p_ptr); }
+		{ if (p_ptr) RefAllocT::Free(p_ptr); }
 
 	public:
 		void Inc()
 		{
-			model_t::Inc(&n_ref);
+			RefModelT::Inc(&n_ref);
 		}
 		bool Dec()
 		{
-			if (model_t::Dec(&n_ref) <= 0)
+			if (RefModelT::Dec(&n_ref) <= 0)
 			{
 				Free();
 				return true;
@@ -156,9 +154,9 @@ protected:
 		}
 
 		EXP_INLINE static CReferPtrT* Alloc()
-		{ return alloc_t::Alloc<CReferPtrT>(); }
+		{ return AllocT::Alloc<CReferPtrT>(); }
 		void Free()
-		{ alloc_t::Free(this); }
+		{ AllocT::Free(this); }
 	};
 
 public:
@@ -177,7 +175,7 @@ public:
 		: m_ReferPtrs(1021)
 	{}
 	~CPtrManagerT()
-	{ Clear(); }
+	{ Clear(true); }
 
 public:
 	EXP_INLINE static CPtrManagerT& Instance()
@@ -247,7 +245,7 @@ public:
 		}
 	}
 	// 清空指针记录表
-	EXP_INLINE void Clear()
+	EXP_INLINE void Clear(bool bNull = false)
 	{
 		ExLock(m_Mutex, false, mutex_t);
 		for(ptr_map_t::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)
@@ -255,7 +253,10 @@ public:
 			IReferPtr* ref_ptr = ite->Val();
 			if (ref_ptr) ref_ptr->Free();
 		}
-		m_ReferPtrs.Clear();
+		if (bNull)
+			m_ReferPtrs.Null();
+		else
+			m_ReferPtrs.Clear();
 	}
 };
 

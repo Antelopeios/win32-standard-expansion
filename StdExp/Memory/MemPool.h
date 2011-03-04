@@ -67,31 +67,40 @@ public:
 	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
+	typedef typename PolicyT::pool_policy_t pool_policy_t;
+	typedef typename PolicyT::byte byte;
 
 protected:
-	// 块链表基类
-	typedef class CBlockList
+	// 内存块标记结点
+	struct block_t
 	{
-	public:
-		// 块结构基类
-		typedef struct _Block
+		IObjPool*	pPool;	// 对象池指针
+		block_t*	pPrev;	// 上一个结点
+		block_t*	pNext;	// 下一个结点
+
+		block_t()
+			: pPool(NULL)
+			, pPrev(NULL)
+			, pNext(NULL)
+		{}
+		~block_t()
 		{
-			_Block*	pPrev;	// 上一个结点
-			_Block*	pNext;	// 下一个结点
-		} block_t;
+			pPrev = pNext = NULL;
+			pPool = NULL;
+		}
+	};
 
-		enum { HeadSize = sizeof(block_t) };
-
+	// 内存块标记链表
+	typedef class blk_list_t
+	{
 	protected:
 		block_t* m_pList;	// 链表头指针
-		DWORD	 m_nCont;	// 结点个数
 
 	public:
-		CBlockList()
+		blk_list_t()
 			: m_pList(NULL)
-			, m_nCont(0)
-		{ }
-		~CBlockList()
+		{}
+		~blk_list_t()
 		{ /*析构不做任何清理工作*/ }
 
 	public:
@@ -116,7 +125,6 @@ protected:
 				pItem->pPrev->pNext = pItem;
 			} else
 				m_pList = pItem->pPrev = pItem->pNext = pItem;
-			++m_nCont;
 			return pItem;
 		}
 		EXP_INLINE block_t* Pop(block_t* pItem = NULL)
@@ -131,7 +139,6 @@ protected:
 				pItem->pPrev = NULL;
 				pItem->pNext = NULL;
 				if( m_pList == pItem ) m_pList = NULL;
-				--m_nCont;
 			}
 			return pItem;
 		}
@@ -139,13 +146,9 @@ protected:
 		EXP_INLINE void Clear()
 		{	// 直接置空,不做任何清理动作
 			m_pList = NULL;
-			m_nCont = 0;
 		}
-
 		EXP_INLINE bool Empty()
 		{ return (m_pList == NULL); }
-		EXP_INLINE DWORD Count()
-		{ return m_nCont; }
 
 		EXP_INLINE block_t* Head()
 		{ return m_pList; }
@@ -153,302 +156,171 @@ protected:
 		{ return m_pList; }
 		EXP_INLINE block_t* Last()
 		{ return m_pList ? m_pList->pPrev : NULL; }
-	} blk_list_t;
-	typedef typename blk_list_t::block_t block_t;
-	typedef typename block_t fre_block_t;
+	};
 
-	// 内存块链表
-	typedef class CMemList : public blk_list_t
+	// 内存块类型
+	template <DWORD SizeT>
+	struct _TypeT
+	{
+		block_t Block;
+		byte	Buff[SizeT];
+	};
+
+	// 对象池
+	template <typename PolicyT>
+	class CLagPoolT : CNonCopyable, public IObjPool
 	{
 	public:
-		// 内存块结构
-		typedef struct _MemBlock : public fre_block_t
-		{
-			DWORD	nSize;		// 内存块大小
-			bool	bHead;		// 是否为内存块头
-			bool	bUsed;		// 是否正在被使用
-			fre_block_t fBlock;	// 空闲链表结点
-		} block_t;
+		typedef typename PolicyT::alloc_t alloc_t;
 
-		enum
-		{
-			HeadSize = sizeof(block_t), 
-			MemBSize = HeadSize - blk_list_t::HeadSize
-		};
-
-	protected:
-		DWORD	 m_nSize;	// 链表大小
-
-	public:
-		EXP_INLINE block_t* Push(block_t* pItem, block_t* pLast = NULL)
-		{
-			if (pItem = (block_t*)(blk_list_t::Push(pItem, pLast)))
-				m_nSize += pItem->nSize;
-			return pItem;
-		}
-		EXP_INLINE block_t* Pop(block_t* pItem = NULL)
-		{
-			if (pItem = (block_t*)(blk_list_t::Pop(pItem)))
-				m_nSize -= pItem->nSize;
-			return pItem;
-		}
-		EXP_INLINE block_t* Split(DWORD nCutSize, block_t*& pItem = m_pList)
-		{
-			if(!nCutSize ) return NULL;
-			// 默认从头部分割结点
-			if(!pItem ) return NULL;
-			block_t* cut_pblk = pItem;
-			DWORD cut_size = (HeadSize + nCutSize);
-			if (pItem->nSize > cut_size)
-			{	// 从现有内存块的头部切割内存块,移动pItem
-				pItem = (block_t*)(((BYTE*)pItem) + cut_size);
-				ZeroMemory(pItem, HeadSize);
-				pItem->nSize = cut_pblk->nSize - cut_size;
-				cut_pblk->nSize = nCutSize;
-				m_nSize -= (HeadSize + pItem->nSize);
-				Push(pItem, (block_t*)(cut_pblk->pNext));
-			}
-			else
-				pItem = NULL;
-			return cut_pblk;
-		}
-		EXP_INLINE block_t* Merger(block_t* pMerg)
-		{
-			if(!pMerg || pMerg->bUsed ) return NULL;
-			block_t* mer_pblk = (block_t*)(pMerg->pPrev);
-			if(!mer_pblk || mer_pblk->bUsed || mer_pblk == pMerg ) return NULL;
-			// 合并到后面
-			if( pMerg->bHead ) return NULL;
-			if(((BYTE*)mer_pblk) + HeadSize + mer_pblk->nSize != (BYTE*)pMerg ) return NULL;
-			mer_pblk->nSize += (HeadSize + pMerg->nSize);
-			mer_pblk->pNext = pMerg->pNext;
-			if (mer_pblk->pNext)
-				mer_pblk->pNext->pPrev = mer_pblk;
-			m_nSize += HeadSize;
-			--m_nCont;
-			return mer_pblk;
-		}
-
-		EXP_INLINE void Clear()
-		{
-			blk_list_t::Clear();
-			m_nSize = 0;
-		}
-
-		EXP_INLINE DWORD Size()
-		{ return m_nSize; }
-	} mem_list_t;
-	typedef typename mem_list_t::block_t mem_block_t;
-
-	// 结点内存分配器
-	typedef class CBlockAlloc
-	{
 	protected:
 		alloc_t m_Alloc;
 
 	public:
-		// 获得内存记录块对应的指针
-		EXP_INLINE void* PtrReal(void* pPtr)
-		{ return pPtr ? (((BYTE*)pPtr) + mem_list_t::HeadSize) : NULL; }
-		EXP_INLINE void* PtrBlock(mem_block_t* pPtr)
-		{ return PtrReal((void*)pPtr); }
+		DWORD GetObjSize()			{ return 0; }
+		bool Valid(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
+		DWORD Size(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
+		void* Alloc(DWORD nSize)	{ return m_Alloc.Alloc(nSize); }
+		void Free(void* pPtr)		{ m_Alloc.Free(pPtr); }
+		void Clear()				{}
+	};
+	typedef CLagPoolT<pool_policy_t>				pool_00_t;
+	typedef CObjPoolT<_TypeT<1>, pool_policy_t>		pool_01_t;
+	typedef CObjPoolT<_TypeT<2>, pool_policy_t>		pool_02_t;
+	typedef CObjPoolT<_TypeT<4>, pool_policy_t>		pool_03_t;
+	typedef CObjPoolT<_TypeT<8>, pool_policy_t>		pool_04_t;
+	typedef CObjPoolT<_TypeT<16>, pool_policy_t>	pool_05_t;
+	typedef CObjPoolT<_TypeT<32>, pool_policy_t>	pool_06_t;
+	typedef CObjPoolT<_TypeT<64>, pool_policy_t>	pool_07_t;
+	typedef CObjPoolT<_TypeT<128>, pool_policy_t>	pool_08_t;
+	typedef CObjPoolT<_TypeT<256>, pool_policy_t>	pool_09_t;
+	typedef CObjPoolT<_TypeT<512>, pool_policy_t>	pool_10_t;
+	typedef CObjPoolT<_TypeT<1024>, pool_policy_t>	pool_11_t;
+	typedef CObjPoolT<_TypeT<2048>, pool_policy_t>	pool_12_t;
+	typedef CObjPoolT<_TypeT<4096>, pool_policy_t>	pool_13_t;
+	typedef CObjPoolT<_TypeT<8192>, pool_policy_t>	pool_14_t;
+	typedef CObjPoolT<_TypeT<16384>, pool_policy_t>	pool_15_t;
+	typedef CObjPoolT<_TypeT<32768>, pool_policy_t>	pool_16_t;
 
-		// 获得指针对应的内存记录块
-		EXP_INLINE void* RealPtr(void* pPtr)
-		{ return pPtr ? (((BYTE*)pPtr) - mem_list_t::HeadSize) : NULL; }
-		EXP_INLINE mem_block_t* BlockPtr(void* pPtr)
-		{ return (mem_block_t*)RealPtr(pPtr); }
-
-		// 空闲记录块与内存记录块的转换
-		EXP_INLINE mem_block_t* BlockFre(fre_block_t* pFre)
-		{ return pFre ? (mem_block_t*)(((BYTE*)pFre) - mem_list_t::MemBSize) : NULL; }
-		EXP_INLINE fre_block_t* FreBlock(mem_block_t* pBlk)
-		{ return pBlk ? &(pBlk->fBlock) : NULL; }
-
-		// 内存校验
-		EXP_INLINE bool Valid(void* pPtr)
-		{
-			mem_block_t* block = BlockPtr(pPtr);
-			return block ? block->bUsed : false;
-		}
-		EXP_INLINE DWORD Size(void* pPtr)
-		{
-			mem_block_t* block = BlockPtr(pPtr);
-			return block ? block->nSize : 0;
-		}
-
-		// 内存分配
-		EXP_INLINE mem_block_t* Alloc(DWORD nSize)
-		{
-			if(!nSize ) return NULL;
-			mem_block_t* pBlock = (mem_block_t*)ZeroMemory(
-				m_Alloc.Alloc(mem_list_t::HeadSize + nSize), mem_list_t::HeadSize + nSize);
-			pBlock->nSize = nSize;
-			pBlock->bHead = true;
-			return pBlock;
-		}
-		EXP_INLINE void Free(mem_block_t* pBlock)
-		{
-			if(!pBlock || !(pBlock->bHead) ) return;
-			m_Alloc.Free(pBlock);
-		}
-	} blk_alloc_t;
+	// 结点转换函数
+	EXP_INLINE block_t* BlockPtr(void* pPtr) { return pPtr ? (block_t*)(((BYTE*)pPtr) - sizeof(block_t)) : NULL; }
+	EXP_INLINE void* PtrBlock(block_t* pPtr) { return pPtr ? (void*)(pPtr + 1) : NULL; }
 
 protected:
-	mutex_t		m_Mutex;	// 线程同步互斥对象
-	blk_alloc_t m_Alloc;	// 内存分配器
+	alloc_t		m_Alloc;
+	mutex_t		m_Mutex;
 
-	CMemList	m_MemList;	// 内存记录块链表
-	CBlockList	m_FreList;	// 空闲记录块链表
-
-	DWORD		m_nMaxSize;	// 内存池大小上限
-
-protected:
-	EXP_INLINE fre_block_t* FrePushOrder(mem_block_t* pItem)
-	{
-		if (!pItem) return NULL;
-		fre_block_t* item = NULL;
-		if( !m_FreList.Empty() )
-		{
-			item = m_FreList.Head();
-			do
-			{
-				mem_block_t* temp = m_Alloc.BlockFre(item);
-				if( temp->nSize <= pItem->nSize )
-					break;
-				item = item->pNext;
-			} while( item != m_FreList.Tail() );
-		}
-		return m_FreList.Push(m_Alloc.FreBlock(pItem), item);
-	}
+	IObjPool*	m_PoolList[17];
+	blk_list_t	m_UsedList;
 
 public:
-	CMemPoolT(DWORD nSize = PolicyT::s_nDefSize)
-		: m_nMaxSize(PolicyT::s_nMaxSize)
-	{ SetPoolSize(nSize); }
+	CMemPoolT()
+	{
+		int i = 0;
+		m_PoolList[i]	= (IObjPool*)CTraits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_01_t>(m_Alloc.Alloc(sizeof(pool_01_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_02_t>(m_Alloc.Alloc(sizeof(pool_02_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_03_t>(m_Alloc.Alloc(sizeof(pool_03_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_04_t>(m_Alloc.Alloc(sizeof(pool_04_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_05_t>(m_Alloc.Alloc(sizeof(pool_05_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_06_t>(m_Alloc.Alloc(sizeof(pool_06_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_07_t>(m_Alloc.Alloc(sizeof(pool_07_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_08_t>(m_Alloc.Alloc(sizeof(pool_08_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_09_t>(m_Alloc.Alloc(sizeof(pool_09_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_10_t>(m_Alloc.Alloc(sizeof(pool_10_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_11_t>(m_Alloc.Alloc(sizeof(pool_11_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_12_t>(m_Alloc.Alloc(sizeof(pool_12_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_13_t>(m_Alloc.Alloc(sizeof(pool_13_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_14_t>(m_Alloc.Alloc(sizeof(pool_14_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_15_t>(m_Alloc.Alloc(sizeof(pool_15_t)));
+		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_16_t>(m_Alloc.Alloc(sizeof(pool_16_t)));
+	}
 	~CMemPoolT()
-	{ Clear(PolicyT::s_bDumpMemLeaks); }
+	{
+		Clear(PolicyT::s_bDumpMemLeaks);
+		int i = 0;
+		m_Alloc.Free(CTraits::Destruct<pool_00_t>(m_PoolList[i]));
+		m_Alloc.Free(CTraits::Destruct<pool_01_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_02_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_03_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_04_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_05_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_06_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_07_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_08_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_09_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_10_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_11_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_12_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_13_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_14_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_15_t>(m_PoolList[++i]));
+		m_Alloc.Free(CTraits::Destruct<pool_16_t>(m_PoolList[++i]));
+	}
 
 public:
-	// 内存池大小设置
-	DWORD GetPoolSize()
-	{
-		ExLock(m_Mutex, true, mutex_t);
-		return m_MemList.Size();
-	}
-	void SetPoolSize(DWORD nSize = PolicyT::s_nDefSize)
-	{
-		ExLock(m_Mutex, false, mutex_t);
-		if( nSize > m_nMaxSize )
-			nSize = m_nMaxSize;
-		if( m_MemList.Size() >= nSize ) return;
-		// 分配新的内存块
-		mem_block_t* block = m_Alloc.Alloc(nSize - m_MemList.Size());
-		// 添加内存记录块
-		m_MemList.Push(block);
-		// 添加空闲记录块
-		FrePushOrder(block);
-	}
-	DWORD GetMaxSize()
-	{
-		ExLock(m_Mutex, true, mutex_t);
-		return m_nMaxSize;
-	}
-	void SetMaxSize(DWORD nMaxSize)
-	{
-		ExLock(m_Mutex, false, mutex_t);
-		m_nMaxSize = nMaxSize;
-	}
-
 	// 内存效验
 	bool Valid(void* pPtr)
 	{
 		ExLock(m_Mutex, true, mutex_t);
-		return m_Alloc.Valid(pPtr);
+		block_t* block = BlockPtr(pPtr);
+		if (!block) return false;
+		IObjPool* pool = block->pPool;
+		if (!pool) return false;
+		return pool->Valid(block);
 	}
 	// 内存大小
 	DWORD Size(void* pPtr)
 	{
 		ExLock(m_Mutex, true, mutex_t);
-		return m_Alloc.Size(pPtr);
+		block_t* block = BlockPtr(pPtr);
+		if (!block) return 0;
+		IObjPool* pool = block->pPool;
+		if (!pool) return 0;
+		return pool->Size(block);
 	}
 	// 分配内存
 	void* Alloc(DWORD nSize)
 	{
 		if (nSize == 0) return NULL;
-		mem_block_t* block = NULL;
 		ExLock(m_Mutex, false, mutex_t);
-		// 查找空闲内存块
-		if( !m_FreList.Empty() )
+		// 定位ObjPool
+		nSize += sizeof(block_t);
+		block_t* block = NULL;
+		int i = 1;
+		for(; i < 17; ++i)
 		{
-			fre_block_t* item = m_FreList.Head();
-			do
+			if (nSize <= m_PoolList[i]->GetObjSize())
 			{
-				mem_block_t* temp = m_Alloc.BlockFre(item);
-				if( temp->nSize >= nSize )
-				{
-					block = temp;
-					break;
-				}
-				item = item->pNext;
-			} while( item != m_FreList.Tail() );
-		}
-		// 标记空闲内存块
-		if( block )
-		{	// 找到合适的内存块
-			mem_block_t* left = NULL;
-			// 内存块需要分割
-			if( block->nSize > nSize )
-			{
-				left = block;
-				block = m_MemList.Split(nSize, left);
+				block = (block_t*)m_PoolList[i]->Alloc(nSize);
+				break;
 			}
-			// 弹出割下来的内存块
-			m_FreList.Pop(m_Alloc.FreBlock(block));
-			// 对链表顺序插入
-			FrePushOrder(left);
-		} else
-		{	// 分配新的内存块
-			block = m_Alloc.Alloc(nSize);
-			// 添加内存记录块
-			m_MemList.Push(block);
 		}
-		ExAssert(block && !(block->bUsed));
-		if(!block || block->bUsed) return NULL;
-		block->bUsed = true;
-		// 返回分配的内存
-		return m_Alloc.PtrBlock(block);
+		if(!block)
+		{
+			i = 0;
+			block = (block_t*)m_PoolList[i]->Alloc(nSize);
+		}
+		// 返回标记内存块
+		ExAssert(block);
+		block->pPool = m_PoolList[i];
+		m_UsedList.Push(block);
+		return PtrBlock(block);
 	}
 	// 回收内存
 	void Free(void* pPtr)
 	{
 		if (!pPtr) return;
 		ExLock(m_Mutex, false, mutex_t);
-		// 获得对应内存块
-		mem_block_t* block = m_Alloc.BlockPtr(pPtr);
-		ExAssert(block && block->bUsed);
-		if(!block || !(block->bUsed)) return;
-		// 标记使用内存块
-		block->bUsed = false;
-		// 释放空间
-		if( m_MemList.Size() > m_nMaxSize && 
-			block->bHead && ((mem_block_t*)(block->pNext))->bHead)
-		{	// 释放掉能够释放的内存块
-			m_MemList.Pop(block);
-			m_Alloc.Free(block);
-		} else
-		{	// 整理归还内存
-			mem_block_t* prev = m_MemList.Merger(block);		// 向前合并
-			if (prev)
-				block = prev;
-			mem_block_t* next = (mem_block_t*)(block->pNext);	// 向后合并
-			if (m_MemList.Merger(next))
-				m_FreList.Pop(m_Alloc.FreBlock(next));
-			// 弹出被合并影响到的结点
-			m_FreList.Pop(m_Alloc.FreBlock(block));
-			// 对链表重新顺序插入
-			FrePushOrder(block);
-		}
+		// 获得标记块
+		block_t* block = BlockPtr(pPtr);
+		// 弹出标记块
+		m_UsedList.Pop(block);
+		// 销毁标记块
+		IObjPool* pool = block->pPool;
+		ExAssert(pool);
+		if (!pool) return;
+		pool->Free(block);
 	}
 
 #ifdef	_DEBUG
@@ -467,37 +339,29 @@ public:
 		if (bDump)
 			ExDPrintf(_T("\nDumping memory leaks...\n"));
 #endif/*EXP_DUMPING_MEMLEAKS*/
-		if( !m_MemList.Empty() )
+		if( !m_UsedList.Empty() )
 		{
-			// 第一次遍历,移除非头结点
-			mem_block_t* item = (mem_block_t*)(m_MemList.Head());
+			block_t* item = m_UsedList.Head();
 			do
 			{
-				mem_block_t* temp = (mem_block_t*)(item->pNext);
+				block_t* temp = item->pNext;
+				IObjPool* pool = item->pPool;
+				ExAssert(pool);
 #ifdef	EXP_DUMPING_MEMLEAKS
-				if (bDump && item->bUsed && ++dump_counter)
+				if (bDump && ++dump_counter)
 				{
-					BYTE* ptr = (BYTE*)m_Alloc.PtrBlock(item);
-					ExDPrintf(_T("\nMemory leak at 0x%08X, %d bytes long.\nData:"), ptr, item->nSize);
+					BYTE* ptr = (BYTE*)PtrBlock(item);
+					ExDPrintf(_T("\nMemory leak at 0x%08X, %d bytes long.\nData:"), ptr, pool->Size(item));
 					ExDPrintf(
 						_T("%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n"), 
 						ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7], 
 						ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
 				}
 #endif/*EXP_DUMPING_MEMLEAKS*/
-				if (!(item->bHead)) m_MemList.Pop(item);
+				m_UsedList.Pop(item);
+				pool->Free(item);
 				item = temp;
-			} while( item != m_MemList.Tail() );
-			// 第二次遍历,清理数据
-			item = (mem_block_t*)(m_MemList.Head());
-			do
-			{
-				mem_block_t* temp = (mem_block_t*)(item->pNext);
-				m_Alloc.Free(item);
-				item = temp;
-			} while( item != m_MemList.Tail() );
-			m_MemList.Clear();
-			m_FreList.Clear();
+			} while( item != m_UsedList.Tail() );
 		}
 #ifdef	EXP_DUMPING_MEMLEAKS
 		if (bDump)
@@ -512,6 +376,9 @@ public:
 			ExDPrintf(_T("Complete memory leak detection.\n"));
 		}
 #endif/*EXP_DUMPING_MEMLEAKS*/
+		// 清理对象池
+		for(int i = 0; i < 17; ++i)
+			m_PoolList[i]->Clear();
 	}
 };
 
@@ -537,8 +404,9 @@ struct _MemPoolPolicy
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	static const DWORD	s_nDefSize = 1024 * 1024;		// 初始大小1M
-	static const DWORD	s_nMaxSize = 1024 * 1024 * 100;	// 最大大小100M
+	typedef _ObjPoolPolicyT<alloc_t, _SingleModel> pool_policy_t;
+	typedef DWORD byte;
+
 	static const bool	s_bDumpMemLeaks = true;
 };
 

@@ -58,11 +58,28 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+// ObjPool接口,方便上层直接操作统一接口
+class IObjPool
+{
+public:
+	virtual ~IObjPool() {}
+
+public:
+	virtual DWORD GetObjSize() = 0;
+	virtual bool Valid(void* pPtr) = 0;
+	virtual DWORD Size(void* pPtr) = 0;
+	virtual void* Alloc(DWORD nSize) = 0;
+	virtual void Free(void* pPtr) = 0;
+	virtual void Clear() = 0;
+};
+
+//////////////////////////////////////////////////////////////////
+
 template <typename AllocT = CMemHeapAlloc, typename ModelT = EXP_THREAD_MODEL>
 struct _ObjPoolPolicyT;
 
 template <typename TypeT, typename PolicyT = _ObjPoolPolicyT<> >
-class CObjPoolT : CNonCopyable
+class CObjPoolT : CNonCopyable, public IObjPool
 {
 public:
 	typedef typename PolicyT::alloc_t alloc_t;
@@ -138,6 +155,8 @@ public:
 		ExLock(m_Mutex, false, mutex_t);
 		m_nMaxSize = nMaxSize;
 	}
+	DWORD GetObjSize()
+	{ return sizeof(TypeT); }
 
 	// 内存效验
 	bool Valid(void* pPtr)
@@ -152,7 +171,7 @@ public:
 		return m_Alloc.Size(block) - block_t::HeadSize;
 	}
 	// 分配内存
-	TypeT* Alloc(DWORD nSize = sizeof(TypeT))
+	void* Alloc(DWORD nSize = sizeof(TypeT))
 	{
 		if (nSize == 0) return NULL;
 		ExLock(m_Mutex, false, mutex_t);
@@ -171,7 +190,7 @@ public:
 		ExAssert(block);
 		// 构造=>返回内存
 		block->block_t::block_t();
-		return block ? &(block->Buff) : NULL;
+		return (void*)(block ? &(block->Buff) : NULL);
 	}
 	// 回收内存
 	void Free(void* pPtr)
@@ -222,7 +241,7 @@ public:
 
 public:
 	static TypeT* Alloc()
-	{ return GetAlloc().Alloc(); }
+	{ return (TypeT*)GetAlloc().Alloc(); }
 	void Free()
 	{ GetAlloc().Free(static_cast<TypeT*>(this)); }
 };

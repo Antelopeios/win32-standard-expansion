@@ -71,7 +71,7 @@ protected:
 	{
 		if (!pDst || nCount == 0) return;
 		ZeroMemory(pDst, sizeof(type_t) * nCount);
-		CTraits::Construct<type_t>(pDst, sizeof(type_t) * nCount);
+		CTraits::Construct<type_t>(pDst, nCount);
 	}
 	EXP_INLINE void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
 	{

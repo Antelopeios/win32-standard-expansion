@@ -33,13 +33,15 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-03
-// Version:	1.0.0017.2130
+// Date:	2011-03-04
+// Version:	1.0.0018.2110
 //
 // History:
 //	- 1.0.0015.2359(2011-03-01)	# CRegistAllocT::Free()一个空指针时会引发内存异常
 //	- 1.0.0017.2130(2011-03-03)	# CTraitsT::Construct()与CTraitsT::Destruct()添加分配异常断言
 //								= CTraitsT<TypeT>改为CTraits,将模板放入成员函数中处理
+//	- 1.0.0018.2110(2011-03-04)	= CTraits的接口调整为根据类型数量而不是内存块大小对,内存块进行构造/析构处理
+//								= CRegistAllocT在分配内存时自动记录内存分配的初始类型块数量,并根据记录的值对内存块构造/析构
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RegistAlloc_h__
@@ -65,25 +67,23 @@ public:
 
 public:
 	template <typename TypeT>
-	EXP_INLINE static TypeT* Construct(void* pPtr, DWORD nSize = sizeof(TypeT))
+	EXP_INLINE static TypeT* Construct(void* pPtr, DWORD nCount = 1)
 	{
-		DWORD count = (nSize / sizeof(TypeT));
-		ExAssert(count);
-		if (count == 0) return NULL;
+		ExAssert(nCount);
+		if (nCount == 0) return NULL;
 	#pragma push_macro("new")
 	#undef new
-		for (DWORD i = 0; i < count; ++i)
+		for (DWORD i = 0; i < nCount; ++i)
 			::new(((TypeT*)pPtr) + i) TypeT;
 	#pragma pop_macro("new")
 		return (TypeT*)pPtr;
 	}
 	template <typename TypeT>
-	EXP_INLINE static TypeT* Destruct(void* pPtr, DWORD nSize = sizeof(TypeT))
+	EXP_INLINE static TypeT* Destruct(void* pPtr, DWORD nCount = 1)
 	{
-		DWORD count = (nSize / sizeof(TypeT));
-		ExAssert(count);
-		if (count == 0) return NULL;
-		for (DWORD i = 0; i < count; ++i)
+		ExAssert(nCount);
+		if (nCount == 0) return NULL;
+		for (DWORD i = 0; i < nCount; ++i)
 			((TypeT*)pPtr)[i].TypeT::~TypeT();
 		return (TypeT*)pPtr;
 	}
@@ -100,7 +100,12 @@ public:
 	typedef typename AllocT::alloc_t alloc_t;
 
 protected:
-	struct _Regist { traitor_t destruct; };
+	struct _Regist
+	{
+		traitor_t	destruct;
+		DWORD		count;
+	};
+
 public:
 	enum { HeadSize = sizeof(_Regist) };
 
@@ -123,7 +128,7 @@ public:
 		ExAssert(pPtr);
 		_Regist* real = (_Regist*)RealPtr(pPtr);
 		real->destruct = (traitor_t)(CTraits::Destruct<TypeT>);
-		return CTraits::Construct<TypeT>(pPtr, (m_Alloc.Size(real) - HeadSize));
+		return CTraits::Construct<TypeT>(pPtr, real->count);
 	}
 	EXP_INLINE void* Destruct(void* pPtr)
 	{
@@ -131,7 +136,7 @@ public:
 		_Regist* real = (_Regist*)RealPtr(pPtr);
 		if (real->destruct)
 		{
-			real->destruct(pPtr, (m_Alloc.Size(real) - HeadSize));
+			real->destruct(pPtr, real->count);
 			real->destruct = NULL;	// 仅允许析构一次,防止高层调用时意外的重复析构
 		}							// 若需要重复析构,需手动调用CTraits::Destruct<TypeT>
 		return real;
@@ -152,6 +157,7 @@ public:
 	{
 		if (nCount == 0) return NULL;
 		_Regist* real = (_Regist*)m_Alloc.Alloc(HeadSize + (sizeof(TypeT) * nCount));
+		real->count = nCount;
 		return Construct<TypeT>(real + 1);
 	}
 	EXP_INLINE void* Alloc(DWORD nSize)

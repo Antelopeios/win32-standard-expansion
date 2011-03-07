@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-04
-// Version:	1.3.0020.2110
+// Date:	2011-03-07
+// Version:	1.3.0022.1540
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -42,6 +42,8 @@
 //	- 1.2.0018.1520(2011-03-02)	= 将static_cast的指针转换改为C语言的强制转换方式
 //								+ 添加一些关键位置的inline定义
 //	- 1.3.0020.2110(2011-03-04)	^ 使用ObjPool彻底重构内存池,大幅提高内存池随机分配的效率
+//	- 1.3.0021.0233(2011-03-06)	# 修正CMemPoolT::CLagPoolT::Size()里的一处笔误
+//	- 1.3.0022.1540(2011-03-07) ^ CMemPoolT::Alloc内部采用二分法命中对应的ObjPool
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -180,7 +182,7 @@ protected:
 	public:
 		DWORD GetObjSize()			{ return 0; }
 		bool Valid(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
-		DWORD Size(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
+		DWORD Size(void* pPtr)		{ return m_Alloc.Size(pPtr); }
 		void* Alloc(DWORD nSize)	{ return m_Alloc.Alloc(nSize); }
 		void Free(void* pPtr)		{ m_Alloc.Free(pPtr); }
 		void Clear()				{}
@@ -288,23 +290,43 @@ public:
 		// 定位ObjPool
 		nSize += sizeof(block_t);
 		block_t* block = NULL;
-		int i = 1;
-		for(; i < 17; ++i)
+		int mid = 0, left = 1, right = 16;
+		while (left <= right)
 		{
-			if (nSize <= m_PoolList[i]->GetObjSize())
-			{
-				block = (block_t*)m_PoolList[i]->Alloc(nSize);
+			mid = (left + right) / 2;
+			DWORD size = m_PoolList[mid]->GetObjSize();
+			if (size == nSize)
 				break;
+			else
+			if (size < nSize)
+			{
+				if (mid >= 16)
+				{
+					mid = 0;
+					break;
+				} else
+				if (m_PoolList[++mid]->GetObjSize() >= nSize)
+					break;
+				else
+					left = mid;
+			} else
+			{
+				size = m_PoolList[--mid]->GetObjSize();
+				if (size == nSize)
+					break;
+				else
+				if (size < nSize)
+				{
+					++mid;
+					break;
+				} else
+					right = mid;
 			}
 		}
-		if(!block)
-		{
-			i = 0;
-			block = (block_t*)m_PoolList[i]->Alloc(nSize);
-		}
+		block = (block_t*)m_PoolList[mid]->Alloc(nSize);
 		// 返回标记内存块
 		ExAssert(block);
-		block->pPool = m_PoolList[i];
+		block->pPool = m_PoolList[mid];
 		m_UsedList.Push(block);
 		return PtrBlock(block);
 	}

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-07
-// Version:	1.3.0022.1540
+// Date:	2011-03-08
+// Version:	1.3.0023.1203
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -44,6 +44,8 @@
 //	- 1.3.0020.2110(2011-03-04)	^ 使用ObjPool彻底重构内存池,大幅提高内存池随机分配的效率
 //	- 1.3.0021.0233(2011-03-06)	# 修正CMemPoolT::CLagPoolT::Size()里的一处笔误
 //	- 1.3.0022.1540(2011-03-07) ^ CMemPoolT::Alloc内部采用二分法命中对应的ObjPool
+//	- 1.3.0023.1203(2011-03-08) ^ CMemPoolT::pool_policy_t采用自动化策略
+//								^ CMemPoolT内部结构体采用1字节内存对齐优化内存占用
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -70,10 +72,10 @@ public:
 	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
-	typedef typename PolicyT::pool_policy_t pool_policy_t;
 	typedef typename PolicyT::byte byte;
 
 protected:
+#pragma pack(1)
 	// 内存块标记结点
 	struct block_t
 	{
@@ -92,6 +94,7 @@ protected:
 			pPool = NULL;
 		}
 	};
+#pragma pack()
 
 	// 内存块标记链表
 	typedef class blk_list_t
@@ -162,12 +165,19 @@ protected:
 	};
 
 	// 内存块类型
+#pragma pack(1)
 	template <DWORD SizeT>
 	struct _TypeT
 	{
 		block_t Block;
 		byte	Buff[SizeT];
 	};
+#pragma pack()
+
+	// 对象池策略
+	template <DWORD SizeT>
+	typedef struct pool_policy_t : public typename PolicyT::pool_policy_t
+	{ static const DWORD s_nMaxSize = (((DWORD)~0) / sizeof(_TypeT<SizeT>) << 1); };
 
 	// 对象池
 	template <typename PolicyT>

@@ -74,6 +74,9 @@ public:
 	typedef typename PolicyT::mutex_t mutex_t;
 	typedef typename PolicyT::byte byte;
 
+	// 对象池策略
+	typedef typename PolicyT::pool_policy_t pool_policy_t;
+
 protected:
 #pragma pack(1)
 	// 内存块标记结点
@@ -173,11 +176,6 @@ protected:
 		byte	Buff[SizeT];
 	};
 #pragma pack()
-
-	// 对象池策略
-	template <DWORD SizeT>
-	typedef struct pool_policy_t : public typename PolicyT::pool_policy_t
-	{ static const DWORD s_nMaxSize = (((DWORD)~0) / sizeof(_TypeT<SizeT>) << 1); };
 
 	// 对象池
 	template <typename PolicyT>

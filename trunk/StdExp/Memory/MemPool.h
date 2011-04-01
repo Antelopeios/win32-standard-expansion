@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-08
-// Version:	1.3.0023.1203
+// Date:	2011-04-01
+// Version:	1.3.0024.1014
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -46,6 +46,7 @@
 //	- 1.3.0022.1540(2011-03-07) ^ CMemPoolT::Alloc内部采用二分法命中对应的ObjPool
 //	- 1.3.0023.1203(2011-03-08) ^ CMemPoolT::pool_policy_t采用自动化策略
 //								^ CMemPoolT内部结构体采用1字节内存对齐优化内存占用
+//	- 1.3.0024.1014(2011-04-01) # 修正CMemPoolT::pool_policy_t因上次优化导致的编译错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -73,9 +74,6 @@ public:
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
 	typedef typename PolicyT::byte byte;
-
-	// 对象池策略
-	typedef typename PolicyT::pool_policy_t pool_policy_t;
 
 protected:
 #pragma pack(1)
@@ -177,6 +175,11 @@ protected:
 	};
 #pragma pack()
 
+	// 对象池策略
+	template <DWORD SizeT>
+	struct pool_policy_t : public PolicyT::pool_policy_t
+	{ static const DWORD s_nMaxSize = (((DWORD)~0) / sizeof(_TypeT<SizeT>) >> 1); };
+
 	// 对象池
 	template <typename PolicyT>
 	class CLagPoolT : CNonCopyable, public IObjPool
@@ -195,23 +198,23 @@ protected:
 		void Free(void* pPtr)		{ m_Alloc.Free(pPtr); }
 		void Clear()				{}
 	};
-	typedef CLagPoolT<pool_policy_t>				pool_00_t;
-	typedef CObjPoolT<_TypeT<1>, pool_policy_t>		pool_01_t;
-	typedef CObjPoolT<_TypeT<2>, pool_policy_t>		pool_02_t;
-	typedef CObjPoolT<_TypeT<4>, pool_policy_t>		pool_03_t;
-	typedef CObjPoolT<_TypeT<8>, pool_policy_t>		pool_04_t;
-	typedef CObjPoolT<_TypeT<16>, pool_policy_t>	pool_05_t;
-	typedef CObjPoolT<_TypeT<32>, pool_policy_t>	pool_06_t;
-	typedef CObjPoolT<_TypeT<64>, pool_policy_t>	pool_07_t;
-	typedef CObjPoolT<_TypeT<128>, pool_policy_t>	pool_08_t;
-	typedef CObjPoolT<_TypeT<256>, pool_policy_t>	pool_09_t;
-	typedef CObjPoolT<_TypeT<512>, pool_policy_t>	pool_10_t;
-	typedef CObjPoolT<_TypeT<1024>, pool_policy_t>	pool_11_t;
-	typedef CObjPoolT<_TypeT<2048>, pool_policy_t>	pool_12_t;
-	typedef CObjPoolT<_TypeT<4096>, pool_policy_t>	pool_13_t;
-	typedef CObjPoolT<_TypeT<8192>, pool_policy_t>	pool_14_t;
-	typedef CObjPoolT<_TypeT<16384>, pool_policy_t>	pool_15_t;
-	typedef CObjPoolT<_TypeT<32768>, pool_policy_t>	pool_16_t;
+	typedef CLagPoolT<typename PolicyT::pool_policy_t>		pool_00_t;
+	typedef CObjPoolT<_TypeT<1>, pool_policy_t<1> >			pool_01_t;
+	typedef CObjPoolT<_TypeT<2>, pool_policy_t<2> >			pool_02_t;
+	typedef CObjPoolT<_TypeT<4>, pool_policy_t<4> >			pool_03_t;
+	typedef CObjPoolT<_TypeT<8>, pool_policy_t<8> >			pool_04_t;
+	typedef CObjPoolT<_TypeT<16>, pool_policy_t<16> >		pool_05_t;
+	typedef CObjPoolT<_TypeT<32>, pool_policy_t<32> >		pool_06_t;
+	typedef CObjPoolT<_TypeT<64>, pool_policy_t<64> >		pool_07_t;
+	typedef CObjPoolT<_TypeT<128>, pool_policy_t<128> >		pool_08_t;
+	typedef CObjPoolT<_TypeT<256>, pool_policy_t<256> >		pool_09_t;
+	typedef CObjPoolT<_TypeT<512>, pool_policy_t<512> >		pool_10_t;
+	typedef CObjPoolT<_TypeT<1024>, pool_policy_t<1024> >	pool_11_t;
+	typedef CObjPoolT<_TypeT<2048>, pool_policy_t<2048> >	pool_12_t;
+	typedef CObjPoolT<_TypeT<4096>, pool_policy_t<4096> >	pool_13_t;
+	typedef CObjPoolT<_TypeT<8192>, pool_policy_t<8192> >	pool_14_t;
+	typedef CObjPoolT<_TypeT<16384>, pool_policy_t<16384> >	pool_15_t;
+	typedef CObjPoolT<_TypeT<32768>, pool_policy_t<32768> >	pool_16_t;
 
 	// 结点转换函数
 	EXP_INLINE block_t* BlockPtr(void* pPtr) { return pPtr ? (block_t*)(((BYTE*)pPtr) - sizeof(block_t)) : NULL; }

@@ -33,13 +33,14 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-01
-// Version:	1.1.0014.2000
+// Date:	2011-04-04
+// Version:	1.1.0015.0120
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
 //								+ 支持与SmartPtr智能指针同时使用
 //	- 1.1.0014.2000(2011-03-01)	# 在GC内部也调用引用计数机制,而不是忽略计数;否则当SmartPtr释放指针后,GC将再次释放同一个指针
+//	- 1.1.0015.0120(2011-04-04)	+ ExGC支持不使用GC进行内存分配,方便提供统一的内存分配接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -198,21 +199,22 @@ class CGCAllocT
 {
 public:
 	typedef GCT alloc_t;
+	typedef typename GCT::alloc_t gc_alloc_t;
 
 public:
-	static bool Valid(alloc_t& alloc, void* pPtr)
-	{ return alloc.Valid(pPtr); }
-	static DWORD Size(alloc_t& alloc, void* pPtr)
-	{ return alloc.Size(pPtr); }
+	static bool Valid(alloc_t* alloc, void* pPtr)
+	{ return alloc ? alloc->Valid(pPtr) : gc_alloc_t::Valid(pPtr); }
+	static DWORD Size(alloc_t* alloc, void* pPtr)
+	{ return alloc ? alloc->Size(pPtr) : gc_alloc_t::Size(pPtr); }
 
 	template <typename TypeT>
-	static TypeT* Alloc(alloc_t& alloc, DWORD nCount = 1)
-	{ return alloc.Alloc<TypeT>(nCount); }
-	static void* Alloc(alloc_t& alloc, DWORD nSize)
-	{ return alloc.Alloc(nSize); }
+	static TypeT* Alloc(alloc_t* alloc, DWORD nCount = 1)
+	{ return alloc ? alloc->Alloc<TypeT>(nCount) : gc_alloc_t::Alloc<TypeT>(nCount); }
+	static void* Alloc(alloc_t* alloc, DWORD nSize)
+	{ return alloc ? alloc->Alloc(nSize) : gc_alloc_t::Alloc(nSize); }
 
-	static void Free(alloc_t& alloc, void* pPtr)
-	{ alloc.Free(pPtr); }
+	static void Free(alloc_t* alloc, void* pPtr)
+	{ if (alloc) alloc->Free(pPtr); else gc_alloc_t::Free(pPtr); }
 };
 
 typedef CGCAllocT<> CGCAlloc;

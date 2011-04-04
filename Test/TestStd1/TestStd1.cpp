@@ -127,7 +127,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		CHeapGC gc;
 		for(int j = 0; j < TestLast; j++)
-			CGCAllocT<CHeapGC>::Alloc<BYTE>(gc, Size[j]);
+			CGCAllocT<CHeapGC>::Alloc<BYTE>(&gc, Size[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -143,7 +143,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		CPoolGC gc;
 		for(int j = 0; j < TestLast; j++)
-			CGCAllocT<CPoolGC>::Alloc<BYTE>(gc, Size[j]);
+			CGCAllocT<CPoolGC>::Alloc<BYTE>(&gc, Size[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);

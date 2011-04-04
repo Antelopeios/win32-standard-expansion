@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-14
-// Version:	1.0.0002.1500
+// Date:	2011-04-04
+// Version:	1.0.0003.0106
+//
+// History:
+//	- 1.0.0003.0106(2011-04-04)	+ 添加CFileSeeker类,用于自动还原文件索引
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FileObject_h__
@@ -48,7 +51,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class IFileObject
+interface IFileObject
 {
 public:
 	enum SeekPosition
@@ -100,6 +103,33 @@ public:
 			return NULL;
 		else
 			return sString;
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CFileSeeker
+{
+protected:
+	IFileObject* m_pFile;
+	uint64_t	 m_nTell;
+
+public:
+	CFileSeeker(IFileObject* pFile)
+		: m_pFile(pFile)
+		, m_nTell(-1)
+	{
+		if (m_pFile)
+		{
+			m_nTell = m_pFile->Tell();
+			if (m_nTell == (uint64_t)-1)
+				m_pFile = NULL;
+		}
+	}
+	~CFileSeeker()
+	{
+		if (m_pFile)
+			m_pFile->Seek(m_nTell, IFileObject::begin);
 	}
 };
 

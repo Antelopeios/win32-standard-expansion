@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-01
-// Version:	1.3.0024.1014
+// Date:	2011-04-03
+// Version:	1.3.0025.2220
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -47,6 +47,7 @@
 //	- 1.3.0023.1203(2011-03-08) ^ CMemPoolT::pool_policy_t采用自动化策略
 //								^ CMemPoolT内部结构体采用1字节内存对齐优化内存占用
 //	- 1.3.0024.1014(2011-04-01) # 修正CMemPoolT::pool_policy_t因上次优化导致的编译错误
+//	- 1.3.0025.2220(2011-04-03) # 修正CMemPoolT::CLagPoolT::Alloc并未将分配的内存块内容初始化为空,导致内存池链表添加异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -194,7 +195,7 @@ protected:
 		DWORD GetObjSize()			{ return 0; }
 		bool Valid(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
 		DWORD Size(void* pPtr)		{ return m_Alloc.Size(pPtr); }
-		void* Alloc(DWORD nSize)	{ return m_Alloc.Alloc(nSize); }
+		void* Alloc(DWORD nSize)	{ return ZeroMemory(m_Alloc.Alloc(nSize), nSize); }
 		void Free(void* pPtr)		{ m_Alloc.Free(pPtr); }
 		void Clear()				{}
 	};

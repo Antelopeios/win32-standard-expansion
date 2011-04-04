@@ -44,6 +44,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "File/FileObject.h"
 #include "Container/Array.h"
 
 EXP_BEG

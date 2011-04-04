@@ -1,4 +1,4 @@
-// Copyright 2010, 木头云
+// Copyright 2010-2011, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-03-02
-// Version:	1.2.0006.1150
+// Date:	2011-04-03
+// Version:	1.2.0007.2000
 //
 // History:
-//	- 1.2.0006.1150(2010-03-02)	= 调整部分宏定义,定义并使用EXP_INLINE宏
+//	- 1.2.0006.1150(2011-03-02)	= 调整部分宏定义,定义并使用EXP_INLINE宏
+//	- 1.2.0007.2000(2011-04-03)	+ 添加interface宏定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Common_h__
@@ -86,6 +87,10 @@ typedef __int32				int32_t;
 typedef __int64				int64_t;
 
 // 功能定义
+
+#ifndef interface
+#define interface struct
+#endif
 
 #ifndef _IN_
 #define _IN_

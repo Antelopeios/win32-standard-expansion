@@ -64,14 +64,14 @@ typedef CBaseObjectT<> CBaseObject;
 // 类型信息结构
 struct TypeInfo
 {
-	typedef CBaseObject* (*creator_t)(CGC& gc);
+	typedef CBaseObject* (*creator_t)(CGC* gc);
 
 	LPTSTR		className;
 	int			type_id;
 	TypeInfo*	pBaseClass[3];
 	creator_t	m_Creator;	// NULL => abstract class
 
-	EXP_INLINE CBaseObject* CreateObject(CGC& gc)
+	EXP_INLINE CBaseObject* CreateObject(CGC* gc)
 	{
 		if (!m_Creator) return NULL;
 		return (*m_Creator)(gc);
@@ -239,7 +239,7 @@ public:																						\
 
 #define EXP_DECLARE_DYNCREATE_C(cls_name)													\
 public:																						\
-	static CBaseObject* CreateObject(CGC& gc);												\
+	static CBaseObject* CreateObject(CGC* gc);												\
 private:																					\
 	static bool m_bRegSuccess;
 
@@ -335,7 +335,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
 	tmp																						\
-	CBaseObject* cls_name::CreateObject(CGC& gc)											\
+	CBaseObject* cls_name::CreateObject(CGC* gc)											\
 	{ return (base_name*)ExGC::Alloc<cls_name>(gc); }										\
 	tmp																						\
 	bool cls_name::m_bRegSuccess =															\

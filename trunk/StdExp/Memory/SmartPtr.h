@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-04
-// Version:	1.3.0023.2110
+// Date:	2011-04-02
+// Version:	1.3.0024.1130
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -69,6 +69,7 @@
 //	- 1.3.0022.2000(2011-03-01)	# 修正SmartPtr::Inc()内部的模板调用错误
 //	- 1.3.0023.2110(2011-03-04)	= CPtrManagerT::CReferPtrT本身的内存由CPtrManagerT的AllocT构建
 //								+ CPtrManagerT::Clear()支持传参定义是否完全清理CPtrManagerT::m_ReferPtrs的所有内存
+//	- 1.3.0024.1130(2011-04-02)	# 修正CPtrManagerT::CReferPtrT::Dec()可能出现多次Free自身的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -144,7 +145,7 @@ protected:
 		}
 		bool Dec()
 		{
-			if (RefModelT::Dec(&n_ref) <= 0)
+			if (RefModelT::Dec(&n_ref) == 0)
 			{
 				Free();
 				return true;

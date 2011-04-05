@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.0.0000.1730
+// Date:	2011-04-05
+// Version:	1.0.0001.2350
+//
+// History:
+//	- 1.0.0001.2350(2011-04-05)	= 将具体的image_t内存块申请工作统一放在ICoderObject中处理
+//								= ICoderObject::DeleteImage()不再断言Image参数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __CoderObject_h__
@@ -54,7 +58,7 @@ protected:
 	IFileObject* m_pFile;
 
 	template <DWORD SizeT>
-	static bool CheckFile(IFileObject* pFile, const BYTE (&chkHead)[SizeT])
+	EXP_INLINE static bool CheckFile(IFileObject* pFile, const BYTE (&chkHead)[SizeT])
 	{
 		if(!pFile) return false;
 		CFileSeeker seeker(pFile);
@@ -67,6 +71,21 @@ protected:
 		if (memcmp(tmp_buff, chkHead, sizeof(chkHead)) != 0)
 			return false;
 		return true;
+	}
+
+	EXP_INLINE static image_t GetImageBuff(LONG nWidth, LONG nHeight, BYTE*& pBuff)
+	{
+		if (nWidth <= 0 || nHeight <= 0) return NULL;
+		pBuff = NULL;
+		BITMAPINFO bmi = {0};
+		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
+		bmi.bmiHeader.biBitCount	= 32;
+		bmi.bmiHeader.biCompression	= BI_RGB;
+		bmi.bmiHeader.biPlanes		= 1;
+		bmi.bmiHeader.biWidth		= nWidth;
+		bmi.bmiHeader.biHeight		= nHeight;
+		image_t image = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pBuff, NULL, 0);
+		return pBuff ? image : NULL;
 	}
 
 public:
@@ -89,10 +108,7 @@ public:
 	virtual image_t Decode() = 0;
 
 	EXP_INLINE static bool DeleteImage(image_t Image)
-	{
-		ExAssert(Image);
-		return Image ? ::DeleteObject(Image) : true;
-	}
+	{ return Image ? ::DeleteObject(Image) : true; }
 };
 
 //////////////////////////////////////////////////////////////////

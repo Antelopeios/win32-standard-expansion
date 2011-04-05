@@ -33,14 +33,16 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-04
-// Version:	1.1.0015.0120
+// Date:	2011-04-05
+// Version:	1.1.0016.2133
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
 //								+ 支持与SmartPtr智能指针同时使用
 //	- 1.1.0014.2000(2011-03-01)	# 在GC内部也调用引用计数机制,而不是忽略计数;否则当SmartPtr释放指针后,GC将再次释放同一个指针
 //	- 1.1.0015.0120(2011-04-04)	+ ExGC支持不使用GC进行内存分配,方便提供统一的内存分配接口
+//	- 1.1.0015.0120(2011-04-04)	+ CGCAllocT支持与ExMem同样的方式直接分配内存
+//								= 调整ExGC为ExMem,统一所有内存分配接口的调用方式
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -198,27 +200,38 @@ template <typename GCT = CGC>
 class CGCAllocT
 {
 public:
-	typedef GCT alloc_t;
-	typedef typename GCT::alloc_t gc_alloc_t;
+	typedef GCT gc_alloc_t;
+	typedef typename gc_alloc_t::alloc_t alloc_t;
 
 public:
-	static bool Valid(alloc_t* alloc, void* pPtr)
-	{ return alloc ? alloc->Valid(pPtr) : gc_alloc_t::Valid(pPtr); }
-	static DWORD Size(alloc_t* alloc, void* pPtr)
-	{ return alloc ? alloc->Size(pPtr) : gc_alloc_t::Size(pPtr); }
-
+	// alloc_t
+	EXP_INLINE static bool Valid(void* pPtr)
+	{ return alloc_t::Valid(pPtr); }
+	EXP_INLINE static DWORD Size(void* pPtr)
+	{ return alloc_t::Size(pPtr); }
 	template <typename TypeT>
-	static TypeT* Alloc(alloc_t* alloc, DWORD nCount = 1)
-	{ return alloc ? alloc->Alloc<TypeT>(nCount) : gc_alloc_t::Alloc<TypeT>(nCount); }
-	static void* Alloc(alloc_t* alloc, DWORD nSize)
-	{ return alloc ? alloc->Alloc(nSize) : gc_alloc_t::Alloc(nSize); }
-
-	static void Free(alloc_t* alloc, void* pPtr)
-	{ if (alloc) alloc->Free(pPtr); else gc_alloc_t::Free(pPtr); }
+	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
+	{ return alloc_t::Alloc<TypeT>(nCount); }
+	EXP_INLINE static void* Alloc(DWORD nSize)
+	{ return alloc_t::Alloc(nSize); }
+	EXP_INLINE static void Free(void* pPtr)
+	{ alloc_t::Free(pPtr); }
+	// gc_alloc_t
+	EXP_INLINE static bool Valid(gc_alloc_t* alloc, void* pPtr)
+	{ return alloc ? alloc->Valid(pPtr) : Valid(pPtr); }
+	EXP_INLINE static DWORD Size(gc_alloc_t* alloc, void* pPtr)
+	{ return alloc ? alloc->Size(pPtr) : Size(pPtr); }
+	template <typename TypeT>
+	EXP_INLINE static TypeT* Alloc(gc_alloc_t* alloc, DWORD nCount = 1)
+	{ return alloc ? alloc->Alloc<TypeT>(nCount) : Alloc<TypeT>(nCount); }
+	EXP_INLINE static void* Alloc(gc_alloc_t* alloc, DWORD nSize)
+	{ return alloc ? alloc->Alloc(nSize) : Alloc(nSize); }
+	EXP_INLINE static void Free(gc_alloc_t* alloc, void* pPtr)
+	{ if (alloc) alloc->Free(pPtr); else Free(pPtr); }
 };
 
 typedef CGCAllocT<> CGCAlloc;
-typedef CGCAlloc ExGC;
+typedef CGCAlloc ExMem;
 
 //////////////////////////////////////////////////////////////////
 

@@ -78,13 +78,13 @@ public:
 		switch (GetImageFormat(pFile))
 		{
 		case bmp:
-			coder = ExGC::Alloc<CBmpCoder>(pGC);
+			coder = ExMem::Alloc<CBmpCoder>(pGC);
 			break;
 		case jpg:
-			coder = ExGC::Alloc<CJpgCoder>(pGC);
+			coder = ExMem::Alloc<CJpgCoder>(pGC);
 			break;
 		case png:
-			coder = ExGC::Alloc<CPngCoder>(pGC);
+			coder = ExMem::Alloc<CPngCoder>(pGC);
 			break;
 		}
 		if (coder) coder->SetFile(pFile);

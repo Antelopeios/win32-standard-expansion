@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.0.0000.2000
+// Date:	2011-04-05
+// Version:	1.0.0001.2350
+//
+// History:
+//	- 1.0.0001.2350(2011-04-05)	^ 优化BmpCoder的结构
+//								+ 添加对16位位图的解析处理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __BmpCoder_h__
@@ -53,16 +57,22 @@ EXP_BEG
 class CBmpCoder : public ICoderObject
 {
 protected:
-	EXP_INLINE static int PitchWidth(int nWidth, int nBitCount)
+	EXP_INLINE static int PitchBytes(int nWidth, int nBitCount)
 	{
 		int wid_bits = nWidth * nBitCount;
-		int wid_byts = (wid_bits >> 3) + ((wid_bits % 8 == 0) ? 0 : 1);
-		int wid_remd = wid_byts % 4;
-		return wid_byts + ((wid_remd == 0) ? 0 : (4 - wid_remd));
+		return (wid_bits >> 3) + ((wid_bits % 8 == 0) ? 0 : 1);
 	}
+	// 4 * ( (biWidth * biBitCount + 31) / 32 );
+	EXP_INLINE static int PitchWidth(int nPitByts)
+	{
+		int wid_remd = nPitByts % 4;
+		return nPitByts + ((wid_remd == 0) ? 0 : (4 - wid_remd));
+	}
+	EXP_INLINE static int PitchWidth(int nWidth, int nBitCount)
+	{ return PitchWidth(PitchBytes(nWidth, nBitCount)); }
 
 public:
-	static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static bool CheckFile(IFileObject* pFile)
 	{
 		if(!pFile) return false;
 		BYTE chk_head[2] = { 0x42, 0x4D };
@@ -77,6 +87,235 @@ public:
 		: ICoderObject(pFile)
 	{}
 
+protected:
+#pragma push_macro("PreDecode")
+#undef PreDecode
+#define PreDecode() \
+	int img_w = bmiInfo.bmiHeader.biWidth; \
+	int img_h = bmiInfo.bmiHeader.biHeight; \
+	int bit_c = bmiInfo.bmiHeader.biBitCount; \
+	int bit_s = bmhHead.bfOffBits; \
+	int pit_b = PitchBytes(img_w, bit_c); \
+	int pit_w = PitchWidth(pit_b); \
+	CGC gc; \
+	BYTE* temp = ExMem::Alloc<BYTE>(&gc, pit_b)
+//#define PreDecode
+
+	EXP_INLINE static void Decode32(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++x, ++pos, inx += 4)
+			{
+				bmBuff[pos] = ExRGBA
+					(
+					temp[inx], 
+					temp[inx + 1], 
+					temp[inx + 2], 
+					temp[inx + 3]
+				);
+			}
+		}
+	}
+
+	EXP_INLINE static void Decode24(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++x, ++pos, inx += 3)
+			{
+				bmBuff[pos] = ExRGBA
+					(
+					temp[inx], 
+					temp[inx + 1], 
+					temp[inx + 2], 
+					(BYTE)~0
+					);
+			}
+		}
+	}
+
+	EXP_INLINE static void Decode555(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++x, ++pos, inx += 2)
+			{
+				bmBuff[pos] = ExRGBA
+					(
+					(temp[inx] & 0x1F) << 3, 
+					(((temp[inx + 1] << 6) >> 3) + (temp[inx] >> 5)) << 3, 
+					((temp[inx + 1] << 1) >> 3) << 3, 
+					(BYTE)~0
+					);
+			}
+		}
+	}
+
+	EXP_INLINE static void Decode565(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++x, ++pos, inx += 2)
+			{
+				bmBuff[pos] = ExRGBA
+					(
+					(temp[inx] & 0x1F) << 3, 
+					(((temp[inx + 1] << 5) >> 2) + (temp[inx] >> 5)) << 2, 
+					(temp[inx + 1] >> 3) << 3, 
+					(BYTE)~0
+					);
+			}
+		}
+	}
+
+	EXP_INLINE static void Decode16(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		// 判断位图类型
+		if (bmiInfo.bmiHeader.biCompression == BI_RGB)
+			Decode555(pFile, bmhHead, bmiInfo, bmBuff);
+		else // BI_BITFIELDS
+		{
+			// 获取掩码
+			DWORD mask[3] = {0};
+			pFile->Seek(bmhHead.bfOffBits - sizeof(mask), IFileObject::begin);
+			pFile->Read(mask, sizeof(mask), 1);
+			if (mask[0] == 0x7C00) // 555
+				Decode555(pFile, bmhHead, bmiInfo, bmBuff);
+			else // 565
+				Decode565(pFile, bmhHead, bmiInfo, bmBuff);
+		}
+	}
+
+	EXP_INLINE static void Decode8(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 获取调色板
+		RGBQUAD colors[1 << 8] = {0};
+		pFile->Seek(bit_s - sizeof(colors), IFileObject::begin);
+		pFile->Read(colors, sizeof(colors), 1);
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			for(int x = 0; x < img_w; ++x, ++pos)
+			{
+				bmBuff[pos] = ExRGBA
+					(
+					colors[temp[x]].rgbBlue, 
+					colors[temp[x]].rgbGreen, 
+					colors[temp[x]].rgbRed, 
+					(BYTE)~0
+					);
+			}
+		}
+	}
+
+	EXP_INLINE static void Decode4(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 获取调色板
+		RGBQUAD colors[1 << 4] = {0};
+		pFile->Seek(bit_s - sizeof(colors), IFileObject::begin);
+		pFile->Read(colors, sizeof(colors), 1);
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++inx)
+			{
+				for(int n = 1; n >= 0 && x < img_w; --n, ++x, ++pos)
+				{
+					BYTE c = (temp[inx] >> (4 * n)) & 0x0F;
+					bmBuff[pos] = ExRGBA
+						(
+						colors[c].rgbBlue, 
+						colors[c].rgbGreen, 
+						colors[c].rgbRed, 
+						(BYTE)~0
+						);
+				}
+			}
+		}
+	}
+
+	EXP_INLINE static void Decode1(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	{
+		if (!pFile || !bmBuff) return;
+		PreDecode();
+		// 获取调色板
+		RGBQUAD colors[1 << 1] = {0};
+		pFile->Seek(bit_s - sizeof(colors), IFileObject::begin);
+		pFile->Read(colors, sizeof(colors), 1);
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++inx)
+			{
+				for(int n = 7; n >= 0 && x < img_w; --n, ++x, ++pos)
+				{
+					BYTE c = (temp[inx] >> (1 * n)) & 0x01;
+					bmBuff[pos] = ExRGBA
+						(
+						colors[c].rgbBlue, 
+						colors[c].rgbGreen, 
+						colors[c].rgbRed, 
+						(BYTE)~0
+						);
+				}
+			}
+		}
+	}
+
+#pragma pop_macro("PreDecode")
+
 public:
 	bool Encode(image_t Image)
 	{
@@ -84,159 +323,42 @@ public:
 	}
 	image_t Decode()
 	{
-		IFileObject* pFile = GetFile();
-		if(!CheckFile(pFile)) return NULL;
-		CFileSeeker seeker(pFile);
+		IFileObject* file = GetFile();
+		if(!CheckFile(file)) return NULL;
+		CFileSeeker seeker(file);
 		// 获取图像信息
 		BITMAPFILEHEADER file_head = {0};
-		pFile->Read(&file_head, sizeof(file_head), 1);
-		BITMAPINFO file_bmi = {0};
-		pFile->Read(&file_bmi, sizeof(file_bmi), 1);
-		if (file_bmi.bmiHeader.biCompression != BI_RGB)
+		file->Read(&file_head, sizeof(file_head), 1);
+		BITMAPINFO file_info = {0};
+		file->Read(&file_info, sizeof(file_info), 1);
+		if (file_info.bmiHeader.biCompression != BI_RGB && 
+			file_info.bmiHeader.biCompression != BI_BITFIELDS)
 			return NULL;
-		size_t bit_c = file_bmi.bmiHeader.biBitCount;
 		// 根据图像信息申请一个图像缓冲区
-		BITMAPINFO bmi = {0};
-		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
-		bmi.bmiHeader.biBitCount	= 32;
-		bmi.bmiHeader.biCompression	= BI_RGB;
-		bmi.bmiHeader.biPlanes		= 1;
-		bmi.bmiHeader.biWidth		= file_bmi.bmiHeader.biWidth;
-		bmi.bmiHeader.biHeight		= file_bmi.bmiHeader.biHeight;
-		bmi.bmiHeader.biSizeImage	= 
-			(bmi.bmiHeader.biWidth * bmi.bmiHeader.biHeight * bmi.bmiHeader.biBitCount) >> 3;
 		COLORREF* bmbf = NULL;
-		image_t image = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&bmbf, NULL, 0);
-		if(!bmbf) return NULL;
+		image_t image = 
+			GetImageBuff(file_info.bmiHeader.biWidth, file_info.bmiHeader.biHeight, (BYTE*&)bmbf);
+		if(!image) return NULL;
 		// 解析图像信息
-		int pitch = PitchWidth(bmi.bmiHeader.biWidth, bit_c);
-		switch (bit_c)
+		switch (file_info.bmiHeader.biBitCount)
 		{
 		case 32:
-			{
-				// 解析图像
-				BYTE temp[4];
-				for(int y = 0; y < bmi.bmiHeader.biHeight; ++y)
-				{
-					int pos = bmi.bmiHeader.biWidth * y;
-					int inx = pitch * y;
-					pFile->Seek(file_head.bfOffBits + inx, IFileObject::begin);
-					for(int x = 0; x < bmi.bmiHeader.biWidth; ++x, ++pos)
-					{
-						pFile->Read(temp, sizeof(temp), 1);
-						bmbf[pos] = ExRGBA(temp[0], temp[1], temp[2], temp[3]);
-					}
-				}
-			}
+			Decode32(file, file_head, file_info, bmbf);
 			break;
 		case 24:
-			{
-				// 设置偏移量
-				// 解析图像
-				BYTE temp[3];
-				for(int y = 0; y < bmi.bmiHeader.biHeight; ++y)
-				{
-					int pos = bmi.bmiHeader.biWidth * y;
-					int inx = pitch * y;
-					pFile->Seek(file_head.bfOffBits + inx, IFileObject::begin);
-					for(int x = 0; x < bmi.bmiHeader.biWidth; ++x, ++pos)
-					{
-						pFile->Read(temp, sizeof(temp), 1);
-						bmbf[pos] = ExRGBA(temp[0], temp[1], temp[2], (BYTE)~0);
-					}
-				}
-			}
+			Decode24(file, file_head, file_info, bmbf);
 			break;
 		case 16:
+			Decode16(file, file_head, file_info, bmbf);
 			break;
 		case 8:
-			{
-				// 获取调色板
-				RGBQUAD colors[1 << 8] = {0};
-				pFile->Seek(file_head.bfOffBits - sizeof(colors), IFileObject::begin);
-				pFile->Read(colors, sizeof(colors), 1);
-				// 解析图像
-				for(int y = 0; y < bmi.bmiHeader.biHeight; ++y)
-				{
-					int pos = bmi.bmiHeader.biWidth * y;
-					int inx = pitch * y;
-					pFile->Seek(file_head.bfOffBits + inx, IFileObject::begin);
-					for(int x = 0; x < bmi.bmiHeader.biWidth; ++x, ++pos)
-					{
-						BYTE temp;
-						pFile->Read(&temp, sizeof(temp), 1);
-						bmbf[pos] = ExRGBA
-							(
-							colors[temp].rgbBlue, 
-							colors[temp].rgbGreen, 
-							colors[temp].rgbRed, 
-							(BYTE)~0
-							);
-					}
-				}
-			}
+			Decode8(file, file_head, file_info, bmbf);
 			break;
 		case 4:
-			{
-				// 获取调色板
-				RGBQUAD colors[1 << 4] = {0};
-				pFile->Seek(file_head.bfOffBits - sizeof(colors), IFileObject::begin);
-				pFile->Read(colors, sizeof(colors), 1);
-				// 解析图像
-				for(int y = 0; y < bmi.bmiHeader.biHeight; ++y)
-				{
-					int pos = bmi.bmiHeader.biWidth * y;
-					int inx = pitch * y;
-					pFile->Seek(file_head.bfOffBits + inx, IFileObject::begin);
-					for(int x = 0; x < bmi.bmiHeader.biWidth;)
-					{
-						BYTE temp;
-						pFile->Read(&temp, sizeof(temp), 1);
-						for(int n = 1; n >= 0 && x < bmi.bmiHeader.biWidth; --n, ++x, ++pos)
-						{
-							BYTE c = (temp >> (4 * n)) & 0x0F;
-							bmbf[pos] = ExRGBA
-								(
-								colors[c].rgbBlue, 
-								colors[c].rgbGreen, 
-								colors[c].rgbRed, 
-								(BYTE)~0
-								);
-						}
-					}
-				}
-			}
+			Decode4(file, file_head, file_info, bmbf);
 			break;
 		case 1:
-			{
-				// 获取调色板
-				RGBQUAD colors[1 << 1] = {0};
-				pFile->Seek(file_head.bfOffBits - sizeof(colors), IFileObject::begin);
-				pFile->Read(colors, sizeof(colors), 1);
-				// 解析图像
-				for(int y = 0; y < bmi.bmiHeader.biHeight; ++y)
-				{
-					int pos = bmi.bmiHeader.biWidth * y;
-					int inx = pitch * y;
-					pFile->Seek(file_head.bfOffBits + inx, IFileObject::begin);
-					for(int x = 0; x < bmi.bmiHeader.biWidth;)
-					{
-						BYTE temp;
-						pFile->Read(&temp, sizeof(temp), 1);
-						for(int n = 7; n >= 0 && x < bmi.bmiHeader.biWidth; --n, ++x, ++pos)
-						{
-							BYTE c = (temp >> (1 * n)) & 0x01;
-							bmbf[pos] = ExRGBA
-								(
-								colors[c].rgbBlue, 
-								colors[c].rgbGreen, 
-								colors[c].rgbRed, 
-								(BYTE)~0
-								);
-						}
-					}
-				}
-			}
+			Decode1(file, file_head, file_info, bmbf);
 			break;
 		}
 		// 返回image_t

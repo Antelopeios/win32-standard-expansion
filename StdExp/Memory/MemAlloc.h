@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-23
-// Version:	1.0.0015.0930
+// Date:	2011-04-05
+// Version:	1.0.0016.2133
+//
+// History:
+//	- 1.0.0016.2133(2011-04-05)	- 移除ExMem的通用内存分配接口定义,此定义在GC.h中实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemAlloc_h__
@@ -85,8 +88,6 @@ public:
 #ifndef EXP_MEMORY_ALLOC
 #define EXP_MEMORY_ALLOC CMemAdapterT<>
 #endif/*EXP_MEMORY_ALLOC*/
-
-typedef EXP_MEMORY_ALLOC ExMem;
 
 //////////////////////////////////////////////////////////////////
 

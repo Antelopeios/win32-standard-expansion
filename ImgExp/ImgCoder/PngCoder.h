@@ -63,7 +63,7 @@ protected:
 	}
 
 public:
-	static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static bool CheckFile(IFileObject* pFile)
 	{
 		if(!pFile) return false;
 		BYTE chk_head[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
@@ -85,47 +85,38 @@ public:
 	}
 	image_t Decode()
 	{
-		IFileObject* pFile = GetFile();
-		if(!CheckFile(pFile)) return NULL;
-		CFileSeeker seeker(pFile);
+		IFileObject* file = GetFile();
+		if(!CheckFile(file)) return NULL;
+		CFileSeeker seeker(file);
 		// 声明并初始化解压缩对象
 		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 		png_infop info_ptr = png_create_info_struct(png_ptr);
 		// 制定错误信息管理器
 		setjmp(png_jmpbuf(png_ptr));
 		// 将打开的图像文件指定为解压缩对象的源文件
-		png_set_read_fn(png_ptr, (png_voidp)pFile, png_coder_read_data);
+		png_set_read_fn(png_ptr, (png_voidp)file, png_coder_read_data);
 		// 读取图像信息
 		png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND, 0);
 		// 获得图像内存块
-		size_t img_w = png_get_image_width(png_ptr, info_ptr);
-		size_t img_h = png_get_image_height(png_ptr, info_ptr);
-		size_t img_c = png_get_channels(png_ptr, info_ptr);
+		int img_w = png_get_image_width(png_ptr, info_ptr);
+		int img_h = png_get_image_height(png_ptr, info_ptr);
+		int img_c = png_get_channels(png_ptr, info_ptr);
 		png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 		// 根据图像信息申请一个图像缓冲区
-		BITMAPINFO bmi = {0};
-		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
-		bmi.bmiHeader.biBitCount	= 32;
-		bmi.bmiHeader.biCompression	= BI_RGB;
-		bmi.bmiHeader.biPlanes		= 1;
-		bmi.bmiHeader.biWidth		= img_w;
-		bmi.bmiHeader.biHeight		= img_h;
-		bmi.bmiHeader.biSizeImage	= 
-			(bmi.bmiHeader.biWidth * bmi.bmiHeader.biHeight * bmi.bmiHeader.biBitCount) >> 3;
 		COLORREF* bmbf = NULL;
-		image_t image = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&bmbf, NULL, 0);
-		if(!bmbf)
+		image_t image = GetImageBuff(img_w, img_h, (BYTE*&)bmbf);
+		if(!image)
 		{
 			// 释放资源
 			png_destroy_read_struct(&png_ptr, &info_ptr, 0);
 			return NULL;
 		}
 		// 解析图像信息
-		for(int y = 0; y < bmi.bmiHeader.biHeight; ++y)
+		for(int y = 0; y < img_h; ++y)
 		{
-			int pos = bmi.bmiHeader.biWidth * (bmi.bmiHeader.biHeight - y - 1);
+			int pos = img_w * (img_h - y - 1);
 			int inx = 0;
-			for(int x = 0; x < bmi.bmiHeader.biWidth; ++x, ++pos, inx += img_c)
+			for(int x = 0; x < img_w; ++x, ++pos, inx += img_c)
 			{
 				bmbf[pos] = ExRGBA
 					(

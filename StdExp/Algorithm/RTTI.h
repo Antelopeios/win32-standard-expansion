@@ -336,7 +336,7 @@ private:																					\
 #define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
 	tmp																						\
 	CBaseObject* cls_name::CreateObject(CGC* gc)											\
-	{ return (base_name*)ExGC::Alloc<cls_name>(gc); }										\
+	{ return (base_name*)ExMem::Alloc<cls_name>(gc); }										\
 	tmp																						\
 	bool cls_name::m_bRegSuccess =															\
 		EXP_REG_TYPEINFO( _T(#cls_name), &(cls_name::EXP_TYPEINFO_MEMBER(cls_name)) );
@@ -408,7 +408,7 @@ EXP_INLINE TypeT* ExDynCast(void* ptr)
 
 // 动态对象创建函数
 template <class TypeT>
-EXP_INLINE TypeT* ExDynCreate(LPCTSTR c_key, CGC& gc)
+EXP_INLINE TypeT* ExDynCreate(LPCTSTR c_key, CGC* gc)
 {
 	if( c_key == NULL ) return NULL;
 	TypeInfo* inf = EXP_GET_TYPEINFO(c_key);

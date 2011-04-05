@@ -151,7 +151,7 @@ protected:
 	}
 
 public:
-	static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static bool CheckFile(IFileObject* pFile)
 	{
 		if(!pFile) return false;
 		BYTE chk_head[2] = { 0xFF, 0xD8 };
@@ -173,10 +173,9 @@ public:
 	}
 	image_t Decode()
 	{
-		IFileObject* pFile = GetFile();
-		if(!CheckFile(pFile)) return NULL;
-		CFileSeeker seeker(pFile);
-		CGC gc;
+		IFileObject* file = GetFile();
+		if(!CheckFile(file)) return NULL;
+		CFileSeeker seeker(file);
 		// 声明并初始化解压缩对象
 		struct jpeg_decompress_struct cinfo;
 		struct jpeg_error_mgr jerr;
@@ -184,22 +183,13 @@ public:
 		cinfo.err = jpeg_std_error(&jerr);
 		jpeg_create_decompress(&cinfo);
 		// 将打开的图像文件指定为解压缩对象的源文件
-		jpeg_stdio_src(&cinfo, pFile);
+		jpeg_stdio_src(&cinfo, file);
 		// 读取图像信息
 		jpeg_read_header(&cinfo, TRUE);
 		// 根据图像信息申请一个图像缓冲区
-		BITMAPINFO bmi = {0};
-		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
-		bmi.bmiHeader.biBitCount	= 32;
-		bmi.bmiHeader.biCompression	= BI_RGB;
-		bmi.bmiHeader.biPlanes		= 1;
-		bmi.bmiHeader.biWidth		= cinfo.image_width;
-		bmi.bmiHeader.biHeight		= cinfo.image_height;
-		bmi.bmiHeader.biSizeImage	= 
-			(bmi.bmiHeader.biWidth * bmi.bmiHeader.biHeight * bmi.bmiHeader.biBitCount) >> 3;
 		COLORREF* bmbf = NULL;
-		image_t image = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&bmbf, NULL, 0);
-		if(!bmbf)
+		image_t image = GetImageBuff(cinfo.image_width, cinfo.image_height, (BYTE*&)bmbf);
+		if(!image)
 		{
 			// 释放资源
 			jpeg_destroy_decompress(&cinfo);
@@ -208,7 +198,7 @@ public:
 		// 开始解压缩
 		jpeg_start_decompress(&cinfo);
 		DWORD size = (DWORD)(cinfo.image_width * cinfo.num_components);
-		BYTE* data = (BYTE*)ExGC::Alloc<BYTE>(&gc, size);
+		BYTE* data = ExMem::Alloc<BYTE>(size);
 		JSAMPROW row_pointer[1];
 		while (cinfo.output_scanline < cinfo.output_height)
 		{
@@ -223,6 +213,7 @@ public:
 			for(size_t x = 0; x < cinfo.image_width; ++x, ++pos, inx += cinfo.num_components)
 				bmbf[pos] = ExRGBA(data[inx + 2], data[inx + 1], data[inx], (BYTE)~0);
 		}
+		ExMem::Free(data);
 		jpeg_finish_decompress(&cinfo);
 		// 释放资源
 		jpeg_destroy_decompress(&cinfo);

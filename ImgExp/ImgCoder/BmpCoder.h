@@ -34,12 +34,13 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-06
-// Version:	1.0.0002.1326
+// Version:	1.0.0003.1544
 //
 // History:
 //	- 1.0.0001.2350(2011-04-05)	^ 优化BmpCoder的结构
 //								+ 添加对16位位图的解析处理
 //	- 1.0.0002.1326(2011-04-06)	= 32位位图不再解析Alpha通道
+//	- 1.0.0003.1544(2011-04-06)	^ 支持任何格式的16位位图解码
 //////////////////////////////////////////////////////////////////
 
 #ifndef __BmpCoder_h__
@@ -58,19 +59,25 @@ EXP_BEG
 class CBmpCoder : public ICoderObject
 {
 protected:
+	// 拿到对齐后的字节宽度
 	EXP_INLINE static int PitchBytes(int nWidth, int nBitCount)
-	{
-		int wid_bits = nWidth * nBitCount;
-		return (wid_bits >> 3) + ((wid_bits % 8 == 0) ? 0 : 1);
-	}
-	// 4 * ( (biWidth * biBitCount + 31) / 32 );
+	{ return (nWidth * nBitCount + 7) >> 3; }
 	EXP_INLINE static int PitchWidth(int nPitByts)
-	{
-		int wid_remd = nPitByts % 4;
-		return nPitByts + ((wid_remd == 0) ? 0 : (4 - wid_remd));
-	}
+	{ return ((nPitByts + 3) >> 2) << 2; }	// 4 * ( (biWidth * biBitCount + 31) / 32 );
 	EXP_INLINE static int PitchWidth(int nWidth, int nBitCount)
 	{ return PitchWidth(PitchBytes(nWidth, nBitCount)); }
+
+	// 计算二进制中1的个数
+	EXP_INLINE static BYTE BitCount(DWORD nNum)
+	{
+		BYTE cnt = 0;
+		while(nNum)
+		{
+			++cnt;
+			nNum &= (nNum - 1);
+		}
+		return cnt;
+	}
 
 public:
 	EXP_INLINE static bool CheckFile(IFileObject* pFile)
@@ -121,8 +128,8 @@ protected:
 					temp[inx], 
 					temp[inx + 1], 
 					temp[inx + 2], 
-					(BYTE)~0/*temp[inx + 3]*/
-				);
+					(BYTE)~0
+					);
 			}
 		}
 	}
@@ -152,72 +159,47 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode555(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
-	{
-		if (!pFile || !bmBuff) return;
-		PreDecode();
-		// 解析图像
-		for(int y = 0; y < img_h; ++y)
-		{
-			int pos = img_w * y;
-			int inx = pit_w * y;
-			pFile->Seek(bit_s + inx, IFileObject::begin);
-			pFile->Read(temp, pit_b, 1);
-			inx = 0;
-			for(int x = 0; x < img_w; ++x, ++pos, inx += 2)
-			{
-				bmBuff[pos] = ExRGBA
-					(
-					(temp[inx] & 0x1F) << 3, 
-					(((temp[inx + 1] << 6) >> 3) + (temp[inx] >> 5)) << 3, 
-					((temp[inx + 1] << 1) >> 3) << 3, 
-					(BYTE)~0
-					);
-			}
-		}
-	}
-
-	EXP_INLINE static void Decode565(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
-	{
-		if (!pFile || !bmBuff) return;
-		PreDecode();
-		// 解析图像
-		for(int y = 0; y < img_h; ++y)
-		{
-			int pos = img_w * y;
-			int inx = pit_w * y;
-			pFile->Seek(bit_s + inx, IFileObject::begin);
-			pFile->Read(temp, pit_b, 1);
-			inx = 0;
-			for(int x = 0; x < img_w; ++x, ++pos, inx += 2)
-			{
-				bmBuff[pos] = ExRGBA
-					(
-					(temp[inx] & 0x1F) << 3, 
-					(((temp[inx + 1] << 5) >> 2) + (temp[inx] >> 5)) << 2, 
-					(temp[inx + 1] >> 3) << 3, 
-					(BYTE)~0
-					);
-			}
-		}
-	}
-
 	EXP_INLINE static void Decode16(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
-		// 判断位图类型
+		PreDecode();
+		// 获取掩码
+		uint32_t mask[3] = {0};
 		if (bmiInfo.bmiHeader.biCompression == BI_RGB)
-			Decode555(pFile, bmhHead, bmiInfo, bmBuff);
-		else // BI_BITFIELDS
 		{
-			// 获取掩码
-			DWORD mask[3] = {0};
-			pFile->Seek(bmhHead.bfOffBits - sizeof(mask), IFileObject::begin);
+			mask[0] = 0x7C00;
+			mask[1] = 0x03E0;
+			mask[2] = 0x001F;
+		} else // BI_BITFIELDS
+		{
+			pFile->Seek(sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), IFileObject::begin);
 			pFile->Read(mask, sizeof(mask), 1);
-			if (mask[0] == 0x7C00) // 555
-				Decode555(pFile, bmhHead, bmiInfo, bmBuff);
-			else // 565
-				Decode565(pFile, bmhHead, bmiInfo, bmBuff);
+		}
+		BYTE cnt_m[3] = 
+		{
+			BitCount(mask[0]), 
+			BitCount(mask[1]), 
+			BitCount(mask[2])
+		};
+		// 解析图像
+		for(int y = 0; y < img_h; ++y)
+		{
+			int pos = img_w * y;
+			int inx = pit_w * y;
+			pFile->Seek(bit_s + inx, IFileObject::begin);
+			pFile->Read(temp, pit_b, 1);
+			inx = 0;
+			for(int x = 0; x < img_w; ++x, ++pos, inx += 2)
+			{
+				uint16_t pixel = *(uint16_t*)(temp + inx);
+				bmBuff[pos] = ExRGBA
+					(
+					(pixel & mask[2]) << (8 - cnt_m[2]), 
+					((pixel & mask[1]) >> cnt_m[2]) << (8 - cnt_m[1]), 
+					((pixel & mask[0]) >> (cnt_m[1] + cnt_m[2])) << (8 - cnt_m[0]), 
+					(BYTE)~0
+					);
+			}
 		}
 	}
 

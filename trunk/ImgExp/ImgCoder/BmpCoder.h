@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-05
-// Version:	1.0.0001.2350
+// Date:	2011-04-06
+// Version:	1.0.0002.1326
 //
 // History:
 //	- 1.0.0001.2350(2011-04-05)	^ 优化BmpCoder的结构
 //								+ 添加对16位位图的解析处理
+//	- 1.0.0002.1326(2011-04-06)	= 32位位图不再解析Alpha通道
 //////////////////////////////////////////////////////////////////
 
 #ifndef __BmpCoder_h__
@@ -120,7 +121,7 @@ protected:
 					temp[inx], 
 					temp[inx + 1], 
 					temp[inx + 2], 
-					temp[inx + 3]
+					(BYTE)~0/*temp[inx + 3]*/
 				);
 			}
 		}

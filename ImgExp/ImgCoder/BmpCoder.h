@@ -314,7 +314,7 @@ public:
 		file_head.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 		BITMAPINFO file_info = {0};
 		file_info.bmiHeader.biSize			= sizeof(file_info.bmiHeader);
-		file_info.bmiHeader.biBitCount		= exp_image.GetChannel();
+		file_info.bmiHeader.biBitCount		= (exp_image.GetChannel() << 3);
 		file_info.bmiHeader.biCompression	= BI_RGB;
 		file_info.bmiHeader.biPlanes		= 1;
 		file_info.bmiHeader.biWidth			= exp_image.GetWidth();

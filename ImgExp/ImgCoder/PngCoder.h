@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.0.0000.2200
+// Date:	2011-04-07
+// Version:	1.0.0001.2350
+//
+// History:
+//	- 1.0.0001.2350(2011-04-07)	^ 优化CPngCoder::Decode()的实现,不再一次性解析图片的全部内容
+//								+ 添加CPngCoder::Encode()实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __PngCoder_h__
@@ -54,12 +58,30 @@ EXP_BEG
 class CPngCoder : public ICoderObject
 {
 protected:
+	// 重写Read回调
+
 	static void PNGAPI png_coder_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 	{
 		png_size_t check;
-		if(png_ptr == NULL) return;
+		if (png_ptr == NULL) return;
 		check = (png_size_t)((IFileObject*)(png_ptr->io_ptr))->Read(data, length, 1);
 		if (check != length) png_error(png_ptr, "Read Error");
+	}
+
+	// 重写Write回调
+
+	static void PNGAPI png_coder_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
+	{
+		png_uint_32 check;
+		if (png_ptr == NULL) return;
+		check = (png_size_t)((IFileObject*)(png_ptr->io_ptr))->Write(data, length, 1);
+		if (check != length) png_error(png_ptr, "Write Error");
+	}
+
+	static void PNGAPI png_coder_flush(png_structp png_ptr)
+	{
+		if(png_ptr == NULL) return;
+		if (png_ptr->io_ptr) ((IFileObject*)(png_ptr->io_ptr))->Flush();
 	}
 
 public:
@@ -81,7 +103,51 @@ public:
 public:
 	bool Encode(image_t Image)
 	{
-		return false;
+		IFileObject* file = GetFile();
+		if(!file) return false;
+		CExpImage exp_image(Image);
+		if (exp_image.IsNull()) return false;
+		// 声明并初始化压缩对象
+		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+		png_infop info_ptr = png_create_info_struct(png_ptr);
+		// 制定错误信息管理器
+		setjmp(png_jmpbuf(png_ptr));
+		// 将打开的压缩对象指定为图像文件的输出文件
+		png_set_write_fn(png_ptr, (png_voidp)file, png_coder_write_data, png_coder_flush);
+		// 设置压缩参数
+		int img_w = exp_image.GetWidth();
+		int img_h = exp_image.GetHeight();
+		int img_c = 4;
+		png_set_IHDR(png_ptr, info_ptr, img_w, img_h, 8, 
+			PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+		png_colorp palette = (png_colorp)png_malloc(png_ptr, PNG_MAX_PALETTE_LENGTH * sizeof(png_color));
+		png_set_PLTE(png_ptr, info_ptr, palette, PNG_MAX_PALETTE_LENGTH);
+		// 写入图像信息
+		png_write_info(png_ptr, info_ptr);
+		png_set_packing(png_ptr);
+		pixel_t* pixel = exp_image.GetPixels();
+		png_bytep row_pointer = ExMem::Alloc<png_byte>(img_w * img_c);
+		for(int y = 0; y < img_h; ++y)
+		{
+			// 读取image_t
+			int pos = img_w * (img_h - y - 1);
+			int inx = 0;
+			for(int x = 0; x < img_w; ++x, ++pos, inx += img_c)
+			{
+				row_pointer[inx + 2] = ExGetR(pixel[pos]);
+				row_pointer[inx + 1] = ExGetG(pixel[pos]);
+				row_pointer[inx]	 = ExGetB(pixel[pos]);
+				row_pointer[inx + 3] = ExGetA(pixel[pos]);
+			}
+			// 写入数据
+			png_write_row(png_ptr, row_pointer);
+		}
+		ExMem::Free(row_pointer);
+		png_write_end(png_ptr, info_ptr);
+		// 释放资源
+		png_free(png_ptr, palette);
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		return true;
 	}
 	image_t Decode()
 	{
@@ -96,12 +162,10 @@ public:
 		// 将打开的图像文件指定为解压缩对象的源文件
 		png_set_read_fn(png_ptr, (png_voidp)file, png_coder_read_data);
 		// 读取图像信息
-		png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND, 0);
-		// 获得图像内存块
+		png_read_info(png_ptr, info_ptr);
 		int img_w = png_get_image_width(png_ptr, info_ptr);
 		int img_h = png_get_image_height(png_ptr, info_ptr);
 		int img_c = png_get_channels(png_ptr, info_ptr);
-		png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 		// 根据图像信息申请一个图像缓冲区
 		pixel_t* bmbf = NULL;
 		image_t image = GetImageBuff(img_w, img_h, (BYTE*&)bmbf);
@@ -112,21 +176,28 @@ public:
 			return NULL;
 		}
 		// 解析图像信息
+		png_bytep row_pointer = ExMem::Alloc<png_byte>(img_w * img_c);
 		for(int y = 0; y < img_h; ++y)
 		{
+			// 设置标记
 			int pos = img_w * (img_h - y - 1);
 			int inx = 0;
+			// 解析数据
+			png_read_row(png_ptr, row_pointer, NULL);
+			// 写入image_t
 			for(int x = 0; x < img_w; ++x, ++pos, inx += img_c)
 			{
 				bmbf[pos] = ExRGBA
 					(
-					row_pointers[y][inx + 2], 
-					row_pointers[y][inx + 1], 
-					row_pointers[y][inx], 
-					(img_c == 4) ? row_pointers[y][inx + 3] : (BYTE)~0
+					row_pointer[inx + 2], 
+					row_pointer[inx + 1], 
+					row_pointer[inx], 
+					(img_c == 4) ? row_pointer[inx + 3] : (BYTE)~0
 					);
 			}
 		}
+		ExMem::Free(row_pointer);
+		png_read_end(png_ptr, info_ptr);
 		// 释放资源
 		png_destroy_read_struct(&png_ptr, &info_ptr, 0);
 		return image;

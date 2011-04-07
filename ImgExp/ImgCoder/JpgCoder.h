@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.0.0000.2123
+// Date:	2011-04-07
+// Version:	1.0.0001.2126
+//
+// History:
+//	- 1.0.0001.2126(2011-04-07)	^ 简化libjpeg的调用方式
+//								+ 添加CJpgCoder::Encode()实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __JpgCoder_h__
@@ -58,6 +62,8 @@ EXP_BEG
 class CJpgCoder : public ICoderObject
 {
 protected:
+	// 重写Read回调
+
 	typedef struct {
 		struct jpeg_source_mgr pub;
 		IFileObject* infile;
@@ -67,17 +73,6 @@ protected:
 	typedef my_source_mgr * my_src_ptr;
 
 	static const DWORD INPUT_BUF_SIZE = 4096;	/* choose an efficiently fread'able size */
-
-	METHODDEF(void) init_source (j_decompress_ptr cinfo)
-	{
-		my_src_ptr src = (my_src_ptr) cinfo->src;
-
-		/* We reset the empty-input-file flag for each image,
-		* but we don't clear the input buffer.
-		* This is correct behavior for reading a series of images from one source.
-		*/
-		src->start_of_file = TRUE;
-	}
 
 	METHODDEF(boolean) fill_input_buffer (j_decompress_ptr cinfo)
 	{
@@ -103,51 +98,59 @@ protected:
 		return TRUE;
 	}
 
-	METHODDEF(void) skip_input_data (j_decompress_ptr cinfo, long num_bytes)
-	{
-		my_src_ptr src = (my_src_ptr) cinfo->src;
-
-		/* Just a dumb implementation for now.  Could use fseek() except
-		* it doesn't work on pipes.  Not clear that being smart is worth
-		* any trouble anyway --- large skips are infrequent.
-		*/
-		if (num_bytes > 0) {
-			while (num_bytes > (long) src->pub.bytes_in_buffer) {
-				num_bytes -= (long) src->pub.bytes_in_buffer;
-				(void) src->pub.fill_input_buffer(cinfo);
-				/* note we assume that fill_input_buffer will never return FALSE,
-				* so suspension need not be handled.
-				*/
-			}
-			src->pub.next_input_byte += (size_t) num_bytes;
-			src->pub.bytes_in_buffer -= (size_t) num_bytes;
-		}
-	}
-
-	METHODDEF(void) term_source (j_decompress_ptr cinfo)
-	{
-		/* no work necessary here */
-	}
-
 	static void jpeg_stdio_src (j_decompress_ptr cinfo, IFileObject* infile)
 	{
-		my_src_ptr src;
-		if (cinfo->src == NULL) {	/* first time for this JPEG object? */
-			cinfo->src = (struct jpeg_source_mgr *)
-				(*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT, SIZEOF(my_source_mgr));
-			src = (my_src_ptr) cinfo->src;
-			src->buffer = (JOCTET *)
-				(*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT, INPUT_BUF_SIZE * SIZEOF(JOCTET));
-		}
-		src = (my_src_ptr) cinfo->src;
-		src->pub.init_source = init_source;
+		::jpeg_stdio_src(cinfo, (FILE*)infile);
+		my_src_ptr src = (my_src_ptr)(cinfo->src);
 		src->pub.fill_input_buffer = fill_input_buffer;
-		src->pub.skip_input_data = skip_input_data;
-		src->pub.resync_to_restart = jpeg_resync_to_restart; /* use default method */
-		src->pub.term_source = term_source;
-		src->infile = infile;
-		src->pub.bytes_in_buffer = 0; /* forces fill_input_buffer on first read */
-		src->pub.next_input_byte = NULL; /* until buffer loaded */
+	}
+
+	// 重写Write回调
+
+	typedef struct {
+		struct jpeg_destination_mgr pub;
+		IFileObject* outfile;
+		JOCTET * buffer;		/* start of buffer */
+	} my_destination_mgr;
+	typedef my_destination_mgr * my_dest_ptr;
+
+	static const DWORD OUTPUT_BUF_SIZE = 4096;	/* choose an efficiently fwrite'able size */
+
+	METHODDEF(boolean) empty_output_buffer (j_compress_ptr cinfo)
+	{
+		my_dest_ptr dest = (my_dest_ptr) cinfo->dest;
+
+		if (dest->outfile->Write(dest->buffer, OUTPUT_BUF_SIZE, 1) != (size_t) OUTPUT_BUF_SIZE)
+			ERREXIT(cinfo, JERR_FILE_WRITE);
+
+		dest->pub.next_output_byte = dest->buffer;
+		dest->pub.free_in_buffer = OUTPUT_BUF_SIZE;
+
+		return TRUE;
+	}
+
+	METHODDEF(void) term_destination (j_compress_ptr cinfo)
+	{
+		my_dest_ptr dest = (my_dest_ptr) cinfo->dest;
+		size_t datacount = OUTPUT_BUF_SIZE - dest->pub.free_in_buffer;
+
+		/* Write any data remaining in the buffer */
+		if (datacount > 0) {
+			if (dest->outfile->Write(dest->buffer, datacount, 1) != datacount)
+				ERREXIT(cinfo, JERR_FILE_WRITE);
+		}
+		dest->outfile->Flush();
+		/* Make sure we wrote the output file OK */
+		if (dest->outfile->Error())
+			ERREXIT(cinfo, JERR_FILE_WRITE);
+	}
+
+	static void jpeg_stdio_dest (j_compress_ptr cinfo, IFileObject* outfile)
+	{
+		::jpeg_stdio_dest(cinfo, (FILE*)outfile);
+		my_dest_ptr dest = (my_dest_ptr)(cinfo->dest);
+		dest->pub.empty_output_buffer = empty_output_buffer;
+		dest->pub.term_destination = term_destination;
 	}
 
 public:
@@ -169,7 +172,52 @@ public:
 public:
 	bool Encode(image_t Image)
 	{
-		return false;
+		IFileObject* file = GetFile();
+		if(!file) return false;
+		CExpImage exp_image(Image);
+		if (exp_image.IsNull()) return false;
+		// 声明并初始化压缩对象
+		struct jpeg_compress_struct cinfo;
+		struct jpeg_error_mgr jerr;
+		// 制定错误信息管理器
+		cinfo.err = jpeg_std_error(&jerr);
+		jpeg_create_compress(&cinfo);
+		// 将打开的压缩对象指定为图像文件的输出文件
+		jpeg_stdio_dest(&cinfo, file);
+		// 设置压缩参数
+		cinfo.image_width = exp_image.GetWidth();
+		cinfo.image_height = exp_image.GetHeight();
+		cinfo.input_components = 3;
+		cinfo.in_color_space = JCS_RGB;
+		jpeg_set_defaults(&cinfo);
+		jpeg_set_quality(&cinfo, 80, true);
+		// 开始压缩
+		jpeg_start_compress(&cinfo, TRUE);
+		JSAMPROW row_pointer[1];
+		pixel_t* pixel = exp_image.GetPixels();
+		DWORD size = (DWORD)(cinfo.image_width * cinfo.input_components);
+		BYTE* data = ExMem::Alloc<BYTE>(size);
+		while (cinfo.next_scanline < cinfo.image_height)
+		{
+			// 设置标记
+			int pos = (cinfo.image_height - cinfo.next_scanline - 1) * cinfo.image_width;
+			int inx = 0;
+			// 读取image_t
+			for(size_t x = 0; x < cinfo.image_width; ++x, ++pos, inx += cinfo.input_components)
+			{
+				data[inx + 2] = ExGetR(pixel[pos]);
+				data[inx + 1] = ExGetG(pixel[pos]);
+				data[inx]	  = ExGetB(pixel[pos]);
+			}
+			// 压缩数据
+			row_pointer[0] = data;
+			jpeg_write_scanlines(&cinfo, row_pointer, 1);
+		}
+		ExMem::Free(data);
+		jpeg_finish_compress(&cinfo);
+		// 释放资源
+		jpeg_destroy_compress(&cinfo);
+		return true;
 	}
 	image_t Decode()
 	{

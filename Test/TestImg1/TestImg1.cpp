@@ -181,22 +181,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case IDM_SAVE:
+			if (hBitmap)
 			{
-				CString ret;
+				CString ret; DWORD inx = 0;
 				CSysDialog::FileDialog(ret, FALSE, NULL, NULL, 
-					_T("BMP文件(*.bmp)\0*.bmp\0JPG文件(*.jpg)\0*.jpg\0PNG文件(*.png)\0*.png\0"));
+					_T("BMP文件(*.bmp)\0*.bmp\0JPG文件(*.jpg)\0*.jpg\0PNG文件(*.png)\0*.png\0"), &inx);
 				if (ret.Empty()) break;
-			/*	// 打开文件并获取解码器
-				CIOFile file(ret); CGC gc;
-				ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
+				// 获取解码器
+				CGC gc;
+				ICoderObject* coder = CImgAnalyzer::GetCoder(inx, &gc);
 				if (!coder) break;
-				// 解码文件
-				ICoderObject::DeleteImage(hBitmap);
-				hBitmap = coder->Decode();
-				// 刷新窗口
-				RECT rect = {0};
-				GetClientRect(hWnd, &rect);
-				InvalidateRect(hWnd, &rect, FALSE);*/
+				// 编码文件
+				CIOFile file(ret, CIOFile::modeCreate | CIOFile::modeReadWrite | CIOFile::shareExclusive);
+				coder->SetFile(&file);
+				coder->Encode(hBitmap);
 			}
 			break;
 		case IDM_ABOUT:

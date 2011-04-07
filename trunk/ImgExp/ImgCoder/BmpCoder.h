@@ -109,7 +109,7 @@ protected:
 	BYTE* temp = ExMem::Alloc<BYTE>(&gc, pit_b)
 //#define PreDecode
 
-	EXP_INLINE static void Decode32(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	EXP_INLINE static void Decode32(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -134,7 +134,7 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode24(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	EXP_INLINE static void Decode24(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -159,7 +159,7 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode16(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	EXP_INLINE static void Decode16(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -203,7 +203,7 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode8(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	EXP_INLINE static void Decode8(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -231,7 +231,7 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode4(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	EXP_INLINE static void Decode4(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -264,7 +264,7 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode1(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, COLORREF* bmBuff)
+	EXP_INLINE static void Decode1(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -302,6 +302,13 @@ protected:
 public:
 	bool Encode(image_t Image)
 	{
+		IFileObject* file = GetFile();
+		if(!file) return false;
+		// 获取图像信息
+		// 填充图像信息
+		//BITMAPFILEHEADER file_head = {0};
+		//file_head.bfType = 0x4D42;
+		//file_head.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 
 		return false;
 	}
 	image_t Decode()
@@ -318,7 +325,7 @@ public:
 			file_info.bmiHeader.biCompression != BI_BITFIELDS)
 			return NULL;
 		// 根据图像信息申请一个图像缓冲区
-		COLORREF* bmbf = NULL;
+		pixel_t* bmbf = NULL;
 		image_t image = 
 			GetImageBuff(file_info.bmiHeader.biWidth, file_info.bmiHeader.biHeight, (BYTE*&)bmbf);
 		if(!image) return NULL;

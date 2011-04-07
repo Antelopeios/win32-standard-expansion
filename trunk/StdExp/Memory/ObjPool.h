@@ -79,7 +79,7 @@ template <typename AllocT = CMemHeapAlloc, typename ModelT = EXP_THREAD_MODEL>
 struct _ObjPoolPolicyT;
 
 template <typename TypeT, typename PolicyT = _ObjPoolPolicyT<> >
-class CObjPoolT : CNonCopyable, public IObjPool
+class CObjPoolT : INonCopyable, public IObjPool
 {
 public:
 	typedef typename PolicyT::alloc_t alloc_t;

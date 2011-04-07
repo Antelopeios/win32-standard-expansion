@@ -171,7 +171,7 @@ protected:
 		// 无限的任务等待循环
 		for(;;)
 		{
-			DWORD wr = CSyncObject::Wait(sync, false);
+			DWORD wr = ISyncObject::Wait(sync, false);
 			// 响应线程清空事件
 			if (wr == WAIT_OBJECT_0 + 1)
 				break;

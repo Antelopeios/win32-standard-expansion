@@ -50,16 +50,16 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CSyncObject : CNonCopyable
+interface ISyncObject : INonCopyable
 {
 protected:
 	HANDLE m_hSync;
 
 public:
-	CSyncObject()
+	ISyncObject()
 		: m_hSync(INVALID_HANDLE_VALUE)
 	{}
-	virtual ~CSyncObject()
+	virtual ~ISyncObject()
 	{ Close(); }
 
 public:
@@ -84,7 +84,7 @@ public:
 		if (Syncs == NULL || nCount == 0) return WAIT_FAILED;
 		return WaitForMultipleObjects(nCount, Syncs, bWaitAll, dwWaitTime);
 	}
-	static DWORD Wait(CSyncObject* Syncs, DWORD nCount, bool bWaitAll, DWORD dwWaitTime = INFINITE)
+	static DWORD Wait(ISyncObject* Syncs, DWORD nCount, bool bWaitAll, DWORD dwWaitTime = INFINITE)
 	{
 		HANDLE syncs[MAXIMUM_WAIT_OBJECTS];
 		DWORD limit = min(MAXIMUM_WAIT_OBJECTS, nCount);
@@ -95,7 +95,7 @@ public:
 	static DWORD Wait(HANDLE (&Syncs)[SizeT], bool bWaitAll, DWORD dwWaitTime = INFINITE)
 	{ return Wait(Syncs, SizeT, bWaitAll, dwWaitTime); }
 	template <DWORD SizeT>
-	static DWORD Wait(CSyncObject (&Syncs)[SizeT], bool bWaitAll, DWORD dwWaitTime = INFINITE)
+	static DWORD Wait(ISyncObject (&Syncs)[SizeT], bool bWaitAll, DWORD dwWaitTime = INFINITE)
 	{ return Wait(Syncs, SizeT, bWaitAll, dwWaitTime); }
 
 	HANDLE GetHandle() { return m_hSync; }

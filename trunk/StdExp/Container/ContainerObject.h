@@ -52,7 +52,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT, typename PolicyT, typename ContainerT>
-class CContainerObjectT
+interface IContainerObjectT
 {
 public:
 	typedef TypeT		type_t;
@@ -71,9 +71,9 @@ private:
 	{ return (const container_t*)this; }
 
 public:
-	CContainerObjectT()
+	IContainerObjectT()
 	{}
-	virtual ~CContainerObjectT()
+	virtual ~IContainerObjectT()
 	{ Clear(); }
 
 public:

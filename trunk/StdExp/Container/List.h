@@ -58,7 +58,7 @@ template <typename AllocT = EXP_MEMORY_ALLOC>
 struct _ListPolicyT;
 
 template <typename TypeT, typename PolicyT = _ListPolicyT<> >
-class CListT : public CContainerObjectT<TypeT, PolicyT, CListT<TypeT, PolicyT> >
+class CListT : public IContainerObjectT<TypeT, PolicyT, CListT<TypeT, PolicyT> >
 {
 public:
 	typedef struct _Block : public CPoolTypeT<_Block, alloc_t>

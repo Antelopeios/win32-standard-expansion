@@ -54,7 +54,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename PolicyT = EXP_THREAD_MODEL::_LockPolicy>
-class CLockT : CNonCopyable
+class CLockT : INonCopyable
 {
 public:
 	typedef PolicyT policy_t;
@@ -88,7 +88,7 @@ typedef CLockT<EXP_THREAD_MODEL::_ShrPolicy> CShrMutex;
 
 // 自动化的加锁/解锁类
 template <typename MutexT = CMutex>
-class CLockerT : CNonCopyable
+class CLockerT : INonCopyable
 {
 public:
 	typedef typename MutexT::mutex_t mutex_t;

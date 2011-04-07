@@ -187,7 +187,7 @@ public:
 		// 读取图像信息
 		jpeg_read_header(&cinfo, TRUE);
 		// 根据图像信息申请一个图像缓冲区
-		COLORREF* bmbf = NULL;
+		pixel_t* bmbf = NULL;
 		image_t image = GetImageBuff(cinfo.image_width, cinfo.image_height, (BYTE*&)bmbf);
 		if(!image)
 		{

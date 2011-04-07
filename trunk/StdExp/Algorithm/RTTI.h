@@ -97,7 +97,7 @@ struct TypeInfo
 //////////////////////////////////////////////////////////////////
 
 // TypeInfo 指针单例工厂
-class CTypeInfoFactory : CNonCopyable
+class CTypeInfoFactory : INonCopyable
 {
 private:
 	typedef CMapT<CString, TypeInfo*> key_map;

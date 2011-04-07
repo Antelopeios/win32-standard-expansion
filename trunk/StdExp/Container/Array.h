@@ -59,7 +59,7 @@ template <typename AllocT = EXP_MEMORY_ALLOC>
 struct _ArrayPolicyT;
 
 template <typename TypeT, typename PolicyT = _ArrayPolicyT<> >
-class CArrayT : public CContainerObjectT<TypeT, PolicyT, CArrayT<TypeT, PolicyT> >
+class CArrayT : public IContainerObjectT<TypeT, PolicyT, CArrayT<TypeT, PolicyT> >
 {
 protected:
 	type_t*	m_Array;

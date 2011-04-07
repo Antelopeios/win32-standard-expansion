@@ -61,7 +61,7 @@ template <typename HashT = CHash, typename AllocT = EXP_MEMORY_ALLOC>
 struct _MapPolicyT;
 
 template <typename KeyT, typename TypeT, typename PolicyT = _MapPolicyT<> >
-class CMapT : public CContainerObjectT<TypeT, PolicyT, CMapT<KeyT, TypeT, PolicyT> >
+class CMapT : public IContainerObjectT<TypeT, PolicyT, CMapT<KeyT, TypeT, PolicyT> >
 {
 public:
 	typedef KeyT key_t;

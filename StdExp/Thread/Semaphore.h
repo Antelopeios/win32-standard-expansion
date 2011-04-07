@@ -50,11 +50,11 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CSemaphore : public CSyncObject
+class CSemaphore : public ISyncObject
 {
 public:
 	CSemaphore(LONG lInitialCount = 1, LONG lMaxCount = 1, LPCTSTR pstrName = NULL, LPSECURITY_ATTRIBUTES lpsaAttributes = NULL)
-		: CSyncObject()
+		: ISyncObject()
 	{ Create(lInitialCount, lMaxCount, pstrName, lpsaAttributes); }
 	~CSemaphore()
 	{}

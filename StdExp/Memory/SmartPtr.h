@@ -87,7 +87,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-class CPtrManagerT : CNonCopyable
+class CPtrManagerT : INonCopyable
 {
 protected:
 	// 计数指针接口

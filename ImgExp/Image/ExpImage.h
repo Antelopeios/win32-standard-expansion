@@ -28,88 +28,87 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// CoderObject - 编/解码器基类
+// ExpImage - 图像拓展类
 //
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-05
-// Version:	1.0.0001.2350
-//
-// History:
-//	- 1.0.0001.2350(2011-04-05)	= 将具体的image_t内存块申请工作统一放在ICoderObject中处理
-//								= ICoderObject::DeleteImage()不再断言Image参数
+// Date:	2011-04-07
+// Version:	1.0.0000.1624
 //////////////////////////////////////////////////////////////////
 
-#ifndef __CoderObject_h__
-#define __CoderObject_h__
+#ifndef __ExpImage_h__
+#define __ExpImage_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Image/ExpImage.h"
-
-EXP_BEG
+#include "Image/ImageObject.h"
 
 //////////////////////////////////////////////////////////////////
 
-interface ICoderObject
+class CExpImage : public IImageObject
 {
 protected:
-	IFileObject* m_pFile;
-
-	template <DWORD SizeT>
-	EXP_INLINE static bool CheckFile(IFileObject* pFile, const BYTE (&chkHead)[SizeT])
-	{
-		if(!pFile) return false;
-		CFileSeeker seeker(pFile);
-		BYTE tmp_buff[SizeT] = {0};
-		// 判断头部
-		if(!pFile->Seek(0, IFileObject::begin))
-			return false;
-		if (pFile->Read(tmp_buff, _countof(tmp_buff), sizeof(BYTE)) != _countof(chkHead))
-			return false;
-		if (memcmp(tmp_buff, chkHead, sizeof(chkHead)) != 0)
-			return false;
-		return true;
-	}
-
-	EXP_INLINE static image_t GetImageBuff(LONG nWidth, LONG nHeight, BYTE*& pBuff)
-	{
-		if (nWidth <= 0 || nHeight <= 0) return NULL;
-		CExpImage exp_image;
-		pBuff = NULL;
-		image_t image = exp_image.Create(nWidth, nHeight);
-		if (image) pBuff = (BYTE*)exp_image.GetPixels();
-		return image;
-	}
+	BITMAP m_Bitmap;
 
 public:
-	ICoderObject()
-		: m_pFile(NULL)
-	{}
-	ICoderObject(IFileObject* pFile)
-		: m_pFile(NULL)
-	{ SetFile(pFile); }
-	virtual ~ICoderObject()
+	CExpImage()
+		: IImageObject()
+	{ ZeroMemory(&m_Bitmap, sizeof(m_Bitmap)); }
+	CExpImage(image_t Image)
+		: IImageObject()
+	{ SetImage(Image); }
+	virtual ~CExpImage()
 	{}
 
 public:
-	virtual void SetFile(IFileObject* pFile)
-	{ m_pFile = pFile; }
-	virtual IFileObject* GetFile()
-	{ return m_pFile; }
+	virtual void SetImage(image_t Image)
+	{
+		m_Image = Image;
+		if(!m_Image) return;
+		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
+		GetObject(m_Image, sizeof(m_Bitmap), &m_Bitmap);
+	}
 
-	virtual bool Encode(image_t Image) = 0;
-	virtual image_t Decode() = 0;
+	bool Delete()
+	{
+		bool ret = true;
+		if (IsNull())
+		{
+			ret = ::DeleteObject(m_Image);
+			m_Image = NULL;
+		}
+		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
+		return ret;
+	}
+	image_t Create(DWORD nWidth, DWORD nHeight)
+	{
+		if (nWidth <= 0 || nHeight <= 0) return GetImage();
+		BITMAPINFO bmi = {0};
+		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
+		bmi.bmiHeader.biBitCount	= 32;
+		bmi.bmiHeader.biCompression	= BI_RGB;
+		bmi.bmiHeader.biPlanes		= 1;
+		bmi.bmiHeader.biWidth		= nWidth;
+		bmi.bmiHeader.biHeight		= nHeight;
+		BYTE* img_buf = NULL;
+		SetImage(CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&img_buf, NULL, 0));
+		if(!img_buf) Delete();
+		return GetImage();
+	}
 
-	EXP_INLINE static bool DeleteImage(image_t Image)
-	{ return Image ? CExpImage(Image).Delete() : true; }
+	DWORD GetWidth()
+	{ return (DWORD)m_Bitmap.bmWidth; }
+	DWORD GetHeight()
+	{ return (DWORD)m_Bitmap.bmHeight; }
+	uint8_t GetChannel()
+	{ return (uint8_t)m_Bitmap.bmBitsPixel; }
+	pixel_t* GetPixels()
+	{ return (pixel_t*)m_Bitmap.bmBits; }
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_END
-
-#endif/*__CoderObject_h__*/
+#endif/*__ExpImage_h__*/

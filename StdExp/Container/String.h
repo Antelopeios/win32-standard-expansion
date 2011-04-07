@@ -59,7 +59,7 @@ template <typename AllocT = EXP_MEMORY_ALLOC>
 struct _StringPolicyT;
 
 template <typename TypeT = TCHAR, typename PolicyT = _StringPolicyT<> >
-class CStringT : public CContainerObjectT<TypeT, PolicyT, CStringT<TypeT, PolicyT> >
+class CStringT : public IContainerObjectT<TypeT, PolicyT, CStringT<TypeT, PolicyT> >
 {
 public:
 	typedef typename PolicyT::array_t<type_t> array_t;

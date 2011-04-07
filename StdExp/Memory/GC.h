@@ -62,7 +62,7 @@ template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL
 struct _GCPolicyT;
 
 template <typename PolicyT = _GCPolicyT<> >
-class CGCT : CNonCopyable
+class CGCT : INonCopyable
 {
 public:
 	typedef typename PolicyT::alloc_t alloc_t;

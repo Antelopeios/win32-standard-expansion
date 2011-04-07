@@ -46,15 +46,15 @@
 
 //////////////////////////////////////////////////////////////////
 
-class CNonCopyable
+interface INonCopyable
 {
 protected:
-	CNonCopyable() {}
-	~CNonCopyable() {}
+	INonCopyable() {}
+	~INonCopyable() {}
 
 private:
-	CNonCopyable(const CNonCopyable&);
-	const CNonCopyable& operator=(const CNonCopyable&);
+	INonCopyable(const INonCopyable&);
+	const INonCopyable& operator=(const INonCopyable&);
 };
 
 //////////////////////////////////////////////////////////////////

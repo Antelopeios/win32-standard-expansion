@@ -28,88 +28,69 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// CoderObject - 编/解码器基类
+// ImageObject - 图像基类
 //
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-05
-// Version:	1.0.0001.2350
-//
-// History:
-//	- 1.0.0001.2350(2011-04-05)	= 将具体的image_t内存块申请工作统一放在ICoderObject中处理
-//								= ICoderObject::DeleteImage()不再断言Image参数
+// Date:	2011-04-07
+// Version:	1.0.0000.1610
 //////////////////////////////////////////////////////////////////
 
-#ifndef __CoderObject_h__
-#define __CoderObject_h__
+#ifndef __ImageObject_h__
+#define __ImageObject_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Image/ExpImage.h"
-
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface ICoderObject
+interface IImageObject : public INonCopyable
 {
 protected:
-	IFileObject* m_pFile;
-
-	template <DWORD SizeT>
-	EXP_INLINE static bool CheckFile(IFileObject* pFile, const BYTE (&chkHead)[SizeT])
-	{
-		if(!pFile) return false;
-		CFileSeeker seeker(pFile);
-		BYTE tmp_buff[SizeT] = {0};
-		// 判断头部
-		if(!pFile->Seek(0, IFileObject::begin))
-			return false;
-		if (pFile->Read(tmp_buff, _countof(tmp_buff), sizeof(BYTE)) != _countof(chkHead))
-			return false;
-		if (memcmp(tmp_buff, chkHead, sizeof(chkHead)) != 0)
-			return false;
-		return true;
-	}
-
-	EXP_INLINE static image_t GetImageBuff(LONG nWidth, LONG nHeight, BYTE*& pBuff)
-	{
-		if (nWidth <= 0 || nHeight <= 0) return NULL;
-		CExpImage exp_image;
-		pBuff = NULL;
-		image_t image = exp_image.Create(nWidth, nHeight);
-		if (image) pBuff = (BYTE*)exp_image.GetPixels();
-		return image;
-	}
+	image_t m_Image;
 
 public:
-	ICoderObject()
-		: m_pFile(NULL)
+	IImageObject()
+		: m_Image(NULL)
 	{}
-	ICoderObject(IFileObject* pFile)
-		: m_pFile(NULL)
-	{ SetFile(pFile); }
-	virtual ~ICoderObject()
+	IImageObject(image_t Image)
+		: m_Image(NULL)
+	{ SetImage(Image); }
+	virtual ~IImageObject()
 	{}
 
 public:
-	virtual void SetFile(IFileObject* pFile)
-	{ m_pFile = pFile; }
-	virtual IFileObject* GetFile()
-	{ return m_pFile; }
+	virtual void SetImage(image_t Image)
+	{ m_Image = Image; }
+	virtual image_t GetImage()
+	{ return m_Image; }
 
-	virtual bool Encode(image_t Image) = 0;
-	virtual image_t Decode() = 0;
+	image_t operator=(image_t Image)
+	{
+		SetImage(Image);
+		return m_Image;
+	}
+	operator image_t()
+	{ return GetImage(); }
 
-	EXP_INLINE static bool DeleteImage(image_t Image)
-	{ return Image ? CExpImage(Image).Delete() : true; }
+	EXP_INLINE bool IsNull()
+	{ return (m_Image == NULL); }
+
+	virtual bool Delete() = 0;
+	virtual image_t Create(DWORD nWidth, DWORD nHeight) = 0;
+
+	virtual DWORD GetWidth() = 0;
+	virtual DWORD GetHeight() = 0;
+	virtual uint8_t GetChannel() = 0;
+	virtual pixel_t* GetPixels() = 0;
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__CoderObject_h__*/
+#endif/*__ImageObject_h__*/

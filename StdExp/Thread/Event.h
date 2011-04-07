@@ -50,14 +50,14 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CEvent : public CSyncObject
+class CEvent : public ISyncObject
 {
 public:
 	CEvent()
-		: CSyncObject()
+		: ISyncObject()
 	{}
 	CEvent(bool bManualReset, bool bInitialState = false)
-		: CSyncObject()
+		: ISyncObject()
 	{ Create(bManualReset, bInitialState); }
 	~CEvent()
 	{}

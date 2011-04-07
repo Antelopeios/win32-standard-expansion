@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-04-04
-// Version:	1.0.0000.0105
+// Date:	2010-04-07
+// Version:	1.0.0001.1700
+//
+// History:
+//	- 1.0.0001.1700(2010-04-07)	+ 添加pixel_t类型定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgCommon_h__
@@ -51,10 +54,11 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 typedef HBITMAP image_t;
+typedef COLORREF pixel_t;
 
 #define ExRGB(r, g, b) RGB(r, g, b)
 #define ExRGBA(r, g, b, a) \
-	( (COLORREF) ((((BYTE)(r) | ((WORD)((BYTE)(g))<<8)) | (((DWORD)(BYTE)(b))<<16)) | (((DWORD)(BYTE)(a))<<24)) )
+	( (pixel_t) ((((BYTE)(r) | ((WORD)((BYTE)(g))<<8)) | (((DWORD)(BYTE)(b))<<16)) | (((DWORD)(BYTE)(a))<<24)) )
 
 //////////////////////////////////////////////////////////////////
 

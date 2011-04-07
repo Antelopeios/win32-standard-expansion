@@ -103,7 +103,7 @@ public:
 		int img_c = png_get_channels(png_ptr, info_ptr);
 		png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 		// 根据图像信息申请一个图像缓冲区
-		COLORREF* bmbf = NULL;
+		pixel_t* bmbf = NULL;
 		image_t image = GetImageBuff(img_w, img_h, (BYTE*&)bmbf);
 		if(!image)
 		{

@@ -33,14 +33,15 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-06
-// Version:	1.0.0003.1544
+// Date:	2011-04-07
+// Version:	1.0.0004.1730
 //
 // History:
 //	- 1.0.0001.2350(2011-04-05)	^ 优化BmpCoder的结构
 //								+ 添加对16位位图的解析处理
 //	- 1.0.0002.1326(2011-04-06)	= 32位位图不再解析Alpha通道
 //	- 1.0.0003.1544(2011-04-06)	^ 支持任何格式的16位位图解码
+//	- 1.0.0004.1730(2011-04-07)	+ 添加BmpCoder::Encode()实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __BmpCoder_h__
@@ -304,12 +305,27 @@ public:
 	{
 		IFileObject* file = GetFile();
 		if(!file) return false;
-		// 获取图像信息
+		CExpImage exp_image(Image);
+		if (exp_image.IsNull()) return false;
 		// 填充图像信息
-		//BITMAPFILEHEADER file_head = {0};
-		//file_head.bfType = 0x4D42;
-		//file_head.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 
-		return false;
+		BITMAPFILEHEADER file_head = {0};
+		file_head.bfType = 0x4D42;
+		file_head.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + exp_image.GetSize();
+		file_head.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+		BITMAPINFO file_info = {0};
+		file_info.bmiHeader.biSize			= sizeof(file_info.bmiHeader);
+		file_info.bmiHeader.biBitCount		= exp_image.GetChannel();
+		file_info.bmiHeader.biCompression	= BI_RGB;
+		file_info.bmiHeader.biPlanes		= 1;
+		file_info.bmiHeader.biWidth			= exp_image.GetWidth();
+		file_info.bmiHeader.biHeight		= exp_image.GetHeight();
+		// 写入文件
+		file->Seek(0, IFileObject::begin);
+		file->Write(&file_head, sizeof(file_head), 1);
+		file->Write(&file_info, sizeof(file_info), 1);
+		file->Write(exp_image.GetPixels(), exp_image.GetSize(), 1);
+		file->Seek(0, IFileObject::begin);
+		return true;
 	}
 	image_t Decode()
 	{

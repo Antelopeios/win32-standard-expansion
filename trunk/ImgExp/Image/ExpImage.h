@@ -34,7 +34,10 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-07
-// Version:	1.0.0000.1624
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2011-04-07)	+ Ìí¼ÓCExpImage::GetSize()½Ó¿Ú
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ExpImage_h__
@@ -105,6 +108,8 @@ public:
 	{ return (DWORD)m_Bitmap.bmHeight; }
 	uint8_t GetChannel()
 	{ return (uint8_t)m_Bitmap.bmBitsPixel; }
+	DWORD GetSize()
+	{ return m_Bitmap.bmWidthBytes * m_Bitmap.bmHeight; }
 	pixel_t* GetPixels()
 	{ return (pixel_t*)m_Bitmap.bmBits; }
 };

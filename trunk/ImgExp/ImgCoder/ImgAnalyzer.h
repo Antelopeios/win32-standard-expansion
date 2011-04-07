@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.0.0000.1730
+// Date:	2011-04-07
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2011-04-07)	+ 支持直接通过ImageFormat返回对应的ICoderObject
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgAnalyzer_h__
@@ -71,11 +74,10 @@ public:
 			return png;
 		return raw;
 	}
-	static ICoderObject* GetCoder(IFileObject* pFile, CGC* pGC)
+	static ICoderObject* GetCoder(int nFormat, CGC* pGC)
 	{
-		if (!pFile) return NULL;
 		ICoderObject* coder = NULL;
-		switch (GetImageFormat(pFile))
+		switch (nFormat)
 		{
 		case bmp:
 			coder = ExMem::Alloc<CBmpCoder>(pGC);
@@ -87,6 +89,12 @@ public:
 			coder = ExMem::Alloc<CPngCoder>(pGC);
 			break;
 		}
+		return coder;
+	}
+	static ICoderObject* GetCoder(IFileObject* pFile, CGC* pGC)
+	{
+		if (!pFile) return NULL;
+		ICoderObject* coder = GetCoder(GetImageFormat(pFile), pGC);
 		if (coder) coder->SetFile(pFile);
 		return coder;
 	}

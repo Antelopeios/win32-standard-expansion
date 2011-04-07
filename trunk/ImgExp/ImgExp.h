@@ -31,7 +31,7 @@
 // ImgExp - Í¼ÏñÍØÕ¹¿â(Image Expansion)
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-03
 // Version:	0.1.0000.1713

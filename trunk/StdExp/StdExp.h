@@ -31,7 +31,7 @@
 // StdExp - 标准拓展库(Standard Expansion)
 //
 // Author:	木头云
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-07
 // Version:	0.1.0011.1605

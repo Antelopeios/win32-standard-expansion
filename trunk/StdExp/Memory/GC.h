@@ -31,7 +31,7 @@
 // GC - À¬»ø»ØÊÕÆ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-05
 // Version:	1.1.0016.2133

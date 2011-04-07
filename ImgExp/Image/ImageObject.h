@@ -34,7 +34,10 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-07
-// Version:	1.0.0000.1610
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2011-04-07)	+ Ìí¼ÓIImageObject::GetSize()½Ó¿Ú
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImageObject_h__
@@ -86,6 +89,7 @@ public:
 	virtual DWORD GetWidth() = 0;
 	virtual DWORD GetHeight() = 0;
 	virtual uint8_t GetChannel() = 0;
+	virtual DWORD GetSize() = 0;
 	virtual pixel_t* GetPixels() = 0;
 };
 

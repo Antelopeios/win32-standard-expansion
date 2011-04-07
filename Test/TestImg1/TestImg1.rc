@@ -46,6 +46,7 @@ BEGIN
     POPUP "文件(&F)"
     BEGIN
         MENUITEM "打开(&O)",                      IDM_OPEN
+        MENUITEM "保存(&S)",                      IDM_SAVE
         MENUITEM SEPARATOR
         MENUITEM "退出(&X)",                      IDM_EXIT
     END

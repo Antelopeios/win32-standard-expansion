@@ -31,7 +31,7 @@
 // TargetVer - Win32 平台版本定义
 //
 // Author:	木头云
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-08-21
 // Version:	1.1.0002.2030

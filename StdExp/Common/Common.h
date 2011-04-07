@@ -31,7 +31,7 @@
 // Common - 标准拓展库公用定义
 //
 // Author:	木头云
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-03
 // Version:	1.2.0007.2000

@@ -31,7 +31,7 @@
 // RegistAlloc - 登记并自动构造/析构的内存分配器
 //
 // Author:	木头云
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-04
 // Version:	1.0.0018.2110

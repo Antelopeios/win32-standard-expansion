@@ -31,7 +31,7 @@
 // Array - Êý×é
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-24
 // Version:	1.0.0015.1600

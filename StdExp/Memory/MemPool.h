@@ -31,7 +31,7 @@
 // MemPool - ÄÚ´æ³Ø
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-03
 // Version:	1.3.0025.2220

@@ -31,7 +31,7 @@
 // Pattern - ģʽ
 //
 // Author:	ľͷ��
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-12-09
 // Version:	1.0.0001.2056

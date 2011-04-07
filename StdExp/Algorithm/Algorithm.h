@@ -31,7 +31,7 @@
 // Algorithm - Ëã·¨
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	blog.csdn.net/markl22222
+// Blog:	http://www.cnblogs.com/black-cat-ptr/
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-01-26
 // Version:	1.0.0003.1730

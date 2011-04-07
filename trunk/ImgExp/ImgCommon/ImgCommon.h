@@ -34,10 +34,11 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-04-07
-// Version:	1.0.0001.1700
+// Version:	1.0.0002.2120
 //
 // History:
 //	- 1.0.0001.1700(2010-04-07)	+ 添加pixel_t类型定义
+//	- 1.0.0002.2120(2010-04-07)	+ 添加用于分离pixel_t通道分量的相关接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgCommon_h__
@@ -59,6 +60,11 @@ typedef COLORREF pixel_t;
 #define ExRGB(r, g, b) RGB(r, g, b)
 #define ExRGBA(r, g, b, a) \
 	( (pixel_t) ((((BYTE)(r) | ((WORD)((BYTE)(g))<<8)) | (((DWORD)(BYTE)(b))<<16)) | (((DWORD)(BYTE)(a))<<24)) )
+
+#define ExGetR(pix)	GetRValue(pix)
+#define ExGetG(pix)	GetGValue(pix)
+#define ExGetB(pix)	GetBValue(pix)
+#define ExGetA(pix)	(LOBYTE((pix) >> 24))
 
 //////////////////////////////////////////////////////////////////
 

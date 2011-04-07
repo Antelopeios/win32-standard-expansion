@@ -79,7 +79,8 @@ public:
 		BOOL bOpenFileDialog = TRUE, 
 		LPCTSTR lpszFileName = NULL, 
 		LPCTSTR lpszDefExt = NULL, 
-		LPCTSTR lpszFilter = _T("所有文件(*.*)\0*.*\0"))
+		LPCTSTR lpszFilter = _T("所有文件(*.*)\0*.*\0"), 
+		LPDWORD lpdwFilterInx = NULL)
 	{
 		TCHAR szFile[MAX_PATH] = {0};
 		OPENFILENAME ofn = {0};
@@ -112,7 +113,11 @@ public:
 			_tcscpy_s(szFile, lpszFileName);
 
 		BOOL ret = bOpenFileDialog ? GetOpenFileName(&ofn) : GetSaveFileName(&ofn);
-		if (ret) strRet = szFile;
+		if (ret)
+		{
+			strRet = szFile;
+			if (lpdwFilterInx) (*lpdwFilterInx) = ofn.nFilterIndex;
+		}
 		return ret;
 	}
 };

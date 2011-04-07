@@ -34,10 +34,11 @@
 // Blog:	blog.csdn.net/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-07
-// Version:	1.0.0001.1730
+// Version:	1.0.0002.2100
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
+//	- 1.0.0002.2100(2011-04-07)	= 调整CExpImage::GetChannel()接口的定义,返回通道数量,而不是BitsCount
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ExpImage_h__
@@ -107,7 +108,7 @@ public:
 	DWORD GetHeight()
 	{ return (DWORD)m_Bitmap.bmHeight; }
 	uint8_t GetChannel()
-	{ return (uint8_t)m_Bitmap.bmBitsPixel; }
+	{ return (uint8_t)(m_Bitmap.bmBitsPixel >> 3); }
 	DWORD GetSize()
 	{ return m_Bitmap.bmWidthBytes * m_Bitmap.bmHeight; }
 	pixel_t* GetPixels()

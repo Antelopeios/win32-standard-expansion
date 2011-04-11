@@ -31,7 +31,7 @@
 // ExpImage - Í¼ÏñÍØÕ¹Àà
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-07
 // Version:	1.0.0002.2100
@@ -50,6 +50,8 @@
 
 #include "Image/ImageObject.h"
 
+EXP_BEG
+
 //////////////////////////////////////////////////////////////////
 
 class CExpImage : public IImageObject
@@ -61,16 +63,16 @@ public:
 	CExpImage()
 		: IImageObject()
 	{ ZeroMemory(&m_Bitmap, sizeof(m_Bitmap)); }
-	CExpImage(image_t Image)
+	CExpImage(image_t tImage)
 		: IImageObject()
-	{ SetImage(Image); }
+	{ SetImage(tImage); }
 	virtual ~CExpImage()
 	{}
 
 public:
-	virtual void SetImage(image_t Image)
+	void SetImage(image_t tImage)
 	{
-		m_Image = Image;
+		m_Image = tImage;
 		if(!m_Image) return;
 		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
 		GetObject(m_Image, sizeof(m_Bitmap), &m_Bitmap);
@@ -116,5 +118,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////
+
+EXP_END
 
 #endif/*__ExpImage_h__*/

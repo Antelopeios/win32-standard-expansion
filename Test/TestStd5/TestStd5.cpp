@@ -5,15 +5,15 @@
 
 //////////////////////////////////////////////////////////////////
 
-class CTest1 : public CBaseObject
+class CTest1 : public IBaseObject
 {
-	EXP_DECLARE_DYNCREATE_CLS(CTest1, CBaseObject)
+	EXP_DECLARE_DYNCREATE_CLS(CTest1, IBaseObject)
 
 protected:
 	int i;
 };
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CTest1, CBaseObject)
+EXP_IMPLEMENT_DYNCREATE_CLS(CTest1, IBaseObject)
 
 //////////////////////////////////////////////////////////////////
 

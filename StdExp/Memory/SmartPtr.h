@@ -31,7 +31,7 @@
 // SmartPtr - ÖÇÄÜÖ¸Õë
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-02
 // Version:	1.3.0024.1130

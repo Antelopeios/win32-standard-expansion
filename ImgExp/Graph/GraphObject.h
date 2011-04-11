@@ -28,20 +28,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImageObject - 图像基类
+// GraphObject - 画布基类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0001.1730
-//
-// History:
-//	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
+// Date:	2011-04-11
+// Version:	1.0.0000.1100
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImageObject_h__
-#define __ImageObject_h__
+#ifndef __GraphObject_h__
+#define __GraphObject_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -51,50 +48,47 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IImageObject : public INonCopyable
+interface IGraphObject : public INonCopyable
 {
 protected:
-	image_t m_Image;
+	graph_t m_Graph;
 
 public:
-	IImageObject()
-		: m_Image(NULL)
+	IGraphObject()
+		: m_Graph(NULL)
 	{}
-	IImageObject(image_t tImage)
-		: m_Image(NULL)
-	{ SetImage(tImage); }
-	virtual ~IImageObject()
+	IGraphObject(graph_t tGraph)
+		: m_Graph(NULL)
+	{ SetGraph(tGraph); }
+	virtual ~IGraphObject()
 	{}
 
 public:
-	virtual void SetImage(image_t tImage)
-	{ m_Image = tImage; }
-	virtual image_t GetImage()
-	{ return m_Image; }
+	virtual void SetGraph(graph_t tGraph)
+	{ m_Graph = tGraph; }
+	virtual graph_t GetGraph()
+	{ return m_Graph; }
 
-	image_t operator=(image_t tImage)
+	graph_t operator=(graph_t tGraph)
 	{
-		SetImage(tImage);
-		return m_Image;
+		SetGraph(tGraph);
+		return m_Graph;
 	}
-	operator image_t()
-	{ return GetImage(); }
+	operator graph_t()
+	{ return GetGraph(); }
 
 	EXP_INLINE bool IsNull()
-	{ return (m_Image == NULL); }
+	{ return (m_Graph == NULL); }
 
 	virtual bool Delete() = 0;
-	virtual image_t Create(DWORD nWidth, DWORD nHeight) = 0;
+	virtual graph_t Create(graph_t tGraph = NULL) = 0;
 
-	virtual DWORD GetWidth() = 0;
-	virtual DWORD GetHeight() = 0;
-	virtual uint8_t GetChannel() = 0;
-	virtual DWORD GetSize() = 0;
-	virtual pixel_t* GetPixels() = 0;
+	virtual HGDIOBJ SetObject(HGDIOBJ hObj) = 0;
+	virtual HGDIOBJ GetObject(UINT uType) = 0;
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__ImageObject_h__*/
+#endif/*__GraphObject_h__*/

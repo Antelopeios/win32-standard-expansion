@@ -605,6 +605,30 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="ImgRender"
+			>
+			<File
+				RelativePath=".\ImgRender\ImgRender.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Graph"
+			>
+			<File
+				RelativePath=".\Graph\ExpGraph.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Graph\Graph.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Graph\GraphObject.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\ImgExp.h"
 			>

@@ -31,7 +31,7 @@
 // MemFile - 内存文件存储
 //
 // Author:	木头云
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-14
 // Version:	1.0.0004.1500

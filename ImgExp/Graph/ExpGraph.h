@@ -28,73 +28,82 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImageObject - 图像基类
+// ExpGraph - 画布拓展类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0001.1730
-//
-// History:
-//	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
+// Date:	2011-04-11
+// Version:	1.0.0000.1100
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImageObject_h__
-#define __ImageObject_h__
+#ifndef __ExpGraph_h__
+#define __ExpGraph_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Graph/GraphObject.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IImageObject : public INonCopyable
+class CExpGraph : public IGraphObject
 {
 protected:
-	image_t m_Image;
+	typedef CListT<DWORD>	typlst_t;
+	typedef CListT<HGDIOBJ>	objlst_t;
+
+	typlst_t m_TypLst;
+	objlst_t m_ObjLst;
 
 public:
-	IImageObject()
-		: m_Image(NULL)
+	CExpGraph()
+		: IGraphObject()
 	{}
-	IImageObject(image_t tImage)
-		: m_Image(NULL)
-	{ SetImage(tImage); }
-	virtual ~IImageObject()
+	CExpGraph(graph_t tGraph)
+		: IGraphObject()
+	{ SetGraph(tGraph); }
+	virtual ~CExpGraph()
 	{}
 
 public:
-	virtual void SetImage(image_t tImage)
-	{ m_Image = tImage; }
-	virtual image_t GetImage()
-	{ return m_Image; }
-
-	image_t operator=(image_t tImage)
+	bool Delete()
 	{
-		SetImage(tImage);
-		return m_Image;
+		if (IsNull()) return true;
+		for(objlst_t::iterator_t ite = m_ObjLst.Head(); ite != m_ObjLst.Tail(); ++ite)
+			SelectObject(m_Graph, ite->Val());
+		m_ObjLst.Clear();
+		m_TypLst.Clear();
+		DeleteDC(m_Graph);
+		m_Handle = NULL;
 	}
-	operator image_t()
-	{ return GetImage(); }
+	graph_t Create(graph_t tGraph = NULL)
+	{
+		SetGraph(CreateCompatibleDC(hDC));
+		return GetGraph();
+	}
 
-	EXP_INLINE bool IsNull()
-	{ return (m_Image == NULL); }
-
-	virtual bool Delete() = 0;
-	virtual image_t Create(DWORD nWidth, DWORD nHeight) = 0;
-
-	virtual DWORD GetWidth() = 0;
-	virtual DWORD GetHeight() = 0;
-	virtual uint8_t GetChannel() = 0;
-	virtual DWORD GetSize() = 0;
-	virtual pixel_t* GetPixels() = 0;
+	HGDIOBJ SetObject(HGDIOBJ hObj)
+	{
+		HGDIOBJ tmp_obj(SelectObject(m_Graph, hObj));
+		DWORD type = GetObjectType(hObj);
+		if (typlst_t::finder_t::Find(m_TypLst, type) == m_TypLst.Tail())
+		{
+			m_TypLst.Add(type);
+			if (tmp_obj && (objlst_t::finder_t::Find(m_ObjLst, tmp_obj) == m_ObjLst.Tail()))
+				m_ObjLst.Add(tmp_obj);
+		}
+		return tmp_obj;
+	}
+	HGDIOBJ GetObject(UINT uType)
+	{ return GetCurrentObject(m_Graph, uType); }
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__ImageObject_h__*/
+#endif/*__ExpGraph_h__*/

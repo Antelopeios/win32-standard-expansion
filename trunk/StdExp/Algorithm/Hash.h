@@ -31,7 +31,7 @@
 // Hash - ¹þÏ£Ëã·¨
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-25
 // Version:	1.0.0005.0106

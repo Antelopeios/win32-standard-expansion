@@ -55,23 +55,23 @@ EXP_BEG
 
 // RTTI 起始类声明
 template <int IntT = 0>
-class CBaseObjectT;
+class IBaseObjectT;
 
-typedef CBaseObjectT<> CBaseObject;
+typedef IBaseObjectT<> IBaseObject;
 
 //////////////////////////////////////////////////////////////////
 
 // 类型信息结构
 struct TypeInfo
 {
-	typedef CBaseObject* (*creator_t)(CGC* gc);
+	typedef IBaseObject* (*creator_t)(CGC* gc);
 
 	LPTSTR		className;
 	int			type_id;
 	TypeInfo*	pBaseClass[3];
 	creator_t	m_Creator;	// NULL => abstract class
 
-	EXP_INLINE CBaseObject* CreateObject(CGC* gc)
+	EXP_INLINE IBaseObject* CreateObject(CGC* gc)
 	{
 		if (!m_Creator) return NULL;
 		return (*m_Creator)(gc);
@@ -239,7 +239,7 @@ public:																						\
 
 #define EXP_DECLARE_DYNCREATE_C(cls_name)													\
 public:																						\
-	static CBaseObject* CreateObject(CGC* gc);												\
+	static IBaseObject* CreateObject(CGC* gc);												\
 private:																					\
 	static bool m_bRegSuccess;
 
@@ -270,7 +270,7 @@ private:																					\
 	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
 	{																						\
 		_T(#cls_name), 																		\
-		CBaseObject::TypeInfoOrder++, 														\
+		IBaseObject::TypeInfoOrder++, 														\
 		{&EXP_TYPEINFO_OF_CLS(base_name), NULL, NULL}, 										\
 		pfn_new																				\
 	};
@@ -283,7 +283,7 @@ private:																					\
 	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
 	{																						\
 		_T(#cls_name), 																		\
-		CBaseObject::TypeInfoOrder++, 														\
+		IBaseObject::TypeInfoOrder++, 														\
 		{&EXP_TYPEINFO_OF_CLS(base_name), &EXP_TYPEINFO_OF_CLS(base_name2), NULL}, 			\
 		pfn_new																				\
 	};
@@ -293,7 +293,7 @@ private:																					\
 	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
 	{																						\
 		_T(#cls_name), 																		\
-		CBaseObject::TypeInfoOrder++, 														\
+		IBaseObject::TypeInfoOrder++, 														\
 		{&EXP_TYPEINFO_OF_CLS(base_name), &EXP_TYPEINFO_OF_CLS(base_name2), &EXP_TYPEINFO_OF_CLS(base_name3)}, \
 		pfn_new																				\
 	};
@@ -303,7 +303,7 @@ private:																					\
 	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
 	{																						\
 		_T(#cls_name), 																		\
-		CBaseObject::TypeInfoOrder++, 														\
+		IBaseObject::TypeInfoOrder++, 														\
 		{NULL, NULL, NULL}, 																\
 		pfn_new																				\
 	};																						\
@@ -335,7 +335,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
 	tmp																						\
-	CBaseObject* cls_name::CreateObject(CGC* gc)											\
+	IBaseObject* cls_name::CreateObject(CGC* gc)											\
 	{ return (base_name*)ExMem::Alloc<cls_name>(gc); }										\
 	tmp																						\
 	bool cls_name::m_bRegSuccess =															\
@@ -359,30 +359,30 @@ private:																					\
 
 #define EXP_IMPLEMENT_DYNCREATE_NULL(cls_name, tmp)											\
 	EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, cls_name::CreateObject, tmp)						\
-	EXP_IMPLEMENT_DYNCREATE_C(cls_name, CBaseObject, tmp)
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, IBaseObject, tmp)
 
 //////////////////////////////////////////////////////////////////
 
 // RTTI 起始类
 template <int IntT/* = 0*/>
-class CBaseObjectT
+class IBaseObjectT
 {
-	EXP_DECLARE_DYNCREATE_NULL(CBaseObjectT)
+	EXP_DECLARE_DYNCREATE_NULL(IBaseObjectT)
 
 public:
 	// type_id 自增量
 	static int TypeInfoOrder;
 };
 
-EXP_IMPLEMENT_DYNCREATE_NULL(CBaseObjectT<IntT>, template <int IntT>)
+EXP_IMPLEMENT_DYNCREATE_NULL(IBaseObjectT<IntT>, template <int IntT>)
 
 template <int IntT>
-int CBaseObjectT<IntT>::TypeInfoOrder = IntT;
+int IBaseObjectT<IntT>::TypeInfoOrder = IntT;
 
 //////////////////////////////////////////////////////////////////
 
 // 动态指针效验函数
-EXP_INLINE bool ExDynCheck(LPCTSTR c_key, CBaseObject* ptr)
+EXP_INLINE bool ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
 {
 	if( ptr )
 	{

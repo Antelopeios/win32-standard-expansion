@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="TestImg1 - ImgCoder"
+	Name="TestImg1"
 	ProjectGUID="{AE2EF6C2-4A1F-4A1F-A7C9-B056686B3626}"
 	RootNamespace="TestImg1"
 	Keyword="Win32Proj"

@@ -28,73 +28,28 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImageObject - 图像基类
+// Graph - 画布操作
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0001.1730
-//
-// History:
-//	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
+// Date:	2011-04-11
+// Version:	1.0.0000.1100
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImageObject_h__
-#define __ImageObject_h__
+#ifndef __Graph_h__
+#define __Graph_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-EXP_BEG
+#include "ImgCommon/ImgCommon.h"
 
 //////////////////////////////////////////////////////////////////
 
-interface IImageObject : public INonCopyable
-{
-protected:
-	image_t m_Image;
 
-public:
-	IImageObject()
-		: m_Image(NULL)
-	{}
-	IImageObject(image_t tImage)
-		: m_Image(NULL)
-	{ SetImage(tImage); }
-	virtual ~IImageObject()
-	{}
-
-public:
-	virtual void SetImage(image_t tImage)
-	{ m_Image = tImage; }
-	virtual image_t GetImage()
-	{ return m_Image; }
-
-	image_t operator=(image_t tImage)
-	{
-		SetImage(tImage);
-		return m_Image;
-	}
-	operator image_t()
-	{ return GetImage(); }
-
-	EXP_INLINE bool IsNull()
-	{ return (m_Image == NULL); }
-
-	virtual bool Delete() = 0;
-	virtual image_t Create(DWORD nWidth, DWORD nHeight) = 0;
-
-	virtual DWORD GetWidth() = 0;
-	virtual DWORD GetHeight() = 0;
-	virtual uint8_t GetChannel() = 0;
-	virtual DWORD GetSize() = 0;
-	virtual pixel_t* GetPixels() = 0;
-};
 
 //////////////////////////////////////////////////////////////////
 
-EXP_END
-
-#endif/*__ImageObject_h__*/
+#endif/*__Graph_h__*/

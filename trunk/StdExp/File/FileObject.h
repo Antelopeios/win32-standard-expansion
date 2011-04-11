@@ -31,7 +31,7 @@
 // FileObject - 文件对象基类
 //
 // Author:	木头云
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-04
 // Version:	1.0.0003.0106

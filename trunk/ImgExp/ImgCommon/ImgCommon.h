@@ -31,14 +31,15 @@
 // ImgCommon - 图像拓展库公用定义
 //
 // Author:	木头云
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-04-07
-// Version:	1.0.0002.2120
+// Date:	2010-04-11
+// Version:	1.0.0003.1700
 //
 // History:
 //	- 1.0.0001.1700(2010-04-07)	+ 添加pixel_t类型定义
 //	- 1.0.0002.2120(2010-04-07)	+ 添加用于分离pixel_t通道分量的相关接口
+//	- 1.0.0003.1700(2010-04-11)	+ 添加graph_t类型定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgCommon_h__
@@ -54,8 +55,9 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-typedef HBITMAP image_t;
-typedef COLORREF pixel_t;
+typedef HDC			graph_t;
+typedef HBITMAP		image_t;
+typedef COLORREF	pixel_t;
 
 #define ExRGB(r, g, b) RGB(r, g, b)
 #define ExRGBA(r, g, b, a) \

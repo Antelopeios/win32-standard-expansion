@@ -31,7 +31,7 @@
 // CoderObject - 编/解码器基类
 //
 // Author:	木头云
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-05
 // Version:	1.0.0001.2350

@@ -31,7 +31,7 @@
 // Thread - Ïß³Ì
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-12-04
 // Version:	1.0.0001.2202

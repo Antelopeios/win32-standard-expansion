@@ -31,7 +31,7 @@
 // Assertion - ¶ÏÑÔ
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	http://www.cnblogs.com/black-cat-ptr/
+// Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-01
 // Version:	1.2.0005.2345

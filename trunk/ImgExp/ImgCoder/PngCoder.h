@@ -105,7 +105,7 @@ public:
 	{
 		IFileObject* file = GetFile();
 		if(!file) return false;
-		CExpImage exp_image(Image);
+		CImage exp_image(Image);
 		if (exp_image.IsNull()) return false;
 		// 声明并初始化压缩对象
 		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);

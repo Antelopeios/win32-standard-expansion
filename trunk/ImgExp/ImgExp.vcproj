@@ -590,22 +590,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Image"
-			>
-			<File
-				RelativePath=".\Image\ExpImage.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Image\Image.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Image\ImageObject.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="ImgRender"
 			>
 			<File
@@ -614,20 +598,56 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Graph"
+			Name="ImgTypes"
 			>
 			<File
-				RelativePath=".\Graph\ExpGraph.h"
+				RelativePath=".\ImgTypes\ImgTypes.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Graph\Graph.h"
+				RelativePath=".\ImgTypes\TypeObject.h"
 				>
 			</File>
-			<File
-				RelativePath=".\Graph\GraphObject.h"
+			<Filter
+				Name="Graph"
 				>
-			</File>
+				<File
+					RelativePath=".\ImgTypes\Graph\Graph.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImgTypes\Graph\GraphObject.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Image"
+				>
+				<File
+					RelativePath=".\ImgTypes\Image\Image.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImgTypes\Image\ImageObject.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Types"
+				>
+				<File
+					RelativePath=".\ImgTypes\Types\Point.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImgTypes\Types\Rect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImgTypes\Types\Types.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ImgExp.h"

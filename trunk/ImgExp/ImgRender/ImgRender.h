@@ -45,6 +45,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgCommon/ImgCommon.h"
+#include "ImgTypes/Types/Types.h
 
 EXP_BEG
 
@@ -53,7 +54,8 @@ EXP_BEG
 class CImgRender
 {
 public:
-	static bool Render()
+	// ‰÷»æÕº∆¨
+	static bool Render(graph_t tGraph, CPoint qDes[4], image_t tImage)
 	{
 	}
 };

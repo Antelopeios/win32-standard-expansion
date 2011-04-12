@@ -28,20 +28,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImageObject - 图像基类
+// Point - 点
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0001.1730
-//
-// History:
-//	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
+// Date:	2011-04-12
+// Version:	1.0.0000.1400
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImageObject_h__
-#define __ImageObject_h__
+#ifndef __Point_h__
+#define __Point_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -51,50 +48,61 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IImageObject : public INonCopyable
+class CPoint
 {
-protected:
-	image_t m_Image;
+public:
+	LONG m_X, m_Y;
 
 public:
-	IImageObject()
-		: m_Image(NULL)
-	{}
-	IImageObject(image_t tImage)
-		: m_Image(NULL)
-	{ SetImage(tImage); }
-	virtual ~IImageObject()
-	{}
+	CPoint(LONG nX = 0, LONG nY = 0)
+		: m_X(0), m_Y(0)
+	{ Set(nX, nY); }
+	CPoint(const CPoint& tPoint)
+		: m_X(0), m_Y(0)
+	{ (*this) = tPoint; }
+	CPoint(POINT& tPoint)
+		: m_X(0), m_Y(0)
+	{ (*this) = tPoint; }
 
 public:
-	virtual void SetImage(image_t tImage)
-	{ m_Image = tImage; }
-	virtual image_t GetImage()
-	{ return m_Image; }
-
-	image_t operator=(image_t tImage)
+	EXP_INLINE void Set(LONG nX = 0, LONG nY = 0)
 	{
-		SetImage(tImage);
-		return m_Image;
+		m_X = nX;
+		m_Y = nY;
 	}
-	operator image_t()
-	{ return GetImage(); }
+	EXP_INLINE void Offset(LONG nX = 0, LONG nY = 0)
+	{
+		m_X += nX;
+		m_Y += nY;
+	}
 
-	EXP_INLINE bool IsNull()
-	{ return (m_Image == NULL); }
+	EXP_INLINE CPoint& operator=(const CPoint& tPoint)
+	{
+		Set(tPoint.m_X, tPoint.m_Y);
+		return (*this);
+	}
+	EXP_INLINE bool operator==(const CPoint& tPoint)
+	{ return ((m_X == tPoint.m_X) && (m_Y == tPoint.m_Y)); }
 
-	virtual bool Delete() = 0;
-	virtual image_t Create(DWORD nWidth, DWORD nHeight) = 0;
+	EXP_INLINE CPoint& operator+=(const CPoint& tPoint)
+	{
+		Offset(tPoint.m_X, tPoint.m_Y);
+		return (*this);
+	}
+	EXP_INLINE CPoint& operator-=(const CPoint& tPoint)
+	{
+		Offset(-tPoint.m_X, -tPoint.m_Y);
+		return (*this);
+	}
 
-	virtual DWORD GetWidth() = 0;
-	virtual DWORD GetHeight() = 0;
-	virtual uint8_t GetChannel() = 0;
-	virtual DWORD GetSize() = 0;
-	virtual pixel_t* GetPixels() = 0;
+	EXP_INLINE CPoint operator+(const CPoint& tPoint)
+	{ return CPoint(m_X + tPoint.m_X, m_Y + tPoint.m_Y); }
+	EXP_INLINE CPoint operator-(const CPoint& tPoint)
+	{ return CPoint(m_X - tPoint.m_X, m_Y - tPoint.m_Y); }
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__ImageObject_h__*/
+#endif/*__Point_h__*/

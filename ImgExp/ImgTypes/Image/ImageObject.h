@@ -28,70 +28,84 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ExpImage - 图像拓展类
+// ImageObject - 图像对象类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0002.2100
+// Date:	2011-04-12
+// Version:	1.0.0002.1716
 //
 // History:
+//	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
+//	- 1.0.0002.1716(2011-04-12)	^ 移除IImageObject接口,通过ITypeObjectT接口模板统一通用的接口
+//								= CExpImage更名为CImage
+//								# 修正CImage::IsNull()判断不完全的问题
+//								# 修正CImage::Delete()没有正确删除对象的问题
+//								+ 添加CImage::Clone()方法
+//
+// History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
 //	- 1.0.0002.2100(2011-04-07)	= 调整CExpImage::GetChannel()接口的定义,返回通道数量,而不是BitsCount
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ExpImage_h__
-#define __ExpImage_h__
+#ifndef __ImageObject_h__
+#define __ImageObject_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Image/ImageObject.h"
+#include "ImgTypes/Types/Types.h
+#include "ImgTypes/Graph/Graph.h
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CExpImage : public IImageObject
+class CImage : public ITypeObjectT<image_t>
 {
+public:
+	typedef ITypeObjectT<graph_t> base_obj_t;
+
 protected:
 	BITMAP m_Bitmap;
 
 public:
-	CExpImage()
-		: IImageObject()
-	{ ZeroMemory(&m_Bitmap, sizeof(m_Bitmap)); }
-	CExpImage(image_t tImage)
-		: IImageObject()
-	{ SetImage(tImage); }
-	virtual ~CExpImage()
+	CImage(image_t tImage = NULL)
+		: base_obj_t()
+	{ Set(tImage); }
+	virtual ~CImage()
 	{}
 
 public:
-	void SetImage(image_t tImage)
+	void Set(image_t tImage)
 	{
-		m_Image = tImage;
-		if(!m_Image) return;
+		base_obj_t::Set(tImage);
 		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
+		if (IsNull()) return;
 		GetObject(m_Image, sizeof(m_Bitmap), &m_Bitmap);
+	}
+	bool IsNull()
+	{
+		if (base_obj_t::IsNull())
+			return (bool)(GetPixels());
+		else
+			return false;
 	}
 
 	bool Delete()
 	{
 		bool ret = true;
-		if (IsNull())
-		{
+		if (!IsNull())
 			ret = ::DeleteObject(m_Image);
-			m_Image = NULL;
-		}
-		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
+		Set(NULL);
 		return ret;
 	}
 	image_t Create(DWORD nWidth, DWORD nHeight)
 	{
-		if (nWidth <= 0 || nHeight <= 0) return GetImage();
+		if (nWidth <= 0 || nHeight <= 0) return Get();
+		Delete();
 		BITMAPINFO bmi = {0};
 		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
 		bmi.bmiHeader.biBitCount	= 32;
@@ -100,9 +114,38 @@ public:
 		bmi.bmiHeader.biWidth		= nWidth;
 		bmi.bmiHeader.biHeight		= nHeight;
 		BYTE* img_buf = NULL;
-		SetImage(CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&img_buf, NULL, 0));
+		Set(CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&img_buf, NULL, 0));
 		if(!img_buf) Delete();
-		return GetImage();
+		return Get();
+	}
+	image_t Clone(CRect& tRect)
+	{
+		// 创建临时对象
+		CImage exp_img;
+		if(!exp_img.Create(tRect.Width(), tRect.Height()))
+			return NULL;
+		CGraph exp_gra;
+		if(!exp_gra.Create())
+		{
+			exp_img.Delete();
+			return NULL;
+		}
+		CGraph exp_mem;
+		if(!exp_mem.Create())
+		{
+			exp_img.Delete();
+			exp_gra.Delete();
+			return NULL;
+		}
+		// 拷贝图像
+		exp_gra.SetObject(exp_img.Get());
+		exp_mem.SetObject(Get());
+		::BitBlt(exp_gra, 0, 0, exp_img.GetWidth(), exp_img.GetHeight(), 
+				 exp_mem, tRect.Left(), tRect.Top(), SRCCOPY);
+		// 清理并返回对象
+		exp_mem.Delete();
+		exp_gra.Delete();
+		return exp_img.Get();
 	}
 
 	DWORD GetWidth()
@@ -121,4 +164,4 @@ public:
 
 EXP_END
 
-#endif/*__ExpImage_h__*/
+#endif/*__ImageObject_h__*/

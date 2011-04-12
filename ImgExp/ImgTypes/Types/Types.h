@@ -28,17 +28,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Image - 图像操作
+// Types - 基本类型操作
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0000.1610
+// Date:	2011-04-12
+// Version:	1.0.0000.1330
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Image_h__
-#define __Image_h__
+#ifndef __Types_h__
+#define __Types_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -48,9 +48,9 @@
 
 //////////////////////////////////////////////////////////////////
 
-#include "Image/ImageObject.h"
-#include "Image/ExpImage.h"
+#include "ImgTypes/Types/Point.h"
+#include "ImgTypes/Types/Rect.h"
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Image_h__*/
+#endif/*__Types_h__*/

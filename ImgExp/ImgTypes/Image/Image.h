@@ -28,82 +28,29 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ExpGraph - 画布拓展类
+// Image - 图像操作
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-11
-// Version:	1.0.0000.1100
+// Date:	2011-04-07
+// Version:	1.0.0000.1610
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ExpGraph_h__
-#define __ExpGraph_h__
+#ifndef __Image_h__
+#define __Image_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Graph/GraphObject.h"
-
-EXP_BEG
+#include "ImgCommon/ImgCommon.h"
 
 //////////////////////////////////////////////////////////////////
 
-class CExpGraph : public IGraphObject
-{
-protected:
-	typedef CListT<DWORD>	typlst_t;
-	typedef CListT<HGDIOBJ>	objlst_t;
-
-	typlst_t m_TypLst;
-	objlst_t m_ObjLst;
-
-public:
-	CExpGraph()
-		: IGraphObject()
-	{}
-	CExpGraph(graph_t tGraph)
-		: IGraphObject()
-	{ SetGraph(tGraph); }
-	virtual ~CExpGraph()
-	{}
-
-public:
-	bool Delete()
-	{
-		if (IsNull()) return true;
-		for(objlst_t::iterator_t ite = m_ObjLst.Head(); ite != m_ObjLst.Tail(); ++ite)
-			SelectObject(m_Graph, ite->Val());
-		m_ObjLst.Clear();
-		m_TypLst.Clear();
-		DeleteDC(m_Graph);
-		m_Handle = NULL;
-	}
-	graph_t Create(graph_t tGraph = NULL)
-	{
-		SetGraph(CreateCompatibleDC(hDC));
-		return GetGraph();
-	}
-
-	HGDIOBJ SetObject(HGDIOBJ hObj)
-	{
-		HGDIOBJ tmp_obj(SelectObject(m_Graph, hObj));
-		DWORD type = GetObjectType(hObj);
-		if (typlst_t::finder_t::Find(m_TypLst, type) == m_TypLst.Tail())
-		{
-			m_TypLst.Add(type);
-			if (tmp_obj && (objlst_t::finder_t::Find(m_ObjLst, tmp_obj) == m_ObjLst.Tail()))
-				m_ObjLst.Add(tmp_obj);
-		}
-		return tmp_obj;
-	}
-	HGDIOBJ GetObject(UINT uType)
-	{ return GetCurrentObject(m_Graph, uType); }
-};
+#include "ImgTypes/Image/ImageObject.h"
+#include "ImgTypes/Image/ExpImage.h"
 
 //////////////////////////////////////////////////////////////////
 
-EXP_END
-
-#endif/*__ExpGraph_h__*/
+#endif/*__Image_h__*/

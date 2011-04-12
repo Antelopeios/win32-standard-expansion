@@ -305,7 +305,7 @@ public:
 	{
 		IFileObject* file = GetFile();
 		if(!file) return false;
-		CExpImage exp_image(Image);
+		CImage exp_image(Image);
 		if (exp_image.IsNull()) return false;
 		// ÃÓ≥‰ÕºœÒ–≈œ¢
 		BITMAPFILEHEADER file_head = {0};

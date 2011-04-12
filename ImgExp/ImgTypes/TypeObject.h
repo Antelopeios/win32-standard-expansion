@@ -28,17 +28,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GraphObject - 画布基类
+// TypeObject - 类型基类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-11
-// Version:	1.0.0000.1100
+// Date:	2011-04-12
+// Version:	1.0.0000.1305
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GraphObject_h__
-#define __GraphObject_h__
+#ifndef __TypeObject_h__
+#define __TypeObject_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -48,47 +48,42 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IGraphObject : public INonCopyable
+template <typename TypeT>
+interface ITypeObjectT : INonCopyable
 {
 protected:
-	graph_t m_Graph;
+	TypeT m_Type;
 
 public:
-	IGraphObject()
-		: m_Graph(NULL)
+	ITypeObjectT()
+		: m_Type(NULL)
 	{}
-	IGraphObject(graph_t tGraph)
-		: m_Graph(NULL)
-	{ SetGraph(tGraph); }
-	virtual ~IGraphObject()
+	ITypeObjectT(TypeT tType)
+		: m_Type(NULL)
+	{ Set(tType); }
+	virtual ~ITypeObjectT()
 	{}
 
 public:
-	virtual void SetGraph(graph_t tGraph)
-	{ m_Graph = tGraph; }
-	virtual graph_t GetGraph()
-	{ return m_Graph; }
+	virtual void Set(TypeT tType)
+	{ m_Type = tType; }
+	virtual TypeT Get()
+	{ return m_Type; }
 
-	graph_t operator=(graph_t tGraph)
+	TypeT operator=(TypeT tType)
 	{
-		SetGraph(tGraph);
-		return m_Graph;
+		Set(tType);
+		return m_Type;
 	}
-	operator graph_t()
-	{ return GetGraph(); }
+	operator TypeT()
+	{ return Get(); }
 
-	EXP_INLINE bool IsNull()
-	{ return (m_Graph == NULL); }
-
-	virtual bool Delete() = 0;
-	virtual graph_t Create(graph_t tGraph = NULL) = 0;
-
-	virtual HGDIOBJ SetObject(HGDIOBJ hObj) = 0;
-	virtual HGDIOBJ GetObject(UINT uType) = 0;
+	virtual bool IsNull()
+	{ return (m_Type == NULL); }
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GraphObject_h__*/
+#endif/*__TypeObject_h__*/

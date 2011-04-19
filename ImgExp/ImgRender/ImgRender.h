@@ -45,7 +45,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgCommon/ImgCommon.h"
-#include "ImgTypes/Types/Types.h
+#include "ImgTypes/Types/Types.h"
 
 EXP_BEG
 
@@ -54,9 +54,61 @@ EXP_BEG
 class CImgRender
 {
 public:
-	// 渲染图片
-	static bool Render(graph_t tGraph, CPoint qDes[4], image_t tImage)
+	// 坐标矩阵变换
+	EXP_INLINE static void Transform(_IN_ CPointT<double>& ptSrc, _OT_ CPointT<double>& ptDes, _IN_ DWORD mtxTans[6])
 	{
+		ptDes.m_X = ptSrc.m_X * mtxTans[0] + ptSrc.m_Y * mtxTans[2] + mtxTans[4];
+		ptDes.m_Y = ptSrc.m_X * mtxTans[1] + ptSrc.m_Y * mtxTans[3] + mtxTans[5];
+	}
+	// 图像转换
+	EXP_INLINE static image_t TransImage(_IN_ image_t imgSrc, _IN_ DWORD mtxTans[6])
+	{
+		CImage exp_src(imgSrc);
+		if (exp_src.IsNull()) return NULL;
+		// 拿到顶点坐标
+		CPointT<double> ver_src[4] = 
+		{
+			CPointT<double>(0, 0), 
+			CPointT<double>(exp_src.GetWidth(), 0), 
+			CPointT<double>(exp_src.GetWidth(), exp_src.GetHeight()), 
+			CPointT<double>(0, exp_src.GetHeight())
+		};
+		CPointT<double> ver_des[4];
+		Transform(ver_src[0], ver_des[0], mtxTans);
+		Transform(ver_src[1], ver_des[1], mtxTans);
+		Transform(ver_src[2], ver_des[2], mtxTans);
+		Transform(ver_src[3], ver_des[3], mtxTans);
+		// 得到目标图像的宽与高
+		LONG min_x = (LONG)min(min(ver_des[0].m_X, ver_des[1].m_X), min(ver_des[2].m_X, ver_des[3].m_X));
+		LONG max_x = (LONG)max(max(ver_des[0].m_X, ver_des[1].m_X), max(ver_des[2].m_X, ver_des[3].m_X));
+		LONG min_y = (LONG)min(min(ver_des[0].m_Y, ver_des[1].m_Y), min(ver_des[2].m_Y, ver_des[3].m_Y));
+		LONG max_y = (LONG)max(max(ver_des[0].m_Y, ver_des[1].m_Y), max(ver_des[2].m_Y, ver_des[3].m_Y));
+		DWORD w_des = max_x - min_x;
+		DWORD h_des = max_y - min_y;
+		// 增加平移坐标矩阵
+		DWORD matrix[6] = 
+		{
+			mtxTans[0], 
+			mtxTans[1], 
+			mtxTans[2], 
+			mtxTans[3], 
+			mtxTans[4] - min_x, 
+			mtxTans[5] - min_y
+		};
+		// 创建目标图像
+		CImage exp_des;
+		exp_des.Create(w_des, h_des);
+		// 映射坐标点
+		CRectT<double> rc_src(0, 0, exp_src.GetWidth(), exp_src.GetHeight());
+		CPointT<double> crd_src, crd_des;
+		for(DWORD y = 0; y < h_des; ++y)
+		{
+			for(DWORD x = 0; x < w_des; ++x)
+			{
+				crd_des.Set(x, y);
+				Transform(crd_des, crd_src, matrix);
+			}
+		}
 	}
 };
 

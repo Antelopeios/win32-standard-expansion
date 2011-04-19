@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-12
-// Version:	1.0.0002.1716
+// Date:	2011-04-19
+// Version:	1.0.0004.1630
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -43,6 +43,7 @@
 //								# 修正CImage::IsNull()判断不完全的问题
 //								# 修正CImage::Delete()没有正确删除对象的问题
 //								+ 添加CImage::Clone()方法
+//	- 1.0.0004.1630(2011-04-19)	= 当对CImage::Clone()传入空区域时,此接口将拷贝整个图片
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
@@ -56,8 +57,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgTypes/Types/Types.h
-#include "ImgTypes/Graph/Graph.h
+#include "ImgTypes/Types/Types.h"
+#include "ImgTypes/Graph/Graph.h"
 
 EXP_BEG
 
@@ -66,7 +67,7 @@ EXP_BEG
 class CImage : public ITypeObjectT<image_t>
 {
 public:
-	typedef ITypeObjectT<graph_t> base_obj_t;
+	typedef ITypeObjectT<image_t> base_obj_t;
 
 protected:
 	BITMAP m_Bitmap;
@@ -84,7 +85,7 @@ public:
 		base_obj_t::Set(tImage);
 		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
 		if (IsNull()) return;
-		GetObject(m_Image, sizeof(m_Bitmap), &m_Bitmap);
+		GetObject(Get(), sizeof(m_Bitmap), &m_Bitmap);
 	}
 	bool IsNull()
 	{
@@ -98,7 +99,7 @@ public:
 	{
 		bool ret = true;
 		if (!IsNull())
-			ret = ::DeleteObject(m_Image);
+			ret = ::DeleteObject(Get());
 		Set(NULL);
 		return ret;
 	}
@@ -120,9 +121,12 @@ public:
 	}
 	image_t Clone(CRect& tRect)
 	{
+		CRect rc_tmp(tRect);
+		if (rc_tmp.IsEmpty())
+			rc_tmp.Set(CPoint(0, 0), CPoint(GetWidth(), GetHeight()));
 		// 创建临时对象
 		CImage exp_img;
-		if(!exp_img.Create(tRect.Width(), tRect.Height()))
+		if(!exp_img.Create(rc_tmp.Width(), rc_tmp.Height()))
 			return NULL;
 		CGraph exp_gra;
 		if(!exp_gra.Create())
@@ -141,7 +145,7 @@ public:
 		exp_gra.SetObject(exp_img.Get());
 		exp_mem.SetObject(Get());
 		::BitBlt(exp_gra, 0, 0, exp_img.GetWidth(), exp_img.GetHeight(), 
-				 exp_mem, tRect.Left(), tRect.Top(), SRCCOPY);
+				 exp_mem, rc_tmp.Left(), rc_tmp.Top(), SRCCOPY);
 		// 清理并返回对象
 		exp_mem.Delete();
 		exp_gra.Delete();

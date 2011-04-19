@@ -91,7 +91,7 @@ public:
 	graph_t Create(graph_t tGraph = NULL)
 	{
 		Delete();
-		Set(CreateCompatibleDC(hDC));
+		Set(CreateCompatibleDC(tGraph));
 		return Get();
 	}
 

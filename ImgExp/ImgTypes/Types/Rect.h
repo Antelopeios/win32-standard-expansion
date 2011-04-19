@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-12
-// Version:	1.0.0000.1400
+// Date:	2011-04-19
+// Version:	1.0.0001.1630
+//
+// History:
+//	- 1.0.0001.1630(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
+//								+ 添加CRectT::IsEmpty()与CRectT::IsNull()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -50,118 +54,130 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CRect
+template <typename TypeT = LONG>
+class CRectT
 {
 public:
-	CPoint m_Pt1, m_Pt2;
+	CPointT<TypeT> m_Pt1, m_Pt2;
 
 public:
-	CRect()
+	CRectT()
 	{}
-	CRect(LONG nX1, LONG nY1, LONG nX2, LONG nY2)
-	{ Set(CPoint(nX1, nY1), CPoint(nX2, nY2)); }
-	CRect(const CPoint& Pt1, const CPoint& Pt2)
+	CRectT(TypeT nX1, TypeT nY1, TypeT nX2, TypeT nY2)
+	{ Set(CPointT<TypeT>(nX1, nY1), CPointT<TypeT>(nX2, nY2)); }
+	CRectT(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
 	{ Set(Pt1, Pt2); }
-	CRect(const CRect& tRect)
+	CRectT(const CRectT& tRect)
 	{ (*this) = tRect; }
-	CRect(RECT& tRect)
+	CRectT(RECT& tRect)
 	{ (*this) = tRect; }
 
 public:
-	EXP_INLINE void Set(const CPoint& Pt1, const CPoint& Pt2)
+	EXP_INLINE void Set(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
 	{
 		m_Pt1 = Pt1;
 		m_Pt2 = Pt2;
 	}
-	EXP_INLINE void Offset(const CPoint& Pt)
+	EXP_INLINE void Offset(const CPointT<TypeT>& Pt)
 	{
 		m_Pt1 += Pt;
 		m_Pt2 += Pt;
 	}
-	EXP_INLINE void MoveTo(const CPoint& Pt)
+	EXP_INLINE void MoveTo(const CPointT<TypeT>& Pt)
 	{ m_Pt2 = m_Pt1 = Pt; }
 
-	EXP_INLINE void Inter(const CRect& tRect)
+	EXP_INLINE void Inter(const CRectT& tRect)
 	{
-		Set(CPoint(max(m_Pt1.m_X, tRect.m_Pt1.m_X), min(m_Pt1.m_Y, tRect.m_Pt1.m_Y)), 
-			CPoint(min(m_Pt2.m_X, tRect.m_Pt2.m_X), min(m_Pt2.m_Y, tRect.m_Pt2.m_Y)));
+		Set(CPointT<TypeT>(max(m_Pt1.m_X, tRect.m_Pt1.m_X), min(m_Pt1.m_Y, tRect.m_Pt1.m_Y)), 
+			CPointT<TypeT>(min(m_Pt2.m_X, tRect.m_Pt2.m_X), min(m_Pt2.m_Y, tRect.m_Pt2.m_Y)));
 	}
-	EXP_INLINE void Union(const CRect& tRect)
+	EXP_INLINE void Union(const CRectT& tRect)
 	{
-		Set(CPoint(min(m_Pt1.m_X, tRect.m_Pt1.m_X), min(m_Pt1.m_Y, tRect.m_Pt1.m_Y)), 
-			CPoint(max(m_Pt2.m_X, tRect.m_Pt2.m_X), min(m_Pt2.m_Y, tRect.m_Pt2.m_Y)));
+		Set(CPointT<TypeT>(min(m_Pt1.m_X, tRect.m_Pt1.m_X), min(m_Pt1.m_Y, tRect.m_Pt1.m_Y)), 
+			CPointT<TypeT>(max(m_Pt2.m_X, tRect.m_Pt2.m_X), min(m_Pt2.m_Y, tRect.m_Pt2.m_Y)));
 	}
 
-	EXP_INLINE void Inflate(const CPoint& Pt)
+	EXP_INLINE void Inflate(const CPointT<TypeT>& Pt)
 	{
 		m_Pt1.m_X -= Pt.m_X;
 		m_Pt2.m_X += Pt.m_X;
 		m_Pt1.m_Y -= Pt.m_Y;
 		m_Pt2.m_Y += Pt.m_Y;
 	}
-	EXP_INLINE void Inflate(const CRect& tRect)
+	EXP_INLINE void Inflate(const CRectT& tRect)
 	{
 		m_Pt1 -= tRect.m_Pt1;
 		m_Pt2 += tRect.m_Pt2;
 	}
-	EXP_INLINE void Deflate(const CPoint& Pt)
+	EXP_INLINE void Deflate(const CPointT<TypeT>& Pt)
 	{
 		m_Pt1.m_X += Pt.m_X;
 		m_Pt2.m_X -= Pt.m_X;
 		m_Pt1.m_Y += Pt.m_Y;
 		m_Pt2.m_Y -= Pt.m_Y;
 	}
-	EXP_INLINE void Deflate(const CRect& tRect)
+	EXP_INLINE void Deflate(const CRectT& tRect)
 	{
 		m_Pt1 += tRect.m_Pt1;
 		m_Pt2 -= tRect.m_Pt2;
 	}
 
-	EXP_INLINE CRect& operator=(const CRect& tRect)
+	EXP_INLINE CRectT& operator=(const CRectT& tRect)
 	{
 		Set(tRect.m_Pt1, tRect.m_Pt2);
 		return (*this);
 	}
-	EXP_INLINE bool operator==(const CRect& tRect)
+	EXP_INLINE bool operator==(const CRectT& tRect)
 	{ return ((m_Pt1 == tRect.m_Pt1) && (m_Pt2 == tRect.m_Pt2)); }
 
-	EXP_INLINE CRect& operator+=(const CPoint& Pt)
+	EXP_INLINE CRectT& operator+=(const CPointT<TypeT>& Pt)
 	{
 		Inflate(Pt);
 		return (*this);
 	}
-	EXP_INLINE CRect& operator-=(const CPoint& Pt)
+	EXP_INLINE CRectT& operator-=(const CPointT<TypeT>& Pt)
 	{
 		Deflate(Pt);
 		return (*this);
 	}
-	EXP_INLINE CRect& operator+=(const CRect& tRect)
+	EXP_INLINE CRectT& operator+=(const CRectT& tRect)
 	{
 		Inflate(tRect);
 		return (*this);
 	}
-	EXP_INLINE CRect& operator-=(const CRect& tRect)
+	EXP_INLINE CRectT& operator-=(const CRectT& tRect)
 	{
 		Deflate(tRect);
 		return (*this);
 	}
 
-	EXP_INLINE CRect operator+(const CPoint& Pt)
-	{ return (CRect(*this) += Pt); }
-	EXP_INLINE CRect operator-(const CPoint& Pt)
-	{ return (CRect(*this) -= Pt); }
-	EXP_INLINE CRect operator+(const CRect& tRect)
-	{ return (CRect(*this) += tRect); }
-	EXP_INLINE CRect operator-(const CRect& tRect)
-	{ return (CRect(*this) -= tRect); }
+	EXP_INLINE CRectT operator+(const CPointT<TypeT>& Pt)
+	{ return (CRectT(*this) += Pt); }
+	EXP_INLINE CRectT operator-(const CPointT<TypeT>& Pt)
+	{ return (CRectT(*this) -= Pt); }
+	EXP_INLINE CRectT operator+(const CRectT& tRect)
+	{ return (CRectT(*this) += tRect); }
+	EXP_INLINE CRectT operator-(const CRectT& tRect)
+	{ return (CRectT(*this) -= tRect); }
 
-	EXP_INLINE LONG Left()	 { return m_Pt1.m_X; }
-	EXP_INLINE LONG Top()	 { return m_Pt1.m_Y; }
-	EXP_INLINE LONG Right()	 { return m_Pt2.m_X; }
-	EXP_INLINE LONG Bottom() { return m_Pt2.m_Y; }
-	EXP_INLINE LONG Width()	 { return Right() - Left(); }
-	EXP_INLINE LONG Height() { return Bottom() - Top(); }
+	EXP_INLINE TypeT Left()	 { return m_Pt1.m_X; }
+	EXP_INLINE TypeT Top()	 { return m_Pt1.m_Y; }
+	EXP_INLINE TypeT Right()	 { return m_Pt2.m_X; }
+	EXP_INLINE TypeT Bottom() { return m_Pt2.m_Y; }
+	EXP_INLINE TypeT Width()	 { return Right() - Left(); }
+	EXP_INLINE TypeT Height() { return Bottom() - Top(); }
+
+	EXP_INLINE bool IsEmpty()
+	{ return (m_Pt1.m_X == m_Pt2.m_X || m_Pt1.m_Y == m_Pt2.m_Y); }
+	EXP_INLINE bool IsNull()
+	{ return (m_Pt1.m_X == 0 && m_Pt2.m_X == 0 && m_Pt1.m_Y == 0 && m_Pt2.m_Y == 0); }
+
+	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt)
+	{ return (Pt.m_X >= m_Pt1.m_X && Pt.m_X <= m_Pt2.m_X && 
+			  Pt.m_Y >= m_Pt1.m_Y && Pt.m_Y <= m_Pt2.m_Y); }
 };
+
+typedef CRectT<> CRect;
 
 //////////////////////////////////////////////////////////////////
 

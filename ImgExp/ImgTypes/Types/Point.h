@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-12
-// Version:	1.0.0000.1400
+// Date:	2011-04-19
+// Version:	1.0.0001.1630
+//
+// History:
+//	- 1.0.0001.1630(2011-04-19)	+ CPoint改为CPointT<>,支持通过模板参数控制内部数据的类型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Point_h__
@@ -48,58 +51,61 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CPoint
+template <typename TypeT = LONG>
+class CPointT
 {
 public:
-	LONG m_X, m_Y;
+	TypeT m_X, m_Y;
 
 public:
-	CPoint(LONG nX = 0, LONG nY = 0)
+	CPointT(TypeT nX = 0, TypeT nY = 0)
 		: m_X(0), m_Y(0)
 	{ Set(nX, nY); }
-	CPoint(const CPoint& tPoint)
+	CPointT(const CPointT& tPoint)
 		: m_X(0), m_Y(0)
 	{ (*this) = tPoint; }
-	CPoint(POINT& tPoint)
+	CPointT(POINT& tPoint)
 		: m_X(0), m_Y(0)
 	{ (*this) = tPoint; }
 
 public:
-	EXP_INLINE void Set(LONG nX = 0, LONG nY = 0)
+	EXP_INLINE void Set(TypeT nX = 0, TypeT nY = 0)
 	{
 		m_X = nX;
 		m_Y = nY;
 	}
-	EXP_INLINE void Offset(LONG nX = 0, LONG nY = 0)
+	EXP_INLINE void Offset(TypeT nX = 0, TypeT nY = 0)
 	{
 		m_X += nX;
 		m_Y += nY;
 	}
 
-	EXP_INLINE CPoint& operator=(const CPoint& tPoint)
+	EXP_INLINE CPointT& operator=(const CPointT& tPoint)
 	{
 		Set(tPoint.m_X, tPoint.m_Y);
 		return (*this);
 	}
-	EXP_INLINE bool operator==(const CPoint& tPoint)
+	EXP_INLINE bool operator==(const CPointT& tPoint)
 	{ return ((m_X == tPoint.m_X) && (m_Y == tPoint.m_Y)); }
 
-	EXP_INLINE CPoint& operator+=(const CPoint& tPoint)
+	EXP_INLINE CPointT& operator+=(const CPointT& tPoint)
 	{
 		Offset(tPoint.m_X, tPoint.m_Y);
 		return (*this);
 	}
-	EXP_INLINE CPoint& operator-=(const CPoint& tPoint)
+	EXP_INLINE CPointT& operator-=(const CPointT& tPoint)
 	{
 		Offset(-tPoint.m_X, -tPoint.m_Y);
 		return (*this);
 	}
 
-	EXP_INLINE CPoint operator+(const CPoint& tPoint)
-	{ return CPoint(m_X + tPoint.m_X, m_Y + tPoint.m_Y); }
-	EXP_INLINE CPoint operator-(const CPoint& tPoint)
-	{ return CPoint(m_X - tPoint.m_X, m_Y - tPoint.m_Y); }
+	EXP_INLINE CPointT operator+(const CPointT& tPoint)
+	{ return CPointT(m_X + tPoint.m_X, m_Y + tPoint.m_Y); }
+	EXP_INLINE CPointT operator-(const CPointT& tPoint)
+	{ return CPointT(m_X - tPoint.m_X, m_Y - tPoint.m_Y); }
 };
+
+typedef CPointT<> CPoint;
 
 //////////////////////////////////////////////////////////////////
 

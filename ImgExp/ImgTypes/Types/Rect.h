@@ -34,11 +34,12 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-19
-// Version:	1.0.0001.1630
+// Version:	1.0.0002.2350
 //
 // History:
-//	- 1.0.0001.1630(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
+//	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
 //								+ 添加CRectT::IsEmpty()与CRectT::IsNull()接口
+//								= CRectT::PtInRect判断坐标时不包括最右边与最下边
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -173,8 +174,8 @@ public:
 	{ return (m_Pt1.m_X == 0 && m_Pt2.m_X == 0 && m_Pt1.m_Y == 0 && m_Pt2.m_Y == 0); }
 
 	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt)
-	{ return (Pt.m_X >= m_Pt1.m_X && Pt.m_X <= m_Pt2.m_X && 
-			  Pt.m_Y >= m_Pt1.m_Y && Pt.m_Y <= m_Pt2.m_Y); }
+	{ return (Pt.m_X >= m_Pt1.m_X && Pt.m_X < m_Pt2.m_X && 
+			  Pt.m_Y >= m_Pt1.m_Y && Pt.m_Y < m_Pt2.m_Y); }
 };
 
 typedef CRectT<> CRect;

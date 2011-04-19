@@ -34,7 +34,7 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-19
-// Version:	1.0.0004.1630
+// Version:	1.0.0005.2350
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -43,7 +43,8 @@
 //								# 修正CImage::IsNull()判断不完全的问题
 //								# 修正CImage::Delete()没有正确删除对象的问题
 //								+ 添加CImage::Clone()方法
-//	- 1.0.0004.1630(2011-04-19)	= 当对CImage::Clone()传入空区域时,此接口将拷贝整个图片
+//	- 1.0.0005.2350(2011-04-19)	= 当对CImage::Clone()传入空区域时,此接口将拷贝整个图片
+//								# 修正CImage::IsNull()中的一个逻辑错误
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
@@ -90,7 +91,7 @@ public:
 	bool IsNull()
 	{
 		if (base_obj_t::IsNull())
-			return (bool)(GetPixels());
+			return (!(bool)(GetPixels()));
 		else
 			return false;
 	}

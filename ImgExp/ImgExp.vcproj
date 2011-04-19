@@ -590,10 +590,10 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="ImgRender"
+			Name="ImgRenderer"
 			>
 			<File
-				RelativePath=".\ImgRender\ImgRender.h"
+				RelativePath=".\ImgRenderer\ImgRenderer.h"
 				>
 			</File>
 		</Filter>
@@ -648,6 +648,14 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="ImgDeformer"
+			>
+			<File
+				RelativePath=".\ImgDeformer\ImgDeformer.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\ImgExp.h"

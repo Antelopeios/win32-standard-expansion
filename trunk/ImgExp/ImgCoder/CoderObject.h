@@ -48,7 +48,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Image/ExpImage.h"
+#include "ImgTypes/Image/ImageObject.h"
 
 EXP_BEG
 

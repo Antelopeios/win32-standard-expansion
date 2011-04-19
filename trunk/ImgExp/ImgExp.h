@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	0.1.0000.1713
+// Date:	2011-04-19
+// Version:	0.1.0001.2300
+//
+// History:
+//	- 0.1.0001.2300(2011-04-19)	@ 完成ImgCoder部分所有类的构建
+//								@ 完成ImgTypes部分所有类的构建
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgExp_h__
@@ -49,7 +53,8 @@
 #include "ImgCommon/ImgCommon.h"
 #include "ImgTypes/ImgTypes.h"
 #include "ImgCoder/ImgCoder.h"
-#include "ImgRender/ImgRender.h"
+#include "ImgDeformer/ImgDeformer.h"
+#include "ImgRenderer/ImgRenderer.h"
 
 //////////////////////////////////////////////////////////////////
 

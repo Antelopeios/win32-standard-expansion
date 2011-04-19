@@ -130,6 +130,18 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	hBitmap = coder->Decode();
 	// 关闭资源
 	CResGetter::ReleaseBinary(hres);
+	// 图像形变
+	double matrix[4] = 
+	{
+		0, 1, 
+		-1, 0, 
+	};
+	HBITMAP tmp = CImgDeformer::Deform(hBitmap, matrix);
+	if (tmp)
+	{
+		ICoderObject::DeleteImage(hBitmap);
+		hBitmap = tmp;
+	}
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

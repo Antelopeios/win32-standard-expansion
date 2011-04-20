@@ -34,7 +34,12 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-20
-// Version:	1.0.0000.2200
+// Version:	1.0.0001.2343
+//
+// History:
+//	- 1.0.0001.2343(2011-04-20)	+ 添加CLineT::Length()计算两点距离
+//								^ 改进CLineT::PtInLine(),支持判断点与直线之间的位置关系
+//								- 移除点与线段之间的判断函数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Line_h__
@@ -45,6 +50,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgTypes/Types/Point.h"
+#include <math.h>
 
 EXP_BEG
 
@@ -91,6 +97,13 @@ public:
 	EXP_INLINE bool IsNull()
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
+	// 求两点距离
+	EXP_INLINE TypeT Length()
+	{
+		TypeT dif_x = (pt1.x - pt2.x), dif_y = (pt1.y - pt2.y);
+		return (TypeT)sqrt((double)(dif_x * dif_x + dif_y * dif_y));
+	}
+
 	// 求斜率
 	EXP_INLINE bool K(_OT_ TypeT& k)
 	{
@@ -101,50 +114,19 @@ public:
 	}
 
 	// 点与直线的关系
-	EXP_INLINE bool PtInLine(const CPointT<TypeT>& Pt)
+	EXP_INLINE int PtInLine(const CPointT<TypeT>& Pt)
 	{
-		CLineT l1(pt1, Pt), l2(Pt, pt2);
-		TypeT k1 = 0, k2 = 0;
-		bool e1 = l1.K(k1), e2 = l2.K(k2);
-		return (e1 == e2 && ExIsEqual(k1, k2));
-	}
-	EXP_INLINE bool PtInSect(const CPointT<TypeT>& Pt)
-	{
-		// 判断x
-		if (ExIsEqual(pt1.x, pt2.x))
-		{
-			if (!ExIsEqual(Pt.x, pt1.x))
-				return false;
-		}
+		TypeT a = pt2.y - pt1.y;
+		TypeT b = pt1.x - pt2.x;
+		TypeT c = a * pt1.x + b * pt1.y;
+		TypeT r = (a * Pt.x + b * Pt.y - c);
+		if (ExIsZero(r))
+			return 0;	// 点在直线上
 		else
-		if (pt1.x < pt2.x)
-		{
-			if (Pt.x < pt1.x || Pt.x > pt2.x)
-				return false;
-		}
+		if ((b > 0 && r > 0) || (b < 0 && r < 0))
+			return 1;	// 点在直线上方
 		else
-		{
-			if (Pt.x > pt1.x || Pt.x < pt2.x)
-				return false;
-		}
-		// 判断y
-		if (ExIsEqual(pt1.y, pt2.y))
-		{
-			if (!ExIsEqual(Pt.y, pt1.y))
-				return false;
-		}
-		else
-		if (pt1.y < pt2.y)
-		{
-			if (Pt.y < pt1.y || Pt.y > pt2.y)
-				return false;
-		}
-		else
-		{
-			if (Pt.y > pt1.y || Pt.y < pt2.y)
-				return false;
-		}
-		return PtInLine(Pt);
+			return -1;	// 点在直线下方
 	}
 
 	// 求交点
@@ -158,14 +140,6 @@ public:
 		TypeT div = a1 * b2 - b1 * a1;
 		Pt.x = (b2 * c1 - b1 * c2) / div;
 		Pt.y = (a1 * c2 - a2 * c1) / div;
-		return true;
-	}
-	EXP_INLINE bool InterSect(const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
-	{
-		CPointT<TypeT> pt;
-		if (!InterLine(tLine, pt)) return false;
-		if (!PtInSect(pt)) return false;
-		Pt = pt;
 		return true;
 	}
 

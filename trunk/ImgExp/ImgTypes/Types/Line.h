@@ -28,24 +28,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Rect - 矩形
+// Line - 线
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-20
-// Version:	1.0.0003.2200
-//
-// History:
-//	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
-//								+ 添加CRectT::IsEmpty()与CRectT::IsNull()接口
-//								= CRectT::PtInRect判断坐标时不包括最右边与最下边
-//	- 1.0.0003.2200(2011-04-20)	^ 简化CRectT的内部数据命名
-//								# 修正CRectT::MoveTo()的错误算法
+// Version:	1.0.0000.2200
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Rect_h__
-#define __Rect_h__
+#ifndef __Line_h__
+#define __Line_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -58,22 +51,22 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT = LONG>
-class CRectT
+class CLineT
 {
 public:
 	CPointT<TypeT> pt1, pt2;
 
 public:
-	CRectT()
+	CLineT()
 	{}
-	CRectT(TypeT nX1, TypeT nY1, TypeT nX2, TypeT nY2)
+	CLineT(TypeT nX1, TypeT nY1, TypeT nX2, TypeT nY2)
 	{ Set(CPointT<TypeT>(nX1, nY1), CPointT<TypeT>(nX2, nY2)); }
-	CRectT(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
+	CLineT(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
 	{ Set(Pt1, Pt2); }
-	CRectT(const CRectT& tRect)
+	CLineT(const CRectT& tRect)
 	{ (*this) = tRect; }
-	CRectT(RECT& tRect)
-	{ (*this) = tRect; }
+	CLineT(const CLineT& tLine)
+	{ (*this) = tLine; }
 
 public:
 	EXP_INLINE void Set(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
@@ -93,58 +86,101 @@ public:
 		pt2 = pt1 + pt;
 	}
 
-	EXP_INLINE void Inter(const CRectT& tRect)
-	{
-		Set(CPointT<TypeT>(max(pt1.x, tRect.pt1.x), min(pt1.y, tRect.pt1.y)), 
-			CPointT<TypeT>(min(pt2.x, tRect.pt2.x), min(pt2.y, tRect.pt2.y)));
-	}
-	EXP_INLINE void Union(const CRectT& tRect)
-	{
-		Set(CPointT<TypeT>(min(pt1.x, tRect.pt1.x), min(pt1.y, tRect.pt1.y)), 
-			CPointT<TypeT>(max(pt2.x, tRect.pt2.x), min(pt2.y, tRect.pt2.y)));
-	}
-
-	EXP_INLINE void Inflate(const CPointT<TypeT>& Pt)
-	{
-		pt1.x -= Pt.x;
-		pt2.x += Pt.x;
-		pt1.y -= Pt.y;
-		pt2.y += Pt.y;
-	}
-	EXP_INLINE void Inflate(const CRectT& tRect)
-	{
-		pt1 -= tRect.pt1;
-		pt2 += tRect.pt2;
-	}
-	EXP_INLINE void Deflate(const CPointT<TypeT>& Pt)
-	{
-		pt1.x += Pt.x;
-		pt2.x -= Pt.x;
-		pt1.y += Pt.y;
-		pt2.y -= Pt.y;
-	}
-	EXP_INLINE void Deflate(const CRectT& tRect)
-	{
-		pt1 += tRect.pt1;
-		pt2 -= tRect.pt2;
-	}
-
 	EXP_INLINE bool IsEmpty()
 	{ return (pt1.x == pt2.x || pt1.y == pt2.y); }
 	EXP_INLINE bool IsNull()
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
-	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt)
-	{ return (Pt.x >= pt1.x && Pt.x < pt2.x && 
-			  Pt.y >= pt1.y && Pt.y < pt2.y); }
+	// 求斜率
+	EXP_INLINE bool K(_OT_ TypeT& k)
+	{
+		TypeT div = pt2.x - pt1.x;
+		if (ExIsZero(div)) return false;
+		k = (pt2.y - pt1.y) / (pt2.x - pt1.x);
+		return true;
+	}
 
-	EXP_INLINE CRectT& operator=(const CRectT& tRect)
+	// 点与直线的关系
+	EXP_INLINE bool PtInLine(const CPointT<TypeT>& Pt)
+	{
+		CLineT l1(pt1, Pt), l2(Pt, pt2);
+		TypeT k1 = 0, k2 = 0;
+		bool e1 = l1.K(k1), e2 = l2.K(k2);
+		return (e1 == e2 && ExIsEqual(k1, k2));
+	}
+	EXP_INLINE bool PtInSect(const CPointT<TypeT>& Pt)
+	{
+		// 判断x
+		if (ExIsEqual(pt1.x, pt2.x))
+		{
+			if (!ExIsEqual(Pt.x, pt1.x))
+				return false;
+		}
+		else
+		if (pt1.x < pt2.x)
+		{
+			if (Pt.x < pt1.x || Pt.x > pt2.x)
+				return false;
+		}
+		else
+		{
+			if (Pt.x > pt1.x || Pt.x < pt2.x)
+				return false;
+		}
+		// 判断y
+		if (ExIsEqual(pt1.y, pt2.y))
+		{
+			if (!ExIsEqual(Pt.y, pt1.y))
+				return false;
+		}
+		else
+		if (pt1.y < pt2.y)
+		{
+			if (Pt.y < pt1.y || Pt.y > pt2.y)
+				return false;
+		}
+		else
+		{
+			if (Pt.y > pt1.y || Pt.y < pt2.y)
+				return false;
+		}
+		return PtInLine(Pt);
+	}
+
+	// 求交点
+	EXP_INLINE bool InterLine(const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
+	{
+		TypeT b1 = pt1.x - pt2.x, b2 = tLine.pt1.x - tLine.pt2.x;
+		if (ExIsZero(b1) && ExIsZero(b2)) return false;
+		TypeT a1 = pt2.y - pt1.y, a2 = tLine.pt2.y - tLine.pt1.y;
+		if (ExIsEqual(a1 / b1, a2 / b2)) return false;
+		TypeT c1 = a1 * pt1.x + b1 * pt1.y, c2 = a2 * tLine.pt1.x + b2 * tLine.pt1.y;
+		TypeT div = a1 * b2 - b1 * a1;
+		Pt.x = (b2 * c1 - b1 * c2) / div;
+		Pt.y = (a1 * c2 - a2 * c1) / div;
+		return true;
+	}
+	EXP_INLINE bool InterSect(const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
+	{
+		CPointT<TypeT> pt;
+		if (!InterLine(tLine, pt)) return false;
+		if (!PtInSect(pt)) return false;
+		Pt = pt;
+		return true;
+	}
+
+	EXP_INLINE CLineT& operator=(const CRectT& tRect)
 	{
 		Set(tRect.pt1, tRect.pt2);
 		return (*this);
 	}
-	EXP_INLINE bool operator==(const CRectT& tRect)
-	{ return ((pt1 == tRect.pt1) && (pt2 == tRect.pt2)); }
+	EXP_INLINE CLineT& operator=(const CLineT& tLine)
+	{
+		Set(tLine.pt1, tLine.pt2);
+		return (*this);
+	}
+	EXP_INLINE bool operator==(const CLineT& tLine)
+	{ return ((pt1 == tLine.pt1) && (pt2 == tLine.pt2)); }
 
 	EXP_INLINE CRectT& operator+=(const CPointT<TypeT>& Pt)
 	{
@@ -156,38 +192,17 @@ public:
 		Deflate(Pt);
 		return (*this);
 	}
-	EXP_INLINE CRectT& operator+=(const CRectT& tRect)
-	{
-		Inflate(tRect);
-		return (*this);
-	}
-	EXP_INLINE CRectT& operator-=(const CRectT& tRect)
-	{
-		Deflate(tRect);
-		return (*this);
-	}
 
 	EXP_INLINE CRectT operator+(const CPointT<TypeT>& Pt)
 	{ return (CRectT(*this) += Pt); }
 	EXP_INLINE CRectT operator-(const CPointT<TypeT>& Pt)
 	{ return (CRectT(*this) -= Pt); }
-	EXP_INLINE CRectT operator+(const CRectT& tRect)
-	{ return (CRectT(*this) += tRect); }
-	EXP_INLINE CRectT operator-(const CRectT& tRect)
-	{ return (CRectT(*this) -= tRect); }
-
-	EXP_INLINE TypeT Left()	 { return pt1.x; }
-	EXP_INLINE TypeT Top()	 { return pt1.y; }
-	EXP_INLINE TypeT Right()	 { return pt2.x; }
-	EXP_INLINE TypeT Bottom() { return pt2.y; }
-	EXP_INLINE TypeT Width()	 { return Right() - Left(); }
-	EXP_INLINE TypeT Height() { return Bottom() - Top(); }
 };
 
-typedef CRectT<> CRect;
+typedef CLineT<> CLine;
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__Rect_h__*/
+#endif/*__Line_h__*/

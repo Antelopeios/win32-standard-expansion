@@ -131,12 +131,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// 关闭资源
 	CResGetter::ReleaseBinary(hres);
 	// 图像形变
-	double matrix[4] = 
+	CPoint var[2] = 
 	{
-		0.5, 0, 
-		0, 0.5, 
+		CPoint(600, -100), 
+		CPoint(700, 800)
 	};
-	HBITMAP tmp = CImgDeformer::Deform(hBitmap, matrix);
+	HBITMAP tmp = CImgDeformer::PlgDeform(hBitmap, var);
 	if (tmp)
 	{
 		ICoderObject::DeleteImage(hBitmap);

@@ -33,13 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-04-11
-// Version:	1.0.0003.1700
+// Date:	2010-04-20
+// Version:	1.0.0004.2222
 //
 // History:
 //	- 1.0.0001.1700(2010-04-07)	+ 添加pixel_t类型定义
 //	- 1.0.0002.2120(2010-04-07)	+ 添加用于分离pixel_t通道分量的相关接口
 //	- 1.0.0003.1700(2010-04-11)	+ 添加graph_t类型定义
+//	- 1.0.0004.2222(2010-04-20)	+ 添加EXP_ZERO,ExIsZero()与ExIsEqual()定义,方便判断浮点数是否为0以及浮点数相等比较
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgCommon_h__
@@ -67,6 +68,10 @@ typedef COLORREF	pixel_t;
 #define ExGetG(pix)	GetGValue(pix)
 #define ExGetB(pix)	GetBValue(pix)
 #define ExGetA(pix)	(LOBYTE((pix) >> 24))
+
+#define EXP_ZERO	0.00000001
+#define ExIsZero(num)	(((num) < EXP_ZERO) && ((num) > -EXP_ZERO))
+#define ExIsEqual(a, b)	ExIsZero((a) - (b))
 
 //////////////////////////////////////////////////////////////////
 

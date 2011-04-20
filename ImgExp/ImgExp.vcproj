@@ -636,6 +636,10 @@
 				Name="Types"
 				>
 				<File
+					RelativePath=".\ImgTypes\Types\Line.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ImgTypes\Types\Point.h"
 					>
 				</File>

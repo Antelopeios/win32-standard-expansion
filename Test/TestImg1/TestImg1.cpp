@@ -133,8 +133,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// Í¼ÏñÐÎ±ä
 	double matrix[4] = 
 	{
-		0, 1, 
-		-1, 0, 
+		0.5, 0, 
+		0, 0.5, 
 	};
 	HBITMAP tmp = CImgDeformer::Deform(hBitmap, matrix);
 	if (tmp)

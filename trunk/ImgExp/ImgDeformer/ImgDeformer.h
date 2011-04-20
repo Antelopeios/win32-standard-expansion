@@ -57,10 +57,11 @@ public:
 	// 坐标矩阵变换
 	EXP_INLINE static void Transform(_IN_ CPointT<double>& ptSrc, _OT_ CPointT<double>& ptDes, _IN_ const double (&mtxTans)[6])
 	{
-		ptDes.m_X = ptSrc.m_X * mtxTans[0] + ptSrc.m_Y * mtxTans[2] + mtxTans[4];
-		ptDes.m_Y = ptSrc.m_X * mtxTans[1] + ptSrc.m_Y * mtxTans[3] + mtxTans[5];
+		ptDes.x = ptSrc.x * mtxTans[0] + ptSrc.y * mtxTans[2] + mtxTans[4];
+		ptDes.y = ptSrc.x * mtxTans[1] + ptSrc.y * mtxTans[3] + mtxTans[5];
 	}
 
+public:
 	// 差值回调指针定义
 	typedef pixel_t (*inter_proc_t)(pixel_t*, CPointT<double>&, CRectT<double>&);
 	// 最邻近插值
@@ -68,18 +69,54 @@ public:
 	{
 		if (!pixSrc) return 0;
 		if (!rcSrc.PtInRect(ptSrc)) return 0;
-		return pixSrc[((DWORD)ptSrc.m_X + (DWORD)ptSrc.m_Y * (DWORD)rcSrc.Width())];
+		return pixSrc[((LONG)ptSrc.x + (LONG)ptSrc.y * (LONG)rcSrc.Width())];
 	}
 	// 双线性插值
 	static pixel_t Bilinear(pixel_t* pixSrc, CPointT<double>& ptSrc, CRectT<double>& rcSrc)
 	{
 		if (!pixSrc) return 0;
 		if (!rcSrc.PtInRect(ptSrc)) return 0;
-		return 0;
+		// 计算待差值的4个顶点
+		LONG lx = (LONG)ptSrc.x;
+		LONG ly = (LONG)ptSrc.y;
+		double dx = ptSrc.x - lx;
+		double dy = ptSrc.y - ly;
+		if (dx < 0.00000001) dx = 0;
+		if (dy < 0.00000001) dy = 0;
+		LONG w = (LONG)rcSrc.Width(), h = (LONG)rcSrc.Height();
+		LONG inx[4] = {0};
+		inx[0] = lx + ly * w;
+		inx[1] = (lx >= (w - 1)) ? inx[0] : ((dx == 0) ? inx[0] : inx[0] + 1);
+		inx[2] = (ly >= (h - 1)) ? inx[0] : ((dy == 0) ? inx[0] : inx[0] + w);
+		inx[3] = (lx >= (w - 1)) ? inx[2] : ((dx == 0) ? inx[2] : inx[2] + 1);
+		pixel_t pix[4] = 
+		{
+			pixSrc[inx[0]], 
+			pixSrc[inx[1]], 
+			pixSrc[inx[2]], 
+			pixSrc[inx[3]]
+		};
+		// 求解差值
+		double mx = 1 - dx, my = 1 - dy;
+		double d[4] = 
+		{
+			mx * my, 
+			mx * dy, 
+			dx * my, 
+			dx * dy
+		};
+		return ExRGBA
+			(
+			(d[0] * ExGetR(pix[0]) + d[1] * ExGetR(pix[2]) + d[2] * ExGetR(pix[1]) + d[3] * ExGetR(pix[3])), 
+			(d[0] * ExGetG(pix[0]) + d[1] * ExGetG(pix[2]) + d[2] * ExGetG(pix[1]) + d[3] * ExGetG(pix[3])), 
+			(d[0] * ExGetB(pix[0]) + d[1] * ExGetB(pix[2]) + d[2] * ExGetB(pix[1]) + d[3] * ExGetB(pix[3])), 
+			(d[0] * ExGetA(pix[0]) + d[1] * ExGetA(pix[2]) + d[2] * ExGetA(pix[1]) + d[3] * ExGetA(pix[3]))
+			);
 	}
 
+public:
 	// 图像转换
-	EXP_INLINE static image_t Deform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = Neighbor)
+	EXP_INLINE static image_t Deform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = Bilinear/*Neighbor*/)
 	{
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return NULL;
@@ -103,10 +140,10 @@ public:
 		Transform(ver_src[2], ver_des[2], matrix);
 		Transform(ver_src[3], ver_des[3], matrix);
 		// 得到目标图像的宽与高
-		LONG min_x = (LONG)min(min(ver_des[0].m_X, ver_des[1].m_X), min(ver_des[2].m_X, ver_des[3].m_X));
-		LONG max_x = (LONG)max(max(ver_des[0].m_X, ver_des[1].m_X), max(ver_des[2].m_X, ver_des[3].m_X));
-		LONG min_y = (LONG)min(min(ver_des[0].m_Y, ver_des[1].m_Y), min(ver_des[2].m_Y, ver_des[3].m_Y));
-		LONG max_y = (LONG)max(max(ver_des[0].m_Y, ver_des[1].m_Y), max(ver_des[2].m_Y, ver_des[3].m_Y));
+		LONG min_x = (LONG)min(min(ver_des[0].x, ver_des[1].x), min(ver_des[2].x, ver_des[3].x));
+		LONG max_x = (LONG)max(max(ver_des[0].x, ver_des[1].x), max(ver_des[2].x, ver_des[3].x));
+		LONG min_y = (LONG)min(min(ver_des[0].y, ver_des[1].y), min(ver_des[2].y, ver_des[3].y));
+		LONG max_y = (LONG)max(max(ver_des[0].y, ver_des[1].y), max(ver_des[2].y, ver_des[3].y));
 		DWORD w_des = max_x - min_x;
 		DWORD h_des = max_y - min_y;
 		// 增加平移坐标矩阵

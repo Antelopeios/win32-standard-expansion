@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-19
-// Version:	1.0.0001.1630
+// Date:	2011-04-20
+// Version:	1.0.0002.1513
 //
 // History:
 //	- 1.0.0001.1630(2011-04-19)	+ CPoint改为CPointT<>,支持通过模板参数控制内部数据的类型
+//	- 1.0.0002.1513(2011-04-20)	^ 简化CPointT的内部数据命名
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Point_h__
@@ -55,54 +56,54 @@ template <typename TypeT = LONG>
 class CPointT
 {
 public:
-	TypeT m_X, m_Y;
+	TypeT x, y;
 
 public:
 	CPointT(TypeT nX = 0, TypeT nY = 0)
-		: m_X(0), m_Y(0)
+		: x(0), y(0)
 	{ Set(nX, nY); }
 	CPointT(const CPointT& tPoint)
-		: m_X(0), m_Y(0)
+		: x(0), y(0)
 	{ (*this) = tPoint; }
 	CPointT(POINT& tPoint)
-		: m_X(0), m_Y(0)
+		: x(0), y(0)
 	{ (*this) = tPoint; }
 
 public:
 	EXP_INLINE void Set(TypeT nX = 0, TypeT nY = 0)
 	{
-		m_X = nX;
-		m_Y = nY;
+		x = nX;
+		y = nY;
 	}
 	EXP_INLINE void Offset(TypeT nX = 0, TypeT nY = 0)
 	{
-		m_X += nX;
-		m_Y += nY;
+		x += nX;
+		y += nY;
 	}
 
 	EXP_INLINE CPointT& operator=(const CPointT& tPoint)
 	{
-		Set(tPoint.m_X, tPoint.m_Y);
+		Set(tPoint.x, tPoint.y);
 		return (*this);
 	}
 	EXP_INLINE bool operator==(const CPointT& tPoint)
-	{ return ((m_X == tPoint.m_X) && (m_Y == tPoint.m_Y)); }
+	{ return ((x == tPoint.x) && (y == tPoint.y)); }
 
 	EXP_INLINE CPointT& operator+=(const CPointT& tPoint)
 	{
-		Offset(tPoint.m_X, tPoint.m_Y);
+		Offset(tPoint.x, tPoint.y);
 		return (*this);
 	}
 	EXP_INLINE CPointT& operator-=(const CPointT& tPoint)
 	{
-		Offset(-tPoint.m_X, -tPoint.m_Y);
+		Offset(-tPoint.x, -tPoint.y);
 		return (*this);
 	}
 
 	EXP_INLINE CPointT operator+(const CPointT& tPoint)
-	{ return CPointT(m_X + tPoint.m_X, m_Y + tPoint.m_Y); }
+	{ return CPointT(x + tPoint.x, y + tPoint.y); }
 	EXP_INLINE CPointT operator-(const CPointT& tPoint)
-	{ return CPointT(m_X - tPoint.m_X, m_Y - tPoint.m_Y); }
+	{ return CPointT(x - tPoint.x, y - tPoint.y); }
 };
 
 typedef CPointT<> CPoint;

@@ -89,21 +89,21 @@ public:
 
 	EXP_INLINE void Inter(const CRectT& tRect)
 	{
-		Set(CPointT<TypeT>(max(m_Pt1.m_X, tRect.m_Pt1.m_X), min(m_Pt1.m_Y, tRect.m_Pt1.m_Y)), 
-			CPointT<TypeT>(min(m_Pt2.m_X, tRect.m_Pt2.m_X), min(m_Pt2.m_Y, tRect.m_Pt2.m_Y)));
+		Set(CPointT<TypeT>(max(m_Pt1.x, tRect.m_Pt1.x), min(m_Pt1.y, tRect.m_Pt1.y)), 
+			CPointT<TypeT>(min(m_Pt2.x, tRect.m_Pt2.x), min(m_Pt2.y, tRect.m_Pt2.y)));
 	}
 	EXP_INLINE void Union(const CRectT& tRect)
 	{
-		Set(CPointT<TypeT>(min(m_Pt1.m_X, tRect.m_Pt1.m_X), min(m_Pt1.m_Y, tRect.m_Pt1.m_Y)), 
-			CPointT<TypeT>(max(m_Pt2.m_X, tRect.m_Pt2.m_X), min(m_Pt2.m_Y, tRect.m_Pt2.m_Y)));
+		Set(CPointT<TypeT>(min(m_Pt1.x, tRect.m_Pt1.x), min(m_Pt1.y, tRect.m_Pt1.y)), 
+			CPointT<TypeT>(max(m_Pt2.x, tRect.m_Pt2.x), min(m_Pt2.y, tRect.m_Pt2.y)));
 	}
 
 	EXP_INLINE void Inflate(const CPointT<TypeT>& Pt)
 	{
-		m_Pt1.m_X -= Pt.m_X;
-		m_Pt2.m_X += Pt.m_X;
-		m_Pt1.m_Y -= Pt.m_Y;
-		m_Pt2.m_Y += Pt.m_Y;
+		m_Pt1.x -= Pt.x;
+		m_Pt2.x += Pt.x;
+		m_Pt1.y -= Pt.y;
+		m_Pt2.y += Pt.y;
 	}
 	EXP_INLINE void Inflate(const CRectT& tRect)
 	{
@@ -112,10 +112,10 @@ public:
 	}
 	EXP_INLINE void Deflate(const CPointT<TypeT>& Pt)
 	{
-		m_Pt1.m_X += Pt.m_X;
-		m_Pt2.m_X -= Pt.m_X;
-		m_Pt1.m_Y += Pt.m_Y;
-		m_Pt2.m_Y -= Pt.m_Y;
+		m_Pt1.x += Pt.x;
+		m_Pt2.x -= Pt.x;
+		m_Pt1.y += Pt.y;
+		m_Pt2.y -= Pt.y;
 	}
 	EXP_INLINE void Deflate(const CRectT& tRect)
 	{
@@ -161,21 +161,21 @@ public:
 	EXP_INLINE CRectT operator-(const CRectT& tRect)
 	{ return (CRectT(*this) -= tRect); }
 
-	EXP_INLINE TypeT Left()	 { return m_Pt1.m_X; }
-	EXP_INLINE TypeT Top()	 { return m_Pt1.m_Y; }
-	EXP_INLINE TypeT Right()	 { return m_Pt2.m_X; }
-	EXP_INLINE TypeT Bottom() { return m_Pt2.m_Y; }
+	EXP_INLINE TypeT Left()	 { return m_Pt1.x; }
+	EXP_INLINE TypeT Top()	 { return m_Pt1.y; }
+	EXP_INLINE TypeT Right()	 { return m_Pt2.x; }
+	EXP_INLINE TypeT Bottom() { return m_Pt2.y; }
 	EXP_INLINE TypeT Width()	 { return Right() - Left(); }
 	EXP_INLINE TypeT Height() { return Bottom() - Top(); }
 
 	EXP_INLINE bool IsEmpty()
-	{ return (m_Pt1.m_X == m_Pt2.m_X || m_Pt1.m_Y == m_Pt2.m_Y); }
+	{ return (m_Pt1.x == m_Pt2.x || m_Pt1.y == m_Pt2.y); }
 	EXP_INLINE bool IsNull()
-	{ return (m_Pt1.m_X == 0 && m_Pt2.m_X == 0 && m_Pt1.m_Y == 0 && m_Pt2.m_Y == 0); }
+	{ return (m_Pt1.x == 0 && m_Pt2.x == 0 && m_Pt1.y == 0 && m_Pt2.y == 0); }
 
 	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt)
-	{ return (Pt.m_X >= m_Pt1.m_X && Pt.m_X < m_Pt2.m_X && 
-			  Pt.m_Y >= m_Pt1.m_Y && Pt.m_Y < m_Pt2.m_Y); }
+	{ return (Pt.x >= m_Pt1.x && Pt.x < m_Pt2.x && 
+			  Pt.y >= m_Pt1.y && Pt.y < m_Pt2.y); }
 };
 
 typedef CRectT<> CRect;

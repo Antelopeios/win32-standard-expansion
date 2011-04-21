@@ -133,8 +133,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// Í¼ÏñÐÎ±ä
 	CPoint var[2] = 
 	{
-		CPoint(600, -100), 
-		CPoint(700, 800)
+		CPoint(500, 200), 
+		CPoint(600, 400)
 	};
 	HBITMAP tmp = CImgDeformer::PlgDeform(hBitmap, var);
 	if (tmp)

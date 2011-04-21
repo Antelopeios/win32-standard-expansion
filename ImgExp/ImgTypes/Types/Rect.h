@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-20
-// Version:	1.0.0003.2200
+// Date:	2011-04-21
+// Version:	1.0.0004.1800
 //
 // History:
 //	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
@@ -42,6 +42,7 @@
 //								= CRectT::PtInRect判断坐标时不包括最右边与最下边
 //	- 1.0.0003.2200(2011-04-20)	^ 简化CRectT的内部数据命名
 //								# 修正CRectT::MoveTo()的错误算法
+//	- 1.0.0004.1800(2011-04-21)	+ CRectT::PtInRect()支持自定义是否忽略右边界与下边界
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -134,9 +135,15 @@ public:
 	EXP_INLINE bool IsNull()
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
-	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt)
-	{ return (Pt.x >= pt1.x && Pt.x < pt2.x && 
-			  Pt.y >= pt1.y && Pt.y < pt2.y); }
+	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt, bool bEgSide = true)
+	{
+		if (bEgSide)
+			return (Pt.x >= pt1.x && Pt.x < pt2.x && 
+					Pt.y >= pt1.y && Pt.y < pt2.y);
+		else
+			return (Pt.x >= pt1.x && Pt.x <= pt2.x && 
+					Pt.y >= pt1.y && Pt.y <= pt2.y);
+	}
 
 	EXP_INLINE CRectT& operator=(const CRectT& tRect)
 	{

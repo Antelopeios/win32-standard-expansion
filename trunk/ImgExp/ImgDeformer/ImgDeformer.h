@@ -34,7 +34,10 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-22
-// Version:	1.0.0000.0000
+// Version:	1.0.0000.0810
+//
+// History:
+//	- 1.0.0000.0810(2011-04-22)	= 调整差值函数接口命名
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDeformer_h__
@@ -57,14 +60,14 @@ public:
 	// 差值回调指针定义
 	typedef pixel_t (*inter_proc_t)(pixel_t*, CPointT<double>&, CRectT<double>&);
 	// 最邻近插值
-	static pixel_t Neighbor(pixel_t* pixSrc, CPointT<double>& ptSrc, CRectT<double>& rcSrc)
+	static pixel_t InterNeighbor(pixel_t* pixSrc, CPointT<double>& ptSrc, CRectT<double>& rcSrc)
 	{
 		if (!pixSrc) return 0;
 		if (!rcSrc.PtInRect(ptSrc)) return 0;
 		return pixSrc[((LONG)ptSrc.x + (LONG)ptSrc.y * (LONG)rcSrc.Width())];
 	}
 	// 双线性插值
-	static pixel_t Bilinear(pixel_t* pixSrc, CPointT<double>& ptSrc, CRectT<double>& rcSrc)
+	static pixel_t InterBilinear(pixel_t* pixSrc, CPointT<double>& ptSrc, CRectT<double>& rcSrc)
 	{
 		if (!pixSrc) return 0;
 		if (!rcSrc.PtInRect(ptSrc))
@@ -118,7 +121,7 @@ protected:
 		mtxTans[3] = ((ptSrc[0].x * ptDes[1].y) - (ptSrc[1].x * ptDes[0].y)) / mtx_div;
 	}
 	// 反向矩阵计算
-	EXP_INLINE static void InvMatrix(_IN_ const double (&mtxSrc)[6], _OT_ double (&mtxDes)[6])
+	EXP_INLINE static void InvMatrix(_IN_ const double (&mtxSrc)[4], _OT_ double (&mtxDes)[4])
 	{
 		double inv_div = mtxSrc[0] * mtxSrc[3] - mtxSrc[2] * mtxSrc[1];
 		if (ExIsZero(inv_div)) return;
@@ -126,8 +129,6 @@ protected:
 		mtxDes[1] = -(mtxSrc[1] / inv_div);
 		mtxDes[2] = -(mtxSrc[2] / inv_div);
 		mtxDes[3] = (mtxSrc[0] / inv_div);
-		mtxDes[4] = ((mtxSrc[2] * mtxSrc[5] - mtxSrc[4] * mtxSrc[3]) / inv_div);
-		mtxDes[5] = ((mtxSrc[4] * mtxSrc[1] - mtxSrc[0] * mtxSrc[5]) / inv_div);
 	}
 	// 坐标矩阵变换
 	EXP_INLINE static void Transform(_IN_ CPointT<double>& ptSrc, _OT_ CPointT<double>& ptDes, _IN_ const double (&mtxTans)[4])
@@ -137,7 +138,7 @@ protected:
 	}
 	// 图像矩阵变换
 	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], 
-										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = Bilinear)
+										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
 	{
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return NULL;
@@ -173,7 +174,7 @@ protected:
 		exp_des.Create(w_des, h_des);
 		if (exp_des.IsNull()) return NULL;
 		// 映射坐标点
-		if (!interProc) interProc = Bilinear;
+		if (!interProc) interProc = InterBilinear;
 		CRectT<double> rc_src(0.0f, 0.0f, exp_src.GetWidth(), exp_src.GetHeight());
 		CPointT<double> crd_src, crd_des;
 		pixel_t* pix_src = exp_src.GetPixels();
@@ -195,8 +196,28 @@ protected:
 	}
 
 public:
+	// 矩阵变换
+	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
+	{
+		CImage exp_src(imgSrc);
+		if (exp_src.IsNull()) return NULL;
+		// 拿到顶点坐标
+		CPointT<double> ver_src[2] = 
+		{
+			CPointT<double>(exp_src.GetWidth(), 0), 
+			CPointT<double>(exp_src.GetWidth(), exp_src.GetHeight()), 
+		};
+		CPointT<double> ver_des[2];
+		Transform(ver_src[0], ver_des[0], mtxTans);
+		Transform(ver_src[1], ver_des[1], mtxTans);
+		// 计算形变矩阵
+		double matrix[4] = {0};
+		InvMatrix(mtxTans, matrix);
+		// 图像变形
+		return MtxDeform(imgSrc, ver_des, matrix, interProc);
+	}
 	// 平行四边形变换
-	EXP_INLINE static image_t PlgDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], inter_proc_t interProc = Bilinear)
+	EXP_INLINE static image_t PlgDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], inter_proc_t interProc = InterBilinear)
 	{
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return NULL;

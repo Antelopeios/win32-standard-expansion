@@ -590,14 +590,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="ImgRenderer"
-			>
-			<File
-				RelativePath=".\ImgRenderer\ImgRenderer.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="ImgTypes"
 			>
 			<File
@@ -654,10 +646,18 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="ImgDeformer"
+			Name="ImgDrawer"
 			>
 			<File
-				RelativePath=".\ImgDeformer\ImgDeformer.h"
+				RelativePath=".\ImgDrawer\ImgDeformer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgDrawer\ImgDrawer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgDrawer\ImgRenderer.h"
 				>
 			</File>
 		</Filter>

@@ -44,7 +44,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgDeformer/ImgDeformer.h"
+#include "ImgDrawer/ImgDeformer.h"
 
 EXP_BEG
 
@@ -58,63 +58,78 @@ public:
 	// ³£¹æäÖÈ¾
 	static pixel_t RenderNormal(pixel_t pixSrc, pixel_t pixDes)
 	{
-		int a = ExGetA(pixSrc);
-		if (a == 0) return pixDes;
-		if (a == (BYTE)~0) return pixSrc;
-		int r_d = ExGetR(pixDes);
-		int g_d = ExGetG(pixDes);
-		int b_d = ExGetB(pixDes);
-		int r_s = (ExGetR(pixSrc) << 8) / a;
-		int g_s = (ExGetG(pixSrc) << 8) / a;
-		int b_s = (ExGetB(pixSrc) << 8) / a;
-		pixDes = ExRGBA
+		BYTE a_s = ExGetA(pixSrc);
+		if (a_s == 0) return pixDes;
+		if (a_s == (BYTE)~0) return pixSrc;
+		BYTE r_s = ExGetR(pixSrc);
+		BYTE g_s = ExGetG(pixSrc);
+		BYTE b_s = ExGetB(pixSrc);
+		BYTE a_d = (BYTE)~0 - a_s;
+		BYTE r_d = ExGetR(pixDes);
+		BYTE g_d = ExGetG(pixDes);
+		BYTE b_d = ExGetB(pixDes);
+		return ExRGBA
 			(
-			(((r_s - r_d) * a) >> 8) + r_d, 
-			(((g_s - g_d) * a) >> 8) + g_d, 
-			(((b_s - b_d) * a) >> 8) + b_d, 
+			(r_s * a_s + r_d * a_d) / (BYTE)~0, 
+			(g_s * a_s + g_d * a_d) / (BYTE)~0, 
+			(b_s * a_s + b_d * a_d) / (BYTE)~0, 
 			(BYTE)~0
 			);
-		return pixDes;
+	}
+	static pixel_t RenderGray(pixel_t pixSrc, pixel_t pixDes)
+	{
+		BYTE g = (ExGetR(pixSrc) * 38 + ExGetG(pixSrc) * 75 + ExGetB(pixSrc) * 15) >> 7;
+		return RenderNormal(ExRGBA(g, g, g, ExGetA(pixSrc)), pixDes);
+	}
+	static pixel_t RenderInverse(pixel_t pixSrc, pixel_t pixDes)
+	{
+		return RenderNormal(
+			ExRGBA
+				(
+				(BYTE)~0 - ExGetR(pixSrc), 
+				(BYTE)~0 - ExGetG(pixSrc), 
+				(BYTE)~0 - ExGetB(pixSrc), 
+				ExGetA(pixSrc)
+				), 
+			pixDes);
 	}
 
 public:
-	EXP_INLINE static bool ImgRender(graph_t grpDes, image_t imgSrc, CRect& rcDes, render_proc_t renderProc = RenderNormal)
+	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, 
+								  CRect& rcDes, CPoint& ptSrc, 
+								  render_proc_t renderProc = RenderNormal)
 	{
-		CGraph exp_grp(grpDes);
-		if (exp_grp.IsNull()) return false;
-		CImage exp_des((image_t)exp_grp.GetObject(OBJ_BITMAP));
+		CImage exp_des(imgDes);
 		if (exp_des.IsNull()) return false;
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return false;
+		if (rcDes.IsEmpty())
+			rcDes.Set(CPoint(), CPoint(exp_des.GetWidth(), exp_des.GetHeight()));
 		// ±éÀúÏñËØ»æÍ¼
 		if (!renderProc) renderProc = RenderNormal;
-		pixel_t* pix_src = exp_src.GetPixels();
 		pixel_t* pix_des = exp_des.GetPixels();
+		pixel_t* pix_src = exp_src.GetPixels();
 		for(long y_s = 0; y_s < (long)exp_src.GetHeight(); ++y_s)
 		{
 			for(long x_s = 0; x_s < (long)exp_src.GetWidth(); ++x_s)
 			{
 				// Ð£ÑéÏñËØÇøÓò
+				if (x_s < ptSrc.x || x_s >= ptSrc.x + rcDes.Width() || 
+					y_s < ptSrc.y || y_s >= ptSrc.y + rcDes.Height()) continue;
 				long x_d = rcDes.Left() + x_s;
 				if (x_d < 0) continue;
 				if (x_d >= (long)exp_des.GetWidth()) break;
 				long y_d = rcDes.Top() + y_s;
 				if (y_d < 0) continue;
 				if (y_d >= (long)exp_des.GetHeight()) break;
-				// »ñµÃÏñËØË÷Òý
-				long i_s = x_s + exp_src.GetWidth() * y_s;
-				long i_d = x_d + exp_des.GetWidth() * y_d;
 				// äÖÈ¾ÏñËØ
-				pix_des[i_d] = renderProc(pix_src[i_s], pix_des[i_d]);
+				pixel_t* pdst = pix_des + ((exp_des.GetHeight() - y_d - 1) * exp_des.GetWidth() + x_d);
+				pixel_t* psrc = pix_src + ((exp_src.GetHeight() - y_s - 1) * exp_src.GetWidth() + x_s);
+				(*pdst) = renderProc((*psrc), (*pdst));
 			}
 		}
 		return true;
 	}
-	//EXP_INLINE static bool PlgRender(graph_t grpDes, image_t imgSrc, const CPoint (&ptVer)[2], 
-	//								 render_proc_t renderProc = RenderNormal, 
-	//								 CImgDeformer::inter_proc_t interProc = CImgDeformer::InterBilinear)
-	//{
-	//}
 };
 
 //////////////////////////////////////////////////////////////////

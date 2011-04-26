@@ -12,7 +12,7 @@
 HINSTANCE hInst;								// 当前实例
 TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
 TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
-HBITMAP hBitmap = NULL;
+image_t hBitmap = NULL;
 
 // 此代码模块中包含的函数的前向声明:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -130,24 +130,45 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	hBitmap = coder->Decode();
 	// 关闭资源
 	CResGetter::ReleaseBinary(hres);
-	// 图像形变
-	//CPoint var[2] = 
-	//{
-	//	CPoint(500, 200), 
-	//	CPoint(600, 400)
-	//};
-	//HBITMAP tmp = CImgDeformer::PlgDeform(hBitmap, var);
-	//HBITMAP tmp = CImgDeformer::WhlDeform(hBitmap, -90);
-	//HBITMAP tmp = CImgDeformer::ZomDeform(hBitmap, -700, 800);
-	//if (tmp)
-	//{
-	//	ICoderObject::DeleteImage(hBitmap);
-	//	hBitmap = tmp;
-	//}
+
+	// 允许拖放
+	DragAcceptFiles(hWnd, TRUE);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
+	return TRUE;
+}
+
+BOOL OpenFile(HWND hWnd, CString& sPath)
+{
+	if (sPath.Empty()) return FALSE;
+	// 打开文件并获取解码器
+	CIOFile file(sPath); CGC gc;
+	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
+	if (!coder) return FALSE;
+	// 解码文件
+	ICoderObject::DeleteImage(hBitmap);
+	hBitmap = coder->Decode();
+	// 刷新窗口
+	RECT rect = {0};
+	GetClientRect(hWnd, &rect);
+	InvalidateRect(hWnd, &rect, FALSE);
+	return TRUE;
+} 
+
+BOOL SaveFile(DWORD nInx, CString& sPath)
+{
+	if (!hBitmap) return FALSE;
+	if (sPath.Empty()) return FALSE;
+	// 获取解码器
+	CGC gc;
+	ICoderObject* coder = CImgAnalyzer::GetCoder(nInx, &gc);
+	if (!coder) return FALSE;
+	// 编码文件
+	CIOFile file(sPath, CIOFile::modeCreate | CIOFile::modeReadWrite | CIOFile::shareExclusive);
+	coder->SetFile(&file);
+	coder->Encode(hBitmap);
 	return TRUE;
 }
 
@@ -180,18 +201,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CString ret;
 				CSysDialog::FileDialog(ret, TRUE, NULL, NULL, 
 					_T("图片文件(*.bmp;*.jpg;*.png)\0*.bmp;*.jpg;*.png\0所有文件(*.*)\0*.*\0"));
-				if (ret.Empty()) break;
-				// 打开文件并获取解码器
-				CIOFile file(ret); CGC gc;
-				ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
-				if (!coder) break;
-				// 解码文件
-				ICoderObject::DeleteImage(hBitmap);
-				hBitmap = coder->Decode();
-				// 刷新窗口
-				RECT rect = {0};
-				GetClientRect(hWnd, &rect);
-				InvalidateRect(hWnd, &rect, FALSE);
+				OpenFile(hWnd, ret);
 			}
 			break;
 		case IDM_SAVE:
@@ -200,15 +210,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CString ret; DWORD inx = 0;
 				CSysDialog::FileDialog(ret, FALSE, NULL, NULL, 
 					_T("BMP文件(*.bmp)\0*.bmp\0JPG文件(*.jpg)\0*.jpg\0PNG文件(*.png)\0*.png\0"), &inx);
-				if (ret.Empty()) break;
-				// 获取解码器
-				CGC gc;
-				ICoderObject* coder = CImgAnalyzer::GetCoder(inx, &gc);
-				if (!coder) break;
-				// 编码文件
-				CIOFile file(ret, CIOFile::modeCreate | CIOFile::modeReadWrite | CIOFile::shareExclusive);
-				coder->SetFile(&file);
-				coder->Encode(hBitmap);
+				SaveFile(inx, ret);
+			}
+			break;
+		case IDM_PLG:
+			if (hBitmap)
+			{
+				CPoint var[2] = 
+				{
+					CPoint(500, 200), 
+					CPoint(600, 400)
+				};
+				image_t tmp = CImgDeformer::PlgDeform(hBitmap, var);
+				if(!tmp) break;
+				ICoderObject::DeleteImage(hBitmap);
+				hBitmap = tmp;
+				// 刷新窗口
+				RECT rect = {0};
+				GetClientRect(hWnd, &rect);
+				InvalidateRect(hWnd, &rect, FALSE);
+			}
+			break;
+		case IDM_WHL:
+			if (hBitmap)
+			{
+				image_t tmp = CImgDeformer::WhlDeform(hBitmap, -45);
+				if(!tmp) break;
+				ICoderObject::DeleteImage(hBitmap);
+				hBitmap = tmp;
+				// 刷新窗口
+				RECT rect = {0};
+				GetClientRect(hWnd, &rect);
+				InvalidateRect(hWnd, &rect, FALSE);
+			}
+			break;
+		case IDM_ZOM:
+			if (hBitmap)
+			{
+				CImage bmp_img(hBitmap);
+				image_t tmp = CImgDeformer::ZomDeform(hBitmap, (LONG)(bmp_img.GetWidth() * -1.2), (LONG)(bmp_img.GetHeight() * 1.5));
+				if(!tmp) break;
+				ICoderObject::DeleteImage(hBitmap);
+				hBitmap = tmp;
+				// 刷新窗口
+				RECT rect = {0};
+				GetClientRect(hWnd, &rect);
+				InvalidateRect(hWnd, &rect, FALSE);
 			}
 			break;
 		case IDM_ABOUT:
@@ -229,6 +276,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			CImage mem_img;
 			mem_img.Create(rect.right - rect.left, rect.bottom - rect.top);
+
 			CGraph mem_grp;
 			mem_grp.Create(hdc);
 			mem_grp.SetObject(mem_img.Get());
@@ -252,8 +300,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//	::SelectObject(bmp_hdc, bmp_old);
 			//	::DeleteDC(bmp_hdc);
 			//}
-
-			CImgRenderer::ImgRender(mem_grp, hBitmap, CRect(0, 0, rect.right - rect.left, rect.bottom - rect.top));
+			CImage bmp_img(hBitmap);
+			if(!bmp_img.IsNull())
+			{
+				CImgRenderer::Render(mem_img, bmp_img, CRect(
+					(rect.right - bmp_img.GetWidth()) / 2, 
+					(rect.bottom - bmp_img.GetHeight()) / 2, 
+					rect.right, rect.bottom), 
+					CPoint(0, 0), CImgRenderer::RenderGray);
+			}
 
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 
@@ -263,6 +318,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_ERASEBKGND:
+		break;
+	case WM_DROPFILES:
+		{
+			HDROP drop = (HDROP)wParam;
+			CString path;
+			DragQueryFile(drop, 0, path.GetCStr(MAX_PATH), MAX_PATH);
+			DragFinish(drop);
+			if (path.Empty()) break;
+			WIN32_FIND_DATA fd;
+			HANDLE find = ::FindFirstFile(path, &fd);
+			if (find == INVALID_HANDLE_VALUE)
+				break;
+			::FindClose(find);
+			if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				break;
+			OpenFile(hWnd, path);
+		}
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);

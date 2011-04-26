@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-19
-// Version:	1.0.0005.2350
+// Date:	2011-04-26
+// Version:	1.0.0006.1730
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -45,6 +45,7 @@
 //								+ 添加CImage::Clone()方法
 //	- 1.0.0005.2350(2011-04-19)	= 当对CImage::Clone()传入空区域时,此接口将拷贝整个图片
 //								# 修正CImage::IsNull()中的一个逻辑错误
+//	- 1.0.0006.1730(2011-04-26)	= 将部分接口的返回值由DWORD改为LONG
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
@@ -153,13 +154,13 @@ public:
 		return exp_img.Get();
 	}
 
-	DWORD GetWidth()
-	{ return (DWORD)m_Bitmap.bmWidth; }
-	DWORD GetHeight()
-	{ return (DWORD)m_Bitmap.bmHeight; }
+	LONG GetWidth()
+	{ return m_Bitmap.bmWidth; }
+	LONG GetHeight()
+	{ return m_Bitmap.bmHeight; }
 	uint8_t GetChannel()
 	{ return (uint8_t)(m_Bitmap.bmBitsPixel >> 3); }
-	DWORD GetSize()
+	LONG GetSize()
 	{ return m_Bitmap.bmWidthBytes * m_Bitmap.bmHeight; }
 	pixel_t* GetPixels()
 	{ return (pixel_t*)m_Bitmap.bmBits; }

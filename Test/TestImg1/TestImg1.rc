@@ -50,6 +50,12 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "退出(&X)",                      IDM_EXIT
     END
+    POPUP "编辑(&E)"
+    BEGIN
+        MENUITEM "平行四边形",                       IDM_PLG
+        MENUITEM "旋转",                          IDM_WHL
+        MENUITEM "缩放",                          IDM_ZOM
+    END
     POPUP "帮助(&H)"
     BEGIN
         MENUITEM "关于(&A) ...",                  IDM_ABOUT

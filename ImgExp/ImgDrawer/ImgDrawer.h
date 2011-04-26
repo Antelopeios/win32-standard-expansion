@@ -28,33 +28,29 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImgExp - 图像拓展库(Image Expansion)
+// ImgTypes - 图像绘制引擎
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-19
-// Version:	0.1.0001.2300
-//
-// History:
-//	- 0.1.0001.2300(2011-04-19)	@ 完成ImgCoder部分所有类的构建
-//								@ 完成ImgTypes部分所有类的构建
+// Date:	2011-04-26
+// Version:	1.0.0000.1514
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImgExp_h__
-#define __ImgExp_h__
+#ifndef __ImgDrawer_h__
+#define __ImgDrawer_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-//////////////////////////////////////////////////////////////////
-
 #include "ImgCommon/ImgCommon.h"
-#include "ImgTypes/ImgTypes.h"
-#include "ImgCoder/ImgCoder.h"
-#include "ImgDrawer/ImgDrawer.h"
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__ImgExp_h__*/
+#include "ImgDrawer/ImgDeformer.h"
+#include "ImgDrawer/ImgRenderer.h"
+
+//////////////////////////////////////////////////////////////////
+
+#endif/*__ImgDrawer_h__*/

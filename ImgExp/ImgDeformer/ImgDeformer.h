@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-22
-// Version:	1.0.0000.0810
+// Date:	2011-04-25
+// Version:	1.0.0001.1630
 //
 // History:
 //	- 1.0.0000.0810(2011-04-22)	= 调整差值函数接口命名
+//	- 1.0.0001.1630(2011-04-25)	+ 添加其他变换函数接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDeformer_h__
@@ -112,7 +113,7 @@ public:
 
 protected:
 	// 生成变换矩阵
-	EXP_INLINE static void MakMatrix(_IN_ const CPoint (&ptSrc)[2], _IN_ const CPoint (&ptDes)[2], _OT_ double (&mtxTans)[4])
+	EXP_INLINE static void MakMatrix(_IN_ const CPointT<double> (&ptSrc)[2], _IN_ const CPointT<double> (&ptDes)[2], _OT_ double (&mtxTans)[4])
 	{
 		double mtx_div = ptSrc[0].x * ptSrc[1].y - ptSrc[0].y * ptSrc[1].x;
 		mtxTans[0] = ((ptSrc[1].y * ptDes[0].x) - (ptSrc[0].y * ptDes[1].x)) / mtx_div;
@@ -137,7 +138,7 @@ protected:
 		ptDes.y = ptSrc.x * mtxTans[1] + ptSrc.y * mtxTans[3];
 	}
 	// 图像矩阵变换
-	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], 
+	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const CPointT<double> (&ptVer)[2], 
 										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
 	{
 		CImage exp_src(imgSrc);
@@ -222,16 +223,53 @@ public:
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
-		CPoint ver_src[2] = 
+		CPointT<double> ver_src[2] = 
 		{
-			CPoint(exp_src.GetWidth(), 0), 
-			CPoint(exp_src.GetWidth(), exp_src.GetHeight())
+			CPointT<double>(exp_src.GetWidth(), 0), 
+			CPointT<double>(exp_src.GetWidth(), exp_src.GetHeight())
+		};
+		CPointT<double> ver_des[2] = 
+		{
+			CPointT<double>(ptVer[0].x, ptVer[0].y), 
+			CPointT<double>(ptVer[1].x, ptVer[1].y)
 		};
 		// 计算形变矩阵
 		double matrix[4] = {0};
-		MakMatrix(ptVer, ver_src, matrix);
+		MakMatrix(ver_des, ver_src, matrix);
 		// 图像变形
-		return MtxDeform(imgSrc, ptVer, matrix, interProc);
+		return MtxDeform(imgSrc, ver_des, matrix, interProc);
+	}
+	// 旋转变换
+	EXP_INLINE static image_t WhlDeform(_IN_ image_t imgSrc, _IN_ int16_t nDegree, inter_proc_t interProc = InterBilinear)
+	{
+		CImage exp_src(imgSrc);
+		if (exp_src.IsNull()) return NULL;
+		// 角度换算弧度
+		nDegree = nDegree % 360;
+		if (nDegree == 0) return NULL;
+		double radian = EXP_PI * ((double)nDegree / 180);
+		// 计算形变矩阵
+		double matrix[4] = 
+		{
+			cos(radian), sin(radian), 
+			-sin(radian), cos(radian)
+		};
+		// 图像变形
+		return MtxDeform(imgSrc, matrix, interProc);
+	}
+	// 缩放变换
+	EXP_INLINE static image_t ZomDeform(_IN_ image_t imgSrc, _IN_ LONG nW, _IN_ LONG nH, inter_proc_t interProc = InterBilinear)
+	{
+		CImage exp_src(imgSrc);
+		if (exp_src.IsNull()) return NULL;
+		// 计算形变矩阵
+		double matrix[4] = 
+		{
+			(double)nW / exp_src.GetWidth(), 0, 
+			0, (double)nH / exp_src.GetHeight()
+		};
+		// 图像变形
+		return MtxDeform(imgSrc, matrix, interProc);
 	}
 };
 

@@ -85,15 +85,15 @@ public:
 	{
 		base_obj_t::Set(tImage);
 		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
-		if (IsNull()) return;
+		if (base_obj_t::IsNull()) return;
 		GetObject(Get(), sizeof(m_Bitmap), &m_Bitmap);
 	}
 	bool IsNull()
 	{
 		if (base_obj_t::IsNull())
-			return (!(bool)(GetPixels()));
+			return true;
 		else
-			return false;
+			return (!(bool)(GetPixels()));
 	}
 
 	bool Delete()

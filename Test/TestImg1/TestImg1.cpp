@@ -131,17 +131,19 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// 关闭资源
 	CResGetter::ReleaseBinary(hres);
 	// 图像形变
-	CPoint var[2] = 
-	{
-		CPoint(500, 200), 
-		CPoint(600, 400)
-	};
-	HBITMAP tmp = CImgDeformer::PlgDeform(hBitmap, var);
-	if (tmp)
-	{
-		ICoderObject::DeleteImage(hBitmap);
-		hBitmap = tmp;
-	}
+	//CPoint var[2] = 
+	//{
+	//	CPoint(500, 200), 
+	//	CPoint(600, 400)
+	//};
+	//HBITMAP tmp = CImgDeformer::PlgDeform(hBitmap, var);
+	//HBITMAP tmp = CImgDeformer::WhlDeform(hBitmap, -90);
+	//HBITMAP tmp = CImgDeformer::ZomDeform(hBitmap, -700, 800);
+	//if (tmp)
+	//{
+	//	ICoderObject::DeleteImage(hBitmap);
+	//	hBitmap = tmp;
+	//}
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -225,35 +227,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			RECT rect = {0};
 			GetClientRect(hWnd, &rect);
 
-			HDC mem_hdc = ::CreateCompatibleDC(hdc);
-			HBITMAP mem_hbm = ::CreateCompatibleBitmap(hdc, rect.right - rect.left, rect.bottom - rect.top);
-			HGDIOBJ mem_old = ::SelectObject(mem_hdc, mem_hbm);
+			CImage mem_img;
+			mem_img.Create(rect.right - rect.left, rect.bottom - rect.top);
+			CGraph mem_grp;
+			mem_grp.Create(hdc);
+			mem_grp.SetObject(mem_img.Get());
 
 			HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
-			FillRect(mem_hdc, &rect, brh);
+			FillRect(mem_grp, &rect, brh);
 
-			if (hBitmap)
-			{
-				HDC bmp_hdc = ::CreateCompatibleDC(hdc);
-				HGDIOBJ bmp_old = ::SelectObject(bmp_hdc, hBitmap);
-				BITMAP bmp_bm;
-				::GetObject(hBitmap, sizeof(bmp_bm), &bmp_bm);
-				BLENDFUNCTION bf = {0};
-				bf.BlendOp				= AC_SRC_OVER;
-				bf.BlendFlags			= 0;
-				bf.AlphaFormat			= AC_SRC_ALPHA;
-				bf.SourceConstantAlpha	= (BYTE)~0;
-				::AlphaBlend(mem_hdc, 0, 0, bmp_bm.bmWidth, bmp_bm.bmHeight, 
-							 bmp_hdc, 0, 0, bmp_bm.bmWidth, bmp_bm.bmHeight, bf);
-				::SelectObject(bmp_hdc, bmp_old);
-				::DeleteDC(bmp_hdc);
-			}
+			//if (hBitmap)
+			//{
+			//	HDC bmp_hdc = ::CreateCompatibleDC(hdc);
+			//	HGDIOBJ bmp_old = ::SelectObject(bmp_hdc, hBitmap);
+			//	BITMAP bmp_bm;
+			//	::GetObject(hBitmap, sizeof(bmp_bm), &bmp_bm);
+			//	BLENDFUNCTION bf = {0};
+			//	bf.BlendOp				= AC_SRC_OVER;
+			//	bf.BlendFlags			= 0;
+			//	bf.AlphaFormat			= AC_SRC_ALPHA;
+			//	bf.SourceConstantAlpha	= (BYTE)~0;
+			//	::AlphaBlend(mem_grp, 0, 0, bmp_bm.bmWidth, bmp_bm.bmHeight, 
+			//				 bmp_hdc, 0, 0, bmp_bm.bmWidth, bmp_bm.bmHeight, bf);
+			//	::SelectObject(bmp_hdc, bmp_old);
+			//	::DeleteDC(bmp_hdc);
+			//}
 
-			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_hdc, 0, 0, SRCCOPY);
+			CImgRenderer::ImgRender(mem_grp, hBitmap, CRect(0, 0, rect.right - rect.left, rect.bottom - rect.top));
 
-			::SelectObject(mem_hdc, mem_old);
-			::DeleteObject(mem_hbm);
-			::DeleteDC(mem_hdc);
+			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
+
+			mem_grp.Delete();
+			mem_img.Delete();
 		}
 		EndPaint(hWnd, &ps);
 		break;

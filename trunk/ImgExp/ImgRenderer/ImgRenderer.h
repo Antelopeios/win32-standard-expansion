@@ -44,8 +44,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgCommon/ImgCommon.h"
-#include "ImgTypes/Types/Types.h"
+#include "ImgDeformer/ImgDeformer.h"
 
 EXP_BEG
 
@@ -54,7 +53,68 @@ EXP_BEG
 class CImgRenderer
 {
 public:
+	// 渲染回调指针定义
+	typedef pixel_t (*render_proc_t)(pixel_t, pixel_t);
+	// 常规渲染
+	static pixel_t RenderNormal(pixel_t pixSrc, pixel_t pixDes)
+	{
+		int a = ExGetA(pixSrc);
+		if (a == 0) return pixDes;
+		if (a == (BYTE)~0) return pixSrc;
+		int r_d = ExGetR(pixDes);
+		int g_d = ExGetG(pixDes);
+		int b_d = ExGetB(pixDes);
+		int r_s = (ExGetR(pixSrc) << 8) / a;
+		int g_s = (ExGetG(pixSrc) << 8) / a;
+		int b_s = (ExGetB(pixSrc) << 8) / a;
+		pixDes = ExRGBA
+			(
+			(((r_s - r_d) * a) >> 8) + r_d, 
+			(((g_s - g_d) * a) >> 8) + g_d, 
+			(((b_s - b_d) * a) >> 8) + b_d, 
+			(BYTE)~0
+			);
+		return pixDes;
+	}
 
+public:
+	EXP_INLINE static bool ImgRender(graph_t grpDes, image_t imgSrc, CRect& rcDes, render_proc_t renderProc = RenderNormal)
+	{
+		CGraph exp_grp(grpDes);
+		if (exp_grp.IsNull()) return false;
+		CImage exp_des((image_t)exp_grp.GetObject(OBJ_BITMAP));
+		if (exp_des.IsNull()) return false;
+		CImage exp_src(imgSrc);
+		if (exp_src.IsNull()) return false;
+		// 遍历像素绘图
+		if (!renderProc) renderProc = RenderNormal;
+		pixel_t* pix_src = exp_src.GetPixels();
+		pixel_t* pix_des = exp_des.GetPixels();
+		for(long y_s = 0; y_s < (long)exp_src.GetHeight(); ++y_s)
+		{
+			for(long x_s = 0; x_s < (long)exp_src.GetWidth(); ++x_s)
+			{
+				// 校验像素区域
+				long x_d = rcDes.Left() + x_s;
+				if (x_d < 0) continue;
+				if (x_d >= (long)exp_des.GetWidth()) break;
+				long y_d = rcDes.Top() + y_s;
+				if (y_d < 0) continue;
+				if (y_d >= (long)exp_des.GetHeight()) break;
+				// 获得像素索引
+				long i_s = x_s + exp_src.GetWidth() * y_s;
+				long i_d = x_d + exp_des.GetWidth() * y_d;
+				// 渲染像素
+				pix_des[i_d] = renderProc(pix_src[i_s], pix_des[i_d]);
+			}
+		}
+		return true;
+	}
+	//EXP_INLINE static bool PlgRender(graph_t grpDes, image_t imgSrc, const CPoint (&ptVer)[2], 
+	//								 render_proc_t renderProc = RenderNormal, 
+	//								 CImgDeformer::inter_proc_t interProc = CImgDeformer::InterBilinear)
+	//{
+	//}
 };
 
 //////////////////////////////////////////////////////////////////

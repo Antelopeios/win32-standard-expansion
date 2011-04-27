@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-21
-// Version:	1.0.0004.1800
+// Date:	2011-04-27
+// Version:	1.0.0005.1452
 //
 // History:
 //	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
@@ -43,6 +43,7 @@
 //	- 1.0.0003.2200(2011-04-20)	^ 简化CRectT的内部数据命名
 //								# 修正CRectT::MoveTo()的错误算法
 //	- 1.0.0004.1800(2011-04-21)	+ CRectT::PtInRect()支持自定义是否忽略右边界与下边界
+//	- 1.0.0005.1452(2011-04-27)	# 修正CRectT::Inter()与CRectT::Union()中的错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -96,13 +97,13 @@ public:
 
 	EXP_INLINE void Inter(const CRectT& tRect)
 	{
-		Set(CPointT<TypeT>(max(pt1.x, tRect.pt1.x), min(pt1.y, tRect.pt1.y)), 
+		Set(CPointT<TypeT>(max(pt1.x, tRect.pt1.x), max(pt1.y, tRect.pt1.y)), 
 			CPointT<TypeT>(min(pt2.x, tRect.pt2.x), min(pt2.y, tRect.pt2.y)));
 	}
 	EXP_INLINE void Union(const CRectT& tRect)
 	{
 		Set(CPointT<TypeT>(min(pt1.x, tRect.pt1.x), min(pt1.y, tRect.pt1.y)), 
-			CPointT<TypeT>(max(pt2.x, tRect.pt2.x), min(pt2.y, tRect.pt2.y)));
+			CPointT<TypeT>(max(pt2.x, tRect.pt2.x), max(pt2.y, tRect.pt2.y)));
 	}
 
 	EXP_INLINE void Inflate(const CPointT<TypeT>& Pt)
@@ -183,12 +184,12 @@ public:
 	EXP_INLINE CRectT operator-(const CRectT& tRect)
 	{ return (CRectT(*this) -= tRect); }
 
-	EXP_INLINE TypeT Left()	 { return pt1.x; }
-	EXP_INLINE TypeT Top()	 { return pt1.y; }
-	EXP_INLINE TypeT Right()	 { return pt2.x; }
-	EXP_INLINE TypeT Bottom() { return pt2.y; }
-	EXP_INLINE TypeT Width()	 { return Right() - Left(); }
-	EXP_INLINE TypeT Height() { return Bottom() - Top(); }
+	EXP_INLINE TypeT Left()		{ return pt1.x; }
+	EXP_INLINE TypeT Top()		{ return pt1.y; }
+	EXP_INLINE TypeT Right()	{ return pt2.x; }
+	EXP_INLINE TypeT Bottom()	{ return pt2.y; }
+	EXP_INLINE TypeT Width()	{ return Right() - Left(); }
+	EXP_INLINE TypeT Height()	{ return Bottom() - Top(); }
 };
 
 typedef CRectT<> CRect;

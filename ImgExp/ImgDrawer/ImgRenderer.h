@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-11
-// Version:	1.0.0000.1100
+// Date:	2011-04-27
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
+//								+ 添加一些滤镜效果类
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -53,51 +57,167 @@ EXP_BEG
 class CImgRenderer
 {
 public:
-	// 渲染回调指针定义
-	typedef pixel_t (*render_proc_t)(pixel_t, pixel_t);
-	// 常规渲染
-	static pixel_t RenderNormal(pixel_t pixSrc, pixel_t pixDes)
+	// 滤镜接口
+	interface IFilter : INonCopyable
 	{
-		BYTE a_s = ExGetA(pixSrc);
-		if (a_s == 0) return pixDes;
-		if (a_s == (BYTE)~0) return pixSrc;
-		BYTE r_s = ExGetR(pixSrc);
-		BYTE g_s = ExGetG(pixSrc);
-		BYTE b_s = ExGetB(pixSrc);
-		BYTE a_d = (BYTE)~0 - a_s;
-		BYTE r_d = ExGetR(pixDes);
-		BYTE g_d = ExGetG(pixDes);
-		BYTE b_d = ExGetB(pixDes);
-		return ExRGBA
-			(
-			(r_s * a_s + r_d * a_d) / (BYTE)~0, 
-			(g_s * a_s + g_d * a_d) / (BYTE)~0, 
-			(b_s * a_s + b_d * a_d) / (BYTE)~0, 
-			(BYTE)~0
-			);
-	}
-	static pixel_t RenderGray(pixel_t pixSrc, pixel_t pixDes)
+		LONG m_Radius;
+
+		IFilter() : m_Radius(3) {}
+
+		virtual LONG GetRadius() { return m_Radius; }
+		virtual pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey) = 0;
+	};
+	// 正常渲染
+	class CFilterNormal : public IFilter
 	{
-		BYTE g = (ExGetR(pixSrc) * 38 + ExGetG(pixSrc) * 75 + ExGetB(pixSrc) * 15) >> 7;
-		return RenderNormal(ExRGBA(g, g, g, ExGetA(pixSrc)), pixDes);
-	}
-	static pixel_t RenderInverse(pixel_t pixSrc, pixel_t pixDes)
-	{
-		return RenderNormal(
-			ExRGBA
+	public:
+		CFilterNormal() : IFilter() { m_Radius = 1; }
+
+		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		{
+			BYTE a_s = ExGetA(pixSrc[nKey]);
+			if (a_s == 0) return pixDes[nKey];
+			if (a_s == (BYTE)~0) return pixSrc[nKey];
+			BYTE r_s = ExGetR(pixSrc[nKey]);
+			BYTE g_s = ExGetG(pixSrc[nKey]);
+			BYTE b_s = ExGetB(pixSrc[nKey]);
+			BYTE a_d = (BYTE)~0 - a_s;
+			BYTE r_d = ExGetR(pixDes[nKey]);
+			BYTE g_d = ExGetG(pixDes[nKey]);
+			BYTE b_d = ExGetB(pixDes[nKey]);
+			return ExRGBA
 				(
-				(BYTE)~0 - ExGetR(pixSrc), 
-				(BYTE)~0 - ExGetG(pixSrc), 
-				(BYTE)~0 - ExGetB(pixSrc), 
-				ExGetA(pixSrc)
-				), 
-			pixDes);
+				(r_s * a_s + r_d * a_d) / (BYTE)~0, 
+				(g_s * a_s + g_d * a_d) / (BYTE)~0, 
+				(b_s * a_s + b_d * a_d) / (BYTE)~0, 
+				(BYTE)~0
+				);
+		}
+	};
+	// 灰度化
+	class CFilterGray : public CFilterNormal
+	{
+	public:
+		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		{
+			BYTE g = 
+				(ExGetR(pixSrc[nKey]) * 38 + ExGetG(pixSrc[nKey]) * 75 + ExGetB(pixSrc[nKey]) * 15) >> 7;
+			pixel_t src = ExRGBA(g, g, g, ExGetA(pixSrc[nKey]));
+			return CFilterNormal::Render(&src, pixDes, nKey);
+		}
+	};
+	// 反色
+	class CFilterInverse : public CFilterNormal
+	{
+	public:
+		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		{
+			pixel_t src = ExRGBA
+				(
+				(BYTE)~0 - ExGetR(pixSrc[nKey]), 
+				(BYTE)~0 - ExGetG(pixSrc[nKey]), 
+				(BYTE)~0 - ExGetB(pixSrc[nKey]), 
+				ExGetA(pixSrc[nKey])
+				);
+			return CFilterNormal::Render(&src, pixDes, nKey);
+		}
+	};
+	// 浮雕
+	class CFilterRelief : public CFilterNormal
+	{
+	protected:
+		LONG m_Diamet;
+	public:
+		pixel_t m_Const;
+
+	public:
+		CFilterRelief(pixel_t cConst = ExRGBA(125, 68, 29, (BYTE)~0))
+			: CFilterNormal()
+			, m_Const(cConst)
+		{
+			m_Radius = 2;
+			m_Diamet = (m_Radius << 1) - 1;
+		}
+
+		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		{
+			if (m_Radius < 2) return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			pixel_t pix1 = pixSrc[nKey];
+			pixel_t pix2 = pixSrc[nKey + m_Diamet + 1];
+			pixSrc[nKey] = ExRGBA
+				(
+				abs(ExGetR(pix1) - ExGetR(pix2) + ExGetB(m_Const)), 
+				abs(ExGetG(pix1) - ExGetG(pix2) + ExGetG(m_Const)), 
+				abs(ExGetB(pix1) - ExGetB(pix2) + ExGetR(m_Const)), 
+				abs(ExGetA(pix1) - ExGetA(pix2) + ExGetA(m_Const))
+				);
+			return CFilterNormal::Render(pixSrc, pixDes, nKey);
+		}
+	};
+	// 扩散
+	class CFilterDiffuse : public CFilterNormal
+	{
+	protected:
+		LONG m_FltSiz;
+
+	public:
+		CFilterDiffuse(LONG nRadius = 1)
+			: CFilterNormal()
+		{
+			m_Radius = nRadius + 1;
+			LONG diamet = (m_Radius << 1) - 1;
+			m_FltSiz = diamet * diamet;
+			ExRandomize();
+		}
+
+		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		{
+			if (m_Radius < 2) return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			pixSrc[nKey] = pixSrc[ExRandom(m_FltSiz)];
+			return CFilterNormal::Render(pixSrc, pixDes, nKey);
+		}
+	};
+	// 高斯模糊
+	class CFilterGauss : public CFilterNormal
+	{
+	protected:
+		LONG m_FltSiz;
+	public:
+		double m_Sigma;
+
+	public:
+		CFilterDiffuse(LONG nRadius = 1, double nSigma = 3)
+			: CFilterNormal()
+		{
+			m_Radius = nRadius + 1;
+			m_Sigma = nSigma;
+			LONG diamet = (m_Radius << 1) - 1;
+			m_FltSiz = diamet * diamet;
+		}
+
+		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		{
+			return CFilterNormal::Render(pixSrc, pixDes, nKey);
+		}
+	};
+
+protected:
+	EXP_INLINE static void GetFilterBlock(pixel_t* pixSrc, LONG nX, LONG nY, LONG nW, LONG nH, CRect& rcSrc, 
+										  pixel_t* pixBlk, LONG nDiamet, LONG nFltRad)
+	{
+		LONG x_b = max(nX - nFltRad, rcSrc.Left()), x_e = min(nX + nFltRad, rcSrc.Right() - 1);
+		LONG y_b = max(nY - nFltRad, rcSrc.Top()), y_e = min(nY + nFltRad, rcSrc.Bottom() - 1);
+		LONG div_x_b = x_b - (nX - nFltRad), div_y_b = y_b - (nY - nFltRad), div_flt = (x_e - x_b + 1) * sizeof(pixel_t);
+		for(LONG n = y_b; n <= y_e; ++n)
+		{
+			LONG i_pix = (nH - n - 1) * nW + x_b;
+			LONG i_flt = (nDiamet - (div_y_b + n - y_b) - 1) * nDiamet + div_x_b;
+			memcpy(pixBlk + i_flt, pixSrc + i_pix, div_flt);
+		}
 	}
 
 public:
-	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, 
-								  CRect& rcDes, CPoint& ptSrc, 
-								  render_proc_t renderProc = RenderNormal)
+	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc, IFilter* pFilter = NULL)
 	{
 		CImage exp_des(imgDes);
 		if (exp_des.IsNull()) return false;
@@ -106,28 +226,43 @@ public:
 		if (rcDes.IsEmpty())
 			rcDes.Set(CPoint(), CPoint(exp_des.GetWidth(), exp_des.GetHeight()));
 		// 遍历像素绘图
-		if (!renderProc) renderProc = RenderNormal;
+		if (!pFilter) pFilter = &CFilterNormal();
+		LONG radius = pFilter->GetRadius();
+		if (radius <= 0) return false;
+		LONG diamet = (radius << 1) - 1;
+		LONG fltsiz = diamet * diamet;
+		LONG fltrad = radius - 1;
+		LONG fltind = diamet * fltrad + fltrad;
+		pixel_t* flt_des = ExMem::Alloc<pixel_t>(fltsiz);
+		pixel_t* flt_src = ExMem::Alloc<pixel_t>(fltsiz);
 		pixel_t* pix_des = exp_des.GetPixels();
 		pixel_t* pix_src = exp_src.GetPixels();
-		for(long y_s = 0; y_s < (long)exp_src.GetHeight(); ++y_s)
+		for(LONG y_s = ptSrc.y; y_s < (LONG)exp_src.GetHeight(); ++y_s)
 		{
-			for(long x_s = 0; x_s < (long)exp_src.GetWidth(); ++x_s)
+			for(LONG x_s = ptSrc.x; x_s < (LONG)exp_src.GetWidth(); ++x_s)
 			{
 				// 校验像素区域
-				if (x_s < ptSrc.x || x_s >= ptSrc.x + rcDes.Width() || 
-					y_s < ptSrc.y || y_s >= ptSrc.y + rcDes.Height()) continue;
-				long x_d = rcDes.Left() + x_s;
+				if (x_s >= ptSrc.x + rcDes.Width() || 
+					y_s >= ptSrc.y + rcDes.Height()) continue;
+				LONG x_d = rcDes.Left() + x_s;
 				if (x_d < 0) continue;
-				if (x_d >= (long)exp_des.GetWidth()) break;
-				long y_d = rcDes.Top() + y_s;
+				if (x_d >= (LONG)exp_des.GetWidth()) break;
+				LONG y_d = rcDes.Top() + y_s;
 				if (y_d < 0) continue;
-				if (y_d >= (long)exp_des.GetHeight()) break;
+				if (y_d >= (LONG)exp_des.GetHeight()) break;
+				// 获得像素块
+				CRect rc(rcDes);
+				rc.Inter(CRect(0, 0, exp_des.GetWidth(), exp_des.GetHeight()));
+				GetFilterBlock(pix_des, x_d, y_d, exp_des.GetWidth(), exp_des.GetHeight(), rc, flt_des, diamet, fltrad);
+				rc.Set(ptSrc, CPoint(exp_src.GetWidth(), exp_src.GetHeight()));
+				GetFilterBlock(pix_src, x_s, y_s, exp_src.GetWidth(), exp_src.GetHeight(), rc, flt_src, diamet, fltrad);
 				// 渲染像素
-				pixel_t* pdst = pix_des + ((exp_des.GetHeight() - y_d - 1) * exp_des.GetWidth() + x_d);
-				pixel_t* psrc = pix_src + ((exp_src.GetHeight() - y_s - 1) * exp_src.GetWidth() + x_s);
-				(*pdst) = renderProc((*psrc), (*pdst));
+				LONG i_d = (exp_des.GetHeight() - y_d - 1) * exp_des.GetWidth() + x_d;
+				pix_des[i_d] = pFilter->Render(flt_src, flt_des, fltind);
 			}
 		}
+		ExMem::Free(flt_src);
+		ExMem::Free(flt_des);
 		return true;
 	}
 };

@@ -307,7 +307,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					(rect.right - bmp_img.GetWidth()) / 2, 
 					(rect.bottom - bmp_img.GetHeight()) / 2, 
 					rect.right, rect.bottom), 
-					CPoint(0, 0), CImgRenderer::RenderGray);
+					CPoint(0, 0), &CImgRenderer::CFilterDiffuse());
 			}
 
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);

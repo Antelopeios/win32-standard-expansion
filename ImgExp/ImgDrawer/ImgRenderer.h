@@ -33,12 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-27
-// Version:	1.0.0001.1730
+// Date:	2011-04-28
+// Version:	1.0.0002.1410
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
 //								+ 添加一些滤镜效果类
+//	- 1.0.0002.1410(2011-04-28)	+ 添加像素直接拷贝与高斯模糊滤镜
+//								^ 将滤镜功能类改为类模板,支持外部动态调整渲染基
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -65,7 +67,18 @@ public:
 		IFilter() : m_Radius(3) {}
 
 		virtual LONG GetRadius() { return m_Radius; }
-		virtual pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey) = 0;
+		virtual pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey) = 0;
+	};
+	// 像素拷贝
+	class CFilterCopy : public IFilter
+	{
+	public:
+		CFilterCopy() : IFilter() { m_Radius = 1; }
+
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
+		{
+			return pixSrc[nKey];
+		}
 	};
 	// 正常渲染
 	class CFilterNormal : public IFilter
@@ -73,18 +86,18 @@ public:
 	public:
 		CFilterNormal() : IFilter() { m_Radius = 1; }
 
-		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 		{
 			BYTE a_s = ExGetA(pixSrc[nKey]);
-			if (a_s == 0) return pixDes[nKey];
+			if (a_s == 0) return pixDes;
 			if (a_s == (BYTE)~0) return pixSrc[nKey];
 			BYTE r_s = ExGetR(pixSrc[nKey]);
 			BYTE g_s = ExGetG(pixSrc[nKey]);
 			BYTE b_s = ExGetB(pixSrc[nKey]);
 			BYTE a_d = (BYTE)~0 - a_s;
-			BYTE r_d = ExGetR(pixDes[nKey]);
-			BYTE g_d = ExGetG(pixDes[nKey]);
-			BYTE b_d = ExGetB(pixDes[nKey]);
+			BYTE r_d = ExGetR(pixDes);
+			BYTE g_d = ExGetG(pixDes);
+			BYTE b_d = ExGetB(pixDes);
 			return ExRGBA
 				(
 				(r_s * a_s + r_d * a_d) / (BYTE)~0, 
@@ -95,22 +108,25 @@ public:
 		}
 	};
 	// 灰度化
-	class CFilterGray : public CFilterNormal
+	template <typename BaseT = CFilterNormal>
+	class CFilterGrayT : public BaseT
 	{
 	public:
-		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 		{
 			BYTE g = 
 				(ExGetR(pixSrc[nKey]) * 38 + ExGetG(pixSrc[nKey]) * 75 + ExGetB(pixSrc[nKey]) * 15) >> 7;
 			pixel_t src = ExRGBA(g, g, g, ExGetA(pixSrc[nKey]));
-			return CFilterNormal::Render(&src, pixDes, nKey);
+			return BaseT::Render(&src, pixDes, nKey);
 		}
 	};
+	typedef CFilterGrayT<> CFilterGray;
 	// 反色
-	class CFilterInverse : public CFilterNormal
+	template <typename BaseT = CFilterNormal>
+	class CFilterInverseT : public BaseT
 	{
 	public:
-		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 		{
 			pixel_t src = ExRGBA
 				(
@@ -119,11 +135,13 @@ public:
 				(BYTE)~0 - ExGetB(pixSrc[nKey]), 
 				ExGetA(pixSrc[nKey])
 				);
-			return CFilterNormal::Render(&src, pixDes, nKey);
+			return BaseT::Render(&src, pixDes, nKey);
 		}
 	};
+	typedef CFilterInverseT<> CFilterInverse;
 	// 浮雕
-	class CFilterRelief : public CFilterNormal
+	template <typename BaseT = CFilterNormal>
+	class CFilterReliefT : public BaseT
 	{
 	protected:
 		LONG m_Diamet;
@@ -131,17 +149,17 @@ public:
 		pixel_t m_Const;
 
 	public:
-		CFilterRelief(pixel_t cConst = ExRGBA(125, 68, 29, (BYTE)~0))
-			: CFilterNormal()
+		CFilterReliefT(pixel_t cConst = ExRGBA(125, 68, 29, (BYTE)~0))
+			: BaseT()
 			, m_Const(cConst)
 		{
 			m_Radius = 2;
 			m_Diamet = (m_Radius << 1) - 1;
 		}
 
-		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 		{
-			if (m_Radius < 2) return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
 			pixel_t pix1 = pixSrc[nKey];
 			pixel_t pix2 = pixSrc[nKey + m_Diamet + 1];
 			pixSrc[nKey] = ExRGBA
@@ -151,18 +169,20 @@ public:
 				abs(ExGetB(pix1) - ExGetB(pix2) + ExGetR(m_Const)), 
 				abs(ExGetA(pix1) - ExGetA(pix2) + ExGetA(m_Const))
 				);
-			return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			return BaseT::Render(pixSrc, pixDes, nKey);
 		}
 	};
+	typedef CFilterReliefT<> CFilterRelief;
 	// 扩散
-	class CFilterDiffuse : public CFilterNormal
+	template <typename BaseT = CFilterNormal>
+	class CFilterDiffuseT : public BaseT
 	{
 	protected:
 		LONG m_FltSiz;
 
 	public:
-		CFilterDiffuse(LONG nRadius = 1)
-			: CFilterNormal()
+		CFilterDiffuseT(LONG nRadius = 1)
+			: BaseT()
 		{
 			m_Radius = nRadius + 1;
 			LONG diamet = (m_Radius << 1) - 1;
@@ -170,36 +190,66 @@ public:
 			ExRandomize();
 		}
 
-		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 		{
-			if (m_Radius < 2) return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
 			pixSrc[nKey] = pixSrc[ExRandom(m_FltSiz)];
-			return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			return BaseT::Render(pixSrc, pixDes, nKey);
 		}
 	};
+	typedef CFilterDiffuseT<> CFilterDiffuse;
 	// 高斯模糊
-	class CFilterGauss : public CFilterNormal
+	template <typename BaseT = CFilterNormal>
+	class CFilterGaussT : public BaseT
 	{
 	protected:
-		LONG m_FltSiz;
-	public:
-		double m_Sigma;
+		LONG m_Diamet, m_FltSiz;
+		double* m_gMatrix;	// 卷积矩阵
 
 	public:
-		CFilterDiffuse(LONG nRadius = 1, double nSigma = 3)
-			: CFilterNormal()
+		CFilterGaussT(LONG nRadius = 3)
+			: BaseT()
 		{
 			m_Radius = nRadius + 1;
-			m_Sigma = nSigma;
-			LONG diamet = (m_Radius << 1) - 1;
-			m_FltSiz = diamet * diamet;
+			m_Diamet = (m_Radius << 1) - 1;
+			m_FltSiz = m_Diamet * m_Diamet;
+			double s = (double)nRadius / 2.0;
+			double sigma2 = 2.0 * s * s;
+			m_gMatrix = ExMem::Alloc<double>(m_Diamet * m_Diamet);
+			// 计算模糊矩阵
+			int i = 0;
+			for(LONG y = -nRadius; y <= nRadius; ++y)
+				for(LONG x = -nRadius; x <= nRadius; ++x)
+					m_gMatrix[i++] = 
+						exp(-(double)(x * x + y * y) / sigma2) / (sigma2 * EXP_PI);
+		}
+		~CFilterGaussT()
+		{
+			ExMem::Free(m_gMatrix);
 		}
 
-		pixel_t Render(pixel_t* pixSrc, pixel_t* pixDes, LONG nKey)
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 		{
-			return CFilterNormal::Render(pixSrc, pixDes, nKey);
+			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
+			double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+			for(int i = 0; i <= m_FltSiz; ++i)
+			{
+				r += m_gMatrix[i] * ExGetR(pixSrc[i]);
+				g += m_gMatrix[i] * ExGetG(pixSrc[i]);
+				b += m_gMatrix[i] * ExGetB(pixSrc[i]);
+				a += m_gMatrix[i] * ExGetA(pixSrc[i]);
+			}
+			pixSrc[nKey] = ExRGBA
+				(
+				r > (BYTE)~0 ? (BYTE)~0 : r, 
+				g > (BYTE)~0 ? (BYTE)~0 : g, 
+				b > (BYTE)~0 ? (BYTE)~0 : b, 
+				a > (BYTE)~0 ? (BYTE)~0 : a
+				);
+			return BaseT::Render(pixSrc, pixDes, nKey);
 		}
 	};
+	typedef CFilterGaussT<> CFilterGauss;
 
 protected:
 	EXP_INLINE static void GetFilterBlock(pixel_t* pixSrc, LONG nX, LONG nY, LONG nW, LONG nH, CRect& rcSrc, 
@@ -233,8 +283,7 @@ public:
 		LONG fltsiz = diamet * diamet;
 		LONG fltrad = radius - 1;
 		LONG fltind = diamet * fltrad + fltrad;
-		pixel_t* flt_des = ExMem::Alloc<pixel_t>(fltsiz);
-		pixel_t* flt_src = ExMem::Alloc<pixel_t>(fltsiz);
+		pixel_t* flt_src = ExMem::Alloc<pixel_t>(fltsiz); // 滤镜像素块
 		pixel_t* pix_des = exp_des.GetPixels();
 		pixel_t* pix_src = exp_src.GetPixels();
 		for(LONG y_s = ptSrc.y; y_s < (LONG)exp_src.GetHeight(); ++y_s)
@@ -251,18 +300,14 @@ public:
 				if (y_d < 0) continue;
 				if (y_d >= (LONG)exp_des.GetHeight()) break;
 				// 获得像素块
-				CRect rc(rcDes);
-				rc.Inter(CRect(0, 0, exp_des.GetWidth(), exp_des.GetHeight()));
-				GetFilterBlock(pix_des, x_d, y_d, exp_des.GetWidth(), exp_des.GetHeight(), rc, flt_des, diamet, fltrad);
-				rc.Set(ptSrc, CPoint(exp_src.GetWidth(), exp_src.GetHeight()));
+				CRect rc(ptSrc, CPoint(exp_src.GetWidth(), exp_src.GetHeight()));
 				GetFilterBlock(pix_src, x_s, y_s, exp_src.GetWidth(), exp_src.GetHeight(), rc, flt_src, diamet, fltrad);
 				// 渲染像素
 				LONG i_d = (exp_des.GetHeight() - y_d - 1) * exp_des.GetWidth() + x_d;
-				pix_des[i_d] = pFilter->Render(flt_src, flt_des, fltind);
+				pix_des[i_d] = pFilter->Render(flt_src, pix_des[i_d], fltind);
 			}
 		}
 		ExMem::Free(flt_src);
-		ExMem::Free(flt_des);
 		return true;
 	}
 };

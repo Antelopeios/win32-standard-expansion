@@ -50,11 +50,20 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "退出(&X)",                      IDM_EXIT
     END
-    POPUP "编辑(&E)"
+    MENUITEM "原图(&O)",                      IDM_ORI
+    POPUP "形变(&D)"
     BEGIN
         MENUITEM "平行四边形",                       IDM_PLG
         MENUITEM "旋转",                          IDM_WHL
         MENUITEM "缩放",                          IDM_ZOM
+    END
+    POPUP "渲染(&R)"
+    BEGIN
+        MENUITEM "灰度化",                         IDM_GRAY
+        MENUITEM "反色",                          IDM_INVE
+        MENUITEM "浮雕",                          IDM_RELI
+        MENUITEM "扩散",                          IDM_DIFF
+        MENUITEM "高斯模糊",                        IDM_GAUS
     END
     POPUP "帮助(&H)"
     BEGIN

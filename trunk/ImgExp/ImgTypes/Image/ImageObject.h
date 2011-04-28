@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-26
-// Version:	1.0.0006.1730
+// Date:	2011-04-28
+// Version:	1.0.0007.1343
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -46,6 +46,7 @@
 //	- 1.0.0005.2350(2011-04-19)	= 当对CImage::Clone()传入空区域时,此接口将拷贝整个图片
 //								# 修正CImage::IsNull()中的一个逻辑错误
 //	- 1.0.0006.1730(2011-04-26)	= 将部分接口的返回值由DWORD改为LONG
+//	- 1.0.0007.1343(2011-04-28)	= CImage::Clone()具有默认参数
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
@@ -121,7 +122,7 @@ public:
 		if(!img_buf) Delete();
 		return Get();
 	}
-	image_t Clone(CRect& tRect)
+	image_t Clone(CRect& tRect = CRect())
 	{
 		CRect rc_tmp(tRect);
 		if (rc_tmp.IsEmpty())

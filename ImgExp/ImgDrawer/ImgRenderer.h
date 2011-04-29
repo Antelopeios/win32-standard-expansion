@@ -33,14 +33,16 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-28
-// Version:	1.0.0002.1410
+// Date:	2011-04-29
+// Version:	1.0.0003.1643
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
 //								+ 添加一些滤镜效果类
 //	- 1.0.0002.1410(2011-04-28)	+ 添加像素直接拷贝与高斯模糊滤镜
 //								^ 将滤镜功能类改为类模板,支持外部动态调整渲染基
+//	- 1.0.0003.1643(2011-04-29)	# 修正高斯模糊导致图像变暗与对比度失真等问题
+//								= 调整默认高斯模糊半径为5
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -205,23 +207,29 @@ public:
 	protected:
 		LONG m_Diamet, m_FltSiz;
 		double* m_gMatrix;	// 卷积矩阵
+		double m_Nuclear;	// 卷积核
 
 	public:
-		CFilterGaussT(LONG nRadius = 3)
+		CFilterGaussT(LONG nRadius = 5)
 			: BaseT()
 		{
 			m_Radius = nRadius + 1;
 			m_Diamet = (m_Radius << 1) - 1;
 			m_FltSiz = m_Diamet * m_Diamet;
-			double s = (double)nRadius / 2.0;
+			double s = (double)nRadius / 3.0;
 			double sigma2 = 2.0 * s * s;
+			m_Nuclear = 0.0;
 			m_gMatrix = ExMem::Alloc<double>(m_Diamet * m_Diamet);
-			// 计算模糊矩阵
+			// 计算高斯矩阵
 			int i = 0;
-			for(LONG y = -nRadius; y <= nRadius; ++y)
-				for(LONG x = -nRadius; x <= nRadius; ++x)
-					m_gMatrix[i++] = 
-						exp(-(double)(x * x + y * y) / sigma2) / (sigma2 * EXP_PI);
+			for(long y = -nRadius; y <= nRadius; ++y)
+				for(long x = -nRadius; x <= nRadius; ++x)
+				{
+					m_gMatrix[i] = 
+						exp(-(double)(x * x + y * y) / sigma2);
+					m_Nuclear += m_gMatrix[i];
+					++i;
+				}
 		}
 		~CFilterGaussT()
 		{
@@ -234,10 +242,11 @@ public:
 			double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
 			for(int i = 0; i <= m_FltSiz; ++i)
 			{
-				r += m_gMatrix[i] * ExGetR(pixSrc[i]);
-				g += m_gMatrix[i] * ExGetG(pixSrc[i]);
-				b += m_gMatrix[i] * ExGetB(pixSrc[i]);
-				a += m_gMatrix[i] * ExGetA(pixSrc[i]);
+				double weight = m_gMatrix[i] / m_Nuclear;
+				r += weight * ExGetR(pixSrc[i]);
+				g += weight * ExGetG(pixSrc[i]);
+				b += weight * ExGetB(pixSrc[i]);
+				a += weight * ExGetA(pixSrc[i]);
 			}
 			pixSrc[nKey] = ExRGBA
 				(

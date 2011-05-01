@@ -40,6 +40,9 @@
 #define IDM_DIFF                        32793
 #define ID_32794                        32794
 #define IDM_GAUS                        32795
+#define ID_32796                        32796
+#define IDM_SHDW                        32797
+#define IDM_OUTG                        32798
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -48,7 +51,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        135
-#define _APS_NEXT_COMMAND_VALUE         32796
+#define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

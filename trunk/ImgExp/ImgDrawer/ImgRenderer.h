@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-29
-// Version:	1.0.0003.1643
+// Date:	2011-05-01
+// Version:	1.0.0004.2350
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -43,6 +43,9 @@
 //								^ 将滤镜功能类改为类模板,支持外部动态调整渲染基
 //	- 1.0.0003.1643(2011-04-29)	# 修正高斯模糊导致图像变暗与对比度失真等问题
 //								= 调整默认高斯模糊半径为5
+//	- 1.0.0004.2350(2011-05-01)	# 修正正常渲染滤镜忽略了背景Alpha通道,导致图像混合后不再透明的问题
+//								# 修正因滤镜像素块采集算法在图像边缘处忽略了无法采集的部分,导致一些滤镜边缘渲染的异常
+//								+ 添加外发光滤镜
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -105,7 +108,7 @@ public:
 				(r_s * a_s + r_d * a_d) / (BYTE)~0, 
 				(g_s * a_s + g_d * a_d) / (BYTE)~0, 
 				(b_s * a_s + b_d * a_d) / (BYTE)~0, 
-				(BYTE)~0
+				ExGetA(pixDes)
 				);
 		}
 	};
@@ -259,14 +262,106 @@ public:
 		}
 	};
 	typedef CFilterGaussT<> CFilterGauss;
+	// 外发光
+	template <typename BaseT = CFilterNormal>
+	class CFilterOuterGlowT : public CFilterGaussT<BaseT>
+	{
+	protected:
+		CFilterNormal m_Filter;
+		pixel_t* m_PixSdw;
+		pixel_t* m_PixChk[2];
+	public:
+		pixel_t m_Const;
+
+	public:
+		CFilterOuterGlowT(LONG nRadius = 7, pixel_t cConst = ExRGB(255, 255, 190))
+			: CFilterGaussT<BaseT>(nRadius)
+			, m_Const(cConst)
+		{
+			m_PixSdw = ExMem::Alloc<pixel_t>(m_FltSiz);
+			m_PixChk[0] = ExMem::Alloc<pixel_t>(m_FltSiz);
+			m_PixChk[1] = ExMem::Alloc<pixel_t>(m_FltSiz);
+			for(int i = 0; i <= m_FltSiz; ++i)
+			{
+				m_PixChk[0][i] = ExRGBA
+					(
+					ExGetR(m_Const), 
+					ExGetG(m_Const), 
+					ExGetB(m_Const), 
+					0
+					);
+				m_PixChk[1][i] = ExRGBA
+					(
+					ExGetR(m_Const), 
+					ExGetG(m_Const), 
+					ExGetB(m_Const), 
+					(BYTE)~0
+					);
+			}
+		}
+		~CFilterOuterGlowT()
+		{
+			ExMem::Free(m_PixChk[1]);
+			ExMem::Free(m_PixChk[0]);
+			ExMem::Free(m_PixSdw);
+		}
+
+		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
+		{
+			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
+			for(int i = 0; i <= m_FltSiz; ++i)
+			{
+				m_PixSdw[i] = ExRGBA
+					(
+					ExGetB(m_Const), 
+					ExGetG(m_Const), 
+					ExGetR(m_Const), 
+					ExGetA(pixSrc[i])
+					);
+			}
+			if (memcmp(m_PixSdw, m_PixChk[0], m_FltSiz * sizeof(pixel_t)) == 0 || 
+				memcmp(m_PixSdw, m_PixChk[1], m_FltSiz * sizeof(pixel_t)) == 0)
+				return m_Filter.Render(pixSrc, BaseT::Render(m_PixSdw, pixDes, nKey), nKey);
+			else
+				return m_Filter.Render(pixSrc, CFilterGaussT<BaseT>::Render(m_PixSdw, pixDes, nKey), nKey);
+		}
+	};
+	typedef CFilterOuterGlowT<> CFilterOuterGlow;
 
 protected:
 	EXP_INLINE static void GetFilterBlock(pixel_t* pixSrc, LONG nX, LONG nY, LONG nW, LONG nH, CRect& rcSrc, 
-										  pixel_t* pixBlk, LONG nDiamet, LONG nFltRad)
+										  pixel_t* pixBlk, LONG nFltSiz, LONG nDiamet, LONG nFltRad)
 	{
-		LONG x_b = max(nX - nFltRad, rcSrc.Left()), x_e = min(nX + nFltRad, rcSrc.Right() - 1);
-		LONG y_b = max(nY - nFltRad, rcSrc.Top()), y_e = min(nY + nFltRad, rcSrc.Bottom() - 1);
-		LONG div_x_b = x_b - (nX - nFltRad), div_y_b = y_b - (nY - nFltRad), div_flt = (x_e - x_b + 1) * sizeof(pixel_t);
+		// 清空像素内存块
+		ZeroMemory(pixBlk, nFltSiz * sizeof(pixel_t));
+		// 计算坐标
+		LONG x_1 = nX - nFltRad, x_2 = nX + nFltRad;
+		LONG y_1 = nY - nFltRad, y_2 = nY + nFltRad;
+		LONG flt = nDiamet * sizeof(pixel_t);
+		LONG x_b = max(x_1, rcSrc.Left()), x_e = min(x_2, rcSrc.Right() - 1);
+		LONG y_b = max(y_1, rcSrc.Top()), y_e = min(y_2, rcSrc.Bottom() - 1);
+		LONG div_x = x_e - x_b + 1, div_y = y_e - y_b + 1;
+		LONG div_flt = div_x * sizeof(pixel_t);
+		LONG div_x_b = x_b - x_1, div_y_b = y_b - y_1;
+		// 判断是否对齐
+		if (div_x < nDiamet || div_y < nDiamet)
+		{
+			// 重新对齐坐标
+			if (x_b > x_1) { x_1 = x_b; x_2 = x_1 + nDiamet - 1; }
+			else
+			if (x_e < x_2) { x_2 = x_e; x_1 = x_2 - nDiamet + 1; }
+			if (y_b > y_1) { y_1 = y_b; y_2 = y_1 + nDiamet - 1; }
+			else
+			if (y_e < y_2) { y_2 = y_e; y_1 = y_2 - nDiamet + 1; }
+			// 覆盖对齐像素
+			for(LONG n = y_1; n <= y_2; ++n)
+			{
+				LONG i_pix = (nH - n - 1) * nW + x_1;
+				LONG i_flt = (nDiamet - (n - y_1) - 1) * nDiamet;
+				memcpy(pixBlk + i_flt, pixSrc + i_pix, flt);
+			}
+		}
+		// 覆盖目标像素
 		for(LONG n = y_b; n <= y_e; ++n)
 		{
 			LONG i_pix = (nH - n - 1) * nW + x_b;
@@ -282,8 +377,10 @@ public:
 		if (exp_des.IsNull()) return false;
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return false;
+		CPoint pt_des(exp_des.GetWidth(), exp_des.GetHeight());
+		CPoint pt_src(exp_src.GetWidth(), exp_src.GetHeight());
 		if (rcDes.IsEmpty())
-			rcDes.Set(CPoint(), CPoint(exp_des.GetWidth(), exp_des.GetHeight()));
+			rcDes.Set(CPoint(), pt_des);
 		// 遍历像素绘图
 		if (!pFilter) pFilter = &CFilterNormal();
 		LONG radius = pFilter->GetRadius();
@@ -295,24 +392,26 @@ public:
 		pixel_t* flt_src = ExMem::Alloc<pixel_t>(fltsiz); // 滤镜像素块
 		pixel_t* pix_des = exp_des.GetPixels();
 		pixel_t* pix_src = exp_src.GetPixels();
-		for(LONG y_s = ptSrc.y; y_s < (LONG)exp_src.GetHeight(); ++y_s)
+		for(LONG y_s = ptSrc.y; y_s < pt_src.y; ++y_s)
 		{
-			for(LONG x_s = ptSrc.x; x_s < (LONG)exp_src.GetWidth(); ++x_s)
+			for(LONG x_s = ptSrc.x; x_s < pt_src.x; ++x_s)
 			{
 				// 校验像素区域
 				if (x_s >= ptSrc.x + rcDes.Width() || 
 					y_s >= ptSrc.y + rcDes.Height()) continue;
 				LONG x_d = rcDes.Left() + x_s;
 				if (x_d < 0) continue;
-				if (x_d >= (LONG)exp_des.GetWidth()) break;
+				if (x_d >= pt_des.x) break;
 				LONG y_d = rcDes.Top() + y_s;
 				if (y_d < 0) continue;
-				if (y_d >= (LONG)exp_des.GetHeight()) break;
+				if (y_d >= pt_des.y) break;
 				// 获得像素块
-				CRect rc(ptSrc, CPoint(exp_src.GetWidth(), exp_src.GetHeight()));
-				GetFilterBlock(pix_src, x_s, y_s, exp_src.GetWidth(), exp_src.GetHeight(), rc, flt_src, diamet, fltrad);
+				CRect rc(ptSrc, CPoint(pt_src.x, pt_src.y));
+				GetFilterBlock(
+					pix_src, x_s, y_s, pt_src.x, pt_src.y, rc, 
+					flt_src, fltsiz, diamet, fltrad);
 				// 渲染像素
-				LONG i_d = (exp_des.GetHeight() - y_d - 1) * exp_des.GetWidth() + x_d;
+				LONG i_d = (pt_des.y - y_d - 1) * pt_des.x + x_d;
 				pix_des[i_d] = pFilter->Render(flt_src, pix_des[i_d], fltind);
 			}
 		}

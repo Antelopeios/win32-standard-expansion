@@ -180,6 +180,20 @@ BOOL SaveFile(DWORD nInx, CString& sPath)
 	return TRUE;
 }
 
+void Render(HWND hWnd, CImgRenderer::IFilter* pFilter = NULL)
+{
+	if (!imgShow) return;
+	CImage bmp_img(imgShow), tmp;
+	CRect rc(0, 0, bmp_img.GetWidth(), bmp_img.GetHeight());
+	tmp.Create(rc.Width(), rc.Height());
+	if (!tmp) return;
+	CImgRenderer::Render(tmp, bmp_img, rc, CPoint(), pFilter);
+	ICoderObject::DeleteImage(imgShow);
+	imgShow = tmp;
+	// 刷新窗口
+	Invalidate(hWnd);
+}
+
 //
 //  函数: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -276,68 +290,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		// 渲染
 		case IDM_GRAY:
-			if (imgShow)
-			{
-				CImage bmp_img(imgShow);
-				image_t tmp = bmp_img.Clone();
-				if(!tmp) break;
-				CImgRenderer::Render(tmp, bmp_img, CRect(), CPoint(), &CImgRenderer::CFilterGray());
-				ICoderObject::DeleteImage(imgShow);
-				imgShow = tmp;
-				// 刷新窗口
-				Invalidate(hWnd);
-			}
+			Render(hWnd, &CImgRenderer::CFilterGrayT<CImgRenderer::CFilterCopy>());
 			break;
 		case IDM_INVE:
-			if (imgShow)
-			{
-				CImage bmp_img(imgShow);
-				image_t tmp = bmp_img.Clone();
-				if(!tmp) break;
-				CImgRenderer::Render(tmp, bmp_img, CRect(), CPoint(), &CImgRenderer::CFilterInverse());
-				ICoderObject::DeleteImage(imgShow);
-				imgShow = tmp;
-				// 刷新窗口
-				Invalidate(hWnd);
-			}
+			Render(hWnd, &CImgRenderer::CFilterInverseT<CImgRenderer::CFilterCopy>());
 			break;
 		case IDM_RELI:
-			if (imgShow)
-			{
-				CImage bmp_img(imgShow);
-				image_t tmp = bmp_img.Clone();
-				if(!tmp) break;
-				CImgRenderer::Render(tmp, bmp_img, CRect(), CPoint(), &CImgRenderer::CFilterRelief());
-				ICoderObject::DeleteImage(imgShow);
-				imgShow = tmp;
-				// 刷新窗口
-				Invalidate(hWnd);
-			}
+			Render(hWnd, &CImgRenderer::CFilterReliefT<CImgRenderer::CFilterCopy>());
 			break;
 		case IDM_DIFF:
-			if (imgShow)
-			{
-				CImage bmp_img(imgShow);
-				image_t tmp = bmp_img.Clone();
-				if(!tmp) break;
-				CImgRenderer::Render(tmp, bmp_img, CRect(), CPoint(), &CImgRenderer::CFilterDiffuse());
-				ICoderObject::DeleteImage(imgShow);
-				imgShow = tmp;
-				// 刷新窗口
-				Invalidate(hWnd);
-			}
+			Render(hWnd, &CImgRenderer::CFilterDiffuseT<CImgRenderer::CFilterCopy>());
 			break;
 		case IDM_GAUS:
+			Render(hWnd, &CImgRenderer::CFilterGaussT<CImgRenderer::CFilterCopy>());
+			break;
+		case IDM_OUTG:
 			if (imgShow)
 			{
-				CImage bmp_img(imgShow);
-				image_t tmp = bmp_img.Clone();
-				if(!tmp) break;
-				CImgRenderer::Render(tmp, bmp_img, CRect(), CPoint(), &CImgRenderer::CFilterGauss());
+				CImgRenderer::CFilterOuterGlowT<CImgRenderer::CFilterCopy> filter;
+				CPoint pt_flt(filter.GetRadius(), filter.GetRadius());
+				CImage bmp_img(imgShow), tmp;
+				CRect rc(0, 0, bmp_img.GetWidth(), bmp_img.GetHeight());
+				CRect rc_tmp(rc + pt_flt);
+				tmp.Create(rc_tmp.Width(), rc_tmp.Height());
+				if (!tmp) break;
+				rc.Offset(pt_flt);
+				CImgRenderer::Render(tmp, bmp_img, rc, CPoint());
 				ICoderObject::DeleteImage(imgShow);
 				imgShow = tmp;
-				// 刷新窗口
-				Invalidate(hWnd);
+				Render(hWnd, &filter);
 			}
 			break;
 		// 关于

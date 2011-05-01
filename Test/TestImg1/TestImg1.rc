@@ -64,6 +64,7 @@ BEGIN
         MENUITEM "浮雕",                          IDM_RELI
         MENUITEM "扩散",                          IDM_DIFF
         MENUITEM "高斯模糊",                        IDM_GAUS
+        MENUITEM "外发光",                         IDM_OUTG
     END
     POPUP "帮助(&H)"
     BEGIN

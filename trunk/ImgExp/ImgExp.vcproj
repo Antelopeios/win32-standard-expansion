@@ -649,6 +649,10 @@
 			Name="ImgDrawer"
 			>
 			<File
+				RelativePath=".\ImgDrawer\FilterObject.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ImgDrawer\ImgDeformer.h"
 				>
 			</File>

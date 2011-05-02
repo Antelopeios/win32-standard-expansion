@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-01
-// Version:	1.0.0004.2350
+// Date:	2011-05-02
+// Version:	1.0.0005.1330
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -46,6 +46,7 @@
 //	- 1.0.0004.2350(2011-05-01)	# 修正正常渲染滤镜忽略了背景Alpha通道,导致图像混合后不再透明的问题
 //								# 修正因滤镜像素块采集算法在图像边缘处忽略了无法采集的部分,导致一些滤镜边缘渲染的异常
 //								+ 添加外发光滤镜
+//	- 1.0.0005.1330(2011-05-02)	= 将滤镜对象从ImgRenderer内部分离
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -55,7 +56,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgDrawer/ImgDeformer.h"
+#include "ImgDrawer/FilterObject.h"
 
 EXP_BEG
 
@@ -63,271 +64,6 @@ EXP_BEG
 
 class CImgRenderer
 {
-public:
-	// 滤镜接口
-	interface IFilter : INonCopyable
-	{
-		LONG m_Radius;
-
-		IFilter() : m_Radius(3) {}
-
-		virtual LONG GetRadius() { return m_Radius; }
-		virtual pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey) = 0;
-	};
-	// 像素拷贝
-	class CFilterCopy : public IFilter
-	{
-	public:
-		CFilterCopy() : IFilter() { m_Radius = 1; }
-
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			return pixSrc[nKey];
-		}
-	};
-	// 正常渲染
-	class CFilterNormal : public IFilter
-	{
-	public:
-		CFilterNormal() : IFilter() { m_Radius = 1; }
-
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			BYTE a_s = ExGetA(pixSrc[nKey]);
-			if (a_s == 0) return pixDes;
-			if (a_s == (BYTE)~0) return pixSrc[nKey];
-			BYTE r_s = ExGetR(pixSrc[nKey]);
-			BYTE g_s = ExGetG(pixSrc[nKey]);
-			BYTE b_s = ExGetB(pixSrc[nKey]);
-			BYTE a_d = (BYTE)~0 - a_s;
-			BYTE r_d = ExGetR(pixDes);
-			BYTE g_d = ExGetG(pixDes);
-			BYTE b_d = ExGetB(pixDes);
-			return ExRGBA
-				(
-				(r_s * a_s + r_d * a_d) / (BYTE)~0, 
-				(g_s * a_s + g_d * a_d) / (BYTE)~0, 
-				(b_s * a_s + b_d * a_d) / (BYTE)~0, 
-				ExGetA(pixDes)
-				);
-		}
-	};
-	// 灰度化
-	template <typename BaseT = CFilterNormal>
-	class CFilterGrayT : public BaseT
-	{
-	public:
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			BYTE g = 
-				(ExGetR(pixSrc[nKey]) * 38 + ExGetG(pixSrc[nKey]) * 75 + ExGetB(pixSrc[nKey]) * 15) >> 7;
-			pixel_t src = ExRGBA(g, g, g, ExGetA(pixSrc[nKey]));
-			return BaseT::Render(&src, pixDes, nKey);
-		}
-	};
-	typedef CFilterGrayT<> CFilterGray;
-	// 反色
-	template <typename BaseT = CFilterNormal>
-	class CFilterInverseT : public BaseT
-	{
-	public:
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			pixel_t src = ExRGBA
-				(
-				(BYTE)~0 - ExGetR(pixSrc[nKey]), 
-				(BYTE)~0 - ExGetG(pixSrc[nKey]), 
-				(BYTE)~0 - ExGetB(pixSrc[nKey]), 
-				ExGetA(pixSrc[nKey])
-				);
-			return BaseT::Render(&src, pixDes, nKey);
-		}
-	};
-	typedef CFilterInverseT<> CFilterInverse;
-	// 浮雕
-	template <typename BaseT = CFilterNormal>
-	class CFilterReliefT : public BaseT
-	{
-	protected:
-		LONG m_Diamet;
-	public:
-		pixel_t m_Const;
-
-	public:
-		CFilterReliefT(pixel_t cConst = ExRGBA(125, 68, 29, (BYTE)~0))
-			: BaseT()
-			, m_Const(cConst)
-		{
-			m_Radius = 2;
-			m_Diamet = (m_Radius << 1) - 1;
-		}
-
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
-			pixel_t pix1 = pixSrc[nKey];
-			pixel_t pix2 = pixSrc[nKey + m_Diamet + 1];
-			pixSrc[nKey] = ExRGBA
-				(
-				abs(ExGetR(pix1) - ExGetR(pix2) + ExGetB(m_Const)), 
-				abs(ExGetG(pix1) - ExGetG(pix2) + ExGetG(m_Const)), 
-				abs(ExGetB(pix1) - ExGetB(pix2) + ExGetR(m_Const)), 
-				abs(ExGetA(pix1) - ExGetA(pix2) + ExGetA(m_Const))
-				);
-			return BaseT::Render(pixSrc, pixDes, nKey);
-		}
-	};
-	typedef CFilterReliefT<> CFilterRelief;
-	// 扩散
-	template <typename BaseT = CFilterNormal>
-	class CFilterDiffuseT : public BaseT
-	{
-	protected:
-		LONG m_FltSiz;
-
-	public:
-		CFilterDiffuseT(LONG nRadius = 1)
-			: BaseT()
-		{
-			m_Radius = nRadius + 1;
-			LONG diamet = (m_Radius << 1) - 1;
-			m_FltSiz = diamet * diamet;
-			ExRandomize();
-		}
-
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
-			pixSrc[nKey] = pixSrc[ExRandom(m_FltSiz)];
-			return BaseT::Render(pixSrc, pixDes, nKey);
-		}
-	};
-	typedef CFilterDiffuseT<> CFilterDiffuse;
-	// 高斯模糊
-	template <typename BaseT = CFilterNormal>
-	class CFilterGaussT : public BaseT
-	{
-	protected:
-		LONG m_Diamet, m_FltSiz;
-		double* m_gMatrix;	// 卷积矩阵
-		double m_Nuclear;	// 卷积核
-
-	public:
-		CFilterGaussT(LONG nRadius = 5)
-			: BaseT()
-		{
-			m_Radius = nRadius + 1;
-			m_Diamet = (m_Radius << 1) - 1;
-			m_FltSiz = m_Diamet * m_Diamet;
-			double s = (double)nRadius / 3.0;
-			double sigma2 = 2.0 * s * s;
-			m_Nuclear = 0.0;
-			m_gMatrix = ExMem::Alloc<double>(m_Diamet * m_Diamet);
-			// 计算高斯矩阵
-			int i = 0;
-			for(long y = -nRadius; y <= nRadius; ++y)
-				for(long x = -nRadius; x <= nRadius; ++x)
-				{
-					m_gMatrix[i] = 
-						exp(-(double)(x * x + y * y) / sigma2);
-					m_Nuclear += m_gMatrix[i];
-					++i;
-				}
-		}
-		~CFilterGaussT()
-		{
-			ExMem::Free(m_gMatrix);
-		}
-
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
-			double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
-			for(int i = 0; i <= m_FltSiz; ++i)
-			{
-				double weight = m_gMatrix[i] / m_Nuclear;
-				r += weight * ExGetR(pixSrc[i]);
-				g += weight * ExGetG(pixSrc[i]);
-				b += weight * ExGetB(pixSrc[i]);
-				a += weight * ExGetA(pixSrc[i]);
-			}
-			pixSrc[nKey] = ExRGBA
-				(
-				r > (BYTE)~0 ? (BYTE)~0 : r, 
-				g > (BYTE)~0 ? (BYTE)~0 : g, 
-				b > (BYTE)~0 ? (BYTE)~0 : b, 
-				a > (BYTE)~0 ? (BYTE)~0 : a
-				);
-			return BaseT::Render(pixSrc, pixDes, nKey);
-		}
-	};
-	typedef CFilterGaussT<> CFilterGauss;
-	// 外发光
-	template <typename BaseT = CFilterNormal>
-	class CFilterOuterGlowT : public CFilterGaussT<BaseT>
-	{
-	protected:
-		CFilterNormal m_Filter;
-		pixel_t* m_PixSdw;
-		pixel_t* m_PixChk[2];
-	public:
-		pixel_t m_Const;
-
-	public:
-		CFilterOuterGlowT(LONG nRadius = 7, pixel_t cConst = ExRGB(255, 255, 190))
-			: CFilterGaussT<BaseT>(nRadius)
-			, m_Const(cConst)
-		{
-			m_PixSdw = ExMem::Alloc<pixel_t>(m_FltSiz);
-			m_PixChk[0] = ExMem::Alloc<pixel_t>(m_FltSiz);
-			m_PixChk[1] = ExMem::Alloc<pixel_t>(m_FltSiz);
-			for(int i = 0; i <= m_FltSiz; ++i)
-			{
-				m_PixChk[0][i] = ExRGBA
-					(
-					ExGetR(m_Const), 
-					ExGetG(m_Const), 
-					ExGetB(m_Const), 
-					0
-					);
-				m_PixChk[1][i] = ExRGBA
-					(
-					ExGetR(m_Const), 
-					ExGetG(m_Const), 
-					ExGetB(m_Const), 
-					(BYTE)~0
-					);
-			}
-		}
-		~CFilterOuterGlowT()
-		{
-			ExMem::Free(m_PixChk[1]);
-			ExMem::Free(m_PixChk[0]);
-			ExMem::Free(m_PixSdw);
-		}
-
-		pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-		{
-			if (m_Radius < 2) return BaseT::Render(pixSrc, pixDes, nKey);
-			for(int i = 0; i <= m_FltSiz; ++i)
-			{
-				m_PixSdw[i] = ExRGBA
-					(
-					ExGetB(m_Const), 
-					ExGetG(m_Const), 
-					ExGetR(m_Const), 
-					ExGetA(pixSrc[i])
-					);
-			}
-			if (memcmp(m_PixSdw, m_PixChk[0], m_FltSiz * sizeof(pixel_t)) == 0 || 
-				memcmp(m_PixSdw, m_PixChk[1], m_FltSiz * sizeof(pixel_t)) == 0)
-				return m_Filter.Render(pixSrc, BaseT::Render(m_PixSdw, pixDes, nKey), nKey);
-			else
-				return m_Filter.Render(pixSrc, CFilterGaussT<BaseT>::Render(m_PixSdw, pixDes, nKey), nKey);
-		}
-	};
-	typedef CFilterOuterGlowT<> CFilterOuterGlow;
-
 protected:
 	EXP_INLINE static void GetFilterBlock(pixel_t* pixSrc, LONG nX, LONG nY, LONG nW, LONG nH, CRect& rcSrc, 
 										  pixel_t* pixBlk, LONG nFltSiz, LONG nDiamet, LONG nFltRad)
@@ -340,11 +76,11 @@ protected:
 		LONG flt = nDiamet * sizeof(pixel_t);
 		LONG x_b = max(x_1, rcSrc.Left()), x_e = min(x_2, rcSrc.Right() - 1);
 		LONG y_b = max(y_1, rcSrc.Top()), y_e = min(y_2, rcSrc.Bottom() - 1);
-		LONG div_x = x_e - x_b + 1, div_y = y_e - y_b + 1;
-		LONG div_flt = div_x * sizeof(pixel_t);
-		LONG div_x_b = x_b - x_1, div_y_b = y_b - y_1;
+		LONG dif_x = x_e - x_b + 1, dif_y = y_e - y_b + 1;
+		LONG dif_flt = dif_x * sizeof(pixel_t);
+		LONG dif_x_b = x_b - x_1, dif_y_b = y_b - y_1;
 		// 判断是否对齐
-		if (div_x < nDiamet || div_y < nDiamet)
+		if (dif_x < nDiamet || dif_y < nDiamet)
 		{
 			// 重新对齐坐标
 			if (x_b > x_1) { x_1 = x_b; x_2 = x_1 + nDiamet - 1; }
@@ -365,13 +101,14 @@ protected:
 		for(LONG n = y_b; n <= y_e; ++n)
 		{
 			LONG i_pix = (nH - n - 1) * nW + x_b;
-			LONG i_flt = (nDiamet - (div_y_b + n - y_b) - 1) * nDiamet + div_x_b;
-			memcpy(pixBlk + i_flt, pixSrc + i_pix, div_flt);
+			LONG i_flt = (nDiamet - (dif_y_b + n - y_b) - 1) * nDiamet + dif_x_b;
+			memcpy(pixBlk + i_flt, pixSrc + i_pix, dif_flt);
 		}
 	}
 
 public:
-	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc, IFilter* pFilter = NULL)
+	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc, 
+								  IFilterObject* pFilter = NULL)
 	{
 		CImage exp_des(imgDes);
 		if (exp_des.IsNull()) return false;
@@ -383,9 +120,14 @@ public:
 			rcDes.Set(CPoint(), pt_des);
 		// 遍历像素绘图
 		if (!pFilter) pFilter = &CFilterNormal();
+		pFilter->SetSize(pt_des.x, pt_des.y);
 		LONG radius = pFilter->GetRadius();
 		if (radius <= 0) return false;
 		LONG diamet = (radius << 1) - 1;
+		if (diamet > pt_des.x || 
+			diamet > pt_des.y || 
+			diamet > pt_src.x || 
+			diamet > pt_src.y) return false;
 		LONG fltsiz = diamet * diamet;
 		LONG fltrad = radius - 1;
 		LONG fltind = diamet * fltrad + fltrad;

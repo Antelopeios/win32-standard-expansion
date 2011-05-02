@@ -180,7 +180,7 @@ BOOL SaveFile(DWORD nInx, CString& sPath)
 	return TRUE;
 }
 
-void Render(HWND hWnd, CImgRenderer::IFilter* pFilter = NULL)
+void Render(HWND hWnd, IFilterObject* pFilter = NULL)
 {
 	if (!imgShow) return;
 	CImage bmp_img(imgShow), tmp;
@@ -290,24 +290,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		// ‰÷»æ
 		case IDM_GRAY:
-			Render(hWnd, &CImgRenderer::CFilterGrayT<CImgRenderer::CFilterCopy>());
+			Render(hWnd, &CFilterGrayT<CFilterCopy>());
 			break;
 		case IDM_INVE:
-			Render(hWnd, &CImgRenderer::CFilterInverseT<CImgRenderer::CFilterCopy>());
+			Render(hWnd, &CFilterInverseT<CFilterCopy>());
 			break;
 		case IDM_RELI:
-			Render(hWnd, &CImgRenderer::CFilterReliefT<CImgRenderer::CFilterCopy>());
+			Render(hWnd, &CFilterReliefT<CFilterCopy>());
 			break;
 		case IDM_DIFF:
-			Render(hWnd, &CImgRenderer::CFilterDiffuseT<CImgRenderer::CFilterCopy>());
+			Render(hWnd, &CFilterDiffuseT<CFilterCopy>());
 			break;
 		case IDM_GAUS:
-			Render(hWnd, &CImgRenderer::CFilterGaussT<CImgRenderer::CFilterCopy>());
+			Render(hWnd, &CFilterGaussT<CFilterCopy>());
 			break;
 		case IDM_OUTG:
 			if (imgShow)
 			{
-				CImgRenderer::CFilterOuterGlowT<CImgRenderer::CFilterCopy> filter;
+				CFilterOuterGlowT<CFilterCopy> filter;
 				CPoint pt_flt(filter.GetRadius(), filter.GetRadius());
 				CImage bmp_img(imgShow), tmp;
 				CRect rc(0, 0, bmp_img.GetWidth(), bmp_img.GetHeight());
@@ -320,6 +320,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				imgShow = tmp;
 				Render(hWnd, &filter);
 			}
+			break;
+		case IDM_GRAD:
+			Render(hWnd, &CFilterGradientT<CFilterCopy>(
+				ExRGBA(255, 255, 255, 128), ExRGBA(0, 0, 0, 128), 0x9, false));
 			break;
 		// πÿ”⁄
 		case IDM_ABOUT:

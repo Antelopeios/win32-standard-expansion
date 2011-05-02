@@ -65,6 +65,7 @@ BEGIN
         MENUITEM "扩散",                          IDM_DIFF
         MENUITEM "高斯模糊",                        IDM_GAUS
         MENUITEM "外发光",                         IDM_OUTG
+        MENUITEM "渐变",                          IDM_GRAD
     END
     POPUP "帮助(&H)"
     BEGIN

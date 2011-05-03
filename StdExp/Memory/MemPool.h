@@ -408,7 +408,7 @@ public:
 				ExDPrintf(_T("\n1 memory leak has been found!\n"));
 			else
 				ExDPrintf(_T("\n%d memory leaks have been found!\n"), dump_counter);
-			ExDPrintf(_T("Complete memory leak detection.\n"));
+			ExDPrintf(_T("Complete memory leak detection.\n\n"));
 		}
 #endif/*EXP_DUMPING_MEMLEAKS*/
 		// 清理对象池

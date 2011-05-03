@@ -28,56 +28,46 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Singleton - 单例
+// GuiCommon - 界面拓展库公用定义
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-03
-// Version:	1.0.0005.1710
-//
-// History:
-//	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
+// Date:	2010-05-03
+// Version:	1.0.0000.1430
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Singleton_h__
-#define __Singleton_h__
+#ifndef __GuiCommon_h__
+#define __GuiCommon_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Thread/Lock.h"
+//////////////////////////////////////////////////////////////////
 
-EXP_BEG
+// 图像处理库
+#include "../ImgExp/ImgExp.h"
+
+// ATL Thunk
+#include <atlstdthunk.h>
+
+// Dll 导出宏定义
+#ifdef EXP_EXPORTS
+#define EXP_API __declspec(dllexport)
+#else
+#define EXP_API __declspec(dllimport)
+#endif
+
+// 功能定义
+
+#define ExGetX(lp)	((int)(short)LOWORD(lp))
+#define ExGetY(lp)	((int)(short)HIWORD(lp))
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT>
-class CSingletonT
-{
-public:
-	EXP_INLINE static TypeT& Instance()
-	{
-		static TypeT* instance = NULL;
-		if (instance == NULL)
-		{
-			ExLockThis();
-			if (instance == NULL)
-			{
-				static TypeT type;
-				instance = &type;
-			}
-		}
-		return (*instance);
-	}
-};
-
-template <typename TypeT>
-EXP_INLINE TypeT& ExSingleton() { return CSingletonT<TypeT>::Instance(); }
+#include "GuiCommon/GuiInterface.h"
 
 //////////////////////////////////////////////////////////////////
 
-EXP_END
-
-#endif/*__Singleton_h__*/
+#endif/*__GuiCommon_h__*/

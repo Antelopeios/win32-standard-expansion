@@ -309,15 +309,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				CFilterOuterGlowT<CFilterCopy> filter;
 				CPoint pt_flt(filter.GetRadius(), filter.GetRadius());
-				CImage bmp_img(imgShow), tmp;
+				// ½«Í¼Æ¬À©´ó
+				CImage bmp_img(imgShow);
 				CRect rc(0, 0, bmp_img.GetWidth(), bmp_img.GetHeight());
-				CRect rc_tmp(rc + pt_flt);
-				tmp.Create(rc_tmp.Width(), rc_tmp.Height());
+				image_t tmp = bmp_img.Clone(rc + pt_flt);
 				if (!tmp) break;
-				rc.Offset(pt_flt);
-				CImgRenderer::Render(tmp, bmp_img, rc, CPoint());
 				ICoderObject::DeleteImage(imgShow);
 				imgShow = tmp;
+				// äÖÈ¾Í¼Æ¬
 				Render(hWnd, &filter);
 			}
 			break;

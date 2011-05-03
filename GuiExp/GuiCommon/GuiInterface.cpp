@@ -28,56 +28,24 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Singleton - 单例
+// GuiInterface - 界面公用接口
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-03
-// Version:	1.0.0005.1710
-//
-// History:
-//	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
+// Date:	2010-05-03
+// Version:	1.0.0000.1430
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Singleton_h__
-#define __Singleton_h__
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-#include "Thread/Lock.h"
+#include "stdafx.h"
+#include "GuiInterface.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT>
-class CSingletonT
-{
-public:
-	EXP_INLINE static TypeT& Instance()
-	{
-		static TypeT* instance = NULL;
-		if (instance == NULL)
-		{
-			ExLockThis();
-			if (instance == NULL)
-			{
-				static TypeT type;
-				instance = &type;
-			}
-		}
-		return (*instance);
-	}
-};
-
-template <typename TypeT>
-EXP_INLINE TypeT& ExSingleton() { return CSingletonT<TypeT>::Instance(); }
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
-
-#endif/*__Singleton_h__*/

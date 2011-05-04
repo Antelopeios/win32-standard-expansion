@@ -46,6 +46,12 @@ EXP_BEG
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
 
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
+
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiWnd, IGuiComp)
+const CString IGuiWnd::s_ClassName = _T("GuiExp_Foundation");
+
 //////////////////////////////////////////////////////////////////
 
 EXP_END

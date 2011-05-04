@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-04
+// Version:	1.0.0001.1135
+//
+// History:
+//	- 1.0.0001.1135(2010-05-04)	+ 添加wnd_t类型定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCommon_h__
@@ -44,13 +47,13 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-//////////////////////////////////////////////////////////////////
-
 // 图像处理库
 #include "../ImgExp/ImgExp.h"
 
 // ATL Thunk
 #include <atlstdthunk.h>
+
+//////////////////////////////////////////////////////////////////
 
 // Dll 导出宏定义
 #ifdef EXP_EXPORTS
@@ -59,12 +62,22 @@
 #define EXP_API __declspec(dllimport)
 #endif
 
+EXP_BEG
+
+//////////////////////////////////////////////////////////////////
+
+// 类型定义
+
+typedef HWND		wnd_t;
+
 // 功能定义
 
 #define ExGetX(lp)	((int)(short)LOWORD(lp))
 #define ExGetY(lp)	((int)(short)HIWORD(lp))
 
 //////////////////////////////////////////////////////////////////
+
+EXP_END
 
 #include "GuiCommon/GuiInterface.h"
 

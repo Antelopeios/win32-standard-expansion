@@ -57,9 +57,13 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-typedef HDC			graph_t;
+// 类型定义
+
+typedef HDC			graph_t;	
 typedef HBITMAP		image_t;
 typedef COLORREF	pixel_t;
+
+// 功能定义
 
 #define ExRGB(r, g, b) RGB(r, g, b)
 #define ExRGBA(r, g, b, a) \

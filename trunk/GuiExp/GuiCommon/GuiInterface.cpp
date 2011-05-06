@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-05
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
 //////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -48,9 +51,6 @@ EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
-
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiWnd, IGuiComp)
-const CString IGuiWnd::s_ClassName = _T("GuiExp_Foundation");
 
 //////////////////////////////////////////////////////////////////
 

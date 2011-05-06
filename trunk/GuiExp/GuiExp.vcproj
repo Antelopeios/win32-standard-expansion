@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;EXP_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -115,7 +115,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;EXP_EXPORTS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -180,6 +180,18 @@
 			</File>
 			<File
 				RelativePath=".\GuiCommon\GuiInterface.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="GuiBoard"
+			>
+			<File
+				RelativePath=".\GuiBoard\GuiBoard.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiBoard\GuiBoard.h"
 				>
 			</File>
 		</Filter>

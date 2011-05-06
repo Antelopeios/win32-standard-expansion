@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-12
-// Version:	1.0.0000.1305
+// Date:	2010-05-05
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2010-05-05)	+ ITypeObjectT::IsNull()添加const类型接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __TypeObject_h__
@@ -79,6 +82,8 @@ public:
 	{ return Get(); }
 
 	virtual bool IsNull()
+	{ return (m_Type == NULL); }
+	virtual bool IsNull() const
 	{ return (m_Type == NULL); }
 };
 

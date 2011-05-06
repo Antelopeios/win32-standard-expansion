@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-21
-// Version:	1.1.0007.1730
+// Date:	2011-05-05
+// Version:	1.1.0008.1730
+//
+// History:
+//	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -150,21 +153,25 @@ public:
 
 // Base Typedef 宏定义
 
+#define EXP_BASE base_t
 #define EXP_DEF_BASETYPE(base_name)															\
 public:																						\
-	typedef base_name Base;
+	typedef base_name EXP_BASE;
 
+#define EXP_BASE2 base2_t
 #define EXP_DEF_BASETYPE2(base_name)														\
 public:																						\
-	typedef base_name Base2;
+	typedef base_name EXP_BASE2;
 
+#define EXP_BASE3 base3_t
 #define EXP_DEF_BASETYPE3(base_name)														\
 public:																						\
-	typedef base_name Base3;
+	typedef base_name base3_t;
 
+#define EXP_MULT mult_t
 #define EXP_DEF_MULTTYPE(mult_name)															\
 public:																						\
-	typedef mult_name Mult;
+	typedef mult_name mult_t;
 
 //////////////////////////////////////////////////////////////////
 
@@ -401,7 +408,7 @@ template <class TypeT>
 EXP_INLINE TypeT* ExDynCast(void* ptr)
 {
 	if( ptr )
-		return ((TypeT::Mult*)ptr)->IsKindOf(EXP_TYPEINFO_OF_CLS(TypeT)) ? (TypeT*)(TypeT::Mult*)ptr : NULL;
+		return ((TypeT::EXP_MULT*)ptr)->IsKindOf(EXP_TYPEINFO_OF_CLS(TypeT)) ? (TypeT*)(TypeT::EXP_MULT*)ptr : NULL;
 	else
 		return NULL;
 }

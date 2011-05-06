@@ -12,7 +12,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	int i = ExGui();
+	IGuiBoard* wnd = (IGuiBoard*)ExGui(_T("CGuiWnd"));
+	wnd->Create(_T("Test"), CRect(0, 0, 100, 100));
+
+	// 主消息循环:
+	MSG msg = {0};
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 
 	return 0;
 }

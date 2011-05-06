@@ -28,35 +28,91 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiExp - 界面拓展库(GUI Expansion)
+// GuiBoard - 界面绘图板(Win32窗口对象)
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-05
+// Version:	1.0.0000.0926
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiExp_h__
-#define __GuiExp_h__
+#ifndef __GuiBoard_h__
+#define __GuiBoard_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-//////////////////////////////////////////////////////////////////
-
 #include "GuiCommon/GuiCommon.h"
-#include "GuiBoard/GuiBoard.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);
+// GUI 窗口对象接口
+interface EXP_API IGuiBoard : public IGuiComp
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiBoard, IGuiComp)
+
+public:
+	IGuiBoard(void)
+	{}
+	virtual ~IGuiBoard(void)
+	{}
+
+public:
+	virtual bool Create(LPCTSTR sWndName, CRect& rcWnd, 
+						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
+						wnd_t wndParent = NULL) = 0;
+	virtual bool Destroy() = 0;
+	virtual bool IsNull() = 0;
+
+	// 窗口属性修改
+	virtual DWORD GetStyle() = 0;
+	virtual DWORD GetExStyle() = 0;
+	virtual bool ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0) = 0;
+	virtual bool ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE) = 0;
+	virtual LONG SetWindowLong(int nIndex, LONG dwNewLong) = 0;
+	virtual LONG GetWindowLong(int nIndex) = 0;
+
+	// 窗口刷新
+	virtual void Invalidate() = 0;
+	virtual void InvalidateRect(CRect& rcInv) = 0;
+	virtual void InvalidateRgn(HRGN hRgn) = 0;
+	virtual bool ShowWindow(int nCmdShow) = 0;
+	virtual bool UpdateWindow() = 0;
+
+	// 窗口DC
+	virtual graph_t GetDC() = 0;
+	virtual bool ReleaseDC(graph_t hdc) = 0;
+
+	// 获得窗口大小
+	virtual bool GetWindowRect(CRect& lpRect) = 0;
+	virtual bool GetClientRect(CRect& lpRect) = 0;
+
+	// 窗口移动
+	virtual void MoveWindow(int x, int y, int nWidth, int nHeight, bool bRepaint = true) = 0;
+	virtual void MoveWindow(CRect& lpRect, bool bRepaint = true) = 0;
+	virtual void CenterWindow(wnd_t hWndCenter = NULL) = 0;
+
+	// 窗口坐标转换
+	virtual void ClientToScreen(CPoint& lpPoint) = 0;
+	virtual void ClientToScreen(CRect& lpRect) = 0;
+	virtual void ScreenToClient(CPoint& lpPoint) = 0;
+	virtual void ScreenToClient(CRect& lpRect) = 0;
+
+	// 窗口关系控制
+	virtual wnd_t GetParent() = 0;
+
+	// 设置焦点
+	virtual wnd_t SetFocus() = 0;
+	static wnd_t GetFocus() { return (wnd_t)::GetFocus(); }
+	virtual bool IsFocus() = 0;
+};
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiExp_h__*/
+#endif/*__GuiBoard_h__*/

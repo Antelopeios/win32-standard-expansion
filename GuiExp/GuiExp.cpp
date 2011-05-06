@@ -7,9 +7,9 @@
 EXP_BEG
 
 // 这是导出函数的一个示例。
-EXP_API int ExGui(void)
+EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
 {
-	return 42;
+	return ExDynCreate<IGuiObject>(sGuiType, pGC);
 }
 
 EXP_END

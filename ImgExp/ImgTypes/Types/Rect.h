@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-27
-// Version:	1.0.0005.1452
+// Date:	2011-05-05
+// Version:	1.0.0006.1730
 //
 // History:
 //	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
@@ -44,6 +44,7 @@
 //								# 修正CRectT::MoveTo()的错误算法
 //	- 1.0.0004.1800(2011-04-21)	+ CRectT::PtInRect()支持自定义是否忽略右边界与下边界
 //	- 1.0.0005.1452(2011-04-27)	# 修正CRectT::Inter()与CRectT::Union()中的错误
+//	- 1.0.0006.1730(2011-05-05)	# 修正构造时传入基本数据类型将导致堆栈溢出的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -151,8 +152,19 @@ public:
 		Set(tRect.pt1, tRect.pt2);
 		return (*this);
 	}
+	EXP_INLINE CRectT& operator=(RECT& tRect)
+	{
+		Set(CPointT<TypeT>(tRect.left, tRect.top), 
+			CPointT<TypeT>(tRect.right, tRect.bottom));
+		return (*this);
+	}
 	EXP_INLINE bool operator==(const CRectT& tRect)
 	{ return ((pt1 == tRect.pt1) && (pt2 == tRect.pt2)); }
+	EXP_INLINE bool operator==(RECT& tRect)
+	{
+		return ((pt1 == CPointT<TypeT>(tRect.left, tRect.top)) && 
+				(pt2 == CPointT<TypeT>(tRect.right, tRect.bottom)));
+	}
 
 	EXP_INLINE CRectT& operator+=(const CPointT<TypeT>& Pt)
 	{

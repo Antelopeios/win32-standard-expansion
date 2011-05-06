@@ -66,6 +66,8 @@
 
 //////////////////////////////////////////////////////////////////
 
+#ifndef EXP_UNUSED_NAMESPACE
 EXP_USING_NAMESPACE
+#endif/*EXP_UNUSED_NAMESPACE*/
 
 #endif/*__StdExp_h__*/

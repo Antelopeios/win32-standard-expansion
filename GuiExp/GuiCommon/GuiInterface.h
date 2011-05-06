@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-05
+// Version:	1.0.0001.1730
+//
+// History:
+//	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -132,151 +135,6 @@ public:
 	IGuiComp* GetComp() { return m_pComp; }
 
 	virtual LRESULT OnMessage(UINT message, WPARAM wParam, LPARAM lParam) = 0;
-};
-
-//////////////////////////////////////////////////////////////////
-
-// GUI 窗口对象接口
-interface EXP_API IGuiWnd : public IGuiComp, public ITypeObjectT<wnd_t>
-{
-	EXP_DECLARE_DYNAMIC_CLS(IGuiWnd, IGuiComp)
-
-public:
-	static const CString s_ClassName;
-protected:
-	HINSTANCE m_hIns;
-
-public:
-	IGuiWnd(void)
-		: m_hIns(::GetModuleHandle(NULL))
-	{}
-	virtual ~IGuiWnd(void)
-	{}
-
-protected:
-	ATOM RegisterWndClass(LPCTSTR sClassName)
-	{
-		WNDCLASSEX wcex		= {0};
-		wcex.cbSize			= sizeof(WNDCLASSEX);
-		wcex.style			= CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
-		wcex.lpfnWndProc	= DefWindowProc;
-		wcex.cbClsExtra		= 0;
-		wcex.cbWndExtra		= 0;
-		wcex.hInstance		= m_hIns;
-		wcex.hIcon			= NULL;
-		wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-		wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW);
-		wcex.lpszMenuName	= NULL;
-		wcex.lpszClassName	= sClassName;
-		return ::RegisterClassEx(&wcex);
-	}
-
-public:
-	virtual bool Create(LPCTSTR sWndName, const CRect& rcWnd, 
-						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
-						wnd_t wndParent = NULL)
-	{
-		Destroy();
-
-		RegisterWndClass(s_ClassName);
-		Set(
-			::CreateWindowEx
-				(
-				dwExStyle, sClassName, sWndName, dwStyle, 
-				rcWnd.Left(), rcWnd.Top(), rcWnd.Width(), rcWnd.Height(), 
-				wndParent, NULL, m_hIns, NULL
-				)
-			);
-		if( IsNull() ) return false;
-
-		::ShowWindow(nCmdShow);
-		::UpdateWindow();
-
-		return true;
-	}
-	virtual bool Destroy()
-	{
-		bool ret = true;
-		if (!IsNull())
-			ret = ::DestroyWindow(Get());
-		Set(NULL);
-		return ret;
-	}
-
-	// 窗口属性修改
-	DWORD GetStyle() const
-	{
-		return (DWORD)GetWindowLong(GWL_STYLE);
-	}
-	DWORD GetExStyle() const
-	{
-		return (DWORD)GetWindowLong(GWL_EXSTYLE);
-	}
-	bool ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0)
-	{
-		return ModifyStyleEx(dwRemove, dwAdd, nFlags, GWL_STYLE);
-	}
-	bool ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE)
-	{
-		ExAssert( !IsNull() );
-		DWORD style = GetWindowLong(nStyleOffset);
-		DWORD new_style = (style & ~dwRemove) | dwAdd;
-		if (style == new_style)
-			return false;
-		SetWindowLong(nStyleOffset, new_style);
-		if (nFlags != 0)
-		{
-			::SetWindowPos(Get(), NULL, 0, 0, 0, 0,
-				SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | nFlags);
-		}
-		return true;
-	}
-	LONG SetWindowLong(int nIndex, LONG dwNewLong)
-	{
-		ExAssert( !IsNull() );
-		return ::SetWindowLong(Get(), nIndex, dwNewLong);
-	}
-	LONG GetWindowLong(int nIndex) const
-	{
-		ExAssert( !IsNull() );
-		return ::GetWindowLong(Get(), nIndex);
-	}
-
-	// 窗口刷新
-	void Invalidate()
-	{
-		if (IsNull()) return ;
-		RECT rect;
-		::GetClientRect(Get(), &rect);
-		::InvalidateRect(Get(), &rect, TRUE);
-	}
-	void InvalidateRect(const CRect& rcInv)
-	{
-		if (IsNull()) return ;
-		RECT rect = 
-		{
-			rcInv.Left(), 
-			rcInv.Top(), 
-			rcInv.Right(), 
-			rcInv.Bottom()
-		};
-		::InvalidateRect(Get(), &rect, TRUE);
-	}
-	void InvalidateRgn(HRGN hRgn)
-	{
-		if (IsNull()) return ;
-		::InvalidateRgn(Get(), hRgn, TRUE);
-	}
-	bool ShowWindow(int nCmdShow)
-	{
-		if(IsNull()) return false;
-		return (bool)::ShowWindow(Get(), nCmdShow);
-	}
-	bool UpdateWindow()
-	{
-		if (IsNull()) return false;
-		return (bool)::UpdateWindow(Get());
-	}
 };
 
 //////////////////////////////////////////////////////////////////

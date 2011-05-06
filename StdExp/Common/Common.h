@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.2.0007.2000
+// Date:	2011-05-05
+// Version:	1.2.0008.1000
 //
 // History:
 //	- 1.2.0006.1150(2011-03-02)	= 调整部分宏定义,定义并使用EXP_INLINE宏
 //	- 1.2.0007.2000(2011-04-03)	+ 添加interface宏定义
+//	- 1.2.0008.1000(2011-05-05)	= 将EXP宏定义由StdExp调整为win_exp
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Common_h__
@@ -60,7 +61,7 @@
 
 // namespace 定义
 
-#define EXP					StdExp
+#define EXP					win_exp
 #define EXP_BEG				namespace EXP {
 #define EXP_END				}
 #define EXP_USING_NAMESPACE	using namespace EXP;

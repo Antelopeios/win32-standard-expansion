@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.0.0015.1600
+// Date:	2011-05-10
+// Version:	1.0.0016.2202
 //
 // History:
 //	- 1.0.0015.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //								# 修正CArrayT::Clear()可能出现的元素重复析构问题
+//	- 1.0.0016.2202(2011-05-10)	# 修正bool operator==()与bool operator!=()在对指针做比较时无法通过编译的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Array_h__
@@ -197,14 +198,14 @@ public:
 	CArrayT& operator=(const CArrayT& Array)
 	{ return SetArray(Array); }
 
-	bool operator==(type_t* pArray) const
+	bool operator==(const type_t* pArray) const
 	{ return (m_Array == pArray); }
 	bool operator==(const CArrayT& Array) const
-	{ return (m_Array == (type_t*)Array); }
-	bool operator!=(type_t* pArray) const
+	{ return (m_Array == Array.m_Array); }
+	bool operator!=(const type_t* pArray) const
 	{ return (m_Array != pArray); }
 	bool operator!=(const CArrayT& Array) const
-	{ return (m_Array != (type_t*)Array); }
+	{ return (m_Array != Array.m_Array); }
 
 	type_t* operator->()
 	{ return m_Array; }

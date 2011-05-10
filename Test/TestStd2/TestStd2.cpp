@@ -5,10 +5,9 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//CString str;
-	//str = _T("123");
-	//if (str == _T("123"))
-	//	int i = 0;
+	CArrayT<TCHAR> str;
+	if (str == _T("123"))
+		int i = 0;
 
 	CArrayT<CString> as1;
 	as1.Add(_T("123"), as1.Head());

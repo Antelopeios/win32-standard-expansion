@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-25
-// Version:	1.0.0014.0106
+// Date:	2011-05-10
+// Version:	1.0.0015.1714
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //	- 1.0.0014.0106(2011-02-25)	+ 为String添加用于Hash的DWORD_PTR重载
+//	- 1.0.0015.1714(2011-05-10)	# 修正bool operator==()与bool operator!=()在对字符串常量做比较时无法通过编译的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -197,13 +198,13 @@ public:
 	CStringT& operator=(const type_t* pString)
 	{ return SetString(pString); }
 
-	bool operator==(type_t* pString)
+	bool operator==(const type_t* pString)
 	{ return (_tcscmp(GetCStr(), pString) == 0); }
 	bool operator==(const CStringT& String)
 	{ return operator==(String.m_Array); }
 	bool operator==(const array_t& aString)
 	{ return operator==((const type_t*)aString); }
-	bool operator!=(type_t* pString)
+	bool operator!=(const type_t* pString)
 	{ return !(*this == pString); }
 	bool operator!=(const CStringT& String)
 	{ return !(*this == String); }

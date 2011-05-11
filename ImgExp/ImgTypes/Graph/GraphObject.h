@@ -80,7 +80,7 @@ public:
 		if (!IsNull())
 		{
 			for(objlst_t::iterator_t ite = m_ObjLst.Head(); ite != m_ObjLst.Tail(); ++ite)
-				SelectObject(Get(), ite->Val());
+				SelectObject(Get(), (*ite));
 			ret = DeleteDC(Get());
 		}
 		Set(NULL);

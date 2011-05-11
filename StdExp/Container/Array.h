@@ -33,13 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-10
-// Version:	1.0.0016.2202
+// Date:	2011-05-12
+// Version:	1.0.0017.0035
 //
 // History:
 //	- 1.0.0015.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //								# 修正CArrayT::Clear()可能出现的元素重复析构问题
 //	- 1.0.0016.2202(2011-05-10)	# 修正bool operator==()与bool operator!=()在对指针做比较时无法通过编译的问题
+//	- 1.0.0017.0035(2011-05-12)	= 调整bool operator==()与bool operator!=()的内部实现,支持对整个CArrayT做比较
+//								- 移除CArrayT中直接与指针做比较的接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Array_h__
@@ -198,14 +200,24 @@ public:
 	CArrayT& operator=(const CArrayT& Array)
 	{ return SetArray(Array); }
 
-	bool operator==(const type_t* pArray) const
-	{ return (m_Array == pArray); }
+	template <DWORD SizeT>
+	bool operator==(const TypeT (&aArray)[SizeT]) const
+	{ return (*this == CArrayT(aArray)); }
 	bool operator==(const CArrayT& Array) const
-	{ return (m_Array == Array.m_Array); }
-	bool operator!=(const type_t* pArray) const
-	{ return (m_Array != pArray); }
+	{
+		if (m_Array == Array.m_Array)
+			return true;
+		if (m_Array == NULL || Array.m_Array == NULL)
+			return false;
+		if (m_nCont != Array.m_nCont)
+			return false;
+		return (memcmp(m_Array, Array.m_Array, m_nCont * sizeof(type_t)) == 0);
+	}
+	template <DWORD SizeT>
+	bool operator!=(const TypeT (&aArray)[SizeT]) const
+	{ return !(*this == aArray); }
 	bool operator!=(const CArrayT& Array) const
-	{ return (m_Array != Array.m_Array); }
+	{ return !(*this == Array); }
 
 	type_t* operator->()
 	{ return m_Array; }

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-05
-// Version:	1.1.0008.1730
+// Date:	2011-05-11
+// Version:	1.1.0009.1908
 //
 // History:
 //	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
+//	- 1.1.0009.1908(2011-05-11)	^ 规范化CTypeInfoFactory的单例实现方式
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -100,22 +101,16 @@ struct TypeInfo
 //////////////////////////////////////////////////////////////////
 
 // TypeInfo 指针单例工厂
-class CTypeInfoFactory : INonCopyable
+class CTypeInfoFactory : INonCopyable, public ISingletonT<CTypeInfoFactory>
 {
+	friend class ISingletonT<CTypeInfoFactory>;
+
 private:
 	typedef CMapT<CString, TypeInfo*> key_map;
 	key_map dc_funcs;
 
 private:
 	CTypeInfoFactory() : dc_funcs(1021) {}
-
-public:
-	static CTypeInfoFactory& Instance()
-	{
-		// 仅用于RTTI时不需要考虑线程同步问题
-		static CTypeInfoFactory instance;
-		return instance;
-	}
 
 public:
 	// 向工厂注册一个类名

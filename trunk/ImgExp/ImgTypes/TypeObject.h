@@ -81,8 +81,6 @@ public:
 	operator TypeT()
 	{ return Get(); }
 
-	virtual bool IsNull()
-	{ return (m_Type == NULL); }
 	virtual bool IsNull() const
 	{ return (m_Type == NULL); }
 };

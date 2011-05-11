@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-05
-// Version:	1.0.0001.1730
+// Date:	2010-05-11
+// Version:	1.0.0002.1525
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
+//	- 1.0.0002.1525(2010-05-11)	+ IGuiComp添加托管行为及对应接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -81,7 +82,7 @@ public:
 		, m_Pare(NULL)
 	{}
 	virtual ~IGuiComp(void)
-	{}
+	{ if (IsTrustChildren()) Clr(); }
 
 public:
 	// 是否对子容器做托管
@@ -112,6 +113,12 @@ public:
 		// 删除对象
 		base_list_t::Del(ite);
 		pComp->m_Pare = NULL;
+	}
+	virtual void Clr()
+	{
+		for(iterator_t ite = Head(); ite != Tail(); ++ite)
+			ite->Val()->m_Pare = NULL;
+		Clear();
 	}
 };
 

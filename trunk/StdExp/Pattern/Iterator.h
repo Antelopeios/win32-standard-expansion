@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-01-24
-// Version:	1.0.0004.1700
+// Date:	2011-05-11
+// Version:	1.0.0005.1802
+//
+// History:
+//	- 1.0.0005.1802(2011-05-11)	= 微调获取NodeT的操作符重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Iterator_h__
@@ -63,9 +66,11 @@ public:
 	{ (*this) = rNode; }
 
 public:
-	EXP_INLINE NodeT& Node()
-	{ return m_Node; }
 	EXP_INLINE NodeT* operator->()
+	{ return &m_Node; }
+	EXP_INLINE NodeT* operator*()
+	{ return &m_Node; }
+	EXP_INLINE NodeT* Node()
 	{ return &m_Node; }
 
 	EXP_INLINE CIteratorT& operator=(const CIteratorT& rIte)

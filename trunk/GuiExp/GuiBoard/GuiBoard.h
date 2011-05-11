@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-05
-// Version:	1.0.0000.0926
+// Date:	2010-05-11
+// Version:	1.0.0001.1054
+//
+// History:
+//	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -56,17 +59,18 @@ interface EXP_API IGuiBoard : public IGuiComp
 	EXP_DECLARE_DYNAMIC_CLS(IGuiBoard, IGuiComp)
 
 public:
-	IGuiBoard(void)
-	{}
-	virtual ~IGuiBoard(void)
-	{}
+	IGuiBoard(void) {}
+	virtual ~IGuiBoard(void) {}
 
 public:
 	virtual bool Create(LPCTSTR sWndName, CRect& rcWnd, 
 						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
 						wnd_t wndParent = NULL) = 0;
 	virtual bool Destroy() = 0;
-	virtual bool IsNull() = 0;
+	virtual bool IsNull() const = 0;
+
+	virtual bool Attach(wnd_t hWnd) = 0;
+	virtual wnd_t Detach() = 0;
 
 	// 窗口属性修改
 	virtual DWORD GetStyle() = 0;

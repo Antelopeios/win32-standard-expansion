@@ -28,57 +28,106 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiCommon - 界面拓展库公用定义
+// GuiThunk - 窗口过程重定向
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-11
-// Version:	1.0.0002.1506
-//
-// History:
-//	- 1.0.0001.1135(2010-05-04)	+ 添加wnd_t类型定义
-//	- 1.0.0002.1506(2010-05-11)	- 移除ATLThunk,采用GWL_USERDATA方式路由窗口过程
+// Version:	1.0.0000.1100
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiCommon_h__
-#define __GuiCommon_h__
+#ifndef __GuiThunk_hpp__
+#define __GuiThunk_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-// 图像处理库
-#include "../ImgExp/ImgExp.h"
+//////////////////////////////////////////////////////////////////
+
+interface IGuiThunk : public IGuiBoardBase
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiThunk, IGuiBoardBase)
+
+protected:
+	WNDPROC m_WndProc;	// 原始的窗口过程
+	bool	m_bHook;	// Hook 标记
+
+public:
+	IGuiThunk(void)
+		: m_WndProc(NULL)
+		, m_bHook(false)
+	{}
+	virtual ~IGuiThunk(void)
+	{}
+
+protected:
+	// 静态回调函数,负责调用窗口过程函数
+	static LRESULT CALLBACK ThunkWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		ExAssert(hWnd != NULL);
+		// 转发窗口消息
+		IGuiThunk* wnd_thk = (IGuiThunk*)::GetWindowLong(hWnd, GWL_USERDATA);
+		ExAssert(wnd_thk != NULL);
+		return wnd_thk->WndProc(message, wParam, lParam);
+	}
+	// WndProc 窗口过程函数
+	virtual LRESULT WndProc(UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		switch( message )
+		{
+		case WM_DESTROY:
+		//	::PostQuitMessage(0);
+			break;
+		}
+		return m_WndProc ? (*m_WndProc)(Get(), message, wParam, lParam) : NULL;
+	}
+
+public:
+	// 关联窗口句柄
+	bool Attach(wnd_t hWnd)
+	{
+		ExAssert(hWnd != NULL);
+
+		DWORD pid_cur = ::GetCurrentProcessId(), pid_wnd = NULL;
+		::GetWindowThreadProcessId(hWnd, &pid_wnd);
+		bool bHook = ( pid_cur != pid_wnd );
+		if( bHook )
+		{
+			IGuiBoardBase::Attach(hWnd);
+			m_bHook = bHook;
+		}
+		else
+		{
+			if (Get() || m_WndProc) Detach();
+			IGuiBoardBase::Attach(hWnd);
+			m_bHook = bHook;
+			m_WndProc = (WNDPROC)SetWindowLong(GWL_WNDPROC, (LONG)ThunkWndProc);
+			if (!m_WndProc) return false;
+			SetWindowLong(GWL_USERDATA, (LONG)this);
+		}
+		return true;
+	}
+	// 释放窗口句柄
+	wnd_t Detach()
+	{
+		wnd_t ret = NULL;
+		if (m_bHook)
+			ret = IGuiBoardBase::Detach();
+		else
+		if (SetWindowLong(GWL_WNDPROC, (LONG)m_WndProc))
+		{
+			SetWindowLong(GWL_USERDATA, 0);
+			ret = IGuiBoardBase::Detach();
+		}
+		m_bHook = false;
+		return ret;
+	}
+};
+
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiThunk, IGuiBoardBase)
 
 //////////////////////////////////////////////////////////////////
 
-// Dll 导出宏定义
-#ifdef EXP_EXPORTS
-#define EXP_API __declspec(dllexport)
-#else
-#define EXP_API __declspec(dllimport)
-#endif
-
-EXP_BEG
-
-//////////////////////////////////////////////////////////////////
-
-// 类型定义
-
-typedef HWND		wnd_t;
-
-// 功能定义
-
-#define ExGetX(lp)	((int)(short)LOWORD(lp))
-#define ExGetY(lp)	((int)(short)HIWORD(lp))
-
-//////////////////////////////////////////////////////////////////
-
-EXP_END
-
-#include "GuiCommon/GuiInterface.h"
-
-//////////////////////////////////////////////////////////////////
-
-#endif/*__GuiCommon_h__*/
+#endif/*__GuiThunk_hpp__*/

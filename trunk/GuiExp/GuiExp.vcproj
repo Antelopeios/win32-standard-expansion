@@ -194,6 +194,10 @@
 				RelativePath=".\GuiBoard\GuiBoard.h"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiBoard\GuiThunk.hpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\dllmain.cpp"

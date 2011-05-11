@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Thread\NonBlocking.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Thread\Semaphore.h"
 				>
 			</File>

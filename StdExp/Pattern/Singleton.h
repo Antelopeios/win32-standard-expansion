@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-03
-// Version:	1.0.0005.1710
+// Date:	2011-05-11
+// Version:	1.0.0006.1909
 //
 // History:
 //	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
+//	- 1.0.0006.1909(2011-05-11)	= 重命名CSingletonT为ISingletonT
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Singleton_h__
@@ -54,7 +55,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT>
-class CSingletonT
+class ISingletonT
 {
 public:
 	EXP_INLINE static TypeT& Instance()
@@ -74,7 +75,7 @@ public:
 };
 
 template <typename TypeT>
-EXP_INLINE TypeT& ExSingleton() { return CSingletonT<TypeT>::Instance(); }
+EXP_INLINE TypeT& ExSingleton() { return ISingletonT<TypeT>::Instance(); }
 
 //////////////////////////////////////////////////////////////////
 

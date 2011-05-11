@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-02
-// Version:	1.3.0024.1130
+// Date:	2011-05-11
+// Version:	1.3.0025.1858
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -70,6 +70,7 @@
 //	- 1.3.0023.2110(2011-03-04)	= CPtrManagerT::CReferPtrT本身的内存由CPtrManagerT的AllocT构建
 //								+ CPtrManagerT::Clear()支持传参定义是否完全清理CPtrManagerT::m_ReferPtrs的所有内存
 //	- 1.3.0024.1130(2011-04-02)	# 修正CPtrManagerT::CReferPtrT::Dec()可能出现多次Free自身的问题
+//	- 1.3.0025.1858(2011-05-11)	^ 优化CPtrManagerT的单例实现方式
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -87,7 +88,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-class CPtrManagerT : INonCopyable
+class CPtrManagerT : INonCopyable, public ISingletonT<CPtrManagerT<AllocT, ModelT> >
 {
 protected:
 	// 计数指针接口
@@ -177,14 +178,6 @@ public:
 	{}
 	~CPtrManagerT()
 	{ Clear(true); }
-
-public:
-	EXP_INLINE static CPtrManagerT& Instance()
-	{
-		ExLockThis(model_t::_ExcPolicy);
-		static CPtrManagerT instance;
-		return instance;
-	}
 
 public:
 	// 获取指针引用计数

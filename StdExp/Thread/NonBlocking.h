@@ -28,7 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// NonBlocking - 非阻塞型同步
+// NonBlocking - 无锁(非阻塞型同步(Non-blocking Synchronization))
 //
 // Author:	木头云
 // Blog:	dark-c.at

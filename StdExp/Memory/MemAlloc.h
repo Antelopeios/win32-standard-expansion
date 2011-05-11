@@ -55,7 +55,7 @@ EXP_BEG
 
 // 将普通内存分配转换为静态内存分配的适配器
 template <typename AllocT = _MemPool>
-class CMemAdapterT : public CSingletonT<AllocT>
+class CMemAdapterT : public ISingletonT<AllocT>
 {
 public:
 	typedef AllocT alloc_t;

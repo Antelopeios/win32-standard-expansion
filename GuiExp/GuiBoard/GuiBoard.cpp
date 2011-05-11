@@ -33,8 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-05
-// Version:	1.0.0000.0926
+// Date:	2010-05-11
+// Version:	1.0.0001.1420
+//
+// History:
+//	- 1.0.0001.1420(2010-05-11)	+ 添加CGuiWnd::Attach()和CGuiWnd::Detach()接口
+//								- 移除一些接口中的ExAssert,直接忽略一些特殊情况
+//								= 将CGuiWnd调整为IGuiBoardBase接口类
 //////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -44,14 +49,15 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+// GUI 窗口对象接口
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiBoard, IGuiComp)
 
 //////////////////////////////////////////////////////////////////
 
 // GUI 窗口对象
-class CGuiWnd : public IGuiBoard, public ITypeObjectT<wnd_t>
+interface IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t>
 {
-	EXP_DECLARE_DYNCREATE_CLS(CGuiWnd, IGuiComp)
+	EXP_DECLARE_DYNAMIC_CLS(IGuiBoardBase, IGuiComp)
 
 	typedef ITypeObjectT<wnd_t> type_base_t;
 
@@ -60,14 +66,14 @@ protected:
 	HINSTANCE m_hIns;
 
 public:
-	CGuiWnd(void)
+	IGuiBoardBase(void)
 		: m_hIns(::GetModuleHandle(NULL))
 	{}
-	CGuiWnd(wnd_t hWnd)
+	IGuiBoardBase(wnd_t hWnd)
 		: m_hIns(::GetModuleHandle(NULL))
 		, type_base_t(hWnd)
 	{}
-	virtual ~CGuiWnd(void)
+	virtual ~IGuiBoardBase(void)
 	{}
 
 protected:
@@ -96,7 +102,7 @@ public:
 		Destroy();
 
 		RegisterWndClass(s_ClassName);
-		Set(
+		Attach(
 			::CreateWindowEx
 				(
 				dwExStyle, s_ClassName, sWndName, dwStyle, 
@@ -116,13 +122,23 @@ public:
 		bool ret = true;
 		if (!IsNull())
 			ret = ::DestroyWindow(Get());
-		Set(NULL);
+		Detach();
 		return ret;
 	}
-	bool IsNull()
-	{ return type_base_t::IsNull(); }
 	bool IsNull() const
 	{ return type_base_t::IsNull(); }
+
+	bool Attach(wnd_t hWnd)
+	{
+		Set(hWnd);
+		return true;
+	}
+	wnd_t Detach()
+	{
+		wnd_t old_wnd = Get();
+		Set(NULL);
+		return old_wnd;
+	}
 
 	// 窗口属性修改
 	DWORD GetStyle()
@@ -139,7 +155,7 @@ public:
 	}
 	bool ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return 0;
 		DWORD style = GetWindowLong(nStyleOffset);
 		DWORD new_style = (style & ~dwRemove) | dwAdd;
 		if (style == new_style)
@@ -154,24 +170,24 @@ public:
 	}
 	LONG SetWindowLong(int nIndex, LONG dwNewLong)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return 0;
 		return ::SetWindowLong(Get(), nIndex, dwNewLong);
 	}
 	LONG GetWindowLong(int nIndex)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return 0;
 		return ::GetWindowLong(Get(), nIndex);
 	}
 
 	// 窗口移动
 	void MoveWindow(int x, int y, int nWidth, int nHeight, bool bRepaint/* = true*/)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return;
 		::MoveWindow(Get(), x, y, nWidth, nHeight, bRepaint);
 	}
 	void MoveWindow(CRect& lpRect, bool bRepaint/* = true*/)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return;
 		::MoveWindow
 			(
 			Get(), 
@@ -234,7 +250,7 @@ public:
 			}
 			else
 			{
-				CGuiWnd(hWndCenter).GetWindowRect(rcCenter);
+				IGuiBoardBase(hWndCenter).GetWindowRect(rcCenter);
 				GetMonitorInfo(MonitorFromWindow(hWndCenter, MONITOR_DEFAULTTONEAREST), &mi);
 				rcArea = mi.rcWork;
 			}
@@ -244,9 +260,9 @@ public:
 			// center within parent client coordinates
 			hWndParent = GetParent();
 			ExAssert(::IsWindow(hWndParent));
-			CGuiWnd(hWndParent).GetClientRect(rcArea);
+			IGuiBoardBase(hWndParent).GetClientRect(rcArea);
 			ExAssert(::IsWindow(hWndCenter));
-			CGuiWnd(hWndCenter).GetClientRect(rcCenter);
+			IGuiBoardBase(hWndCenter).GetClientRect(rcCenter);
 			::MapWindowPoints(hWndCenter, hWndParent, (POINT*)&rcCenter, 2);
 		}
 
@@ -277,12 +293,12 @@ public:
 	// 窗口坐标转换
 	void ClientToScreen(CPoint& lpPoint)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return;
 		::ClientToScreen(Get(), (LPPOINT)&lpPoint);
 	}
 	void ClientToScreen(CRect& lpRect)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return;
 		CPoint pt(lpRect.pt1);
 		ClientToScreen(pt);
 		lpRect.pt2.x += (pt.x - lpRect.pt1.x);
@@ -292,12 +308,12 @@ public:
 	}
 	void ScreenToClient(CPoint& lpPoint)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return;
 		::ScreenToClient(Get(), (LPPOINT)&lpPoint);
 	}
 	void ScreenToClient(CRect& lpRect)
 	{
-		ExAssert( !IsNull() );
+		if (IsNull()) return;
 		CPoint pt(lpRect.pt1);
 		ScreenToClient(pt);
 		lpRect.pt2.x += (pt.x - lpRect.pt1.x);
@@ -395,8 +411,12 @@ public:
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWnd, IGuiBoard)
-const CString CGuiWnd::s_ClassName = _T("GuiExp_Foundation");
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiBoardBase, IGuiBoard)
+const CString IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
+
+//////////////////////////////////////////////////////////////////
+
+#include "GuiBoard/GuiThunk.hpp"
 
 //////////////////////////////////////////////////////////////////
 

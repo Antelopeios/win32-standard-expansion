@@ -95,7 +95,7 @@ protected:
 	{
 	protected:
 		void*		  p_ptr;
-		volatile long n_ref;
+		volatile LONG n_ref;
 
 	public:
 		IReferPtr()

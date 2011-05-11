@@ -28,17 +28,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// NonBlocking - 无锁(非阻塞型同步(Non-blocking Synchronization))
+// NonLock - 无锁(非阻塞型同步(Non-blocking Synchronization))
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-11
-// Version:	1.0.0000.1705
+// Version:	1.0.0001.2354
+//
+// History:
+//	- 1.0.0001.2354(2011-05-11)	= NonBlocking改名为NonLock
 //////////////////////////////////////////////////////////////////
 
-#ifndef __NonBlocking_h__
-#define __NonBlocking_h__
+#ifndef __NonLock_h__
+#define __NonLock_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -50,12 +53,12 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
-class CNonBlockingT
+template <typename TypeT, typename PolicyT = EXP_THREAD_MODEL::_LockPolicy>
+class CNonLockT
 {
 public:
 	typedef TypeT type_t;
-	typedef typename ModelT::_LockPolicy policy_t;
+	typedef PolicyT policy_t;
 	typedef typename CLockT<policy_t>::mutex_t mutex_t;
 
 	struct ret_t
@@ -72,10 +75,10 @@ protected:
 	mutex_t m_LckRef;
 
 public:
-	CNonBlockingT()
+	CNonLockT()
 		: m_Has(false)
 	{}
-	virtual ~CNonBlockingT()
+	virtual ~CNonLockT()
 	{}
 
 public:
@@ -105,11 +108,11 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // 自动化的数据访问类
-template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
-class CDataAccessT : INonCopyable
+template <typename NonLockT>
+class CNonLockerT : INonCopyable
 {
 public:
-	typedef CNonBlockingT<TypeT, ModelT> non_t;
+	typedef NonLockT non_t;
 	typedef typename non_t::type_t type_t;
 
 protected:
@@ -117,25 +120,23 @@ protected:
 	type_t m_Dat;
 
 public:
-	CDataAccessT(non_t& tNon)
+	CNonLockerT(non_t& tNon)
 		: m_Non(tNon)
 	{ m_Dat = m_Non.Get(); }
-	~CDataAccessT()
+	~CNonLockerT()
 	{ m_Non.Release(); }
 
 public:
 	type_t* operator->()
 	{ return &m_Dat; }
-	type_t* operator*()
-	{ return &m_Dat; }
 	operator type_t*()
 	{ return &m_Dat; }
+	type_t& operator*()
+	{ return m_Dat; }
 };
-
-typedef CLockerT<> CLocker;
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__NonBlocking_h__*/
+#endif/*__NonLock_h__*/

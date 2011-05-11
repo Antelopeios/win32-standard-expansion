@@ -53,7 +53,7 @@
 #include "Thread/Semaphore.h"
 #include "Thread/ThreadModel.h"
 #include "Thread/Lock.h"
-#include "Thread/NonBlocking.h"
+#include "Thread/NonLock.h"
 #include "Thread/ThreadHeap.h"
 #include "Thread/ThreadPool.h"
 #include "Thread/ThreadCreator.h"

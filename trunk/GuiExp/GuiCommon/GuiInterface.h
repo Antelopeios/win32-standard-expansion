@@ -117,7 +117,7 @@ public:
 	virtual void Clr()
 	{
 		for(iterator_t ite = Head(); ite != Tail(); ++ite)
-			ite->Val()->m_Pare = NULL;
+			(*ite)->m_Pare = NULL;
 		Clear();
 	}
 };

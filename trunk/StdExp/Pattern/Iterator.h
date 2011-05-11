@@ -34,10 +34,11 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-11
-// Version:	1.0.0005.1802
+// Version:	1.0.0006.2325
 //
 // History:
 //	- 1.0.0005.1802(2011-05-11)	= 微调获取NodeT的操作符重载
+//	- 1.0.0006.2325(2011-05-11)	^ 调整CIteratorT::operator*(),支持通过此操作符直接获取NodeT存储的值
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Iterator_h__
@@ -54,37 +55,41 @@ EXP_BEG
 template <typename NodeT>
 class CIteratorT
 {
+public:
+	typedef NodeT node_t;
+	typedef typename node_t::type_t type_t;
+
 protected:
-	NodeT m_Node;
+	node_t m_Node;
 
 public:
 	CIteratorT()
 	{}
 	CIteratorT(const CIteratorT& rIte)
 	{ (*this) = rIte; }
-	CIteratorT(const NodeT& rNode)
+	CIteratorT(const node_t& rNode)
 	{ (*this) = rNode; }
 
 public:
-	EXP_INLINE NodeT* operator->()
+	EXP_INLINE node_t* operator->()
 	{ return &m_Node; }
-	EXP_INLINE NodeT* operator*()
+	EXP_INLINE node_t* Node()
 	{ return &m_Node; }
-	EXP_INLINE NodeT* Node()
-	{ return &m_Node; }
+	EXP_INLINE type_t& operator*()
+	{ return m_Node.Val(); }
 
 	EXP_INLINE CIteratorT& operator=(const CIteratorT& rIte)
 	{ m_Node = rIte.m_Node; return (*this); }
-	EXP_INLINE CIteratorT& operator=(const NodeT& rNode)
+	EXP_INLINE CIteratorT& operator=(const node_t& rNode)
 	{ m_Node = rNode; return (*this); }
 
 	EXP_INLINE bool operator==(const CIteratorT& rIte)
 	{ return m_Node == rIte.m_Node; }
-	EXP_INLINE bool operator==(const NodeT& rNode)
+	EXP_INLINE bool operator==(const node_t& rNode)
 	{ return m_Node == rNode; }
 	EXP_INLINE bool operator!=(const CIteratorT& rIte)
 	{ return m_Node != rIte.m_Node; }
-	EXP_INLINE bool operator!=(const NodeT& rNode)
+	EXP_INLINE bool operator!=(const node_t& rNode)
 	{ return m_Node != rNode; }
 
 	EXP_INLINE CIteratorT& operator++()

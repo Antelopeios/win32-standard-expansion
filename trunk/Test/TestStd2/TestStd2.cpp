@@ -5,8 +5,9 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	CArrayT<TCHAR> str;
-	if (str == _T("123"))
+	CArrayT<TCHAR> str(_T("1234")), str2(_T("123"));
+	TCHAR* a = NULL, b[MAX_PATH] = {0};
+	if (str/* == *//*a*//*b*//*str2*//*_T("123")*/)
 		int i = 0;
 
 	CArrayT<CString> as1;
@@ -20,7 +21,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	ExCPrintf(_T("\n"));
 
 	for(CArrayT<CString>::iterator_t ite = as1.Head(); ite != as1.Tail(); ++ite)
-		ExCPrintf(_T("%s\n"), (LPCTSTR)ite->Val());
+		ExCPrintf(_T("%s\n"), (LPCTSTR)(*ite));
 
 	ExCPrintf(_T("\n"));
 
@@ -32,7 +33,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	as2.Add(_T("312"), as2.Head());
 
 	for(CListT<CString>::iterator_t ite = as2.Head(); ite != as2.Tail(); ++ite)
-		ExCPrintf(_T("%s\n"), (LPCTSTR)ite->Val());
+		ExCPrintf(_T("%s\n"), (LPCTSTR)(*ite));
 
 	ExCPrintf(_T("\n"));
 

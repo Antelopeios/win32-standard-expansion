@@ -189,7 +189,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Thread\NonBlocking.h"
+				RelativePath=".\Thread\NonLock.h"
 				>
 			</File>
 			<File

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-11
-// Version:	1.3.0025.1858
+// Date:	2011-05-12
+// Version:	1.3.0026.1724
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -71,6 +71,7 @@
 //								+ CPtrManagerT::Clear()支持传参定义是否完全清理CPtrManagerT::m_ReferPtrs的所有内存
 //	- 1.3.0024.1130(2011-04-02)	# 修正CPtrManagerT::CReferPtrT::Dec()可能出现多次Free自身的问题
 //	- 1.3.0025.1858(2011-05-11)	^ 优化CPtrManagerT的单例实现方式
+//	- 1.3.0026.1724(2011-05-12)	# 修正CSmartPtrT对裸指针的构造函数在实现上存在无限递归的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -316,14 +317,16 @@ public:
 
 	//////////////////////////////////
 
-	CSmartPtrT& operator=(const CSmartPtrT& ptr)
+	CSmartPtrT& operator=(TypeT* ptr)
 	{
-		if( (*this) == ptr ) return (*this);
+		if ((*this) == ptr) return (*this);
 		Dec();
-		m_Ptr = ptr.m_Ptr;
+		m_Ptr = ptr;
 		Inc();
 		return (*this);
 	}
+	CSmartPtrT& operator=(const CSmartPtrT& ptr)
+	{ return ((*this) = ptr.m_Ptr); }
 
 	bool operator==(TypeT* ptr) const
 	{
@@ -364,14 +367,17 @@ public:
 	//////////////////////////////////
 
 	template <typename Type2T>
-	CSmartPtrT& operator=(const CSmartPtrT<Type2T>& ptr)
+	CSmartPtrT& operator=(Type2T* ptr)
 	{
-		if( (*this) == ptr ) return (*this);
+		if ((*this) == ptr) return (*this);
 		Dec();
-		m_Ptr = (TypeT*)ptr.m_Ptr;
+		m_Ptr = (TypeT*)ptr;
 		Inc();
 		return (*this);
 	}
+	template <typename Type2T>
+	CSmartPtrT& operator=(const CSmartPtrT<Type2T>& ptr)
+	{ return ((*this) = ptr.m_Ptr); }
 
 	template <typename Type2T>
 	bool operator==(Type2T* ptr) const

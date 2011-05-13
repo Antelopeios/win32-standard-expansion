@@ -47,6 +47,7 @@
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
+#include "GuiCtrl/GuiCtrl.h"
 #include "GuiBoard/GuiBoard.h"
 
 EXP_BEG

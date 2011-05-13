@@ -195,7 +195,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiBoard\GuiBoardBase.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiBoard\GuiThunk.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="GuiCtrl"
+			>
+			<File
+				RelativePath=".\GuiCtrl\GuiCtrl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiCtrl\GuiCtrl.h"
 				>
 			</File>
 		</Filter>

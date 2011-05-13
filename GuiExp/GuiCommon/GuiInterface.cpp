@@ -48,9 +48,9 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
 
 //////////////////////////////////////////////////////////////////
 

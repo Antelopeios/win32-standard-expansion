@@ -33,12 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-11
-// Version:	1.0.0002.1525
+// Date:	2010-05-13
+// Version:	1.0.0003.1428
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
 //	- 1.0.0002.1525(2010-05-11)	+ IGuiComp添加托管行为及对应接口
+//	- 1.0.0003.1428(2010-05-13)	= 调整IGuiComp在托管时的行为
+//								= 调整IGuiEvent对外的接口及行为
+//								+ GUI 事件转发器(IGuiSender)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -65,41 +68,45 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 组合接口
-interface EXP_API IGuiComp : public IGuiObject, public CListT<IGuiComp*>
+interface EXP_API IGuiComp : public IGuiObject, protected CListT<IGuiComp*>
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiComp, IGuiObject)
 
 public:
-	typedef CListT<IGuiComp*> base_list_t;
+	typedef CListT<IGuiComp*> list_t;
 
 protected:
-	bool		m_bTruCldr;	// 子容器链托管标记
+	bool		m_bTru;		// 子容器链托管标记
 	IGuiComp*	m_Pare;		// 父对象指针
 
 public:
 	IGuiComp(void)
-		: m_bTruCldr(false)
+		: m_bTru(false)
 		, m_Pare(NULL)
 	{}
 	virtual ~IGuiComp(void)
-	{ if (IsTrustChildren()) Clr(); }
+	{ Clear(); }
 
 public:
 	// 是否对子容器做托管
-	void SetTrustChildren(bool bTruCldr = true) { m_bTruCldr = bTruCldr; }
-	bool IsTrustChildren() { return m_bTruCldr; }
-	// 获得父容器
+	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
+	bool IsTrust() { return m_bTru; }
+	// 获得内部对象
 	IGuiComp* GetParent() { return m_Pare; }
+	list_t& GetChildren() { return *((list_t*)this); }
+
+	// 查找
+	iterator_t& Find(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
 
 	// 组合接口
 	virtual void Add(IGuiComp* pComp)
 	{
 		if (!pComp) return ;
 		// 定位对象
-		iterator_t ite = finder_t::Find(*this, pComp);
-		if (ite != Tail()) return;
+		list_t::iterator_t ite = Find(pComp);
+		if (ite != list_t::Tail()) return;
 		// 添加新对象
-		base_list_t::Add(pComp);
+		list_t::Add(pComp);
 		if( pComp->m_Pare )
 			pComp->m_Pare->Del(pComp);
 		pComp->m_Pare = this;
@@ -108,19 +115,30 @@ public:
 	{
 		if (!pComp) return ;
 		// 定位对象
-		iterator_t ite = finder_t::Find(*this, pComp);
-		if (ite == Tail()) return;
+		list_t::iterator_t ite = Find(pComp);
+		if (ite == list_t::Tail()) return;
 		// 删除对象
-		base_list_t::Del(ite);
-		pComp->m_Pare = NULL;
+		list_t::Del(ite);
+		if (m_bTru)
+			ExMem::Free(pComp);
+		else
+			pComp->m_Pare = NULL;
 	}
-	virtual void Clr()
+	virtual void Clear()
 	{
-		for(iterator_t ite = Head(); ite != Tail(); ++ite)
-			(*ite)->m_Pare = NULL;
-		Clear();
+		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+		{
+			if (!(*ite)) continue;
+			if (m_bTru)
+				ExMem::Free(*ite);
+			else
+				(*ite)->m_Pare = NULL;
+		}
+		list_t::Clear();
 	}
 };
+
+//////////////////////////////////////////////////////////////////
 
 // GUI 事件接口
 interface EXP_API IGuiEvent : public IGuiObject
@@ -128,20 +146,93 @@ interface EXP_API IGuiEvent : public IGuiObject
 	EXP_DECLARE_DYNAMIC_CLS(IGuiEvent, IGuiObject)
 
 protected:
-	IGuiComp* m_pComp;
+	LRESULT m_Result;
 
 public:
 	IGuiEvent()
-		: m_pComp(NULL)
+		: m_Result(0)
 	{}
 	virtual ~IGuiEvent()
 	{}
 
 public:
-	void SetComp(IGuiComp* pComp) { m_pComp = pComp; }
-	IGuiComp* GetComp() { return m_pComp; }
+	// 事件结果接口
+	void SetResult(LRESULT lrRes = 0) { m_Result = lrRes; }
+	LRESULT GetResult() { return m_Result; }
+	// 事件传递接口
+	virtual void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
+};
 
-	virtual LRESULT OnMessage(UINT message, WPARAM wParam, LPARAM lParam) = 0;
+//////////////////////////////////////////////////////////////////
+
+// GUI 事件转发器
+interface EXP_API IGuiSender : public IGuiObject, protected CListT<IGuiEvent*>
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiObject)
+
+public:
+	typedef CListT<IGuiEvent*> list_t;
+
+protected:
+	bool m_bTru;		// 子容器链托管标记
+
+public:
+	IGuiSender(void)
+		: m_bTru(false)
+	{}
+	virtual ~IGuiSender(void)
+	{ ClearEvent(); }
+
+public:
+	// 是否对子容器做托管
+	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
+	bool IsTrust() { return m_bTru; }
+	// 获得内部对象
+	list_t& GetEvent() { return *((list_t*)this); }
+
+	// 查找
+	iterator_t& Find(IGuiEvent* pEvent) { return list_t::finder_t::Find(GetEvent(), pEvent); }
+
+	// 组合接口
+	virtual void AddEvent(IGuiEvent* pEvent)
+	{
+		if (!pEvent) return ;
+		// 定位对象
+		list_t::iterator_t ite = Find(pEvent);
+		if (ite != list_t::Tail()) return;
+		// 添加新对象
+		list_t::Add(pEvent);
+	}
+	virtual void DelEvent(IGuiEvent* pEvent)
+	{
+		if (!pEvent) return ;
+		// 定位对象
+		list_t::iterator_t ite = Find(pEvent);
+		if (ite == list_t::Tail()) return;
+		// 删除对象
+		list_t::Del(ite);
+		if (m_bTru) ExMem::Free(pEvent);
+	}
+	virtual void ClearEvent()
+	{
+		if (m_bTru)
+			for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+			{
+				if (!(*ite)) continue;
+				ExMem::Free(*ite);
+			}
+			list_t::Clear();
+	}
+
+	// 事件发送接口
+	virtual void Send(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+		{
+			if (!(*ite)) continue;
+			(*ite)->OnMessage(this, nMessage, wParam, lParam);
+		}
+	}
 };
 
 //////////////////////////////////////////////////////////////////

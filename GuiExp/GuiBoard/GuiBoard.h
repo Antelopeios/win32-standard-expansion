@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-11
-// Version:	1.0.0001.1054
+// Date:	2010-05-13
+// Version:	1.0.0002.1525
 //
 // History:
 //	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
+//	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoard::Send()和IGuiBoard::Post()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -71,6 +72,10 @@ public:
 
 	virtual bool Attach(wnd_t hWnd) = 0;
 	virtual wnd_t Detach() = 0;
+
+	// 窗口消息
+	virtual LRESULT Send(UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
+	virtual bool Post(UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
 
 	// 窗口属性修改
 	virtual DWORD GetStyle() = 0;

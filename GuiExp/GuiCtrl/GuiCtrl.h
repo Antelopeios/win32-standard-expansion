@@ -28,33 +28,36 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiBoard - 界面绘图板(Win32窗口对象)
+// GuiCtrl - 控件对象
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-13
-// Version:	1.0.0002.1525
-//
-// History:
-//	- 1.0.0002.1525(2010-05-13)	^ 将IGuiBoardBase接口实现与GuiBoard的实现分离
+// Version:	1.0.0000.1600
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "GuiBoard.h"
+#ifndef __GuiCtrl_h__
+#define __GuiCtrl_h__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+#include "GuiCommon/GuiCommon.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-// GUI 窗口对象接口
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiBoard, IGuiComp)
-
-//////////////////////////////////////////////////////////////////
-
-#include "GuiBoard/GuiBoardBase.hpp"
-#include "GuiBoard/GuiThunk.hpp"
+// GUI 控件对象接口
+interface EXP_API IGuiCtrl : public IGuiComp, public IGuiSender
+{
+	EXP_DECLARE_DYNAMIC_MULT2(IGuiCtrl, IGuiComp, IGuiSender)
+};
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiCtrl_h__*/

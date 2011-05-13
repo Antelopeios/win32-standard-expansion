@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-11
-// Version:	1.1.0009.1908
+// Date:	2011-05-13
+// Version:	1.1.0010.1704
 //
 // History:
 //	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
 //	- 1.1.0009.1908(2011-05-11)	^ 规范化CTypeInfoFactory的单例实现方式
+//	- 1.1.0010.1704(2011-05-13)	# 修正RTTI在多继承时的编译错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -197,18 +198,18 @@ private:																					\
 	EXP_DECLARE_TYPEINFO(cls_name)
 
 #define EXP_DECLARE_TYPEINFO_MULT(cls_name, base_name)										\
-	EXP_DEF_MULTTYPE(base_name::Mult)														\
+	EXP_DEF_MULTTYPE(base_name::EXP_MULT)													\
 	EXP_DEF_BASETYPE(base_name)																\
 	EXP_DECLARE_TYPEINFO(cls_name)
 
 #define EXP_DECLARE_TYPEINFO_MULT2(cls_name, base_name, base_name2)							\
-	EXP_DEF_MULTTYPE(base_name::Mult)														\
+	EXP_DEF_MULTTYPE(base_name::EXP_MULT)													\
 	EXP_DEF_BASETYPE(base_name)																\
 	EXP_DEF_BASETYPE2(base_name2)															\
 	EXP_DECLARE_TYPEINFO(cls_name)
 
 #define EXP_DECLARE_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3)				\
-	EXP_DEF_MULTTYPE(base_name::Mult)														\
+	EXP_DEF_MULTTYPE(base_name::EXP_MULT)													\
 	EXP_DEF_BASETYPE(base_name)																\
 	EXP_DEF_BASETYPE2(base_name2)															\
 	EXP_DEF_BASETYPE3(base_name3)															\
@@ -349,15 +350,15 @@ private:																					\
 
 #define EXP_IMPLEMENT_DYNCREATE_MULT(cls_name, base_name, tmp)								\
 	EXP_IMPLEMENT_TYPEINFO_MULT(cls_name, base_name, cls_name::CreateObject, tmp)			\
-	EXP_IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, EXP_MULT, tmp)
 
 #define EXP_IMPLEMENT_DYNCREATE_MULT2(cls_name, base_name, base_name2, tmp)					\
 	EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, cls_name::CreateObject, tmp) \
-	EXP_IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, EXP_MULT, tmp)
 
 #define EXP_IMPLEMENT_DYNCREATE_MULT3(cls_name, base_name, base_name2, base_name3, tmp)		\
 	EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, cls_name::CreateObject, tmp) \
-	EXP_IMPLEMENT_DYNCREATE_C(cls_name, Mult, tmp)
+	EXP_IMPLEMENT_DYNCREATE_C(cls_name, EXP_MULT, tmp)
 
 #define EXP_IMPLEMENT_DYNCREATE_NULL(cls_name, tmp)											\
 	EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, cls_name::CreateObject, tmp)						\

@@ -12,10 +12,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	//CSmartPtrT<IGuiBoard> wnd = (IGuiBoard*)ExGui(_T("CGuiThunk"));
-	//wnd->Create(_T("Test"), CRect(0, 0, 500, 300), SW_HIDE);
-	//wnd->CenterWindow();
-	//wnd->ShowWindow(SW_SHOW);
+	CSmartPtrT<IGuiBoard> wnd = (IGuiBoard*)ExGui(_T("CGuiWnd"));
+	wnd->Create(_T("Test"), CRect(0, 0, 500, 300), SW_HIDE);
+	wnd->CenterWindow();
+	wnd->ShowWindow(SW_SHOW);
 
 	// 主消息循环:
 	MSG msg = {0};

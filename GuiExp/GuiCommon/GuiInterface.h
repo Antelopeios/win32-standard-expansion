@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-13
-// Version:	1.0.0003.1428
+// Date:	2010-05-16
+// Version:	1.0.0004.1527
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -42,6 +42,7 @@
 //	- 1.0.0003.1428(2010-05-13)	= 调整IGuiComp在托管时的行为
 //								= 调整IGuiEvent对外的接口及行为
 //								+ GUI 事件转发器(IGuiSender)
+//	- 1.0.0004.1527(2010-05-16)	+ 添加IGuiComp::Init()与IGuiComp::Fina()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -87,6 +88,10 @@ public:
 	virtual ~IGuiComp(void)
 	{ Clear(); }
 
+protected:
+	virtual void Init(IGuiComp* pComp) { m_Pare = pComp; }
+	virtual void Fina() { m_Pare = NULL; }
+
 public:
 	// 是否对子容器做托管
 	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
@@ -109,7 +114,7 @@ public:
 		list_t::Add(pComp);
 		if( pComp->m_Pare )
 			pComp->m_Pare->Del(pComp);
-		pComp->m_Pare = this;
+		pComp->Init(this);
 	}
 	virtual void Del(IGuiComp* pComp)
 	{
@@ -119,20 +124,16 @@ public:
 		if (ite == list_t::Tail()) return;
 		// 删除对象
 		list_t::Del(ite);
-		if (m_bTru)
-			ExMem::Free(pComp);
-		else
-			pComp->m_Pare = NULL;
+		pComp->Fina();
+		if (m_bTru) ExMem::Free(pComp);
 	}
 	virtual void Clear()
 	{
 		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
-			if (m_bTru)
-				ExMem::Free(*ite);
-			else
-				(*ite)->m_Pare = NULL;
+			(*ite)->Fina();
+			if (m_bTru) ExMem::Free(*ite);
 		}
 		list_t::Clear();
 	}
@@ -160,7 +161,7 @@ public:
 	void SetResult(LRESULT lrRes = 0) { m_Result = lrRes; }
 	LRESULT GetResult() { return m_Result; }
 	// 事件传递接口
-	virtual void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
+	virtual void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -171,7 +172,7 @@ interface EXP_API IGuiSender : public IGuiObject, protected CListT<IGuiEvent*>
 	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiObject)
 
 public:
-	typedef CListT<IGuiEvent*> list_t;
+	typedef CListT<IGuiEvent*> evt_list_t;
 
 protected:
 	bool m_bTru;		// 子容器链托管标记
@@ -188,46 +189,46 @@ public:
 	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
 	bool IsTrust() { return m_bTru; }
 	// 获得内部对象
-	list_t& GetEvent() { return *((list_t*)this); }
+	evt_list_t& GetEvent() { return *((evt_list_t*)this); }
 
 	// 查找
-	iterator_t& Find(IGuiEvent* pEvent) { return list_t::finder_t::Find(GetEvent(), pEvent); }
+	iterator_t& Find(IGuiEvent* pEvent) { return evt_list_t::finder_t::Find(GetEvent(), pEvent); }
 
 	// 组合接口
 	virtual void AddEvent(IGuiEvent* pEvent)
 	{
 		if (!pEvent) return ;
 		// 定位对象
-		list_t::iterator_t ite = Find(pEvent);
-		if (ite != list_t::Tail()) return;
+		evt_list_t::iterator_t ite = Find(pEvent);
+		if (ite != evt_list_t::Tail()) return;
 		// 添加新对象
-		list_t::Add(pEvent);
+		evt_list_t::Add(pEvent);
 	}
 	virtual void DelEvent(IGuiEvent* pEvent)
 	{
 		if (!pEvent) return ;
 		// 定位对象
-		list_t::iterator_t ite = Find(pEvent);
-		if (ite == list_t::Tail()) return;
+		evt_list_t::iterator_t ite = Find(pEvent);
+		if (ite == evt_list_t::Tail()) return;
 		// 删除对象
-		list_t::Del(ite);
+		evt_list_t::Del(ite);
 		if (m_bTru) ExMem::Free(pEvent);
 	}
 	virtual void ClearEvent()
 	{
 		if (m_bTru)
-			for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+			for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
 			{
 				if (!(*ite)) continue;
 				ExMem::Free(*ite);
 			}
-			list_t::Clear();
+			evt_list_t::Clear();
 	}
 
 	// 事件发送接口
-	virtual void Send(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	virtual void Send(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->OnMessage(this, nMessage, wParam, lParam);

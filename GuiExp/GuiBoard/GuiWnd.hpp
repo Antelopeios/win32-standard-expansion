@@ -28,112 +28,60 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiThunk - 窗口过程重定向
+// GuiWnd - 窗口类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-11
-// Version:	1.0.0000.1100
+// Date:	2010-05-16
+// Version:	1.0.0000.1434
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiThunk_hpp__
-#define __GuiThunk_hpp__
+#ifndef __GuiWnd_hpp__
+#define __GuiWnd_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "GuiCtrl/GuiCtrl.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IGuiThunk : public IGuiBoardBase
+class CGuiWnd : public IGuiThunk
 {
-	EXP_DECLARE_DYNAMIC_CLS(IGuiThunk, IGuiBoardBase)
+	EXP_DECLARE_DYNCREATE_CLS(CGuiWnd, IGuiThunk)
 
 protected:
-	WNDPROC m_WndProc;	// 原始的窗口过程
-	bool	m_bHook;	// Hook 标记
-
-public:
-	IGuiThunk(void)
-		: m_WndProc(NULL)
-		, m_bHook(false)
-	{}
-	virtual ~IGuiThunk(void)
-	{}
-
-protected:
-	// 静态回调函数,负责调用窗口过程函数
-	static LRESULT CALLBACK ThunkWndProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
+	LRESULT WndProc(UINT nMessage, WPARAM wParam, LPARAM lParam)
 	{
-		ExAssert(hWnd != NULL);
-		// 转发窗口消息
-		IGuiThunk* wnd_thk = (IGuiThunk*)::GetWindowLong(hWnd, GWL_USERDATA);
-		ExAssert(wnd_thk != NULL);
-		return wnd_thk->WndProc(nMessage, wParam, lParam);
-	}
-	// WndProc 窗口过程函数
-	virtual LRESULT WndProc(UINT nMessage, WPARAM wParam, LPARAM lParam)
-	{
-		switch( nMessage )
+		LRESULT ret = EXP_BASE::WndProc(nMessage, wParam, lParam);
+		// 消息转发
+		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
 		{
-		case WM_DESTROY:
-		//	::PostQuitMessage(0);
-			break;
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+			if (!ctrl) continue;
+			ctrl->Send(nMessage, wParam, lParam);
+			// 判断返回值
+			for(IGuiCtrl::evt_list_t::iterator_t ite = ctrl->GetEvent().Head(); ite != ctrl->GetEvent().Tail(); ++ite)
+			{
+				if (!(*ite)) continue;
+				LRESULT r = (*ite)->GetResult();
+				if (ret != r) ret = r;
+			}
 		}
-		return m_WndProc ? (*m_WndProc)(Get(), nMessage, wParam, lParam) : NULL;
-	}
-
-public:
-	// 关联窗口句柄
-	bool Attach(wnd_t hWnd)
-	{
-		ExAssert(hWnd != NULL);
-
-		DWORD pid_cur = ::GetCurrentProcessId(), pid_wnd = NULL;
-		::GetWindowThreadProcessId(hWnd, &pid_wnd);
-		bool bHook = ( pid_cur != pid_wnd );
-		if( bHook )
-		{
-			IGuiBoardBase::Attach(hWnd);
-			m_bHook = bHook;
-		}
-		else
-		{
-			if (Get() || m_WndProc) Detach();
-			IGuiBoardBase::Attach(hWnd);
-			m_bHook = bHook;
-			m_WndProc = (WNDPROC)SetWindowLong(GWL_WNDPROC, (LONG)ThunkWndProc);
-			if (!m_WndProc) return false;
-			SetWindowLong(GWL_USERDATA, (LONG)this);
-		}
-		return true;
-	}
-	// 释放窗口句柄
-	wnd_t Detach()
-	{
-		wnd_t ret = NULL;
-		if (m_bHook)
-			ret = IGuiBoardBase::Detach();
-		else
-		if (SetWindowLong(GWL_WNDPROC, (LONG)m_WndProc))
-		{
-			SetWindowLong(GWL_USERDATA, 0);
-			ret = IGuiBoardBase::Detach();
-		}
-		m_bHook = false;
 		return ret;
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiThunk, IGuiBoardBase)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWnd, IGuiThunk)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiThunk_hpp__*/
+#endif/*__GuiWnd_hpp__*/

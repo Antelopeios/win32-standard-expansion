@@ -202,6 +202,10 @@
 				RelativePath=".\GuiBoard\GuiThunk.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiBoard\GuiWnd.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="GuiCtrl"

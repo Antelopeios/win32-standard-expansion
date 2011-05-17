@@ -33,13 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-05
-// Version:	1.0.0003.1730
+// Date:	2011-05-17
+// Version:	1.0.0004.1020
 //
 // History:
 //	- 1.0.0001.1630(2011-04-19)	+ CPoint改为CPointT<>,支持通过模板参数控制内部数据的类型
 //	- 1.0.0002.1513(2011-04-20)	^ 简化CPointT的内部数据命名
 //	- 1.0.0003.1730(2011-05-05)	# 修正构造时传入基本数据类型将导致堆栈溢出的问题
+//	- 1.0.0004.1020(2011-05-17)	+ 添加CPointT::operator-()负号重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Point_h__
@@ -112,6 +113,9 @@ public:
 	{ return CPointT(x + tPoint.x, y + tPoint.y); }
 	EXP_INLINE CPointT operator-(const CPointT& tPoint)
 	{ return CPointT(x - tPoint.x, y - tPoint.y); }
+
+	EXP_INLINE CPointT operator-()
+	{ return CPointT(-x, -y); }
 };
 
 typedef CPointT<> CPoint;

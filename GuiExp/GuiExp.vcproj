@@ -218,6 +218,10 @@
 				RelativePath=".\GuiCtrl\GuiCtrl.h"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiCtrl\GuiCtrlBase.hpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\dllmain.cpp"

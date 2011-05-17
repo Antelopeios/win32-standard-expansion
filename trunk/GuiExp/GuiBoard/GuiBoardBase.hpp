@@ -50,6 +50,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+EXP_BEG
+
 //////////////////////////////////////////////////////////////////
 
 // GUI ´°¿Ú¶ÔÏó
@@ -425,5 +427,7 @@ EXP_IMPLEMENT_DYNAMIC_CLS(IGuiBoardBase, IGuiBoard)
 const CString IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
 
 //////////////////////////////////////////////////////////////////
+
+EXP_END
 
 #endif/*__GuiBoardBase_hpp__*/

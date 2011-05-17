@@ -52,9 +52,10 @@ EXP_IMPLEMENT_DYNAMIC_CLS(IGuiBoard, IGuiComp)
 
 //////////////////////////////////////////////////////////////////
 
+EXP_END
+
 #include "GuiBoard/GuiBoardBase.hpp"
 #include "GuiBoard/GuiThunk.hpp"
+#include "GuiBoard/GuiWnd.hpp"
 
 //////////////////////////////////////////////////////////////////
-
-EXP_END

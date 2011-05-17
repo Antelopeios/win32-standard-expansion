@@ -33,13 +33,14 @@
 // Author:	木头云
 // Blog:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-13
-// Version:	1.1.0010.1704
+// Date:	2011-05-16
+// Version:	1.1.0011.1511
 //
 // History:
 //	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
 //	- 1.1.0009.1908(2011-05-11)	^ 规范化CTypeInfoFactory的单例实现方式
 //	- 1.1.0010.1704(2011-05-13)	# 修正RTTI在多继承时的编译错误
+//	- 1.1.0011.1511(2011-05-16)	= 调整一些内部接口的名称定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -141,9 +142,9 @@ public:
 };
 
 // 向工厂注册 TypeInfo 指针
-#define EXP_REG_TYPEINFO(key, inf)	CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
+#define ExRegTypeInfo(key, inf)	CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
 // 从工厂得到 TypeInfo 指针
-#define EXP_GET_TYPEINFO(key)		CTypeInfoFactory::Instance().GetTypeInfo(key)
+#define ExGetTypeInfo(key)		CTypeInfoFactory::Instance().GetTypeInfo(key)
 
 //////////////////////////////////////////////////////////////////
 
@@ -173,11 +174,11 @@ public:																						\
 
 // TYPEINFO 类型信息宏定义
 
-#define EXP_TYPEINFO_OF_CLS(cls_name)		(cls_name::GetTypeInfoClass())
-#define EXP_TYPEINFO_OF_OBJ(obj_name)		(obj_name.GetTypeInfo())
-#define EXP_TYPEINFO_OF_PTR(ptr_name)		(ptr_name->GetTypeInfo())
+#define ExTypeInfoCls(cls_name)		(cls_name::GetTypeInfoClass())
+#define ExTypeInfoObj(obj_name)		(obj_name.GetTypeInfo())
+#define ExTypeInfoPtr(ptr_name)		(ptr_name->GetTypeInfo())
 
-#define EXP_TYPEINFO_MEMBER(cls_name)		rttiTypeInfo
+#define EXP_TYPEINFO_MEMBER			rttiTypeInfo
 
 //////////////////////////////////////////////////////////////////
 
@@ -185,12 +186,12 @@ public:																						\
 
 #define EXP_DECLARE_TYPEINFO(cls_name)														\
 public:																						\
-	virtual int GetTypeID()				{ return EXP_TYPEINFO_MEMBER(cls_name).type_id; }	\
-	virtual LPCTSTR GetTypeName()		{ return EXP_TYPEINFO_MEMBER(cls_name).className; }	\
-	virtual TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER(cls_name); }			\
-	static TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER(cls_name); }			\
+	virtual int GetTypeID()				{ return EXP_TYPEINFO_MEMBER.type_id; }				\
+	virtual LPCTSTR GetTypeName()		{ return EXP_TYPEINFO_MEMBER.className; }			\
+	virtual TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }						\
+	static TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }						\
 private:																					\
-	static TypeInfo EXP_TYPEINFO_MEMBER(cls_name);											\
+	static TypeInfo EXP_TYPEINFO_MEMBER;													\
 
 #define EXP_DECLARE_TYPEINFO_CLS(cls_name, base_name)										\
 	EXP_DEF_MULTTYPE(cls_name)																\
@@ -270,11 +271,11 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)						\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
-		{&EXP_TYPEINFO_OF_CLS(base_name), NULL, NULL}, 										\
+		{&ExTypeInfoCls(base_name), NULL, NULL}, 											\
 		pfn_new																				\
 	};
 
@@ -283,27 +284,27 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, pfn_new, tmp)			\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
-		{&EXP_TYPEINFO_OF_CLS(base_name), &EXP_TYPEINFO_OF_CLS(base_name2), NULL}, 			\
+		{&ExTypeInfoCls(base_name), &ExTypeInfoCls(base_name2), NULL}, 						\
 		pfn_new																				\
 	};
 
 #define EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, pfn_new, tmp)	\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
-		{&EXP_TYPEINFO_OF_CLS(base_name), &EXP_TYPEINFO_OF_CLS(base_name2), &EXP_TYPEINFO_OF_CLS(base_name3)}, \
+		{&ExTypeInfoCls(base_name), &ExTypeInfoCls(base_name2), &ExTypeInfoCls(base_name3)}, \
 		pfn_new																				\
 	};
 
 #define EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, pfn_new, tmp)									\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER(cls_name) =										\
+	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
@@ -342,7 +343,7 @@ private:																					\
 	{ return (base_name*)ExMem::Alloc<cls_name>(gc); }										\
 	tmp																						\
 	bool cls_name::m_bRegSuccess =															\
-		EXP_REG_TYPEINFO( _T(#cls_name), &(cls_name::EXP_TYPEINFO_MEMBER(cls_name)) );
+		ExRegTypeInfo( _T(#cls_name), &(cls_name::EXP_TYPEINFO_MEMBER) );
 
 #define EXP_IMPLEMENT_DYNCREATE_CLS(cls_name, base_name, tmp)								\
 	EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, cls_name::CreateObject, tmp)			\
@@ -389,7 +390,7 @@ EXP_INLINE bool ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
 {
 	if( ptr )
 	{
-		TypeInfo* inf = EXP_GET_TYPEINFO(c_key);
+		TypeInfo* inf = ExGetTypeInfo(c_key);
 		if( inf )
 			return ptr->IsKindOf(*inf);
 		else
@@ -404,7 +405,7 @@ template <class TypeT>
 EXP_INLINE TypeT* ExDynCast(void* ptr)
 {
 	if( ptr )
-		return ((TypeT::EXP_MULT*)ptr)->IsKindOf(EXP_TYPEINFO_OF_CLS(TypeT)) ? (TypeT*)(TypeT::EXP_MULT*)ptr : NULL;
+		return ((TypeT::EXP_MULT*)ptr)->IsKindOf(ExTypeInfoCls(TypeT)) ? (TypeT*)(TypeT::EXP_MULT*)ptr : NULL;
 	else
 		return NULL;
 }
@@ -414,7 +415,7 @@ template <class TypeT>
 EXP_INLINE TypeT* ExDynCreate(LPCTSTR c_key, CGC* gc)
 {
 	if( c_key == NULL ) return NULL;
-	TypeInfo* inf = EXP_GET_TYPEINFO(c_key);
+	TypeInfo* inf = ExGetTypeInfo(c_key);
 	if( inf )
 		return ExDynCast<TypeT>(inf->CreateObject(gc));
 	else

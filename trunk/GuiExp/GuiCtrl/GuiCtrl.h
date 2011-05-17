@@ -59,16 +59,9 @@ interface EXP_API IGuiCtrl : public IGuiComp, public IGuiSender
 protected:
 	IGuiCtrl** m_Focus;
 
-	bool m_bEnable;		// 是否可用
-	bool m_bVisible;	// 是否可见
-
-	CRect m_Rect;		// 控件区域
-
 public:
 	IGuiCtrl()
 		: m_Focus(NULL)
-		, m_bEnable(true)
-		, m_bVisible(true)
 	{}
 
 protected:
@@ -95,7 +88,7 @@ protected:
 	}
 
 public:
-	IGuiBoard* GetBoard()
+	virtual IGuiBoard* GetBoard()
 	{
 		if (m_Pare)
 		{
@@ -106,64 +99,33 @@ public:
 		}
 		return NULL;
 	}
-	CRect rc_p;
-	board->GetClientRect(rc_p);
 
 	// 区域控制
-	void P2C(CRect& rc)
-	{
-		if (!m_Pare) return;
-		IGuiBoard* board = GetBoard();
-		if (!board) return;
-		if (m_Pare == board)
-		{
-		}
-		else
-		{
-		}
-	}
-	void SetRect(const CRect& rc) { m_Rect = rc; }
-	void GetRect(CRect& rc) { rc = m_Rect; }
-	void SetRealRect(const CRect& rc)
-	{
-	}
-	void GetRealRect(CRect& rc)
-	{
-	}
+	virtual bool P2C(CRect& rc) = 0;
+	virtual bool C2P(CRect& rc) = 0;
+	virtual bool B2C(CRect& rc) = 0;
+	virtual bool C2B(CRect& rc) = 0;
+	virtual bool SetRect(const CRect& rc) = 0;
+	virtual bool GetRect(CRect& rc) = 0;
+	virtual bool SetRealRect(const CRect& rc) = 0;
+	virtual bool GetRealRect(CRect& rc) = 0;
 
 	// 刷新绘图
-	void Refresh()
-	{
-		IGuiBoard* board = GetBoard();
-		if (!board) return;
-		CRect rc;
-		GetRealRect(rc);
-		board->InvalidateRect(rc);
-	}
+	virtual void Refresh() = 0;
 
 	// 设置可用性
-	bool SetEnable(bool bEnable = true)
-	{
-		bool old = m_bEnable;
-		m_bEnable = bEnable;
-		return old;
-	}
-	bool IsEnabled() const { return m_bEnable; }
+	virtual bool SetEnable(bool bEnable = true) = 0;
+	virtual bool IsEnabled() const = 0;
 
 	// 设置可见性
-	bool SetVisible(bool bVisible = true)
-	{
-		bool old = m_bVisible;
-		m_bVisible = bVisible;
-		return old;
-	}
-	bool IsVisible() const { return m_bVisible; }
+	virtual bool SetVisible(bool bVisible = true) = 0;
+	virtual bool IsVisible() const = 0;
 
 	// 判断有效性
 	static bool IsEffect(IGuiCtrl* pCtrl)
 	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
 
-	IGuiCtrl* SetFocus(IGuiCtrl* pFocus = NULL)
+	virtual IGuiCtrl* SetFocus(IGuiCtrl* pFocus = NULL)
 	{
 		if (!m_Focus) return NULL;
 		// 设置焦点
@@ -177,11 +139,11 @@ public:
 		old_fc->Send(WM_KILLFOCUS, 0, (LPARAM)(*m_Focus));
 		return old_fc;
 	}
-	IGuiCtrl* GetFocus()
+	virtual IGuiCtrl* GetFocus()
 	{
 		return (*m_Focus);
 	}
-	bool IsFocus()
+	virtual bool IsFocus()
 	{
 		IGuiBoard* board = GetBoard();
 		if (board && !board->IsFocus())
@@ -190,13 +152,12 @@ public:
 		IGuiCtrl* foc = GetFocus();
 		if (foc == this)
 			return IsEffect(this);
-		else
-		if (!Empty())
-			for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
-			{
-				if (!(*ite)) continue;
-				if ((*ite)->IsFocus()) return true;
-			}
+		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+		{
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+			if (!ctrl) continue;
+			if (ctrl->IsFocus()) return true;
+		}
 		return false;
 	}
 };

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-02
-// Version:	1.0.0001.1328
+// Date:	2011-05-18
+// Version:	1.0.0002.1948
 //
 // History:
 //	- 1.0.0001.1328(2011-05-02)	+ 添加渐变滤镜
+//	- 1.0.0002.1948(2011-05-18)	= 调整CFilterNormal滤镜返回像素的alpha通道计算方法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FilterObject_h__
@@ -96,16 +97,17 @@ public:
 		BYTE r_s = ExGetR(pixSrc[nKey]);
 		BYTE g_s = ExGetG(pixSrc[nKey]);
 		BYTE b_s = ExGetB(pixSrc[nKey]);
-		BYTE a_d = (BYTE)~0 - a_s;
+		BYTE a_d = ExGetA(pixDes);
 		BYTE r_d = ExGetR(pixDes);
 		BYTE g_d = ExGetG(pixDes);
 		BYTE b_d = ExGetB(pixDes);
+		BYTE a_i = (BYTE)~0 - a_s;
 		return ExRGBA
 			(
-			(r_s * a_s + r_d * a_d) / (BYTE)~0, 
-			(g_s * a_s + g_d * a_d) / (BYTE)~0, 
-			(b_s * a_s + b_d * a_d) / (BYTE)~0, 
-			ExGetA(pixDes)
+			(r_s * a_s + r_d * a_i) / (BYTE)~0, 
+			(g_s * a_s + g_d * a_i) / (BYTE)~0, 
+			(b_s * a_s + b_d * a_i) / (BYTE)~0, 
+			(a_d + a_s) - a_d * a_s / (BYTE)~0
 			);
 	}
 };

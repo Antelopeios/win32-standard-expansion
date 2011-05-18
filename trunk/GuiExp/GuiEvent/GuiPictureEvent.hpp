@@ -81,13 +81,6 @@ public:
 				CImage* mem_img = (CImage*)lParam;
 				CRect rect;
 				ctrl->GetRealRect(rect);
-
-				CGraph mem_grp;
-				mem_grp.Create();
-				mem_grp.SetObject(mem_img->Get());
-				FillRect(mem_grp, &(RECT)rect, (HBRUSH)GetStockObject(GRAY_BRUSH));
-				mem_grp.Delete();
-
 				// ¥¶¿Ì
 				if (m_rcOld != rect)
 				{

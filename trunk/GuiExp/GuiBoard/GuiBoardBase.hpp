@@ -453,17 +453,10 @@ public:
 			return;
 		}
 
-		//HDC hdc = ::GetDC(NULL);
+		HDC hdc = ::GetDC(NULL);
 
 		CRect rect;
 		GetWindowRect(rect);
-
-		CImage mem_img;
-		mem_img.Create(rect.Width(), rect.Height());
-
-		CGraph mem_grp;
-		mem_grp.Create(hDC);
-		mem_grp.SetObject(mem_img.Get());
 
 		POINT pt_wnd = {rect.Left(), rect.Top()};
 		SIZE  sz_wnd = {rect.Width(), rect.Height()};
@@ -472,12 +465,9 @@ public:
 		BLENDFUNCTION blend		  = {0};
 		blend.AlphaFormat		  = AC_SRC_ALPHA;
 		blend.SourceConstantAlpha = (BYTE)~0;
-		::UpdateLayeredWindow(Get(), mem_grp, &pt_wnd, &sz_wnd, hDC, &pt_src, 0, &blend, 2);
+		::UpdateLayeredWindow(Get(), hdc, &pt_wnd, &sz_wnd, hDC, &pt_src, 0, &blend, 2);
 
-		mem_grp.Delete();
-		mem_img.Delete();
-
-		//::ReleaseDC(NULL, hdc);
+		::ReleaseDC(NULL, hdc);
 	}
 };
 

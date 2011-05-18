@@ -33,12 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-03
-// Version:	1.0.0014.2140
+// Date:	2011-05-18
+// Version:	1.0.0015.1419
 //
 // History:
 //	- 1.0.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
 //	- 1.0.0014.2140(2011-03-03)	+ CObjPoolT支持对任意大小进行分配
+//	- 1.0.0015.1419(2011-05-18)	+ CPoolTypeT支持重写CPoolTypeT::Free()
+//								= CPoolTypeT改名为IPoolTypeT
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -231,7 +233,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT, typename AllocT, typename ModelT = EXP_THREAD_MODEL>
-class CPoolTypeT
+class IPoolTypeT
 {
 public:
 	typedef CObjPoolT<TypeT, _ObjPoolPolicyT<AllocT, ModelT> > alloc_t;
@@ -242,7 +244,7 @@ public:
 public:
 	static TypeT* Alloc()
 	{ return (TypeT*)GetAlloc().Alloc(); }
-	void Free()
+	virtual void Free()
 	{ GetAlloc().Free(static_cast<TypeT*>(this)); }
 };
 

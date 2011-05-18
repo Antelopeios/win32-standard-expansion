@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-16
-// Version:	1.0.0004.1527
+// Date:	2010-05-18
+// Version:	1.0.0005.1652
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -43,6 +43,7 @@
 //								= 调整IGuiEvent对外的接口及行为
 //								+ GUI 事件转发器(IGuiSender)
 //	- 1.0.0004.1527(2010-05-16)	+ 添加IGuiComp::Init()与IGuiComp::Fina()接口
+//	- 1.0.0005.1652(2010-05-18)	# 修正IGuiComp::Init()里的逻辑错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -111,10 +112,10 @@ public:
 		list_t::iterator_t ite = Find(pComp);
 		if (ite != list_t::Tail()) return;
 		// 添加新对象
-		list_t::Add(pComp);
 		if( pComp->m_Pare )
 			pComp->m_Pare->Del(pComp);
 		pComp->Init(this);
+		list_t::Add(pComp);
 	}
 	virtual void Del(IGuiComp* pComp)
 	{
@@ -222,16 +223,16 @@ public:
 				if (!(*ite)) continue;
 				ExMem::Free(*ite);
 			}
-			evt_list_t::Clear();
+		evt_list_t::Clear();
 	}
 
 	// 事件发送接口
-	virtual void Send(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	virtual void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
-			(*ite)->OnMessage(this, nMessage, wParam, lParam);
+			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 		}
 	}
 };

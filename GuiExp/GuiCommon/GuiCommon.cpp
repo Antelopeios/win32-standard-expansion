@@ -28,28 +28,28 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiExp - 界面拓展库(GUI Expansion)
+// GuiCommon - 界面拓展库公用定义
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-11
+// Version:	1.0.0002.1506
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiExp_h__
-#define __GuiExp_h__
+#include "stdafx.h"
+#include "GuiCommon.h"
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-//////////////////////////////////////////////////////////////////
-
-#include "GuiCommon/GuiCommon.h"
-#include "GuiCtrl/GuiCtrl.h"
-#include "GuiBoard/GuiBoard.h"
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__GuiExp_h__*/
+// 通用对象创建接口
+EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
+{
+	return ExDynCreate<IGuiObject>(sGuiType, pGC);
+}
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END

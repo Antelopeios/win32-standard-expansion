@@ -33,13 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-10
-// Version:	1.0.0015.1714
+// Date:	2011-05-18
+// Version:	1.0.0016.1642
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //	- 1.0.0014.0106(2011-02-25)	+ 为String添加用于Hash的DWORD_PTR重载
 //	- 1.0.0015.1714(2011-05-10)	# 修正bool operator==()与bool operator!=()在对字符串常量做比较时无法通过编译的问题
+//	- 1.0.0016.1642(2011-05-18)	= 使用友元方式重载bool operator==()与bool operator!=()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -198,18 +199,21 @@ public:
 	CStringT& operator=(const type_t* pString)
 	{ return SetString(pString); }
 
-	bool operator==(const type_t* pString)
-	{ return (_tcscmp(GetCStr(), pString) == 0); }
-	bool operator==(const CStringT& String)
-	{ return operator==(String.m_Array); }
-	bool operator==(const array_t& aString)
-	{ return operator==((const type_t*)aString); }
-	bool operator!=(const type_t* pString)
-	{ return !(*this == pString); }
-	bool operator!=(const CStringT& String)
-	{ return !(*this == String); }
-	bool operator!=(const array_t& aString)
-	{ return !(*this == aString); }
+	int Compare(const type_t* pString) const
+	{ return _tcscmp(m_Array, pString); }
+
+	friend bool operator==(const CStringT& str1, const CStringT& str2)
+	{ return (str1.Compare(str2) == 0); }
+	friend bool operator==(const CStringT& str1, const type_t* str2)
+	{ return (str1.Compare(str2) == 0); }
+	friend bool operator==(const type_t* str1, const CStringT& str2)
+	{ return (str2.Compare(str1) == 0); }
+	friend bool operator!=(const CStringT& str1, const CStringT& str2)
+	{ return (str1.Compare(str2) != 0); }
+	friend bool operator!=(const CStringT& str1, const type_t* str2)
+	{ return (str1.Compare(str2) != 0); }
+	friend bool operator!=(const type_t* str1, const CStringT& str2)
+	{ return (str2.Compare(str1) != 0); }
 
 	CStringT& operator+=(const type_t* pString)
 	{

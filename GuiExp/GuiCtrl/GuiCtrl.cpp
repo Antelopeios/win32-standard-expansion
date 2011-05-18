@@ -52,5 +52,6 @@ EXP_IMPLEMENT_DYNAMIC_MULT2(IGuiCtrl, IGuiComp, IGuiSender)
 EXP_END
 
 #include "GuiCtrl/GuiCtrlBase.hpp"
+#include "GuiCtrl/GuiPicture.hpp"
 
 //////////////////////////////////////////////////////////////////

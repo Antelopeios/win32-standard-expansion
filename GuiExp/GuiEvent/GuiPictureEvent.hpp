@@ -28,28 +28,87 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiExp - 界面拓展库(GUI Expansion)
+// GuiPictureEvent - 绘图板控件事件
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-18
+// Version:	1.0.0000.1150
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "GuiExp.h"
+#ifndef __GuiPictureEvent_hpp__
+#define __GuiPictureEvent_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+#include "GuiCtrl/GuiCtrl.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-// 通用对象创建接口
-EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
+class CGuiPictureEvent : public IGuiEvent
 {
-	return ExDynCreate<IGuiObject>(sGuiType, pGC);
-}
+	EXP_DECLARE_DYNCREATE_CLS(CGuiPictureEvent, IGuiEvent)
+
+protected:
+	CRect m_rcOld;
+	CImage m_imgTmp;
+
+public:
+	~CGuiPictureEvent() { m_imgTmp.Delete(); }
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_PAINT:
+			if (lParam)
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("image"), &gc);
+				if (!state) break;
+				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
+				if (!image || image->IsNull()) break;
+				CImage* mem_img = (CImage*)lParam;
+				CRect rect;
+				ctrl->GetRealRect(rect);
+
+				CGraph mem_grp;
+				mem_grp.Create();
+				mem_grp.SetObject(mem_img->Get());
+				FillRect(mem_grp, &(RECT)rect, (HBRUSH)GetStockObject(GRAY_BRUSH));
+				mem_grp.Delete();
+
+				// 处理
+				if (m_rcOld != rect)
+				{
+					m_imgTmp.Delete();
+					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), rect.Height()));
+					m_rcOld = rect;
+				}
+				// 绘图
+				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiPictureEvent, IGuiEvent);
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiPictureEvent_hpp__*/

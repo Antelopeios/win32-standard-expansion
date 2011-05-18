@@ -55,20 +55,66 @@ class CGuiWnd : public IGuiThunk
 	EXP_DECLARE_DYNCREATE_CLS(CGuiWnd, IGuiThunk)
 
 protected:
-	LRESULT WndProc(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	// 消息转发
+	LRESULT WndSend(UINT nMessage, WPARAM wParam, LPARAM lParam)
 	{
-		LRESULT ret = EXP_BASE::WndProc(nMessage, wParam, lParam);
-		// 消息转发
+		LRESULT ret = 0;
 		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
 		{
 			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 			if (!ctrl) continue;
-			ctrl->Send(nMessage, wParam, lParam);
+			ctrl->Send(*ite, nMessage, wParam, lParam);
 			// 判断返回值
 			for(IGuiCtrl::evt_list_t::iterator_t ite = ctrl->GetEvent().Head(); ite != ctrl->GetEvent().Tail(); ++ite)
 			{
 				if (!(*ite)) continue;
 				LRESULT r = (*ite)->GetResult();
+				if (ret != r) ret = r;
+			}
+		}
+		return ret;
+	}
+	LRESULT WndProc(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		LRESULT ret = 0;
+		// 筛选消息
+		switch( nMessage )
+		{
+		case WM_PAINT:
+			{
+				PAINTSTRUCT ps = {0};
+				HDC hdc = BeginPaint(Get(), &ps);
+
+				// 构建绘图缓存
+				CRect rect;
+				GetClientRect(rect);
+				CImage mem_img;
+				mem_img.Create(rect.Width(), rect.Height());
+
+				// 发送绘图消息
+				ret = WndSend(nMessage, wParam, (LPARAM)&mem_img);
+
+				// 覆盖缓存绘图
+				CGraph mem_grp;
+				mem_grp.Create(hdc);
+				mem_grp.SetObject(mem_img.Get());
+				if (m_bLayered)
+					LayerWindow(mem_grp);
+				else
+					::BitBlt(hdc, rect.Left(), rect.Top(), rect.Width(), rect.Height(), mem_grp, 0, 0, SRCCOPY);
+				mem_grp.Delete();
+				mem_img.Delete();
+
+				EndPaint(Get(), &ps);
+			}
+			break;
+		case WM_ERASEBKGND:
+			ret = WndSend(nMessage, wParam, lParam);
+			break;
+		default:
+			{
+				ret = EXP_BASE::WndProc(nMessage, wParam, lParam);
+				LRESULT r = WndSend(nMessage, wParam, lParam);
 				if (ret != r) ret = r;
 			}
 		}

@@ -33,14 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-13
-// Version:	1.0.0002.1525
+// Date:	2010-05-18
+// Version:	1.0.0003.1705
 //
 // History:
 //	- 1.0.0001.1420(2010-05-11)	+ 添加CGuiWnd::Attach()和CGuiWnd::Detach()接口实现
 //								- 移除一些接口中的ExAssert,直接忽略一些特殊情况
 //								= 将CGuiWnd调整为IGuiBoardBase接口类
 //	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoardBase::Send()和IGuiBoardBase::Post()接口实现
+//	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoardBase::Layer()窗口图层化接口实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoardBase_hpp__
@@ -65,9 +66,12 @@ protected:
 	static const CString s_ClassName;
 	HINSTANCE m_hIns;
 
+	bool m_bLayered;
+
 public:
 	IGuiBoardBase(void)
 		: m_hIns(::GetModuleHandle(NULL))
+		, m_bLayered(true)
 	{}
 	IGuiBoardBase(wnd_t hWnd)
 		: m_hIns(::GetModuleHandle(NULL))
@@ -418,6 +422,62 @@ public:
 			while (hwnd && hwnd != hfoc) hwnd = (wnd_t)::GetParent(hwnd);
 			return hwnd ? true : false;
 		}
+	}
+
+	// 窗口图层化
+	void SetLayered(bool bLayered = true)
+	{
+		m_bLayered = bLayered;
+		Invalidate();
+	}
+	bool IsLayered()
+	{ return m_bLayered; }
+
+	#ifndef WS_EX_LAYERED
+	#define WS_EX_LAYERED	0x00080000
+	#endif
+
+	void LayerWindow(HDC hDC)
+	{
+		if (hDC)
+		{
+			DWORD ex_style = GetWindowLong(GWL_EXSTYLE);
+			if( (ex_style & WS_EX_LAYERED) != WS_EX_LAYERED )
+				SetWindowLong(GWL_EXSTYLE, ex_style ^ WS_EX_LAYERED);
+		}
+		else
+		{
+			DWORD dwExStyle = GetWindowLong(GWL_EXSTYLE);
+			if (dwExStyle | WS_EX_LAYERED)
+				SetWindowLong(GWL_EXSTYLE, dwExStyle & ~WS_EX_LAYERED);
+			return;
+		}
+
+		//HDC hdc = ::GetDC(NULL);
+
+		CRect rect;
+		GetWindowRect(rect);
+
+		CImage mem_img;
+		mem_img.Create(rect.Width(), rect.Height());
+
+		CGraph mem_grp;
+		mem_grp.Create(hDC);
+		mem_grp.SetObject(mem_img.Get());
+
+		POINT pt_wnd = {rect.Left(), rect.Top()};
+		SIZE  sz_wnd = {rect.Width(), rect.Height()};
+		POINT pt_src = {0, 0};
+
+		BLENDFUNCTION blend		  = {0};
+		blend.AlphaFormat		  = AC_SRC_ALPHA;
+		blend.SourceConstantAlpha = (BYTE)~0;
+		::UpdateLayeredWindow(Get(), mem_grp, &pt_wnd, &sz_wnd, hDC, &pt_src, 0, &blend, 2);
+
+		mem_grp.Delete();
+		mem_img.Delete();
+
+		//::ReleaseDC(NULL, hdc);
 	}
 };
 

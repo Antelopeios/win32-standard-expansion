@@ -171,6 +171,10 @@
 			Name="GuiCommon"
 			>
 			<File
+				RelativePath=".\GuiCommon\GuiCommon.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiCommon\GuiCommon.h"
 				>
 			</File>
@@ -222,6 +226,22 @@
 				RelativePath=".\GuiCtrl\GuiCtrlBase.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiCtrl\GuiPicture.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="GuiEvent"
+			>
+			<File
+				RelativePath=".\GuiEvent\GuiEvent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiEvent\GuiPictureEvent.hpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\dllmain.cpp"
@@ -244,10 +264,6 @@
 					CompileAsManaged="0"
 				/>
 			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\GuiExp.cpp"
-			>
 		</File>
 		<File
 			RelativePath=".\GuiExp.h"

@@ -96,6 +96,7 @@ public:
 	bool SetRect(const CRect& rc)
 	{
 		m_Rect = rc;
+		Refresh(false);
 		return true;
 	}
 	bool GetRect(CRect& rc)
@@ -119,13 +120,18 @@ public:
 	}
 
 	// 刷新绘图
-	void Refresh()
+	void Refresh(bool bSelf = true)
 	{
 		IGuiBoard* board = GetBoard();
 		if (!board) return;
-		CRect rc;
-		GetRealRect(rc);
-		board->InvalidateRect(rc);
+		if (bSelf)
+		{
+			CRect rc;
+			GetRealRect(rc);
+			board->InvalidateRect(rc);
+		}
+		else
+			board->Invalidate();
 	}
 
 	// 设置可用性
@@ -133,6 +139,7 @@ public:
 	{
 		bool old = m_bEnable;
 		m_bEnable = bEnable;
+		Refresh();
 		return old;
 	}
 	bool IsEnabled() const { return m_bEnable; }
@@ -142,6 +149,7 @@ public:
 	{
 		bool old = m_bVisible;
 		m_bVisible = bVisible;
+		Refresh();
 		return old;
 	}
 	bool IsVisible() const { return m_bVisible; }

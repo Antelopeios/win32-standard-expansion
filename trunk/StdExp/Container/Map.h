@@ -73,7 +73,7 @@ public:
 		key_t	Key;
 		type_t	Val;
 	} pair_t;
-	typedef struct _Assoc : public pair_t, public CPoolTypeT<_Assoc, alloc_t>
+	typedef struct _Assoc : public pair_t, public IPoolTypeT<_Assoc, alloc_t>
 	{
 		DWORD	nHash;
 		bool	bSet;

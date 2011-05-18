@@ -61,7 +61,7 @@ template <typename TypeT, typename PolicyT = _ListPolicyT<> >
 class CListT : public IContainerObjectT<TypeT, PolicyT, CListT<TypeT, PolicyT> >
 {
 public:
-	typedef struct _Block : public CPoolTypeT<_Block, alloc_t>
+	typedef struct _Block : public IPoolTypeT<_Block, alloc_t>
 	{
 		TypeT	Buff;	// 数据块
 		_Block*	pPrev;	// 上一个结点

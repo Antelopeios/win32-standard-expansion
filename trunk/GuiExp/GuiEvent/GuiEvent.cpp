@@ -28,28 +28,19 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiExp - 界面拓展库(GUI Expansion)
+// GuiEvent - 事件对象
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-18
+// Version:	1.0.0000.1150
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiExp_h__
-#define __GuiExp_h__
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
+#include "stdafx.h"
 
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
-#include "GuiCtrl/GuiCtrl.h"
-#include "GuiBoard/GuiBoard.h"
+#include "GuiEvent/GuiPictureEvent.hpp"
 
 //////////////////////////////////////////////////////////////////
-
-#endif/*__GuiExp_h__*/

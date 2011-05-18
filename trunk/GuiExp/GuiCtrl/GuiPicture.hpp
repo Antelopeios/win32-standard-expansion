@@ -28,28 +28,59 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiExp - 界面拓展库(GUI Expansion)
+// GuiPicture - 绘图板控件
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2010-05-18
+// Version:	1.0.0000.1150
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiExp_h__
-#define __GuiExp_h__
+#ifndef __GuiPicture_hpp__
+#define __GuiPicture_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-//////////////////////////////////////////////////////////////////
-
-#include "GuiCommon/GuiCommon.h"
-#include "GuiCtrl/GuiCtrl.h"
-#include "GuiBoard/GuiBoard.h"
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__GuiExp_h__*/
+class CGuiPicture : public IGuiCtrlBase
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
+
+protected:
+	CGC m_GC;
+	CImage m_Image;
+
+public:
+	CGuiPicture()
+	{
+		// 添加事件对象
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), &m_GC));
+	}
+
+public:
+	// 获得控件状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		state_t* state = pGC ? ExMem::Alloc<state_t>(pGC) : state_t::Alloc();
+		state->sta_typ = sType;
+		if (sType == _T("image"))
+			state->sta_arr.Add(&m_Image);
+		return state;
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase);
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiPicture_hpp__*/

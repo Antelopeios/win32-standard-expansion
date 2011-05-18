@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-13
-// Version:	1.0.0002.1525
+// Date:	2010-05-18
+// Version:	1.0.0003.1705
 //
 // History:
 //	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
 //	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoard::Send()和IGuiBoard::Post()接口
+//	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoard::Layer()窗口图层化接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -118,6 +119,10 @@ public:
 	virtual wnd_t SetFocus() = 0;
 	static wnd_t GetFocus() { return (wnd_t)::GetFocus(); }
 	virtual bool IsFocus() = 0;
+
+	// 窗口图层化
+	virtual void SetLayered(bool bLayered = true) = 0;
+	virtual bool IsLayered() = 0;
 };
 
 //////////////////////////////////////////////////////////////////

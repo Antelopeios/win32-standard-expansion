@@ -56,6 +56,13 @@ interface EXP_API IGuiCtrl : public IGuiComp, public IGuiSender
 {
 	EXP_DECLARE_DYNAMIC_MULT2(IGuiCtrl, IGuiComp, IGuiSender)
 
+public:
+	struct state_t : IPoolTypeT<state_t, EXP_MULT::alloc_t>
+	{
+		CString			sta_typ;
+		CArrayT<void*>	sta_arr;
+	};
+
 protected:
 	IGuiCtrl** m_Focus;
 
@@ -70,7 +77,10 @@ protected:
 		EXP_BASE::Init(pComp);
 		if (!pComp) return;
 		if (pComp->Empty())
+		{
 			m_Focus = ExMem::Alloc<IGuiCtrl*>();
+			(*m_Focus) = NULL;
+		}
 		else
 		{
 			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pComp->LastItem());
@@ -88,6 +98,10 @@ protected:
 	}
 
 public:
+	// 获得控件状态
+	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
+
+	// 获得绘图板
 	virtual IGuiBoard* GetBoard()
 	{
 		if (m_Pare)
@@ -111,7 +125,7 @@ public:
 	virtual bool GetRealRect(CRect& rc) = 0;
 
 	// 刷新绘图
-	virtual void Refresh() = 0;
+	virtual void Refresh(bool bSelf = true) = 0;
 
 	// 设置可用性
 	virtual bool SetEnable(bool bEnable = true) = 0;
@@ -134,9 +148,9 @@ public:
 		if (old_fc == (*m_Focus)) return NULL;
 		// 发送焦点改变消息
 		ExAssert(*m_Focus);
-		(*m_Focus)->Send(WM_SETFOCUS, 0, (LPARAM)old_fc);
+		(*m_Focus)->Send(ExDynCast<IGuiObject>(*m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
 		if (!old_fc) return old_fc;
-		old_fc->Send(WM_KILLFOCUS, 0, (LPARAM)(*m_Focus));
+		old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(*m_Focus));
 		return old_fc;
 	}
 	virtual IGuiCtrl* GetFocus()

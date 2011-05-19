@@ -33,14 +33,15 @@
 // Author:	木头云
 // Blog:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-16
-// Version:	1.1.0011.1511
+// Date:	2011-05-19
+// Version:	1.1.0012.1400
 //
 // History:
 //	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
 //	- 1.1.0009.1908(2011-05-11)	^ 规范化CTypeInfoFactory的单例实现方式
 //	- 1.1.0010.1704(2011-05-13)	# 修正RTTI在多继承时的编译错误
 //	- 1.1.0011.1511(2011-05-16)	= 调整一些内部接口的名称定义
+//	- 1.1.0012.1400(2011-05-19)	^ ExDynCreate()支持默认传入空指针GC构造对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -70,14 +71,14 @@ typedef IBaseObjectT<> IBaseObject;
 // 类型信息结构
 struct TypeInfo
 {
-	typedef IBaseObject* (*creator_t)(CGC* gc);
+	typedef IBaseObject* (*creator_t)(CGC*);
 
 	LPTSTR		className;
 	int			type_id;
 	TypeInfo*	pBaseClass[3];
 	creator_t	m_Creator;	// NULL => abstract class
 
-	EXP_INLINE IBaseObject* CreateObject(CGC* gc)
+	EXP_INLINE IBaseObject* CreateObject(CGC* gc = NULL)
 	{
 		if (!m_Creator) return NULL;
 		return (*m_Creator)(gc);
@@ -243,7 +244,7 @@ public:																						\
 
 #define EXP_DECLARE_DYNCREATE_C(cls_name)													\
 public:																						\
-	static IBaseObject* CreateObject(CGC* gc);												\
+	static IBaseObject* CreateObject(CGC* gc = NULL);										\
 private:																					\
 	static bool m_bRegSuccess;
 
@@ -339,7 +340,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
 	tmp																						\
-	IBaseObject* cls_name::CreateObject(CGC* gc)											\
+	IBaseObject* cls_name::CreateObject(CGC* gc/* = NULL*/)									\
 	{ return (base_name*)ExMem::Alloc<cls_name>(gc); }										\
 	tmp																						\
 	bool cls_name::m_bRegSuccess =															\
@@ -411,13 +412,12 @@ EXP_INLINE TypeT* ExDynCast(void* ptr)
 }
 
 // 动态对象创建函数
-template <class TypeT>
-EXP_INLINE TypeT* ExDynCreate(LPCTSTR c_key, CGC* gc)
+EXP_INLINE void* ExDynCreate(LPCTSTR c_key, CGC* gc = NULL)
 {
 	if( c_key == NULL ) return NULL;
 	TypeInfo* inf = ExGetTypeInfo(c_key);
 	if( inf )
-		return ExDynCast<TypeT>(inf->CreateObject(gc));
+		return inf->CreateObject(gc);
 	else
 		return NULL;
 }

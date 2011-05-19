@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-18
-// Version:	1.0.0005.1652
+// Date:	2010-05-19
+// Version:	1.0.0006.1000
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -44,6 +44,7 @@
 //								+ GUI 事件转发器(IGuiSender)
 //	- 1.0.0004.1527(2010-05-16)	+ 添加IGuiComp::Init()与IGuiComp::Fina()接口
 //	- 1.0.0005.1652(2010-05-18)	# 修正IGuiComp::Init()里的逻辑错误
+//	- 1.0.0006.1000(2010-05-19)	+ 添加IGuiBase界面对象基础类定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -87,7 +88,7 @@ public:
 		, m_Pare(NULL)
 	{}
 	virtual ~IGuiComp(void)
-	{ Clear(); }
+	{ ClearComp(); }
 
 protected:
 	virtual void Init(IGuiComp* pComp) { m_Pare = pComp; }
@@ -105,7 +106,7 @@ public:
 	iterator_t& Find(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
 
 	// 组合接口
-	virtual void Add(IGuiComp* pComp)
+	virtual void AddComp(IGuiComp* pComp)
 	{
 		if (!pComp) return ;
 		// 定位对象
@@ -113,11 +114,11 @@ public:
 		if (ite != list_t::Tail()) return;
 		// 添加新对象
 		if( pComp->m_Pare )
-			pComp->m_Pare->Del(pComp);
+			pComp->m_Pare->DelComp(pComp);
 		pComp->Init(this);
 		list_t::Add(pComp);
 	}
-	virtual void Del(IGuiComp* pComp)
+	virtual void DelComp(IGuiComp* pComp)
 	{
 		if (!pComp) return ;
 		// 定位对象
@@ -128,7 +129,7 @@ public:
 		pComp->Fina();
 		if (m_bTru) ExMem::Free(pComp);
 	}
-	virtual void Clear()
+	virtual void ClearComp()
 	{
 		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
 		{
@@ -226,15 +227,45 @@ public:
 		evt_list_t::Clear();
 	}
 
-	// 事件发送接口
-	virtual void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	// 事件结果接口
+	void SetResult(LRESULT lrRet = 0)
 	{
 		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
-			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			(*ite)->SetResult(lrRet);
 		}
 	}
+	LRESULT GetResult(LRESULT lrDef = 0)
+	{
+		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
+		{
+			if (!(*ite)) continue;
+			LRESULT r = (*ite)->GetResult();
+			if (r != 0 && lrDef != r) lrDef = r;
+		}
+		return lrDef;
+	}
+	// 事件发送接口
+	virtual void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		LRESULT ret = GetResult();
+		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
+		{
+			if (!(*ite)) continue;
+			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
+			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			ret = (*ite)->GetResult();
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 界面对象基础
+interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
+{
+	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
 };
 
 //////////////////////////////////////////////////////////////////

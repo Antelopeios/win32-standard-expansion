@@ -242,6 +242,10 @@
 				RelativePath=".\GuiEvent\GuiPictureEvent.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiEvent\GuiWndEvent.hpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\dllmain.cpp"

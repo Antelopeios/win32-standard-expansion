@@ -62,6 +62,10 @@ public:
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), &m_GC));
 	}
+	~CGuiPicture()
+	{
+		m_Image.Delete();
+	}
 
 public:
 	// 获得控件状态
@@ -72,6 +76,15 @@ public:
 		if (sType == _T("image"))
 			state->sta_arr.Add(&m_Image);
 		return state;
+	}
+	void SetState(const CString& sType, void* pState)
+	{
+		if (sType == _T("image"))
+		{
+			m_Image.Delete();
+			m_Image.Set(((CImage*)pState)->Get());
+		}
+		Refresh();
 	}
 };
 

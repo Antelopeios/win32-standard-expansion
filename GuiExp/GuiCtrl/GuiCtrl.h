@@ -52,9 +52,9 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-interface EXP_API IGuiCtrl : public IGuiComp, public IGuiSender
+interface EXP_API IGuiCtrl : public IGuiBase
 {
-	EXP_DECLARE_DYNAMIC_MULT2(IGuiCtrl, IGuiComp, IGuiSender)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
 
 public:
 	struct state_t : IPoolTypeT<state_t, EXP_MULT::alloc_t>
@@ -100,6 +100,7 @@ protected:
 public:
 	// 获得控件状态
 	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
+	virtual void SetState(const CString& sType, void* pState) = 0;
 
 	// 获得绘图板
 	virtual IGuiBoard* GetBoard()

@@ -50,7 +50,7 @@ EXP_BEG
 
 // 将普通线程分配转换为静态线程分配的适配器
 template <typename CreatorT = _ThreadHeap>
-class CThreadAdapterT : public ISingletonT<CreatorT>
+class CThreadAdapterT : public EXP_SINGLETON<CreatorT>
 {
 public:
 	typedef CreatorT creator_t;

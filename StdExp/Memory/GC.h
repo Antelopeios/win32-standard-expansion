@@ -34,7 +34,7 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-19
-// Version:	1.1.0017.1331
+// Version:	1.1.0017.1640
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
@@ -43,7 +43,9 @@
 //	- 1.1.0015.0120(2011-04-04)	+ ExGC支持不使用GC进行内存分配,方便提供统一的内存分配接口
 //	- 1.1.0015.0120(2011-04-04)	+ CGCAllocT支持与ExMem同样的方式直接分配内存
 //								= 调整ExGC为ExMem,统一所有内存分配接口的调用方式
-//	- 1.1.0017.1331(2011-05-19)	+ 添加CGCT::Regist接口,支持从外部直接注册指针
+//	- 1.1.0017.1640(2011-05-19)	+ 添加CGCT::Regist接口,支持从外部直接注册指针
+//								= CGCT::CheckAlloc()与CGCT::CheckFree()改为静态函数
+//								= CGCAllocT在不使用外部GC构造对象时仍然向指针管理器注册指针(统一所有的指针管理)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -89,15 +91,15 @@ public:
 		alloc_t::Free(m_BlockArray);
 	}
 
-protected:
+public:
 	template <typename TypeT>
-	EXP_INLINE TypeT* CheckAlloc(DWORD nCount = 1)
+	EXP_INLINE static TypeT* CheckAlloc(DWORD nCount = 1)
 	{
 		TypeT* ptr = alloc_t::Alloc<TypeT>(nCount);
 		CPtrManager::Instance().Add<alloc_t, model_t>(ptr);
 		return ptr;
 	}
-	EXP_INLINE void CheckFree(void* pPtr)
+	EXP_INLINE static void CheckFree(void* pPtr)
 	{
 		CPtrManager::Instance().Del(pPtr);
 	}
@@ -220,11 +222,11 @@ public:
 	{ return alloc_t::Size(pPtr); }
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
-	{ return alloc_t::Alloc<TypeT>(nCount); }
+	{ return gc_alloc_t::CheckAlloc<TypeT>(nCount); }
 	EXP_INLINE static void* Alloc(DWORD nSize)
-	{ return alloc_t::Alloc(nSize); }
+	{ return gc_alloc_t::CheckAlloc<BYTE>(nSize); }
 	EXP_INLINE static void Free(void* pPtr)
-	{ alloc_t::Free(pPtr); }
+	{ gc_alloc_t::CheckFree(pPtr); }
 	// gc_alloc_t
 	EXP_INLINE static bool Valid(gc_alloc_t* alloc, void* pPtr)
 	{ return alloc ? alloc->Valid(pPtr) : Valid(pPtr); }

@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-11
-// Version:	1.0.0006.1909
+// Date:	2011-05-19
+// Version:	1.0.0007.1554
 //
 // History:
 //	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
 //	- 1.0.0006.1909(2011-05-11)	= 重命名CSingletonT为ISingletonT
+//	- 1.0.0007.1554(2011-05-19)	+ StdExp内部的单例调用支持由外部统一置换
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Singleton_h__
@@ -74,8 +75,12 @@ public:
 	}
 };
 
+#ifndef EXP_SINGLETON
+#define EXP_SINGLETON ISingletonT
+#endif/*EXP_SINGLETON*/
+
 template <typename TypeT>
-EXP_INLINE TypeT& ExSingleton() { return ISingletonT<TypeT>::Instance(); }
+EXP_INLINE TypeT& ExSingleton() { return EXP_SINGLETON<TypeT>::Instance(); }
 
 //////////////////////////////////////////////////////////////////
 

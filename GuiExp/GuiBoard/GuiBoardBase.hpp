@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-18
-// Version:	1.0.0003.1705
+// Date:	2010-05-19
+// Version:	1.0.0004.1636
 //
 // History:
 //	- 1.0.0001.1420(2010-05-11)	+ 添加CGuiWnd::Attach()和CGuiWnd::Detach()接口实现
@@ -42,6 +42,7 @@
 //								= 将CGuiWnd调整为IGuiBoardBase接口类
 //	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoardBase::Send()和IGuiBoardBase::Post()接口实现
 //	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoardBase::Layer()窗口图层化接口实现
+//	- 1.0.0004.1636(2010-05-19)	# 修正IGuiBoardBase::LayeredWindow()的内部逻辑错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoardBase_hpp__
@@ -71,7 +72,7 @@ protected:
 public:
 	IGuiBoardBase(void)
 		: m_hIns(::GetModuleHandle(NULL))
-		, m_bLayered(true)
+		, m_bLayered(false)
 	{}
 	IGuiBoardBase(wnd_t hWnd)
 		: m_hIns(::GetModuleHandle(NULL))
@@ -448,22 +449,13 @@ public:
 
 	void LayeredWindow(HDC hDC)
 	{
-		if (hDC)
-		{
-			DWORD ex_style = GetWindowLong(GWL_EXSTYLE);
-			if( (ex_style & WS_EX_LAYERED) != WS_EX_LAYERED )
-				SetWindowLong(GWL_EXSTYLE, ex_style ^ WS_EX_LAYERED);
-		}
-		else
-		{
-			DWORD dwExStyle = GetWindowLong(GWL_EXSTYLE);
-			if (dwExStyle | WS_EX_LAYERED)
-				SetWindowLong(GWL_EXSTYLE, dwExStyle & ~WS_EX_LAYERED);
-			return;
-		}
-
+		if (!hDC) return;
 		if (m_bLayered)
 		{
+			DWORD ex_style = GetWindowLong(GWL_EXSTYLE);
+			if((ex_style & WS_EX_LAYERED) != WS_EX_LAYERED)
+				SetWindowLong(GWL_EXSTYLE, ex_style ^ WS_EX_LAYERED);
+
 			HDC hdc = ::GetDC(NULL);
 
 			CRect rect;
@@ -482,6 +474,10 @@ public:
 		}
 		else
 		{
+			DWORD ex_style = GetWindowLong(GWL_EXSTYLE);
+			if (ex_style | WS_EX_LAYERED)
+				SetWindowLong(GWL_EXSTYLE, ex_style & ~WS_EX_LAYERED);
+
 			PAINTSTRUCT ps = {0};
 			HDC hdc = ::BeginPaint(Get(), &ps);
 

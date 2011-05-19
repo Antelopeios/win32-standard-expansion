@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-07
-// Version:	1.0.0001.1730
+// Date:	2011-05-19
+// Version:	1.0.0002.1620
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 支持直接通过ImageFormat返回对应的ICoderObject
+//	- 1.0.0002.1620(2011-05-19)	+ CImgAnalyzer::GetCoder()支持默认传入空指针GC构造对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgAnalyzer_h__
@@ -74,7 +75,7 @@ public:
 			return png;
 		return raw;
 	}
-	static ICoderObject* GetCoder(int nFormat, CGC* pGC)
+	static ICoderObject* GetCoder(int nFormat, CGC* pGC = NULL)
 	{
 		ICoderObject* coder = NULL;
 		switch (nFormat)
@@ -91,7 +92,7 @@ public:
 		}
 		return coder;
 	}
-	static ICoderObject* GetCoder(IFileObject* pFile, CGC* pGC)
+	static ICoderObject* GetCoder(IFileObject* pFile, CGC* pGC = NULL)
 	{
 		if (!pFile) return NULL;
 		ICoderObject* coder = GetCoder(GetImageFormat(pFile), pGC);

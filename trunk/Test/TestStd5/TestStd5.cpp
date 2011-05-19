@@ -45,8 +45,8 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CTest3<TestT>, TestT, template <typename TestT>)
 int _tmain(int argc, _TCHAR* argv[])
 {
 	CGC gc;
-	CTest2* pt2 = ExDynCreate<CTest2>(_T("CTest2"), &gc);
+	CTest2* pt2 = ExDynCast<CTest2>(ExDynCreate(_T("CTest2"), &gc));
 	CTest1* pt1 = ExDynCast<CTest1>(pt2);
-	CTest3<CTest1>* pt3_1 = ExDynCreate<CTest3<CTest1> >(_T("CTest3<TestT>"), &gc); // Fail, 对template的支持暂时不是很理想
+	CTest3<CTest1>* pt3_1 = ExDynCast<CTest3<CTest1> >(ExDynCreate(_T("CTest3<TestT>"), &gc)); // Fail, 对template的支持暂时不是很理想
 	return 0;
 }

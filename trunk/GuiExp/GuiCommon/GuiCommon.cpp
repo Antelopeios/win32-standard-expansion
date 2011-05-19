@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-11
-// Version:	1.0.0002.1506
+// Date:	2010-05-19
+// Version:	1.0.0003.1354
+//
+// History:
+//	- 1.0.0003.1354(2010-05-19)	= 调整ExGui()的内部实现,始终在模块内构造对象
 //////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -47,7 +50,9 @@ EXP_BEG
 // 通用对象创建接口
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
 {
-	return ExDynCreate<IGuiObject>(sGuiType, pGC);
+	if (!pGC) pGC = &ExSingleton<CGC>(); // 从内部构造默认的单例GC
+	ExAssert(pGC);
+	return ExDynCast<IGuiObject>(pGC->Regist(ExDynCreate(sGuiType)));
 }
 
 //////////////////////////////////////////////////////////////////

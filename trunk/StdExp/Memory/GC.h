@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-05
-// Version:	1.1.0016.2133
+// Date:	2011-05-19
+// Version:	1.1.0017.1331
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
@@ -43,6 +43,7 @@
 //	- 1.1.0015.0120(2011-04-04)	+ ExGC支持不使用GC进行内存分配,方便提供统一的内存分配接口
 //	- 1.1.0015.0120(2011-04-04)	+ CGCAllocT支持与ExMem同样的方式直接分配内存
 //								= 调整ExGC为ExMem,统一所有内存分配接口的调用方式
+//	- 1.1.0017.1331(2011-05-19)	+ 添加CGCT::Regist接口,支持从外部直接注册指针
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -97,7 +98,9 @@ protected:
 		return ptr;
 	}
 	EXP_INLINE void CheckFree(void* pPtr)
-	{ CPtrManager::Instance().Del(pPtr); }
+	{
+		CPtrManager::Instance().Del(pPtr);
+	}
 
 public:
 	template <typename TypeT>
@@ -145,17 +148,23 @@ public:
 		ExLock(m_Mutex, true, mutex_t);
 		return alloc_t::Size(pPtr);
 	}
+	// 注册内存
+	void* Regist(void* pPtr)
+	{
+		ExLock(m_Mutex, false, mutex_t);
+		if (GetGCSize() == m_nIndx)
+			SetGCSize(PolicyT::Expan(GetGCSize()));
+		m_BlockArray[m_nIndx] = pPtr;
+		ExAssert(m_BlockArray[m_nIndx]);
+		return m_BlockArray[m_nIndx++];
+	}
 	// 分配内存
 	template <typename TypeT>
 	TypeT* Alloc(DWORD nCount = 1)
 	{
 		if (nCount == 0) return NULL;
 		ExLock(m_Mutex, false, mutex_t);
-		if (GetGCSize() == m_nIndx)
-			SetGCSize(PolicyT::Expan(GetGCSize()));
-		m_BlockArray[m_nIndx] = CheckAlloc<TypeT>(nCount);
-		ExAssert(m_BlockArray[m_nIndx]);
-		return ((TypeT*)(m_BlockArray[m_nIndx++]));
+		return (TypeT*)Regist(CheckAlloc<TypeT>(nCount));
 	}
 	void* Alloc(DWORD nSize)
 	{

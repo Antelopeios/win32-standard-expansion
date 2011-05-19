@@ -28,110 +28,96 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiThunk - 窗口过程重定向
+// GuiWndEvent - 窗口事件
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-11
-// Version:	1.0.0000.1100
+// Date:	2010-05-19
+// Version:	1.0.0000.1020
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiThunk_hpp__
-#define __GuiThunk_hpp__
+#ifndef __GuiWndEvent_hpp__
+#define __GuiWndEvent_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "GuiBoard/GuiBoard.h"
+#include "GuiCtrl/GuiCtrl.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IGuiThunk : public IGuiBoardBase
+class CGuiWndEvent : public IGuiEvent
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiThunk, IGuiBoardBase)
+	EXP_DECLARE_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
 
 protected:
-	WNDPROC m_WndProc;	// 原始的窗口过程
-	bool	m_bHook;	// Hook 标记
-
-public:
-	IGuiThunk(void)
-		: m_WndProc(NULL)
-		, m_bHook(false)
-	{}
-	virtual ~IGuiThunk(void)
-	{}
-
-protected:
-	// 静态回调函数,负责调用窗口过程函数
-	static LRESULT CALLBACK ThunkWndProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
+	// 消息转发
+	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
-		ExAssert(hWnd != NULL);
-		// 转发窗口消息
-		IGuiThunk* wnd_thk = (IGuiThunk*)::GetWindowLong(hWnd, GWL_USERDATA);
-		ExAssert(wnd_thk != NULL);
-		return wnd_thk->WndProc(nMessage, wParam, lParam);
-	}
-	// WndProc 窗口过程函数
-	virtual LRESULT WndProc(UINT nMessage, WPARAM wParam, LPARAM lParam)
-	{
-		Send(ExDynCast<IGuiObject>(this), nMessage, wParam, lParam);
-		return GetResult();
+		if (!pGui) return 0;
+		// 向控件转发消息
+		for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+		{
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+			if (!ctrl) continue;
+			// 初始化返回值
+			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+			// 转发消息
+			ctrl->Send(*ite, nMessage, wParam, lParam);
+			// 判断返回值
+			ctrl->GetResult(lrDef);
+		}
+		return lrDef;
 	}
 
 public:
-	LRESULT DefProc(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{ return m_WndProc ? (*m_WndProc)(Get(), nMessage, wParam, lParam) : 0; }
-
-	// 关联窗口句柄
-	bool Attach(wnd_t hWnd)
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		ExAssert(hWnd != NULL);
-
-		DWORD pid_cur = ::GetCurrentProcessId(), pid_wnd = NULL;
-		::GetWindowThreadProcessId(hWnd, &pid_wnd);
-		bool bHook = ( pid_cur != pid_wnd );
-		if( bHook )
+		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
+		if (!board) return;
+		// 筛选消息
+		LRESULT ret = 0;
+		switch( nMessage )
 		{
-			IGuiBoardBase::Attach(hWnd);
-			m_bHook = bHook;
+		case WM_PAINT:
+			{
+				// 构建绘图缓存
+				CRect rect;
+				board->GetClientRect(rect);
+				CImage mem_img;
+				mem_img.Create(rect.Width(), rect.Height());
+				// 发送绘图消息
+				ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
+				// 覆盖缓存绘图
+				CGraph mem_grp;
+				mem_grp.Create();
+				mem_grp.SetObject(mem_img.Get());
+				board->LayeredWindow(mem_grp);
+				mem_grp.Delete();
+				mem_img.Delete();
+			}
+			break;
+		case WM_ERASEBKGND:
+			ret = WndSend(board, nMessage, wParam, lParam);
+			break;
+		default:
+			ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));
 		}
-		else
-		{
-			if (Get() || m_WndProc) Detach();
-			IGuiBoardBase::Attach(hWnd);
-			m_bHook = bHook;
-			m_WndProc = (WNDPROC)SetWindowLong(GWL_WNDPROC, (LONG)ThunkWndProc);
-			if (!m_WndProc) return false;
-			SetWindowLong(GWL_USERDATA, (LONG)this);
-		}
-		return true;
-	}
-	// 释放窗口句柄
-	wnd_t Detach()
-	{
-		wnd_t ret = NULL;
-		if (m_bHook)
-			ret = IGuiBoardBase::Detach();
-		else
-		if (SetWindowLong(GWL_WNDPROC, (LONG)m_WndProc))
-		{
-			SetWindowLong(GWL_USERDATA, 0);
-			ret = IGuiBoardBase::Detach();
-		}
-		m_bHook = false;
-		return ret;
+		SetResult(ret);
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiThunk, IGuiBoardBase)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent);
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiThunk_hpp__*/
+#endif/*__GuiWndEvent_hpp__*/

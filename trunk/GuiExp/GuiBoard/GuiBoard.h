@@ -33,13 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-18
-// Version:	1.0.0003.1705
+// Date:	2010-05-19
+// Version:	1.0.0004.1000
 //
 // History:
 //	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
 //	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoard::Send()和IGuiBoard::Post()接口
 //	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoard::Layer()窗口图层化接口
+//	- 1.0.0004.1000(2010-05-19)	= IGuiBoard的基类改为IGuiBase
+//								+ 添加IGuiBoard::LayeredWindow();IGuiBoard::DefProc();IGuiBoard::GethWnd()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -56,9 +58,9 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 窗口对象接口
-interface EXP_API IGuiBoard : public IGuiComp
+interface EXP_API IGuiBoard : public IGuiBase
 {
-	EXP_DECLARE_DYNAMIC_CLS(IGuiBoard, IGuiComp)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiBoard, IGuiBase)
 
 public:
 	IGuiBoard(void) {}
@@ -73,10 +75,12 @@ public:
 
 	virtual bool Attach(wnd_t hWnd) = 0;
 	virtual wnd_t Detach() = 0;
+	virtual wnd_t GethWnd() = 0;
 
 	// 窗口消息
-	virtual LRESULT Send(UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
-	virtual bool Post(UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
+	virtual LRESULT DefProc(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
+	virtual LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
+	virtual bool PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
 
 	// 窗口属性修改
 	virtual DWORD GetStyle() = 0;
@@ -123,6 +127,7 @@ public:
 	// 窗口图层化
 	virtual void SetLayered(bool bLayered = true) = 0;
 	virtual bool IsLayered() = 0;
+	virtual void LayeredWindow(HDC hDC) = 0;
 };
 
 //////////////////////////////////////////////////////////////////

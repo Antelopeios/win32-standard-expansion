@@ -59,7 +59,10 @@ protected:
 	CImage m_imgTmp;
 
 public:
-	~CGuiPictureEvent() { m_imgTmp.Delete(); }
+	~CGuiPictureEvent()
+	{
+		m_imgTmp.Delete();
+	}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)

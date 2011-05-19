@@ -58,7 +58,7 @@ EXP_BEG
 // GUI 窗口对象
 interface IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t>
 {
-	EXP_DECLARE_DYNAMIC_CLS(IGuiBoardBase, IGuiComp)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
 
 	typedef ITypeObjectT<wnd_t> type_base_t;
 
@@ -143,13 +143,17 @@ public:
 		Set(NULL);
 		return old_wnd;
 	}
+	wnd_t GethWnd()
+	{
+		return Get();
+	}
 
 	// 窗口消息
-	LRESULT Send(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		return ::SendMessage(Get(), nMessage, wParam, lParam);
 	}
-	bool Post(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	bool PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		return ::PostMessage(Get(), nMessage, wParam, lParam);
 	}
@@ -264,7 +268,9 @@ public:
 			}
 			else
 			{
-				IGuiBoardBase(hWndCenter).GetWindowRect(rcCenter);
+				RECT rc = {0, 0, 0, 0};
+				::GetWindowRect(hWndCenter, &rc);
+				rcCenter = rc;
 				GetMonitorInfo(MonitorFromWindow(hWndCenter, MONITOR_DEFAULTTONEAREST), &mi);
 				rcArea = mi.rcWork;
 			}
@@ -274,9 +280,12 @@ public:
 			// center within parent client coordinates
 			hWndParent = GetParent();
 			ExAssert(::IsWindow(hWndParent));
-			IGuiBoardBase(hWndParent).GetClientRect(rcArea);
+			RECT rc = {0, 0, 0, 0};
+			::GetClientRect(hWndParent, &rc);
+			rcArea = rc;
 			ExAssert(::IsWindow(hWndCenter));
-			IGuiBoardBase(hWndCenter).GetClientRect(rcCenter);
+			::GetClientRect(hWndCenter, &rc);
+			rcCenter = rc;
 			::MapWindowPoints(hWndCenter, hWndParent, (POINT*)&rcCenter, 2);
 		}
 
@@ -437,7 +446,7 @@ public:
 	#define WS_EX_LAYERED	0x00080000
 	#endif
 
-	void LayerWindow(HDC hDC)
+	void LayeredWindow(HDC hDC)
 	{
 		if (hDC)
 		{
@@ -453,27 +462,42 @@ public:
 			return;
 		}
 
-		HDC hdc = ::GetDC(NULL);
+		if (m_bLayered)
+		{
+			HDC hdc = ::GetDC(NULL);
 
-		CRect rect;
-		GetWindowRect(rect);
+			CRect rect;
+			GetWindowRect(rect);
 
-		POINT pt_wnd = {rect.Left(), rect.Top()};
-		SIZE  sz_wnd = {rect.Width(), rect.Height()};
-		POINT pt_src = {0, 0};
+			POINT pt_wnd = {rect.Left(), rect.Top()};
+			SIZE  sz_wnd = {rect.Width(), rect.Height()};
+			POINT pt_src = {0, 0};
 
-		BLENDFUNCTION blend		  = {0};
-		blend.AlphaFormat		  = AC_SRC_ALPHA;
-		blend.SourceConstantAlpha = (BYTE)~0;
-		::UpdateLayeredWindow(Get(), hdc, &pt_wnd, &sz_wnd, hDC, &pt_src, 0, &blend, 2);
+			BLENDFUNCTION blend		  = {0};
+			blend.AlphaFormat		  = AC_SRC_ALPHA;
+			blend.SourceConstantAlpha = (BYTE)~0;
+			::UpdateLayeredWindow(Get(), hdc, &pt_wnd, &sz_wnd, hDC, &pt_src, 0, &blend, 2);
 
-		::ReleaseDC(NULL, hdc);
+			::ReleaseDC(NULL, hdc);
+		}
+		else
+		{
+			PAINTSTRUCT ps = {0};
+			HDC hdc = ::BeginPaint(Get(), &ps);
+
+			CRect rect;
+			GetClientRect(rect);
+
+			::BitBlt(hdc, rect.Left(), rect.Top(), rect.Width(), rect.Height(), hDC, 0, 0, SRCCOPY);
+
+			::EndPaint(Get(), &ps);
+		}
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiBoardBase, IGuiBoard)
+EXP_IMPLEMENT_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
 const CString IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
 
 //////////////////////////////////////////////////////////////////

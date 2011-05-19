@@ -44,6 +44,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Debugging/Assertion.h"
 #include "Thread/Event.h"
 
 EXP_BEG

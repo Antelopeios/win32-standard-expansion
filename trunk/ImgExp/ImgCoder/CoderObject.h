@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-05
-// Version:	1.0.0001.2350
+// Date:	2011-05-19
+// Version:	1.0.0002.1620
 //
 // History:
 //	- 1.0.0001.2350(2011-04-05)	= 将具体的image_t内存块申请工作统一放在ICoderObject中处理
 //								= ICoderObject::DeleteImage()不再断言Image参数
+//	- 1.0.0002.1620(2011-05-19)	+ 添加ICoderObject::Free()接口,方便CImgAnalyzer构造对象后手动释放指针资源
 //////////////////////////////////////////////////////////////////
 
 #ifndef __CoderObject_h__
@@ -103,6 +104,8 @@ public:
 
 	virtual bool Encode(image_t Image) = 0;
 	virtual image_t Decode() = 0;
+
+	void Free() { ExMem::Free(this); }
 
 	EXP_INLINE static bool DeleteImage(image_t Image)
 	{ return Image ? CImage(Image).Delete() : true; }

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-12
-// Version:	1.3.0026.1724
+// Date:	2011-05-19
+// Version:	1.3.0027.1619
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -72,6 +72,7 @@
 //	- 1.3.0024.1130(2011-04-02)	# 修正CPtrManagerT::CReferPtrT::Dec()可能出现多次Free自身的问题
 //	- 1.3.0025.1858(2011-05-11)	^ 优化CPtrManagerT的单例实现方式
 //	- 1.3.0026.1724(2011-05-12)	# 修正CSmartPtrT对裸指针的构造函数在实现上存在无限递归的问题
+//	- 1.3.0027.1619(2011-05-19)	= CPtrManagerT在单例情况下,内部对象会被内存池自动回收,因此析构函数不做任何工作
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -89,7 +90,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-class CPtrManagerT : INonCopyable, public ISingletonT<CPtrManagerT<AllocT, ModelT> >
+class CPtrManagerT : INonCopyable, public EXP_SINGLETON<CPtrManagerT<AllocT, ModelT> >
 {
 protected:
 	// 计数指针接口
@@ -178,7 +179,7 @@ public:
 		: m_ReferPtrs(1021)
 	{}
 	~CPtrManagerT()
-	{ Clear(true); }
+	{ /*Clear(true);*//*单例情况下,内部对象会被内存池自动回收*/ }
 
 public:
 	// 获取指针引用计数

@@ -104,9 +104,9 @@ struct TypeInfo
 //////////////////////////////////////////////////////////////////
 
 // TypeInfo 指针单例工厂
-class CTypeInfoFactory : INonCopyable, public ISingletonT<CTypeInfoFactory>
+class CTypeInfoFactory : INonCopyable, public EXP_SINGLETON<CTypeInfoFactory>
 {
-	friend class ISingletonT<CTypeInfoFactory>;
+	friend class EXP_SINGLETON<CTypeInfoFactory>;
 
 private:
 	typedef CMapT<CString, TypeInfo*> key_map;

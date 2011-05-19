@@ -50,9 +50,7 @@ EXP_BEG
 // 通用对象创建接口
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
 {
-	if (!pGC) pGC = &ExSingleton<CGC>(); // 从内部构造默认的单例GC
-	ExAssert(pGC);
-	return ExDynCast<IGuiObject>(pGC->Regist(ExDynCreate(sGuiType)));
+	return ExDynCast<IGuiObject>(ExDynCreate(sGuiType, pGC));
 }
 
 //////////////////////////////////////////////////////////////////

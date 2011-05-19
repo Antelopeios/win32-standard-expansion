@@ -34,7 +34,7 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-19
-// Version:	1.0.0006.1000
+// Version:	1.0.0006.1620
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -44,7 +44,8 @@
 //								+ GUI 事件转发器(IGuiSender)
 //	- 1.0.0004.1527(2010-05-16)	+ 添加IGuiComp::Init()与IGuiComp::Fina()接口
 //	- 1.0.0005.1652(2010-05-18)	# 修正IGuiComp::Init()里的逻辑错误
-//	- 1.0.0006.1000(2010-05-19)	+ 添加IGuiBase界面对象基础类定义
+//	- 1.0.0006.1620(2010-05-19)	+ 添加IGuiBase界面对象基础类定义
+//								+ 添加IGuiObject::Free()接口,方便ExGui()构造对象后手动释放指针资源
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -66,6 +67,9 @@ interface EXP_API IGuiObject : public IBaseObject
 public:
 	IGuiObject() {}
 	virtual ~IGuiObject() {}
+
+public:
+	void Free() { ExMem::Free(this); }
 };
 
 //////////////////////////////////////////////////////////////////
@@ -127,7 +131,7 @@ public:
 		// 删除对象
 		list_t::Del(ite);
 		pComp->Fina();
-		if (m_bTru) ExMem::Free(pComp);
+		if (m_bTru) pComp->Free();
 	}
 	virtual void ClearComp()
 	{
@@ -135,7 +139,7 @@ public:
 		{
 			if (!(*ite)) continue;
 			(*ite)->Fina();
-			if (m_bTru) ExMem::Free(*ite);
+			if (m_bTru) (*ite)->Free();
 		}
 		list_t::Clear();
 	}
@@ -214,7 +218,7 @@ public:
 		if (ite == evt_list_t::Tail()) return;
 		// 删除对象
 		evt_list_t::Del(ite);
-		if (m_bTru) ExMem::Free(pEvent);
+		if (m_bTru) pEvent->Free();
 	}
 	virtual void ClearEvent()
 	{
@@ -222,7 +226,7 @@ public:
 			for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
 			{
 				if (!(*ite)) continue;
-				ExMem::Free(*ite);
+				(*ite)->Free();
 			}
 		evt_list_t::Clear();
 	}
@@ -266,6 +270,9 @@ public:
 interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
 {
 	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+
+public:
+	void Free() { EXP_MULT::Free(); }
 };
 
 //////////////////////////////////////////////////////////////////

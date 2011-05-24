@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-19
-// Version:	1.0.0004.1636
+// Date:	2010-05-23
+// Version:	1.0.0004.2202
 //
 // History:
 //	- 1.0.0001.1420(2010-05-11)	+ 添加CGuiWnd::Attach()和CGuiWnd::Detach()接口实现
@@ -43,6 +43,7 @@
 //	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoardBase::Send()和IGuiBoardBase::Post()接口实现
 //	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoardBase::Layer()窗口图层化接口实现
 //	- 1.0.0004.1636(2010-05-19)	# 修正IGuiBoardBase::LayeredWindow()的内部逻辑错误
+//	- 1.0.0005.2202(2010-05-23)	= 调整IGuiBoardBase::LayeredWindow()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoardBase_hpp__
@@ -350,7 +351,7 @@ public:
 	void Invalidate()
 	{
 		if (IsNull()) return ;
-		RECT rect;
+		RECT rect = {0, 0, 0, 0};
 		::GetClientRect(Get(), &rect);
 		::InvalidateRect(Get(), &rect, TRUE);
 	}
@@ -447,16 +448,15 @@ public:
 	#define WS_EX_LAYERED	0x00080000
 	#endif
 
-	void LayeredWindow(HDC hDC)
+	void LayeredWindow(HDC hDC, HDC tGrp)
 	{
-		if (!hDC) return;
+		if (!hDC || !tGrp) return;
+
 		if (m_bLayered)
 		{
 			DWORD ex_style = GetWindowLong(GWL_EXSTYLE);
 			if((ex_style & WS_EX_LAYERED) != WS_EX_LAYERED)
 				SetWindowLong(GWL_EXSTYLE, ex_style ^ WS_EX_LAYERED);
-
-			HDC hdc = ::GetDC(NULL);
 
 			CRect rect;
 			GetWindowRect(rect);
@@ -468,9 +468,7 @@ public:
 			BLENDFUNCTION blend		  = {0};
 			blend.AlphaFormat		  = AC_SRC_ALPHA;
 			blend.SourceConstantAlpha = (BYTE)~0;
-			::UpdateLayeredWindow(Get(), hdc, &pt_wnd, &sz_wnd, hDC, &pt_src, 0, &blend, 2);
-
-			::ReleaseDC(NULL, hdc);
+			::UpdateLayeredWindow(Get(), hDC, &pt_wnd, &sz_wnd, tGrp, &pt_src, 0, &blend, 2);
 		}
 		else
 		{
@@ -478,15 +476,10 @@ public:
 			if (ex_style | WS_EX_LAYERED)
 				SetWindowLong(GWL_EXSTYLE, ex_style & ~WS_EX_LAYERED);
 
-			PAINTSTRUCT ps = {0};
-			HDC hdc = ::BeginPaint(Get(), &ps);
-
 			CRect rect;
 			GetClientRect(rect);
 
-			::BitBlt(hdc, rect.Left(), rect.Top(), rect.Width(), rect.Height(), hDC, 0, 0, SRCCOPY);
-
-			::EndPaint(Get(), &ps);
+			::BitBlt(hDC, rect.Left(), rect.Top(), rect.Width(), rect.Height(), tGrp, 0, 0, SRCCOPY);
 		}
 	}
 };

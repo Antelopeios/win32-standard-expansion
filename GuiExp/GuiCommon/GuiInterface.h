@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-19
-// Version:	1.0.0006.1620
+// Date:	2010-05-23
+// Version:	1.0.0007.1000
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -46,6 +46,8 @@
 //	- 1.0.0005.1652(2010-05-18)	# 修正IGuiComp::Init()里的逻辑错误
 //	- 1.0.0006.1620(2010-05-19)	+ 添加IGuiBase界面对象基础类定义
 //								+ 添加IGuiObject::Free()接口,方便ExGui()构造对象后手动释放指针资源
+//	- 1.0.0007.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础定义
+//								= 调整IGuiObject::Free()为虚函数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -69,7 +71,7 @@ public:
 	virtual ~IGuiObject() {}
 
 public:
-	void Free() { ExMem::Free(this); }
+	virtual void Free() { ExMem::Free(this); }
 };
 
 //////////////////////////////////////////////////////////////////
@@ -262,6 +264,21 @@ public:
 			ret = (*ite)->GetResult();
 		}
 	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 效果对象基础
+interface EXP_API IGuiEffect : public IGuiObject
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiEffect, IGuiObject)
+
+public:
+	// 初始化
+	virtual void Init(CImage& tImg) = 0;
+	virtual bool IsInit() = 0;
+	// 效果显示接口
+	virtual void Show(IGuiObject* pGui, CImage& tImg) = 0;
 };
 
 //////////////////////////////////////////////////////////////////

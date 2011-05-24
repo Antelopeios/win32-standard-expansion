@@ -28,34 +28,55 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiInterface - 界面公用接口
+// GuiFade - 淡入淡出效果
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0003.1000
-//
-// History:
-//	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
-//	- 1.0.0002.1000(2010-05-19)	+ 添加IGuiBase界面对象基础类实现
-//	- 1.0.0003.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础类实现
+// Date:	2010-05-24
+// Version:	1.0.0000.0935
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "GuiInterface.h"
+#ifndef __GuiFade_hpp__
+#define __GuiFade_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffect, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+class CGuiFade : public IGuiEffectBase
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
+
+public:
+	bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld)
+	{
+		if (!pCtrl) return false;
+		static int alpha = 0;
+		if (alpha >= (BYTE)~0) alpha = 0;
+		if (alpha > (BYTE)~0 - 25) alpha = (BYTE)~0;
+		ExTrace(_T("fade alpha: %d\n"), alpha);
+
+		CImage tmp_old(tOld.Clone());
+		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(alpha));
+		CImgRenderer::Render(tNew, tmp_old, CRect(), CPoint(), &CFilterCopy());
+		tmp_old.Delete();
+
+		alpha += 25;
+		return (alpha < (BYTE)~0);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiFade_hpp__*/

@@ -82,6 +82,7 @@ public:
 				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
 				if (!image || image->IsNull()) break;
 				CImage* mem_img = (CImage*)lParam;
+				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
 				ctrl->GetRealRect(rect);
 				// ¥¶¿Ì
@@ -101,7 +102,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiPictureEvent, IGuiEvent);
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiPictureEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 

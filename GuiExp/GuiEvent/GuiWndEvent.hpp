@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-19
-// Version:	1.0.0000.1020
+// Date:	2010-05-23
+// Version:	1.0.0001.2202
+//
+// History:
+//	- 1.0.0001.2202(2010-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -68,7 +71,25 @@ protected:
 			// 初始化返回值
 			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
-			ctrl->Send(*ite, nMessage, wParam, lParam);
+			switch( nMessage )
+			{
+			case WM_PAINT:
+				{
+					IGuiEffect* eff = ctrl->GetEffect();
+					if (eff)
+					{
+						if(!eff->IsInit())
+							eff->Init(*(CImage*)lParam);
+						ctrl->Send(*ite, nMessage, wParam, lParam);
+						eff->Show(*ite, *(CImage*)lParam);
+					}
+					else
+						ctrl->Send(*ite, nMessage, wParam, lParam);
+				}
+				break;
+			default:
+				ctrl->Send(*ite, nMessage, wParam, lParam);
+			}
 			// 判断返回值
 			ctrl->GetResult(lrDef);
 		}
@@ -86,20 +107,26 @@ public:
 		{
 		case WM_PAINT:
 			{
+				PAINTSTRUCT ps = {0};
+				HDC hdc = ::BeginPaint(board->GethWnd(), &ps);
 				// 构建绘图缓存
 				CRect rect;
 				board->GetClientRect(rect);
 				CImage mem_img;
 				mem_img.Create(rect.Width(), rect.Height());
-				// 发送绘图消息
-				ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
-				// 覆盖缓存绘图
+				// 覆盖背景绘图
 				CGraph mem_grp;
 				mem_grp.Create();
 				mem_grp.SetObject(mem_img.Get());
-				board->LayeredWindow(mem_grp);
+			//	::BitBlt(mem_grp, 0, 0, rect.Width(), rect.Height(), hdc, 0, 0, SRCCOPY);
+				// 覆盖控件绘图
+				ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
+				// 覆盖缓存绘图
+				board->LayeredWindow(hdc, mem_grp);
+				// 结束绘图
 				mem_grp.Delete();
 				mem_img.Delete();
+				::EndPaint(board->GethWnd(), &ps);
 			}
 			break;
 		case WM_ERASEBKGND:
@@ -114,7 +141,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent);
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 

@@ -40,8 +40,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建事件对象并设置
 	CCustomEvent cus_evt;
+	CCusPicEvent pic_evt;
 
 	// 将窗口与控件及事件对象关联
+	pic->AddEvent(&pic_evt);
 	wnd->AddComp(pic);
 	wnd->AddEvent(&cus_evt);
 

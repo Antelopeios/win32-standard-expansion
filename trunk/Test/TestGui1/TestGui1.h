@@ -12,6 +12,8 @@ public:
 		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
 		if (!board) return;
 
+		ExTrace(_T("0x%04X\n"), nMessage);
+
 		switch( nMessage )
 		{
 		case WM_NCHITTEST:
@@ -29,6 +31,36 @@ public:
 			break;
 		case WM_DESTROY:
 			::PostQuitMessage(0);
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CCusPicEvent : public IGuiEvent
+{
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_NCLBUTTONDOWN:
+			{
+				CGC gc;
+				IGuiCtrl::state_t* s = ctrl->GetState(_T("color"), &gc);
+				if (!s) break;
+				pixel_t* pix = (pixel_t*)(((void**)s->sta_arr)[0]);
+				if (!pix) break;
+				if (*pix)
+					*pix = 0;
+				else
+					*pix = ExRGBA(128, 128, 128, 128);
+				ctrl->SetState(_T("color"), pix);
+			}
 			break;
 		}
 	}

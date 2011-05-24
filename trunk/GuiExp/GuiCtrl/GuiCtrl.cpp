@@ -53,5 +53,6 @@ EXP_END
 
 #include "GuiCtrl/GuiCtrlBase.hpp"
 #include "GuiCtrl/GuiPicture.hpp"
+#include "GuiCtrl/GuiButton.hpp"
 
 //////////////////////////////////////////////////////////////////

@@ -215,6 +215,10 @@
 			Name="GuiCtrl"
 			>
 			<File
+				RelativePath=".\GuiCtrl\GuiButton.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiCtrl\GuiCtrl.cpp"
 				>
 			</File>

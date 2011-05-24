@@ -114,14 +114,12 @@ public:
 				board->GetClientRect(rect);
 				CImage mem_img;
 				mem_img.Create(rect.Width(), rect.Height());
-				// ¸²¸Ç±³¾°»æÍ¼
-				CGraph mem_grp;
-				mem_grp.Create();
-				mem_grp.SetObject(mem_img.Get());
-			//	::BitBlt(mem_grp, 0, 0, rect.Width(), rect.Height(), hdc, 0, 0, SRCCOPY);
 				// ¸²¸Ç¿Ø¼ş»æÍ¼
 				ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
 				// ¸²¸Ç»º´æ»æÍ¼
+				CGraph mem_grp;
+				mem_grp.Create();
+				mem_grp.SetObject(mem_img.Get());
 				board->LayeredWindow(hdc, mem_grp);
 				// ½áÊø»æÍ¼
 				mem_grp.Delete();

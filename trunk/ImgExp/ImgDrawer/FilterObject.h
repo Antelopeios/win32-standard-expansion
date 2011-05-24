@@ -34,12 +34,13 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-24
-// Version:	1.0.0003.1054
+// Version:	1.0.0003.1700
 //
 // History:
 //	- 1.0.0001.1328(2011-05-02)	+ 添加渐变滤镜
 //	- 1.0.0002.1948(2011-05-18)	= 调整CFilterNormal滤镜返回像素的alpha通道计算方法
-//	- 1.0.0003.1054(2011-05-24)	+ 调整CFilterCopy;CFilterNormal滤镜支持设置半透明渲染参数
+//	- 1.0.0003.1700(2011-05-24)	+ 调整CFilterCopy;CFilterNormal滤镜支持设置半透明渲染参数
+//								+ 添加CFilterFill颜色画刷
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FilterObject_h__
@@ -87,18 +88,24 @@ public:
 	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 	{
 		if (m_Alpha == 0)
-			return 0;
+			return pixDes;
 		else
 		if (m_Alpha == (BYTE)~0)
 			return pixSrc[nKey];
 		else
+		{
+			int r_dif = ((int)ExGetR(pixSrc[nKey]) - (int)ExGetR(pixDes)) * m_Alpha / (BYTE)~0;
+			int g_dif = ((int)ExGetG(pixSrc[nKey]) - (int)ExGetG(pixDes)) * m_Alpha / (BYTE)~0;
+			int b_dif = ((int)ExGetB(pixSrc[nKey]) - (int)ExGetB(pixDes)) * m_Alpha / (BYTE)~0;
+			int a_dif = ((int)ExGetA(pixSrc[nKey]) - (int)ExGetA(pixDes)) * m_Alpha / (BYTE)~0;
 			return ExRGBA
 				(
-				ExGetR(pixSrc[nKey]) * m_Alpha / (BYTE)~0, 
-				ExGetG(pixSrc[nKey]) * m_Alpha / (BYTE)~0, 
-				ExGetB(pixSrc[nKey]) * m_Alpha / (BYTE)~0, 
-				ExGetA(pixSrc[nKey]) * m_Alpha / (BYTE)~0
+				ExGetR(pixDes) + r_dif, 
+				ExGetG(pixDes) + g_dif, 
+				ExGetB(pixDes) + b_dif, 
+				ExGetA(pixDes) + a_dif
 				);
+		}
 	}
 };
 
@@ -140,6 +147,38 @@ public:
 			);
 	}
 };
+
+//////////////////////////////////////////////////////////////////
+
+// 颜色画刷
+template <typename BaseT = CFilterNormal>
+class CFilterFillT : public BaseT
+{
+public:
+	BYTE m_Mask;
+	pixel_t m_Const;
+
+public:
+	CFilterFillT(pixel_t cConst = 0, BYTE bMask = 0xf)
+		: BaseT()
+		, m_Const(cConst)
+		, m_Mask(bMask)
+	{}
+
+	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
+	{
+		if (m_Mask == 0) return BaseT::Render(pixSrc, pixDes, nKey);
+		pixSrc[nKey] = ExRGBA
+			(
+			(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pixSrc[nKey]), 
+			(m_Mask & 0x04) ? ExGetG(m_Const) : ExGetG(pixSrc[nKey]), 
+			(m_Mask & 0x02) ? ExGetB(m_Const) : ExGetB(pixSrc[nKey]), 
+			(m_Mask & 0x01) ? ExGetA(m_Const) : ExGetA(pixSrc[nKey])
+			);
+		return BaseT::Render(pixSrc, pixDes, nKey);
+	}
+};
+typedef CFilterFillT<> CFilterFill;
 
 //////////////////////////////////////////////////////////////////
 

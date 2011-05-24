@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0000.1333
+// Date:	2010-05-24
+// Version:	1.0.0001.1515
+//
+// History:
+//	- 1.0.0001.1515(2010-05-24)	# 修正IGuiEffectBase::SetTimer里的id赋值错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEffectBase_hpp__
@@ -64,8 +67,8 @@ protected:
 	{
 		if (!pBase) return;
 		static UINT_PTR id = 1;
-		::SetTimer(hWnd, id++, 40, TimerProc);
-		pBase->m_idEvent = id;
+		::SetTimer(hWnd, id, 40, TimerProc);
+		pBase->m_idEvent = id++;
 	}
 
 	static void KillTimer(HWND hWnd, IGuiEffectBase* pBase)
@@ -114,6 +117,7 @@ public:
 			KillTimer(board->GethWnd(), this);
 			m_imgCac.Delete();
 			m_imgCac.Set(tImg.Clone());
+			board->Invalidate();
 		}
 	}
 

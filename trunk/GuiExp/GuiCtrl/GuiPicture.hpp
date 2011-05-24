@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0001.2236
+// Date:	2010-05-24
+// Version:	1.0.0002.1500
 //
 // History:
 //	- 1.0.0001.2236(2010-05-23)	+ 添加CGuiPicture::IsUpdated()接口
+//	- 1.0.0002.1500(2010-05-24)	+ CGuiPicture添加Color属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPicture_hpp__
@@ -57,12 +58,16 @@ class CGuiPicture : public IGuiCtrlBase
 
 protected:
 	CGC m_GC;
+
+	pixel_t m_Color;
 	CImage m_Image;
+
 	bool m_Updated;
 
 public:
 	CGuiPicture()
-		: m_Updated(true)
+		: m_Color(0)
+		, m_Updated(true)
 	{
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), &m_GC));
@@ -78,19 +83,29 @@ public:
 	{
 		state_t* state = pGC ? ExMem::Alloc<state_t>(pGC) : state_t::Alloc();
 		state->sta_typ = sType;
+		if (sType == _T("color"))
+			state->sta_arr.Add(&m_Color);
+		else
 		if (sType == _T("image"))
 			state->sta_arr.Add(&m_Image);
 		return state;
 	}
 	void SetState(const CString& sType, void* pState)
 	{
+		if (!pState) return;
+		if (sType == _T("color"))
+		{
+			m_Color = *(pixel_t*)pState;
+			m_Updated = true;
+		}
+		else
 		if (sType == _T("image"))
 		{
 			m_Image.Delete();
 			m_Image.Set(((CImage*)pState)->Get());
 			m_Updated = true;
 		}
-		Refresh();
+		if (m_Updated) Refresh();
 	}
 	bool IsUpdated()
 	{

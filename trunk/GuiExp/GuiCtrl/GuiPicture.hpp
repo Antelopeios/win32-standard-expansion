@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-18
-// Version:	1.0.0000.1150
+// Date:	2010-05-23
+// Version:	1.0.0001.2236
+//
+// History:
+//	- 1.0.0001.2236(2010-05-23)	+ 添加CGuiPicture::IsUpdated()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPicture_hpp__
@@ -55,9 +58,11 @@ class CGuiPicture : public IGuiCtrlBase
 protected:
 	CGC m_GC;
 	CImage m_Image;
+	bool m_Updated;
 
 public:
 	CGuiPicture()
+		: m_Updated(true)
 	{
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), &m_GC));
@@ -83,8 +88,15 @@ public:
 		{
 			m_Image.Delete();
 			m_Image.Set(((CImage*)pState)->Get());
+			m_Updated = true;
 		}
 		Refresh();
+	}
+	bool IsUpdated()
+	{
+		bool updt = m_Updated;
+		m_Updated = false; // 外部一旦获知当前状态,则更新状态自动复位
+		return updt;
 	}
 };
 

@@ -28,34 +28,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiInterface - 界面公用接口
+// GuiEffect - 效果对象
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-23
-// Version:	1.0.0003.1000
-//
-// History:
-//	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
-//	- 1.0.0002.1000(2010-05-19)	+ 添加IGuiBase界面对象基础类实现
-//	- 1.0.0003.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础类实现
+// Version:	1.0.0000.1333
 //////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "GuiInterface.h"
-
-EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffect, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+#include "GuiEffect/GuiEffectBase.hpp"
+#include "GuiEffect/GuiFade.hpp"
 
 //////////////////////////////////////////////////////////////////
-
-EXP_END

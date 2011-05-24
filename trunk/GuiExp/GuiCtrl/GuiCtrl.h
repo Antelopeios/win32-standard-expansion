@@ -33,8 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-13
-// Version:	1.0.0000.1600
+// Date:	2010-05-23
+// Version:	1.0.0001.2236
+//
+// History:
+//	- 1.0.0001.2236(2010-05-23)	+ IGuiCtrl添加效果对象相关接口
+//								+ 添加IGuiCtrl::IsUpdated()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -65,10 +69,12 @@ public:
 
 protected:
 	IGuiCtrl** m_Focus;
+	IGuiEffect* m_Effect;
 
 public:
 	IGuiCtrl()
 		: m_Focus(NULL)
+		, m_Effect(NULL)
 	{}
 
 protected:
@@ -101,6 +107,18 @@ public:
 	// 获得控件状态
 	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
 	virtual void SetState(const CString& sType, void* pState) = 0;
+	virtual bool IsUpdated() = 0;
+
+	// 设置效果对象
+	void SetEffect(IGuiEffect* pEff)
+	{
+		m_Effect = pEff;
+		Refresh(false);
+	}
+	IGuiEffect* GetEffect()
+	{
+		return m_Effect;
+	}
 
 	// 获得绘图板
 	virtual IGuiBoard* GetBoard()

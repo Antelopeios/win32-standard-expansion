@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-18
-// Version:	1.0.0002.1948
+// Date:	2011-05-24
+// Version:	1.0.0003.1054
 //
 // History:
 //	- 1.0.0001.1328(2011-05-02)	+ 添加渐变滤镜
 //	- 1.0.0002.1948(2011-05-18)	= 调整CFilterNormal滤镜返回像素的alpha通道计算方法
+//	- 1.0.0003.1054(2011-05-24)	+ 调整CFilterCopy;CFilterNormal滤镜支持设置半透明渲染参数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FilterObject_h__
@@ -72,12 +73,32 @@ interface IFilterObject : INonCopyable
 // 像素拷贝
 class CFilterCopy : public IFilterObject
 {
+protected:
+	BYTE m_Alpha;
+
 public:
-	CFilterCopy() : IFilterObject() { m_Radius = 1; }
+	CFilterCopy(BYTE a = (BYTE)~0)
+		: IFilterObject()
+	{
+		m_Radius = 1;
+		m_Alpha = a;
+	}
 
 	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 	{
-		return pixSrc[nKey];
+		if (m_Alpha == 0)
+			return 0;
+		else
+		if (m_Alpha == (BYTE)~0)
+			return pixSrc[nKey];
+		else
+			return ExRGBA
+				(
+				ExGetR(pixSrc[nKey]) * m_Alpha / (BYTE)~0, 
+				ExGetG(pixSrc[nKey]) * m_Alpha / (BYTE)~0, 
+				ExGetB(pixSrc[nKey]) * m_Alpha / (BYTE)~0, 
+				ExGetA(pixSrc[nKey]) * m_Alpha / (BYTE)~0
+				);
 	}
 };
 
@@ -86,12 +107,20 @@ public:
 // 正常渲染
 class CFilterNormal : public IFilterObject
 {
+protected:
+	BYTE m_Alpha;
+
 public:
-	CFilterNormal() : IFilterObject() { m_Radius = 1; }
+	CFilterNormal(BYTE a = (BYTE)~0)
+		: IFilterObject()
+	{
+		m_Radius = 1;
+		m_Alpha = a;
+	}
 
 	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 	{
-		BYTE a_s = ExGetA(pixSrc[nKey]);
+		BYTE a_s = (ExGetA(pixSrc[nKey]) * m_Alpha) / (BYTE)~0;
 		if (a_s == 0) return pixDes;
 		if (a_s == (BYTE)~0) return pixSrc[nKey];
 		BYTE r_s = ExGetR(pixSrc[nKey]);

@@ -21,11 +21,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	if (!coder) return 0;
 	CImage img_pic(coder->Decode());
 
+	// 创建效果对象并设置
+	IGuiEffect* eff = ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"), &gc));
+
 	// 创建控件对象并设置
 	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc));
 	pic->SetState(_T("image"), &img_pic);
 	CRect rect(0, 0, img_pic.GetWidth(), img_pic.GetHeight());
 	pic->SetRect(rect);
+	pic->SetEffect(eff);
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));

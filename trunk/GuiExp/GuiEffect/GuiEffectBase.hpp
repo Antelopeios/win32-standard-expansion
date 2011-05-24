@@ -28,34 +28,104 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiInterface - 界面公用接口
+// GuiEffectBase - 效果基础实现
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-23
-// Version:	1.0.0003.1000
-//
-// History:
-//	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
-//	- 1.0.0002.1000(2010-05-19)	+ 添加IGuiBase界面对象基础类实现
-//	- 1.0.0003.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础类实现
+// Version:	1.0.0000.1333
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "GuiInterface.h"
+#ifndef __GuiEffectBase_hpp__
+#define __GuiEffectBase_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+#include "GuiCtrl/GuiCtrl.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffect, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+// GUI 效果对象接口
+interface IGuiEffectBase : public IGuiEffect
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiEffectBase, IGuiEffect)
+
+protected:
+	UINT_PTR m_idEvent;
+	CImage m_imgCac;
+
+protected:
+	static void SetTimer(HWND hWnd, IGuiEffectBase* pBase)
+	{
+		if (!pBase) return;
+		static UINT_PTR id = 1;
+		::SetTimer(hWnd, id++, 40, TimerProc);
+		pBase->m_idEvent = id;
+	}
+
+	static void KillTimer(HWND hWnd, IGuiEffectBase* pBase)
+	{
+		if (!pBase) return;
+		::KillTimer(hWnd, pBase->m_idEvent);
+		pBase->m_idEvent = 0;
+	}
+
+	static void CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+	{
+		RECT rect = {0, 0, 0, 0};
+		::GetClientRect(hWnd, &rect);
+		::InvalidateRect(hWnd, &rect, TRUE);
+	}
+
+public:
+	IGuiEffectBase()
+		: m_idEvent(0)
+	{}
+
+public:
+	void Init(CImage& tImg)
+	{
+		m_imgCac.Delete();
+		m_imgCac.Set(tImg.Clone());
+	}
+	bool IsInit()
+	{
+		return !(m_imgCac.IsNull());
+	}
+	void Show(IGuiObject* pGui, CImage& tImg)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+		IGuiBoard* board = ctrl->GetBoard();
+		if (!board) return;
+		if (ctrl->IsUpdated())
+		{
+			CImgRenderer::Render(tImg, m_imgCac, CRect(), CPoint(), &CFilterCopy());
+			SetTimer(board->GethWnd(), this);
+		}
+		else
+		if (m_idEvent && !Overlap(ctrl, tImg, m_imgCac))
+		{
+			KillTimer(board->GethWnd(), this);
+			m_imgCac.Delete();
+			m_imgCac.Set(tImg.Clone());
+		}
+	}
+
+	virtual bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffectBase, IGuiEffect)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiEffectBase_hpp__*/

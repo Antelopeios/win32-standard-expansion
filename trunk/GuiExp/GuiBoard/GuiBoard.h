@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-19
-// Version:	1.0.0004.1000
+// Date:	2010-05-23
+// Version:	1.0.0005.2202
 //
 // History:
 //	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -42,6 +42,7 @@
 //	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoard::Layer()窗口图层化接口
 //	- 1.0.0004.1000(2010-05-19)	= IGuiBoard的基类改为IGuiBase
 //								+ 添加IGuiBoard::LayeredWindow();IGuiBoard::DefProc();IGuiBoard::GethWnd()
+//	- 1.0.0005.2202(2010-05-23)	= 调整IGuiBoard::LayeredWindow()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -127,7 +128,7 @@ public:
 	// 窗口图层化
 	virtual void SetLayered(bool bLayered = true) = 0;
 	virtual bool IsLayered() = 0;
-	virtual void LayeredWindow(HDC hDC) = 0;
+	virtual void LayeredWindow(HDC hDC, HDC tGrp) = 0;
 };
 
 //////////////////////////////////////////////////////////////////

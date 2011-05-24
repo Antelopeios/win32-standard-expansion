@@ -247,6 +247,22 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="GuiEffect"
+			>
+			<File
+				RelativePath=".\GuiEffect\GuiEffect.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiEffect\GuiEffectBase.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiEffect\GuiFade.hpp"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\dllmain.cpp"
 			>

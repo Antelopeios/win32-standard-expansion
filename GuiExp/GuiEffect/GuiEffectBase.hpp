@@ -33,11 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-24
-// Version:	1.0.0001.1515
+// Date:	2010-05-25
+// Version:	1.0.0002.1600
 //
 // History:
 //	- 1.0.0001.1515(2010-05-24)	# 修正IGuiEffectBase::SetTimer里的id赋值错误
+//	- 1.0.0002.1600(2010-05-25)	+ 添加IGuiEffectBase::IsFinished()接口实现
+//								= 调整IGuiEffectBase::SetTimer();KillTimer()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEffectBase_hpp__
@@ -63,21 +65,6 @@ protected:
 	CImage m_imgCac;
 
 protected:
-	static void SetTimer(HWND hWnd, IGuiEffectBase* pBase)
-	{
-		if (!pBase) return;
-		static UINT_PTR id = 1;
-		::SetTimer(hWnd, id, 40, TimerProc);
-		pBase->m_idEvent = id++;
-	}
-
-	static void KillTimer(HWND hWnd, IGuiEffectBase* pBase)
-	{
-		if (!pBase) return;
-		::KillTimer(hWnd, pBase->m_idEvent);
-		pBase->m_idEvent = 0;
-	}
-
 	static void CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		RECT rect = {0, 0, 0, 0};
@@ -100,6 +87,12 @@ public:
 	{
 		return !(m_imgCac.IsNull());
 	}
+
+	bool IsFinished()
+	{
+		return (m_idEvent == 0);
+	}
+
 	void Show(IGuiObject* pGui, CImage& tImg)
 	{
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
@@ -109,19 +102,31 @@ public:
 		if (ctrl->IsUpdated())
 		{
 			CImgRenderer::Render(tImg, m_imgCac, CRect(), CPoint(), &CFilterCopy());
-			SetTimer(board->GethWnd(), this);
+			SetTimer(board->GethWnd());
 		}
 		else
 		if (m_idEvent && !Overlap(ctrl, tImg, m_imgCac))
 		{
-			KillTimer(board->GethWnd(), this);
+			KillTimer(board->GethWnd());
 			m_imgCac.Delete();
 			m_imgCac.Set(tImg.Clone());
 			board->Invalidate();
 		}
 	}
-
 	virtual bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
+
+	void SetTimer(wnd_t hWnd)
+	{
+		static UINT_PTR id = 1;
+		::SetTimer(hWnd, id, 40, TimerProc);
+		m_idEvent = id++;
+	}
+
+	void KillTimer(wnd_t hWnd)
+	{
+		::KillTimer(hWnd, m_idEvent);
+		m_idEvent = 0;
+	}
 };
 
 //////////////////////////////////////////////////////////////////

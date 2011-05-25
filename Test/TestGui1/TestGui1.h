@@ -62,6 +62,13 @@ public:
 				ctrl->SetState(_T("color"), pix);
 			}
 			break;
+		case WM_KEYDOWN:
+			{
+				int nKey = wParam;
+				if (nKey == 13) // Enter
+					ctrl->SetVisible(!ctrl->IsVisible());
+			}
+			break;
 		}
 	}
 };

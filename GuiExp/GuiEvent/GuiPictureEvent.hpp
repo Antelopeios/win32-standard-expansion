@@ -34,11 +34,12 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-25
-// Version:	1.0.0002.1100
+// Version:	1.0.0002.1424
 //
 // History:
 //	- 1.0.0001.1500(2010-05-24)	+ CGuiPictureEvent添加Color属性的处理
-//	- 1.0.0002.1100(2010-05-25)	+ CGuiPictureEvent添加Text属性的处理
+//	- 1.0.0002.1424(2010-05-25)	+ CGuiPictureEvent添加Text属性的处理
+//								# 修正CGuiPictureEvent添对Text属性处理过程中的内存泄漏
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPictureEvent_hpp__
@@ -113,12 +114,18 @@ public:
 				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
-					CImgRenderer::Render(mem_img->Get(), txt_img, 
-						CRect(
-						(rect.Right() - txt_img.GetWidth()) / 2, 
-						(rect.Bottom() - txt_img.GetHeight()) / 2, 
-						rect.Right(), rect.Bottom()), 
-						CPoint());
+					CImgRenderer::Render
+						(
+						mem_img->Get(), txt_img, 
+						CRect
+							(
+							(rect.Right() - txt_img.GetWidth()) / 2, 
+							(rect.Bottom() - txt_img.GetHeight()) / 2, 
+							rect.Right(), rect.Bottom()
+							), 
+						CPoint()
+						);
+				txt_img.Delete();
 			}
 			break;
 		}

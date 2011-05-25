@@ -370,6 +370,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					rect.bottom - bmp_img.GetHeight() - 5, 
 					rect.right, rect.bottom), CPoint());
 			}
+			bmp_img.Delete();
 
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 

@@ -34,12 +34,13 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-25
-// Version:	1.0.0003.1047
+// Version:	1.0.0003.1406
 //
 // History:
 //	- 1.0.0001.2236(2010-05-23)	+ 添加CGuiPicture::IsUpdated()接口
 //	- 1.0.0002.1500(2010-05-24)	+ CGuiPicture添加Color属性
-//	- 1.0.0003.1047(2010-05-25)	+ CGuiPicture添加Text属性
+//	- 1.0.0003.1406(2010-05-25)	+ CGuiPicture添加Text属性
+//								= CGuiPicture调整控件状态接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPicture_hpp__
@@ -58,18 +59,13 @@ class CGuiPicture : public IGuiCtrlBase
 	EXP_DECLARE_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
 
 protected:
-	CGC m_GC;
-
 	pixel_t m_Color;
 	CImage m_Image;
 	CText m_Text;
 
-	bool m_Updated;
-
 public:
 	CGuiPicture()
 		: m_Color(0)
-		, m_Updated(true)
 	{
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), &m_GC));
@@ -83,16 +79,18 @@ public:
 	// 获得控件状态
 	state_t* GetState(const CString& sType, CGC* pGC = NULL)
 	{
-		state_t* state = pGC ? ExMem::Alloc<state_t>(pGC) : state_t::Alloc();
-		state->sta_typ = sType;
-		if (sType == _T("color"))
-			state->sta_arr.Add(&m_Color);
-		else
-		if (sType == _T("image"))
-			state->sta_arr.Add(&m_Image);
-		else
-		if (sType == _T("text"))
-			state->sta_arr.Add(&m_Text);
+		state_t* state = EXP_BASE::GetState(sType, pGC);
+		if (state)
+		{
+			if (state->sta_typ == _T("color"))
+				state->sta_arr.Add(&m_Color);
+			else
+			if (state->sta_typ == _T("image"))
+				state->sta_arr.Add(&m_Image);
+			else
+			if (state->sta_typ == _T("text"))
+				state->sta_arr.Add(&m_Text);
+		}
 		return state;
 	}
 	void SetState(const CString& sType, void* pState)
@@ -101,28 +99,21 @@ public:
 		if (sType == _T("color"))
 		{
 			m_Color = *(pixel_t*)pState;
-			m_Updated = true;
+			EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
 			m_Image.Delete();
 			m_Image.Set(((CImage*)pState)->Get());
-			m_Updated = true;
+			EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
 			m_Text = *(CText*)pState;
-			m_Updated = true;
+			EXP_BASE::SetState(sType, pState);
 		}
-		if (m_Updated) Refresh();
-	}
-	bool IsUpdated()
-	{
-		bool updt = m_Updated;
-		m_Updated = false; // 外部一旦获知当前状态,则更新状态自动复位
-		return updt;
 	}
 };
 

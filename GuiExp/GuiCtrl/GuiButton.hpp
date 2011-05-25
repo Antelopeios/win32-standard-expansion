@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-24
-// Version:	1.0.0000.1452
+// Date:	2010-05-25
+// Version:	1.0.0001.1718
+//
+// History:
+//	- 1.0.0001.1718(2010-05-25)	+ CGuiButton添加状态属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -52,12 +55,16 @@ class CGuiButton : public IGuiCtrlBase
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
 
-protected:
+public:
 	/*
 	正常; 浮动; 按下; 焦点; 禁止
 	*/
+	enum status_t {nor, ovr, hit, foc};
+
+protected:
+	status_t m_Status;
 	pixel_t m_Color[5];
-	CImage m_Image[5];
+	CImage m_Image[9];	// 九宫格分割,每个小块保存5个状态
 	CText m_Text[5];
 
 public:
@@ -80,6 +87,9 @@ public:
 		state_t* state = EXP_BASE::GetState(sType, pGC);
 		if (state)
 		{
+			if (state->sta_typ == _T("status"))
+				state->sta_arr.Add(&m_Status);
+			else
 			if (state->sta_typ == _T("color"))
 				for(int i = 0; i < _countof(m_Color); ++i)
 					state->sta_arr.Add(m_Color + i);
@@ -97,6 +107,14 @@ public:
 	void SetState(const CString& sType, void* pState)
 	{
 		if (!pState) return;
+		if (sType == _T("status"))
+		{
+			status_t old_sta = m_Status;
+			m_Status = *(status_t*)pState;
+			if (old_sta != m_Status)
+				EXP_BASE::SetState(sType, pState);
+		}
+		else
 		if (sType == _T("color"))
 		{
 			for(int i = 0; i < _countof(m_Color); ++i)

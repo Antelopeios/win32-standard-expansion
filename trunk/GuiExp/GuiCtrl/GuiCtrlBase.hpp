@@ -33,8 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-17
-// Version:	1.0.0000.1000
+// Date:	2010-05-25
+// Version:	1.0.0001.1500
+//
+// History:
+//	- 1.0.0001.1500(2010-05-25)	+ IGuiCtrlBase添加控件状态接口基本实现
+//								= 将控件GC统一到IGuiCtrlBase内定义
+//								= 当可见性或可用性发生改变时,控件将设置更新状态
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrlBase_hpp__
@@ -54,18 +59,44 @@ interface IGuiCtrlBase : public IGuiCtrl
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
 
 protected:
+	CGC m_GC;
+
 	bool m_bEnable;		// 是否可用
 	bool m_bVisible;	// 是否可见
 
 	CRect m_Rect;		// 控件区域
 
+	bool m_Updated;
+
 public:
 	IGuiCtrlBase()
 		: m_bEnable(true)
 		, m_bVisible(true)
+		, m_Updated(true)
 	{}
 
 public:
+	// 更新状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		state_t* state = pGC ? ExMem::Alloc<state_t>(pGC) : state_t::Alloc();
+		ExAssert(state);
+		if (state) state->sta_typ = sType;
+		return state;
+	}
+	void SetState(const CString& sType, void* pState)
+	{
+		if (!pState) return;
+		m_Updated = true;
+		Refresh();
+	}
+	bool IsUpdated()
+	{
+		bool updt = m_Updated;
+		m_Updated = false; // 外部一旦获知当前状态,则更新状态自动复位
+		return updt;
+	}
+
 	// 区域控制
 	bool P2C(CRect& rc)
 	{
@@ -139,6 +170,7 @@ public:
 	{
 		bool old = m_bEnable;
 		m_bEnable = bEnable;
+		m_Updated = true;
 		Refresh();
 		return old;
 	}
@@ -149,6 +181,7 @@ public:
 	{
 		bool old = m_bVisible;
 		m_bVisible = bVisible;
+		m_Updated = true;
 		Refresh();
 		return old;
 	}

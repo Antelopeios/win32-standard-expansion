@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0001.2202
+// Date:	2010-05-25
+// Version:	1.0.0002.1611
 //
 // History:
 //	- 1.0.0001.2202(2010-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
+//	- 1.0.0002.1611(2010-05-25)	# 修正当控件被设置为不可见并且其特效正在处理时,特效定时器将不会自动关闭的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -74,6 +75,7 @@ protected:
 			switch( nMessage )
 			{
 			case WM_PAINT:
+				if (ctrl->IsVisible())
 				{
 					IGuiEffect* eff = ctrl->GetEffect();
 					if (eff)
@@ -85,6 +87,11 @@ protected:
 					}
 					else
 						ctrl->Send(*ite, nMessage, wParam, lParam);
+				}
+				else
+				{
+					IGuiEffect* eff = ctrl->GetEffect();
+					if (eff) eff->KillTimer(pGui->GethWnd());
 				}
 				break;
 			default:

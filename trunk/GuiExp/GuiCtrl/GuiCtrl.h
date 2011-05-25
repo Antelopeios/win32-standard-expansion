@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0001.2236
+// Date:	2010-05-25
+// Version:	1.0.0002.1517
 //
 // History:
 //	- 1.0.0001.2236(2010-05-23)	+ IGuiCtrl添加效果对象相关接口
 //								+ 添加IGuiCtrl::IsUpdated()接口
+//	- 1.0.0002.1517(2010-05-25)	# 当控件无效时IGuiCtrl::SetFocus()应该直接返回
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -161,6 +162,7 @@ public:
 	virtual IGuiCtrl* SetFocus(IGuiCtrl* pFocus = NULL)
 	{
 		if (!m_Focus) return NULL;
+		if (!IsEffect(this)) return NULL;
 		// 设置焦点
 		IGuiCtrl* old_fc = (*m_Focus);
 		(*m_Focus) = pFocus ? pFocus : this;

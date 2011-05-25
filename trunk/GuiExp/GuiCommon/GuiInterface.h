@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0007.1000
+// Date:	2010-05-25
+// Version:	1.0.0008.1600
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -48,6 +48,7 @@
 //								+ 添加IGuiObject::Free()接口,方便ExGui()构造对象后手动释放指针资源
 //	- 1.0.0007.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础定义
 //								= 调整IGuiObject::Free()为虚函数
+//	- 1.0.0008.1600(2010-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -277,8 +278,13 @@ public:
 	// 初始化
 	virtual void Init(CImage& tImg) = 0;
 	virtual bool IsInit() = 0;
+	// 完毕
+	virtual bool IsFinished() = 0;
 	// 效果显示接口
 	virtual void Show(IGuiObject* pGui, CImage& tImg) = 0;
+	// 定时器
+	virtual void SetTimer(wnd_t hWnd) = 0;
+	virtual void KillTimer(wnd_t hWnd) = 0;
 };
 
 //////////////////////////////////////////////////////////////////

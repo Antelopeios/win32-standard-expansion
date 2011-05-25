@@ -48,19 +48,84 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiButton : public CGuiPicture
+class CGuiButton : public IGuiCtrlBase
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, CGuiPicture)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
 
 protected:
+	/*
+	正常; 浮动; 按下; 焦点; 禁止
+	*/
+	pixel_t m_Color[5];
+	CImage m_Image[5];
+	CText m_Text[5];
 
 public:
+	CGuiButton()
+	{
+		ZeroMemory(m_Color, sizeof(m_Color));
+		// 添加事件对象
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiButtonEvent"), &m_GC));
+	}
+	~CGuiButton()
+	{
+		for(int i = 0; i < _countof(m_Image); ++i)
+			m_Image[i].Delete();
+	}
 
+public:
+	// 获得控件状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		state_t* state = EXP_BASE::GetState(sType, pGC);
+		if (state)
+		{
+			if (state->sta_typ == _T("color"))
+				for(int i = 0; i < _countof(m_Color); ++i)
+					state->sta_arr.Add(m_Color + i);
+			else
+			if (state->sta_typ == _T("image"))
+				for(int i = 0; i < _countof(m_Image); ++i)
+					state->sta_arr.Add(m_Image + i);
+			else
+			if (state->sta_typ == _T("text"))
+				for(int i = 0; i < _countof(m_Text); ++i)
+					state->sta_arr.Add(m_Text + i);
+		}
+		return state;
+	}
+	void SetState(const CString& sType, void* pState)
+	{
+		if (!pState) return;
+		if (sType == _T("color"))
+		{
+			for(int i = 0; i < _countof(m_Color); ++i)
+				m_Color[i] = *((pixel_t*)pState + i);
+			EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("image"))
+		{
+			for(int i = 0; i < _countof(m_Image); ++i)
+			{
+				m_Image[i].Delete();
+				m_Image[i].Set(((CImage*)pState + i)->Get());
+			}
+			EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("text"))
+		{
+			for(int i = 0; i < _countof(m_Text); ++i)
+				m_Text[i] = *((CText*)pState + i);
+			EXP_BASE::SetState(sType, pState);
+		}
+	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, CGuiPicture);
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase);
 
 //////////////////////////////////////////////////////////////////
 

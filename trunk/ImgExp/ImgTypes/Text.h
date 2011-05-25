@@ -34,10 +34,11 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-25
-// Version:	1.0.0001.1100
+// Version:	1.0.0001.1425
 //
 // History:
-//	- 1.0.0001.1100(2010-05-25)	# 修正CText::operator=()的赋值及返回值错误
+//	- 1.0.0001.1425(2010-05-25)	# 修正CText::operator=()的赋值及返回值错误
+//								# 修正CText::GetImage()接口对颜色处理的错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -124,33 +125,44 @@ public:
 	image_t GetImage()
 	{
 		if (Empty()) return NULL;
-
+		// 创建临时画板
 		CGraph tmp_grp;
 		tmp_grp.Create();
 		tmp_grp.SetObject(m_Font.Get());
-		::SetTextColor(tmp_grp, m_Color);
 		::SetBkMode(tmp_grp, TRANSPARENT);
-
+		// 获得文字区域
 		CSize sz;
 		GetSize(tmp_grp, sz);
-
+		// 创建文字图像
 		CImage img;
 		img.Create(sz.cx, sz.cy);
 		if (img.IsNull()) return NULL;
 		tmp_grp.SetObject(img.Get());
-
+		// 绘制文字
 		CImgRenderer::Render(img, img, CRect(), CPoint(), 
 			&CFilterFillT<CFilterCopy>(ExRGBA(0, 0, 0, EXP_CM), 0x1));
 		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), 
 			&(RECT)CRect(0, 0, sz.cx, sz.cy), DT_LEFT | DT_TOP);
 		CImgRenderer::Render(img, img, CRect(), CPoint(), 
 			&CFilterInverseT<CFilterCopy>(0x1));
-		if (ExGetA(m_Color) != EXP_CM)
-			CImgRenderer::Render(img, img, CRect(), CPoint(), 
-				&CFilterFillT<CFilterCopy>(ExRGBA(0, 0, 0, ExGetA(m_Color)), 0x1, true));
-
+		if (m_Color != ExRGBA(0, 0, 0, EXP_CM))
+			CImgRenderer::Render
+				(
+				img, img, CRect(), CPoint(), 
+				&CFilterFillT<CFilterCopy>
+					(
+					ExRGBA
+						(
+						ExGetB(m_Color), 
+						ExGetG(m_Color), 
+						ExGetR(m_Color), 
+						ExGetA(m_Color)
+						), 
+					0xf, true
+					)
+				);
+		// 清理内存并返回
 		tmp_grp.Delete();
-
 		return img;
 	}
 };

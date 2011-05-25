@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-24
-// Version:	1.0.0002.1500
+// Date:	2010-05-25
+// Version:	1.0.0003.1047
 //
 // History:
 //	- 1.0.0001.2236(2010-05-23)	+ 添加CGuiPicture::IsUpdated()接口
 //	- 1.0.0002.1500(2010-05-24)	+ CGuiPicture添加Color属性
+//	- 1.0.0003.1047(2010-05-25)	+ CGuiPicture添加Text属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPicture_hpp__
@@ -61,6 +62,7 @@ protected:
 
 	pixel_t m_Color;
 	CImage m_Image;
+	CText m_Text;
 
 	bool m_Updated;
 
@@ -88,6 +90,9 @@ public:
 		else
 		if (sType == _T("image"))
 			state->sta_arr.Add(&m_Image);
+		else
+		if (sType == _T("text"))
+			state->sta_arr.Add(&m_Text);
 		return state;
 	}
 	void SetState(const CString& sType, void* pState)
@@ -103,6 +108,12 @@ public:
 		{
 			m_Image.Delete();
 			m_Image.Set(((CImage*)pState)->Get());
+			m_Updated = true;
+		}
+		else
+		if (sType == _T("text"))
+		{
+			m_Text = *(CText*)pState;
 			m_Updated = true;
 		}
 		if (m_Updated) Refresh();

@@ -27,6 +27,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 创建控件对象并设置
 	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc));
 	pic->SetState(_T("image"), &img_pic);
+	CText text(_T("Dark C.at"), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(33, 66, 99, 255));
+	pic->SetState(_T("text"), &text);
 	CRect rect(0, 0, img_pic.GetWidth(), img_pic.GetHeight());
 	pic->SetRect(rect);
 	pic->SetEffect(eff);

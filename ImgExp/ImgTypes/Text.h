@@ -33,8 +33,11 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-24
-// Version:	1.0.0000.2204
+// Date:	2011-05-25
+// Version:	1.0.0001.1100
+//
+// History:
+//	- 1.0.0001.1100(2010-05-25)	# 修正CText::operator=()的赋值及返回值错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -91,9 +94,10 @@ public:
 
 	CText& operator=(const CText& txt)
 	{
-		(CString)(*this) = (CString)txt;
+		this->SetString((LPCTSTR)txt);
 		SetColor(txt.GetColor());
 		SetFont(txt.GetFont());
+		return (*this);
 	}
 
 	friend bool operator==(const CText& txt1, const CText& txt2)
@@ -119,6 +123,8 @@ public:
 
 	image_t GetImage()
 	{
+		if (Empty()) return NULL;
+
 		CGraph tmp_grp;
 		tmp_grp.Create();
 		tmp_grp.SetObject(m_Font.Get());

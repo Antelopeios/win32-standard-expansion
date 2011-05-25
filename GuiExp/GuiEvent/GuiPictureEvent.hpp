@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-24
-// Version:	1.0.0001.1500
+// Date:	2010-05-25
+// Version:	1.0.0002.1100
 //
 // History:
 //	- 1.0.0001.1500(2010-05-24)	+ CGuiPictureEvent添加Color属性的处理
+//	- 1.0.0002.1100(2010-05-25)	+ CGuiPictureEvent添加Text属性的处理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPictureEvent_hpp__
@@ -79,15 +80,23 @@ public:
 		case WM_PAINT:
 			if (lParam)
 			{
+				// 获得属性
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("image"), &gc);
 				if (!state) break;
 				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
 				if (!image || image->IsNull()) break;
+
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
 				pixel_t* pixel = (pixel_t*)(((void**)state->sta_arr)[0]);
 				if (!pixel) break;
+
+				state = ctrl->GetState(_T("text"), &gc);
+				if (!state) break;
+				CText* text = (CText*)(((void**)state->sta_arr)[0]);
+				if (!text) break;
+
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
@@ -102,6 +111,14 @@ public:
 				// 绘图
 				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
 				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
+				CImage txt_img(text->GetImage());
+				if (!txt_img.IsNull())
+					CImgRenderer::Render(mem_img->Get(), txt_img, 
+						CRect(
+						(rect.Right() - txt_img.GetWidth()) / 2, 
+						(rect.Bottom() - txt_img.GetHeight()) / 2, 
+						rect.Right(), rect.Bottom()), 
+						CPoint());
 			}
 			break;
 		}

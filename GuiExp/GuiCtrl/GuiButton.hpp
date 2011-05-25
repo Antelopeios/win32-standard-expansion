@@ -52,6 +52,10 @@ class CGuiButton : public CGuiPicture
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, CGuiPicture)
 
+protected:
+
+public:
+
 };
 
 //////////////////////////////////////////////////////////////////

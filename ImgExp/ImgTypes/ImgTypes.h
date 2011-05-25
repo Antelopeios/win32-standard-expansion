@@ -48,9 +48,12 @@
 
 //////////////////////////////////////////////////////////////////
 
+#include "ImgTypes/Types/Types.h"
 #include "ImgTypes/TypeObject.h"
-#include "ImgTypes/Graph/Graph.h"
-#include "ImgTypes/Image/Image.h"
+#include "ImgTypes/Graph.h"
+#include "ImgTypes/Image.h"
+#include "ImgTypes/Font.h"
+#include "ImgTypes/Text.h"
 
 //////////////////////////////////////////////////////////////////
 

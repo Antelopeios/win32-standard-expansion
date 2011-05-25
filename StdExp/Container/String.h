@@ -33,14 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-18
-// Version:	1.0.0016.1642
+// Date:	2011-05-24
+// Version:	1.0.0017.2220
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //	- 1.0.0014.0106(2011-02-25)	+ 为String添加用于Hash的DWORD_PTR重载
 //	- 1.0.0015.1714(2011-05-10)	# 修正bool operator==()与bool operator!=()在对字符串常量做比较时无法通过编译的问题
 //	- 1.0.0016.1642(2011-05-18)	= 使用友元方式重载bool operator==()与bool operator!=()
+//	- 1.0.0017.2220(2011-05-24)	# 修正CStringT::SetString()当参数为NULL时的崩溃问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -183,6 +184,7 @@ public:
 
 	CStringT& SetString(const type_t* pString)
 	{
+		if (!pString) return (*this);
 		GetCStr(_tcslen(pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 		StringCchCopy(m_Array, GetSize(), pString);
 		return (*this);

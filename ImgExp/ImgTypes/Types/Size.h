@@ -28,111 +28,125 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Point - 点
+// Size - 区域
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-24
-// Version:	1.0.0005.2242
-//
-// History:
-//	- 1.0.0001.1630(2011-04-19)	+ CPoint改为CPointT<>,支持通过模板参数控制内部数据的类型
-//	- 1.0.0002.1513(2011-04-20)	^ 简化CPointT的内部数据命名
-//	- 1.0.0003.1730(2011-05-05)	# 修正构造时传入基本数据类型将导致堆栈溢出的问题
-//	- 1.0.0004.1020(2011-05-17)	+ 添加CPointT::operator-()负号重载
-//	- 1.0.0005.2242(2011-05-24)	+ 添加CPointT::operator!=()与CPointT::operator POINT()
+// Version:	1.0.0000.2238
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Point_h__
-#define __Point_h__
+#ifndef __Size_h__
+#define __Size_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+
+#include "ImgTypes/Types/Point.h"
+#include "ImgTypes/Types/Rect.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT = LONG>
-class CPointT
+class CSizeT
 {
 public:
-	TypeT x, y;
+	TypeT cx, cy;
 
 public:
-	CPointT(TypeT nX = 0, TypeT nY = 0)
-		: x(0), y(0)
+	CSizeT(TypeT nX = 0, TypeT nY = 0)
+		: cx(0), cy(0)
 	{ Set(nX, nY); }
-	CPointT(const CPointT& tPoint)
-		: x(0), y(0)
+	CSizeT(const CSizeT& tSize)
+		: cx(0), cy(0)
+	{ (*this) = tSize; }
+	CSizeT(SIZE& tSize)
+		: cx(0), cy(0)
+	{ (*this) = tSize; }
+	CSizeT(POINT& tPoint)
+		: cx(0), cy(0)
 	{ (*this) = tPoint; }
-	CPointT(POINT& tPoint)
-		: x(0), y(0)
-	{ (*this) = tPoint; }
+	CSizeT(RECT& tRect)
+		: cx(0), cy(0)
+	{ (*this) = tRect; }
 
 public:
 	EXP_INLINE void Set(TypeT nX = 0, TypeT nY = 0)
 	{
-		x = nX;
-		y = nY;
-	}
-	EXP_INLINE void Offset(TypeT nX = 0, TypeT nY = 0)
-	{
-		x += nX;
-		y += nY;
+		cx = nX;
+		cy = nY;
 	}
 
-	EXP_INLINE CPointT& operator=(const CPointT& tPoint)
+	EXP_INLINE CSizeT& operator=(const CSizeT& tSize)
+	{
+		Set(tSize.cx, tSize.cy);
+		return (*this);
+	}
+	EXP_INLINE CSizeT& operator=(SIZE& tSize)
+	{
+		Set(tSize.cx, tSize.cy);
+		return (*this);
+	}
+	EXP_INLINE CSizeT& operator=(POINT& tPoint)
 	{
 		Set(tPoint.x, tPoint.y);
 		return (*this);
 	}
-	EXP_INLINE CPointT& operator=(POINT& tPoint)
+	EXP_INLINE CSizeT& operator=(RECT& tRect)
 	{
-		Set(tPoint.x, tPoint.y);
-		return (*this);
-	}
-	EXP_INLINE bool operator==(const CPointT& tPoint)
-	{ return ((x == tPoint.x) && (y == tPoint.y)); }
-	EXP_INLINE bool operator==(POINT& tPoint)
-	{ return ((x == tPoint.x) && (y == tPoint.y)); }
-	EXP_INLINE bool operator!=(const CPointT& tPoint)
-	{ return !((*this) == tPoint); }
-	EXP_INLINE bool operator!=(POINT& tPoint)
-	{ return !((*this) == tPoint); }
-
-	EXP_INLINE CPointT& operator+=(const CPointT& tPoint)
-	{
-		Offset(tPoint.x, tPoint.y);
-		return (*this);
-	}
-	EXP_INLINE CPointT& operator-=(const CPointT& tPoint)
-	{
-		Offset(-tPoint.x, -tPoint.y);
+		Set(tRect.right - tRect.left, tRect.bottom - tRect.top);
 		return (*this);
 	}
 
-	EXP_INLINE CPointT operator+(const CPointT& tPoint)
-	{ return CPointT(x + tPoint.x, y + tPoint.y); }
-	EXP_INLINE CPointT operator-(const CPointT& tPoint)
-	{ return CPointT(x - tPoint.x, y - tPoint.y); }
+	EXP_INLINE bool operator==(const CSizeT& tSize)
+	{ return ((cx == tSize.cx) && (cy == tSize.cy)); }
+	EXP_INLINE bool operator==(SIZE& tSize)
+	{ return ((cx == tSize.cx) && (cy == tSize.cy)); }
+	EXP_INLINE bool operator!=(const CSizeT& tSize)
+	{ return !((*this) == tSize); }
+	EXP_INLINE bool operator!=(SIZE& tSize)
+	{ return !((*this) == tSize); }
 
-	EXP_INLINE CPointT operator-()
-	{ return CPointT(-x, -y); }
-
-	EXP_INLINE operator POINT()
+	EXP_INLINE CSizeT& operator+=(const CSizeT& tSize)
 	{
-		POINT pt = {x, y};
-		return pt;
+		cx += tSize.cx;
+		cy += tSize.cy;
+		return (*this);
+	}
+	EXP_INLINE CSizeT& operator-=(const CSizeT& tSize)
+	{
+		cx -= tSize.cx;
+		cy -= tSize.cy;
+		return (*this);
+	}
+
+	EXP_INLINE CSizeT& operator+(const CSizeT& tSize)
+	{
+		return CSizeT(cx + tSize.cx, cy + tSize.cy);
+	}
+	EXP_INLINE CSizeT& operator-(const CSizeT& tSize)
+	{
+		return CSizeT(cx - tSize.cx, cy - tSize.cy);
+	}
+
+	EXP_INLINE CSizeT operator-()
+	{ return CSizeT(-cx, -cy); }
+
+	EXP_INLINE operator SIZE()
+	{
+		SIZE sz = {cx, cy};
+		return sz;
 	}
 };
 
-typedef CPointT<> CPoint;
+typedef CSizeT<> CSize;
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__Point_h__*/
+#endif/*__Size_h__*/

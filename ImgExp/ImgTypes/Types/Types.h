@@ -50,6 +50,7 @@
 
 #include "ImgTypes/Types/Point.h"
 #include "ImgTypes/Types/Rect.h"
+#include "ImgTypes/Types/Size.h"
 #include "ImgTypes/Types/Line.h"
 
 //////////////////////////////////////////////////////////////////

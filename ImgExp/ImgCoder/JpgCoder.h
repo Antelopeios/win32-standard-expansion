@@ -259,7 +259,7 @@ public:
 			jpeg_read_scanlines(&cinfo, row_pointer, 1);
 			// –¥»Îimage_t
 			for(size_t x = 0; x < cinfo.image_width; ++x, ++pos, inx += cinfo.num_components)
-				bmbf[pos] = ExRGBA(data[inx + 2], data[inx + 1], data[inx], (BYTE)~0);
+				bmbf[pos] = ExRGBA(data[inx + 2], data[inx + 1], data[inx], EXP_CM);
 		}
 		ExMem::Free(data);
 		jpeg_finish_decompress(&cinfo);

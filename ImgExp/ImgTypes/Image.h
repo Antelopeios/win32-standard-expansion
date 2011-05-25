@@ -28,13 +28,13 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImageObject - 图像对象类
+// Image - 图像对象类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-28
-// Version:	1.0.0007.1343
+// Date:	2011-05-24
+// Version:	1.0.0008.2319
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -47,21 +47,22 @@
 //								# 修正CImage::IsNull()中的一个逻辑错误
 //	- 1.0.0006.1730(2011-04-26)	= 将部分接口的返回值由DWORD改为LONG
 //	- 1.0.0007.1343(2011-04-28)	= CImage::Clone()具有默认参数
+//	- 1.0.0008.2319(2010-05-24)	+ 为CImage的属性获取接口及一些常量接口添加const类型
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
 //	- 1.0.0002.2100(2011-04-07)	= 调整CExpImage::GetChannel()接口的定义,返回通道数量,而不是BitsCount
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImageObject_h__
-#define __ImageObject_h__
+#ifndef __Image_h__
+#define __Image_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
 #include "ImgTypes/Types/Types.h"
-#include "ImgTypes/Graph/Graph.h"
+#include "ImgTypes/Graph.h"
 
 EXP_BEG
 
@@ -122,7 +123,7 @@ public:
 		if(!img_buf) Delete();
 		return Get();
 	}
-	image_t Clone(CRect& tRect = CRect())
+	image_t Clone(CRect& tRect = CRect()) const
 	{
 		CRect rc_tmp(tRect);
 		if (rc_tmp.IsEmpty())
@@ -155,15 +156,15 @@ public:
 		return exp_img.Get();
 	}
 
-	LONG GetWidth()
+	LONG GetWidth() const
 	{ return m_Bitmap.bmWidth; }
-	LONG GetHeight()
+	LONG GetHeight() const
 	{ return m_Bitmap.bmHeight; }
-	uint8_t GetChannel()
+	uint8_t GetChannel() const
 	{ return (uint8_t)(m_Bitmap.bmBitsPixel >> 3); }
-	LONG GetSize()
+	LONG GetSize() const
 	{ return m_Bitmap.bmWidthBytes * m_Bitmap.bmHeight; }
-	pixel_t* GetPixels()
+	pixel_t* GetPixels() const
 	{ return (pixel_t*)m_Bitmap.bmBits; }
 };
 
@@ -171,4 +172,4 @@ public:
 
 EXP_END
 
-#endif/*__ImageObject_h__*/
+#endif/*__Image_h__*/

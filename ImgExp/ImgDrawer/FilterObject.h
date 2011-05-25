@@ -33,14 +33,16 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-24
-// Version:	1.0.0003.1700
+// Date:	2011-05-25
+// Version:	1.0.0004.1022
 //
 // History:
 //	- 1.0.0001.1328(2011-05-02)	+ 添加渐变滤镜
 //	- 1.0.0002.1948(2011-05-18)	= 调整CFilterNormal滤镜返回像素的alpha通道计算方法
 //	- 1.0.0003.1700(2011-05-24)	+ 调整CFilterCopy;CFilterNormal滤镜支持设置半透明渲染参数
 //								+ 添加CFilterFill颜色画刷
+//	- 1.0.0004.1022(2011-05-25)	+ CFilterFill支持跳过指定颜色
+//								+ CFilterInverse支持屏蔽通道
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FilterObject_h__
@@ -78,7 +80,7 @@ protected:
 	BYTE m_Alpha;
 
 public:
-	CFilterCopy(BYTE a = (BYTE)~0)
+	CFilterCopy(BYTE a = EXP_CM)
 		: IFilterObject()
 	{
 		m_Radius = 1;
@@ -90,14 +92,14 @@ public:
 		if (m_Alpha == 0)
 			return pixDes;
 		else
-		if (m_Alpha == (BYTE)~0)
+		if (m_Alpha == EXP_CM)
 			return pixSrc[nKey];
 		else
 		{
-			int r_dif = ((int)ExGetR(pixSrc[nKey]) - (int)ExGetR(pixDes)) * m_Alpha / (BYTE)~0;
-			int g_dif = ((int)ExGetG(pixSrc[nKey]) - (int)ExGetG(pixDes)) * m_Alpha / (BYTE)~0;
-			int b_dif = ((int)ExGetB(pixSrc[nKey]) - (int)ExGetB(pixDes)) * m_Alpha / (BYTE)~0;
-			int a_dif = ((int)ExGetA(pixSrc[nKey]) - (int)ExGetA(pixDes)) * m_Alpha / (BYTE)~0;
+			int r_dif = ((int)ExGetR(pixSrc[nKey]) - (int)ExGetR(pixDes)) * m_Alpha / EXP_CM;
+			int g_dif = ((int)ExGetG(pixSrc[nKey]) - (int)ExGetG(pixDes)) * m_Alpha / EXP_CM;
+			int b_dif = ((int)ExGetB(pixSrc[nKey]) - (int)ExGetB(pixDes)) * m_Alpha / EXP_CM;
+			int a_dif = ((int)ExGetA(pixSrc[nKey]) - (int)ExGetA(pixDes)) * m_Alpha / EXP_CM;
 			return ExRGBA
 				(
 				ExGetR(pixDes) + r_dif, 
@@ -118,7 +120,7 @@ protected:
 	BYTE m_Alpha;
 
 public:
-	CFilterNormal(BYTE a = (BYTE)~0)
+	CFilterNormal(BYTE a = EXP_CM)
 		: IFilterObject()
 	{
 		m_Radius = 1;
@@ -127,9 +129,9 @@ public:
 
 	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 	{
-		BYTE a_s = (ExGetA(pixSrc[nKey]) * m_Alpha) / (BYTE)~0;
+		BYTE a_s = (ExGetA(pixSrc[nKey]) * m_Alpha) / EXP_CM;
 		if (a_s == 0) return pixDes;
-		if (a_s == (BYTE)~0) return pixSrc[nKey];
+		if (a_s == EXP_CM) return pixSrc[nKey];
 		BYTE r_s = ExGetR(pixSrc[nKey]);
 		BYTE g_s = ExGetG(pixSrc[nKey]);
 		BYTE b_s = ExGetB(pixSrc[nKey]);
@@ -137,13 +139,13 @@ public:
 		BYTE r_d = ExGetR(pixDes);
 		BYTE g_d = ExGetG(pixDes);
 		BYTE b_d = ExGetB(pixDes);
-		BYTE a_i = (BYTE)~0 - a_s;
+		BYTE a_i = EXP_CM - a_s;
 		return ExRGBA
 			(
-			(r_s * a_s + r_d * a_i) / (BYTE)~0, 
-			(g_s * a_s + g_d * a_i) / (BYTE)~0, 
-			(b_s * a_s + b_d * a_i) / (BYTE)~0, 
-			(a_d + a_s) - a_d * a_s / (BYTE)~0
+			(r_s * a_s + r_d * a_i) / EXP_CM, 
+			(g_s * a_s + g_d * a_i) / EXP_CM, 
+			(b_s * a_s + b_d * a_i) / EXP_CM, 
+			(a_d + a_s) - a_d * a_s / EXP_CM
 			);
 	}
 };
@@ -157,17 +159,23 @@ class CFilterFillT : public BaseT
 public:
 	BYTE m_Mask;
 	pixel_t m_Const;
+	bool m_bClrMask;
+	pixel_t m_ClrMask;
 
 public:
-	CFilterFillT(pixel_t cConst = 0, BYTE bMask = 0xf)
+	CFilterFillT(pixel_t cConst = 0, BYTE bMask = 0xf, bool bClrMask = false, pixel_t cMask = 0)
 		: BaseT()
 		, m_Const(cConst)
 		, m_Mask(bMask)
+		, m_bClrMask(bClrMask)
+		, m_ClrMask(cMask)
 	{}
 
 	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 	{
 		if (m_Mask == 0) return BaseT::Render(pixSrc, pixDes, nKey);
+		if (m_bClrMask && pixSrc[nKey] == m_ClrMask)
+			return BaseT::Render(pixSrc, pixDes, nKey);
 		pixSrc[nKey] = ExRGBA
 			(
 			(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pixSrc[nKey]), 
@@ -204,14 +212,22 @@ template <typename BaseT = CFilterNormal>
 class CFilterInverseT : public BaseT
 {
 public:
+	BYTE m_Mask;
+
+public:
+	CFilterInverseT(BYTE bMask = 0xe)
+		: BaseT()
+		, m_Mask(bMask)
+	{}
+
 	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
 	{
 		pixel_t src = ExRGBA
 			(
-			(BYTE)~0 - ExGetR(pixSrc[nKey]), 
-			(BYTE)~0 - ExGetG(pixSrc[nKey]), 
-			(BYTE)~0 - ExGetB(pixSrc[nKey]), 
-			ExGetA(pixSrc[nKey])
+			(m_Mask & 0x08) ? EXP_CM - ExGetR(pixSrc[nKey]) : ExGetR(pixSrc[nKey]), 
+			(m_Mask & 0x04) ? EXP_CM - ExGetG(pixSrc[nKey]) : ExGetG(pixSrc[nKey]), 
+			(m_Mask & 0x02) ? EXP_CM - ExGetB(pixSrc[nKey]) : ExGetB(pixSrc[nKey]), 
+			(m_Mask & 0x01) ? EXP_CM - ExGetA(pixSrc[nKey]) : ExGetA(pixSrc[nKey])
 			);
 		return BaseT::Render(&src, pixDes, nKey);
 	}
@@ -230,7 +246,7 @@ public:
 	pixel_t m_Const;
 
 public:
-	CFilterReliefT(pixel_t cConst = ExRGBA(125, 68, 29, (BYTE)~0))
+	CFilterReliefT(pixel_t cConst = ExRGBA(125, 68, 29, EXP_CM))
 		: BaseT()
 		, m_Const(cConst)
 	{
@@ -335,10 +351,10 @@ public:
 		}
 		pixSrc[nKey] = ExRGBA
 			(
-			r > (BYTE)~0 ? (BYTE)~0 : r, 
-			g > (BYTE)~0 ? (BYTE)~0 : g, 
-			b > (BYTE)~0 ? (BYTE)~0 : b, 
-			a > (BYTE)~0 ? (BYTE)~0 : a
+			r > EXP_CM ? EXP_CM : r, 
+			g > EXP_CM ? EXP_CM : g, 
+			b > EXP_CM ? EXP_CM : b, 
+			a > EXP_CM ? EXP_CM : a
 			);
 		return BaseT::Render(pixSrc, pixDes, nKey);
 	}
@@ -380,7 +396,7 @@ public:
 				ExGetR(m_Const), 
 				ExGetG(m_Const), 
 				ExGetB(m_Const), 
-				(BYTE)~0
+				EXP_CM
 				);
 		}
 	}

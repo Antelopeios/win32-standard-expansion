@@ -28,55 +28,92 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiFade - 淡入淡出效果
+// Graph - 画布对象类
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-24
-// Version:	1.0.0000.0935
+// Date:	2011-05-24
+// Version:	1.0.0002.2319
+//
+// History:
+//	- 1.0.0001.1334(2011-04-12)	^ 移除IGraphObject接口,通过ITypeObjectT接口模板统一通用的接口
+//								= CExpGraph更名为CGraph
+//	- 1.0.0002.2319(2010-05-24)	+ 为CGraph的属性获取接口添加const类型
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiFade_hpp__
-#define __GuiFade_hpp__
+#ifndef __Graph_h__
+#define __Graph_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "ImgTypes/TypeObject.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiFade : public IGuiEffectBase
+class CGraph : public ITypeObjectT<graph_t>
 {
-	EXP_DECLARE_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
+public:
+	typedef ITypeObjectT<graph_t> base_obj_t;
+
+protected:
+	typedef CListT<DWORD>	typlst_t;
+	typedef CListT<HGDIOBJ>	objlst_t;
+
+	typlst_t m_TypLst;
+	objlst_t m_ObjLst;
 
 public:
-	bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld)
+	CGraph(graph_t tGraph = NULL)
+		: base_obj_t()
+	{ Set(tGraph); }
+	virtual ~CGraph()
+	{}
+
+public:
+	bool Delete()
 	{
-		if (!pCtrl) return false;
-		static int alpha = 0;
-		if (alpha >= EXP_CM) alpha = 0;
-		if (alpha > EXP_CM - 25) alpha = EXP_CM;
-		ExTrace(_T("fade alpha: %d\n"), alpha);
-
-		CImage tmp_old(tOld.Clone());
-		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(alpha));
-		CImgRenderer::Render(tNew, tmp_old, CRect(), CPoint(), &CFilterCopy());
-		tmp_old.Delete();
-
-		alpha += 25;
-		return (alpha < EXP_CM);
+		bool ret = true;
+		if (!IsNull())
+		{
+			for(objlst_t::iterator_t ite = m_ObjLst.Head(); ite != m_ObjLst.Tail(); ++ite)
+				SelectObject(Get(), (*ite));
+			ret = DeleteDC(Get());
+		}
+		Set(NULL);
+		m_ObjLst.Clear();
+		m_TypLst.Clear();
+		return ret;
 	}
+	graph_t Create(graph_t tGraph = NULL)
+	{
+		Delete();
+		Set(CreateCompatibleDC(tGraph));
+		return Get();
+	}
+
+	HGDIOBJ SetObject(HGDIOBJ hObj)
+	{
+		HGDIOBJ tmp_obj(SelectObject(Get(), hObj));
+		DWORD type = GetObjectType(hObj);
+		if (typlst_t::finder_t::Find(m_TypLst, type) == m_TypLst.Tail())
+		{
+			m_TypLst.Add(type);
+			if (tmp_obj && (objlst_t::finder_t::Find(m_ObjLst, tmp_obj) == m_ObjLst.Tail()))
+				m_ObjLst.Add(tmp_obj);
+		}
+		return tmp_obj;
+	}
+	HGDIOBJ GetObject(UINT uType) const
+	{ return GetCurrentObject(Get(), uType); }
 };
-
-//////////////////////////////////////////////////////////////////
-
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiFade_hpp__*/
+#endif/*__Graph_h__*/

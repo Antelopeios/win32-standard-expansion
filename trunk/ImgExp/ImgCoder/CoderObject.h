@@ -49,7 +49,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgTypes/Image/ImageObject.h"
+#include "ImgTypes/Image.h"
 
 EXP_BEG
 

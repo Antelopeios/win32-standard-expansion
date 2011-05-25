@@ -593,37 +593,29 @@
 			Name="ImgTypes"
 			>
 			<File
+				RelativePath=".\ImgTypes\Font.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgTypes\Graph.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgTypes\Image.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ImgTypes\ImgTypes.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgTypes\Text.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ImgTypes\TypeObject.h"
 				>
 			</File>
-			<Filter
-				Name="Graph"
-				>
-				<File
-					RelativePath=".\ImgTypes\Graph\Graph.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ImgTypes\Graph\GraphObject.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Image"
-				>
-				<File
-					RelativePath=".\ImgTypes\Image\Image.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ImgTypes\Image\ImageObject.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="Types"
 				>
@@ -637,6 +629,10 @@
 				</File>
 				<File
 					RelativePath=".\ImgTypes\Types\Rect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImgTypes\Types\Size.h"
 					>
 				</File>
 				<File

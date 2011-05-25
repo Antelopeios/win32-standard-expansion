@@ -192,7 +192,7 @@ public:
 					row_pointer[inx + 2], 
 					row_pointer[inx + 1], 
 					row_pointer[inx], 
-					(img_c == 4) ? row_pointer[inx + 3] : (BYTE)~0
+					(img_c == 4) ? row_pointer[inx + 3] : EXP_CM
 					);
 			}
 		}

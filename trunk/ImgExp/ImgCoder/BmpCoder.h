@@ -130,7 +130,7 @@ protected:
 					temp[inx + 1], 
 					temp[inx + 2], 
 					temp[inx + 3], 
-					(BYTE)~0
+					EXP_CM
 					);
 			}
 		}
@@ -155,7 +155,7 @@ protected:
 					temp[inx], 
 					temp[inx + 1], 
 					temp[inx + 2], 
-					(BYTE)~0
+					EXP_CM
 					);
 			}
 		}
@@ -199,7 +199,7 @@ protected:
 					(pixel & mask[2]) << (8 - cnt_m[2]), 
 					((pixel & mask[1]) >> cnt_m[2]) << (8 - cnt_m[1]), 
 					((pixel & mask[0]) >> (cnt_m[1] + cnt_m[2])) << (8 - cnt_m[0]), 
-					(BYTE)~0
+					EXP_CM
 					);
 			}
 		}
@@ -227,7 +227,7 @@ protected:
 					colors[temp[x]].rgbBlue, 
 					colors[temp[x]].rgbGreen, 
 					colors[temp[x]].rgbRed, 
-					(BYTE)~0
+					EXP_CM
 					);
 			}
 		}
@@ -259,7 +259,7 @@ protected:
 						colors[c].rgbBlue, 
 						colors[c].rgbGreen, 
 						colors[c].rgbRed, 
-						(BYTE)~0
+						EXP_CM
 						);
 				}
 			}
@@ -292,7 +292,7 @@ protected:
 						colors[c].rgbBlue, 
 						colors[c].rgbGreen, 
 						colors[c].rgbRed, 
-						(BYTE)~0
+						EXP_CM
 						);
 				}
 			}

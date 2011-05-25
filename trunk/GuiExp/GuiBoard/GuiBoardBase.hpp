@@ -467,7 +467,7 @@ public:
 
 			BLENDFUNCTION blend		  = {0};
 			blend.AlphaFormat		  = AC_SRC_ALPHA;
-			blend.SourceConstantAlpha = (BYTE)~0;
+			blend.SourceConstantAlpha = EXP_CM;
 			::UpdateLayeredWindow(Get(), hDC, &pt_wnd, &sz_wnd, tGrp, &pt_src, 0, &blend, 2);
 		}
 		else

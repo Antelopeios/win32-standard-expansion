@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-04-25
-// Version:	1.0.0005.1730
+// Date:	2010-05-25
+// Version:	1.0.0006.0952
 //
 // History:
 //	- 1.0.0001.1700(2010-04-07)	+ 添加pixel_t类型定义
@@ -42,6 +42,7 @@
 //	- 1.0.0003.1700(2010-04-11)	+ 添加graph_t类型定义
 //	- 1.0.0004.2222(2010-04-20)	+ 添加EXP_ZERO,ExIsZero()与ExIsEqual()定义,方便判断浮点数是否为0以及浮点数相等比较
 //	- 1.0.0005.1730(2010-04-25)	+ 添加EXP_PI定义
+//	- 1.0.0006.0952(2010-05-25)	+ 添加EXP_CM定义代替(BYTE)~0
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgCommon_h__
@@ -62,6 +63,7 @@ EXP_BEG
 typedef HDC			graph_t;	
 typedef HBITMAP		image_t;
 typedef COLORREF	pixel_t;
+typedef HFONT		font_t;
 
 // 功能定义
 
@@ -79,6 +81,7 @@ typedef COLORREF	pixel_t;
 #define ExIsEqual(a, b)	ExIsZero((a) - (b))
 
 #define EXP_PI		3.14159265
+#define EXP_CM		((BYTE)~0)
 
 //////////////////////////////////////////////////////////////////
 

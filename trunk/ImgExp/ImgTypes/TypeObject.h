@@ -33,11 +33,12 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-05
-// Version:	1.0.0001.1730
+// Date:	2010-05-24
+// Version:	1.0.0002.2319
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	+ ITypeObjectT::IsNull()添加const类型接口
+//	- 1.0.0002.2319(2010-05-24)	+ ITypeObjectT::Get()添加const类型接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __TypeObject_h__
@@ -70,7 +71,7 @@ public:
 public:
 	virtual void Set(TypeT tType)
 	{ m_Type = tType; }
-	virtual TypeT Get()
+	virtual TypeT Get() const
 	{ return m_Type; }
 
 	TypeT operator=(TypeT tType)

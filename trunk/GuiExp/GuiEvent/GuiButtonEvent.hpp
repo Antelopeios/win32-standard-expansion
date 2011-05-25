@@ -28,21 +28,54 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiEvent - 事件对象
+// GuiButtonEvent - 按钮控件事件
 //
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-18
-// Version:	1.0.0000.1150
+// Date:	2010-05-25
+// Version:	1.0.0000.1658
+//
+// History:
+//	- 1.0.0000.1658(2010-05-25)	@ 开始构建CGuiButtonEvent
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#ifndef __GuiButtonEvent_hpp__
+#define __GuiButtonEvent_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+#include "GuiCtrl/GuiCtrl.h"
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "GuiEvent/GuiWndEvent.hpp"
-#include "GuiEvent/GuiPictureEvent.hpp"
-#include "GuiEvent/GuiButtonEvent.hpp"
+class CGuiButtonEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
+
+protected:
+
+public:
+	~CGuiButtonEvent()
+	{
+	}
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+	}
+};
 
 //////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiButtonEvent_hpp__*/

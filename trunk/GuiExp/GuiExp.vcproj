@@ -239,6 +239,10 @@
 			Name="GuiEvent"
 			>
 			<File
+				RelativePath=".\GuiEvent\GuiButtonEvent.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiEvent\GuiEvent.cpp"
 				>
 			</File>

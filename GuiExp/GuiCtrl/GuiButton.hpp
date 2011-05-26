@@ -61,7 +61,7 @@ public:
 	/*
 	正常; 浮动; 按下; 焦点; 禁止
 	*/
-	enum status_t {nor, ovr, hit, foc};
+	enum status_t {nor, ovr, hit};
 
 protected:
 	status_t m_Status;

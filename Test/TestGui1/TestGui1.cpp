@@ -44,7 +44,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	{
 		txt_btn[i].SetString(_T("Dark C.at"));
 		txt_btn[i].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
-		txt_btn[i].SetColor(ExRGBA(255, 255, 0, 255));
+		txt_btn[i].SetColor(ExRGBA(0, 60, 116, 200));
 	}
 
 	// 创建效果对象并设置
@@ -63,7 +63,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc));
 	btn->SetState(_T("image"), img_btn);
 	btn->SetState(_T("text"), txt_btn);
-	btn->SetRect(CRect(50, 50, 200, 140));
+	btn->SetRect(CRect(70, 100, 180, 140));
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));

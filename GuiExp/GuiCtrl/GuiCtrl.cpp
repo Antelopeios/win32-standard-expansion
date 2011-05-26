@@ -46,6 +46,7 @@ EXP_BEG
 
 // GUI 控件对象接口
 EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
+IGuiCtrl* IGuiCtrl::m_Focus = NULL;
 
 //////////////////////////////////////////////////////////////////
 

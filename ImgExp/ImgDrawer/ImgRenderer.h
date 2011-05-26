@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-02
-// Version:	1.0.0005.1330
+// Date:	2011-05-26
+// Version:	1.0.0006.1130
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -47,6 +47,7 @@
 //								# 修正因滤镜像素块采集算法在图像边缘处忽略了无法采集的部分,导致一些滤镜边缘渲染的异常
 //								+ 添加外发光滤镜
 //	- 1.0.0005.1330(2011-05-02)	= 将滤镜对象从ImgRenderer内部分离
+//	- 1.0.0006.1130(2011-05-26)	# 修正ImgRenderer::Render()在绘图时顶点坐标偏移的计算错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -114,46 +115,46 @@ public:
 		if (exp_des.IsNull()) return false;
 		CImage exp_src(imgSrc);
 		if (exp_src.IsNull()) return false;
-		CPoint pt_des(exp_des.GetWidth(), exp_des.GetHeight());
-		CPoint pt_src(exp_src.GetWidth(), exp_src.GetHeight());
+		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
+		CSize sz_src(exp_src.GetWidth(), exp_src.GetHeight());
 		if (rcDes.IsEmpty())
-			rcDes.Set(CPoint(), pt_des);
+			rcDes.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
 		// 遍历像素绘图
 		if (!pFilter) pFilter = &CFilterNormal();
-		pFilter->SetSize(pt_des.x, pt_des.y);
+		pFilter->SetSize(sz_des.cx, sz_des.cy);
 		LONG radius = pFilter->GetRadius();
 		if (radius <= 0) return false;
 		LONG diamet = (radius << 1) - 1;
-		if (diamet > pt_des.x || 
-			diamet > pt_des.y || 
-			diamet > pt_src.x || 
-			diamet > pt_src.y) return false;
+		if (diamet > sz_des.cx || diamet > sz_des.cy || 
+			diamet > sz_src.cx || diamet > sz_src.cy) return false;
 		LONG fltsiz = diamet * diamet;
 		LONG fltrad = radius - 1;
 		LONG fltind = diamet * fltrad + fltrad;
 		pixel_t* flt_src = ExMem::Alloc<pixel_t>(fltsiz); // 滤镜像素块
 		pixel_t* pix_des = exp_des.GetPixels();
 		pixel_t* pix_src = exp_src.GetPixels();
-		for(LONG y_s = ptSrc.y; y_s < pt_src.y; ++y_s)
+		for(LONG y_s = ptSrc.y; y_s < sz_src.cy; ++y_s)
 		{
-			for(LONG x_s = ptSrc.x; x_s < pt_src.x; ++x_s)
+			for(LONG x_s = ptSrc.x; x_s < sz_src.cx; ++x_s)
 			{
 				// 校验像素区域
 				if (x_s >= ptSrc.x + rcDes.Width() || 
 					y_s >= ptSrc.y + rcDes.Height()) continue;
-				LONG x_d = rcDes.Left() + x_s;
+				LONG x_d = rcDes.Left() + x_s - ptSrc.x;
 				if (x_d < 0) continue;
-				if (x_d >= pt_des.x) break;
-				LONG y_d = rcDes.Top() + y_s;
+				if (x_d >= sz_des.cx) break;
+				LONG y_d = rcDes.Top() + y_s - ptSrc.y;
 				if (y_d < 0) continue;
-				if (y_d >= pt_des.y) break;
+				if (y_d >= sz_des.cy) break;
 				// 获得像素块
-				CRect rc(ptSrc, CPoint(pt_src.x, pt_src.y));
-				GetFilterBlock(
-					pix_src, x_s, y_s, pt_src.x, pt_src.y, rc, 
-					flt_src, fltsiz, diamet, fltrad);
+				CRect rc(ptSrc, CPoint(sz_src.cx, sz_src.cy));
+				GetFilterBlock
+					(
+					pix_src, x_s, y_s, sz_src.cx, sz_src.cy, rc, 
+					flt_src, fltsiz, diamet, fltrad
+					);
 				// 渲染像素
-				LONG i_d = (pt_des.y - y_d - 1) * pt_des.x + x_d;
+				LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d;
 				pix_des[i_d] = pFilter->Render(flt_src, pix_des[i_d], fltind);
 			}
 		}

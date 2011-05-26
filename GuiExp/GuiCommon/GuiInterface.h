@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
-// Version:	1.0.0008.1600
+// Date:	2010-05-26
+// Version:	1.0.0009.1411
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -49,6 +49,7 @@
 //	- 1.0.0007.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础定义
 //								= 调整IGuiObject::Free()为虚函数
 //	- 1.0.0008.1600(2010-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
+//	- 1.0.0009.1411(2010-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -295,6 +296,34 @@ interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
 	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
 
 public:
+	virtual bool GetRealRect(CRect& rc) = 0;
+
+	IGuiBase* GetPtCtrl(const CPoint& pt)
+	{
+		CRect rc;
+		GetRealRect(rc);
+		if (rc.PtInRect(pt))
+		{
+			if (GetChildren().Empty()) return this;
+			for(list_t::iterator_t ite = GetChildren().Last(); ite != GetChildren().Head(); --ite)
+			{
+				IGuiBase* base = ExDynCast<IGuiBase>(*ite);
+				if (!base) continue;
+				base = base->GetPtCtrl(pt);
+				if (base) return base;
+			}
+			IGuiBase* base = ExDynCast<IGuiBase>(GetChildren().HeadItem());
+			if (base)
+			{
+				base = base->GetPtCtrl(pt);
+				if (base) return base;
+			}
+			return this;
+		}
+		else
+			return NULL;
+	}
+
 	void Free() { EXP_MULT::Free(); }
 };
 

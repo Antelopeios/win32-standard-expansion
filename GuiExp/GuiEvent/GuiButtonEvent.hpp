@@ -33,12 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
-// Version:	1.0.0000.2258
+// Date:	2010-05-26
+// Version:	1.0.0001.2006
 //
 // History:
 //	- 1.0.0000.2258(2010-05-25)	@ 开始构建CGuiButtonEvent
 //								@ 基本完成CGuiButtonEvent的绘图部分
+//	- 1.0.0001.2006(2010-05-26)	# 修正CGuiButtonEvent绘图中的错误
+//								+ CGuiButtonEvent添加状态变化消息处理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -76,6 +78,30 @@ public:
 		// 处理消息
 		switch( nMessage )
 		{
+		case WM_MOUSEMOVE:
+			{
+				DWORD status = 1;
+				ctrl->SetState(_T("status"), &status);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			{
+				DWORD status = 2;
+				ctrl->SetState(_T("status"), &status);
+			}
+			break;
+		case WM_LBUTTONUP:
+			{
+				DWORD status = 1;
+				ctrl->SetState(_T("status"), &status);
+			}
+			break;
+		case WM_MOUSELEAVE:
+			{
+				DWORD status = 0;
+				ctrl->SetState(_T("status"), &status);
+			}
+			break;
 		case WM_PAINT:
 			if (lParam)
 			{
@@ -85,6 +111,7 @@ public:
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
 				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				if (ctrl->IsFocus() && status == 0) status = 3;
 				if (!ctrl->IsEnabled()) status = 4;
 
 				state = ctrl->GetState(_T("image"), &gc);
@@ -114,6 +141,7 @@ public:
 				// 处理
 				if (m_rcOld != rect)
 				{
+					LONG r_h = rect.Height() * 5;
 					// l-t
 					m_imgTmp[0].Delete();
 					m_imgTmp[0].Set(image[0]->Get());
@@ -139,7 +167,7 @@ public:
 							(
 							image[3]->Get(), 
 							image[3]->GetWidth(), 
-							rect.Height() - image[0]->GetHeight() - image[6]->GetHeight()
+							r_h - image[0]->GetHeight() - image[6]->GetHeight()
 							)
 						);
 					// m-m
@@ -150,7 +178,7 @@ public:
 							(
 							image[4]->Get(), 
 							rect.Width() - image[3]->GetWidth() - image[5]->GetWidth(), 
-							rect.Height() - image[1]->GetHeight() - image[7]->GetHeight()
+							r_h - image[1]->GetHeight() - image[7]->GetHeight()
 							)
 						);
 					// r-m
@@ -161,7 +189,7 @@ public:
 							(
 							image[5]->Get(), 
 							image[5]->GetWidth(), 
-							rect.Height() - image[2]->GetHeight() - image[8]->GetHeight()
+							r_h - image[2]->GetHeight() - image[8]->GetHeight()
 							)
 						);
 					// l-b
@@ -196,7 +224,7 @@ public:
 						rect.Left(), 
 						rect.Top(), 
 						rect.Left() + m_imgTmp[0].GetWidth(), 
-						rect.Top() + m_imgTmp[0].GetHeight()
+						rect.Top() + m_imgTmp[0].GetHeight() / 5
 						), 
 					CPoint(0, m_imgTmp[0].GetHeight() * status / 5)
 					);
@@ -209,7 +237,7 @@ public:
 						rect.Left() + m_imgTmp[0].GetWidth(), 
 						rect.Top(), 
 						rect.Right() - m_imgTmp[2].GetWidth(), 
-						rect.Top() + m_imgTmp[1].GetHeight()
+						rect.Top() + m_imgTmp[1].GetHeight() / 5
 						), 
 					CPoint(0, m_imgTmp[1].GetHeight() * status / 5)
 					);
@@ -222,7 +250,7 @@ public:
 						rect.Right() - m_imgTmp[2].GetWidth(), 
 						rect.Top(), 
 						rect.Right(), 
-						rect.Top() + m_imgTmp[2].GetHeight()
+						rect.Top() + m_imgTmp[2].GetHeight() / 5
 						), 
 					CPoint(0, m_imgTmp[2].GetHeight() * status / 5)
 					);
@@ -233,9 +261,9 @@ public:
 					CRect
 						(
 						rect.Left(), 
-						rect.Top() + m_imgTmp[0].GetHeight(), 
+						rect.Top() + m_imgTmp[0].GetHeight() / 5, 
 						rect.Left() + m_imgTmp[3].GetWidth(), 
-						rect.Bottom() - m_imgTmp[6].GetHeight()
+						rect.Bottom() - m_imgTmp[6].GetHeight() / 5
 						), 
 					CPoint(0, m_imgTmp[3].GetHeight() * status / 5)
 					);
@@ -246,9 +274,9 @@ public:
 					CRect
 						(
 						rect.Left() + m_imgTmp[3].GetWidth(), 
-						rect.Top() + m_imgTmp[1].GetHeight(), 
+						rect.Top() + m_imgTmp[1].GetHeight() / 5, 
 						rect.Right() - m_imgTmp[5].GetWidth(), 
-						rect.Bottom() - m_imgTmp[7].GetHeight()
+						rect.Bottom() - m_imgTmp[7].GetHeight() / 5
 						), 
 					CPoint(0, m_imgTmp[4].GetHeight() * status / 5)
 					);
@@ -259,9 +287,9 @@ public:
 					CRect
 						(
 						rect.Right() - m_imgTmp[5].GetWidth(), 
-						rect.Top() + m_imgTmp[2].GetHeight(), 
+						rect.Top() + m_imgTmp[2].GetHeight() / 5, 
 						rect.Right(), 
-						rect.Bottom() - m_imgTmp[8].GetHeight()
+						rect.Bottom() - m_imgTmp[8].GetHeight() / 5
 						), 
 					CPoint(0, m_imgTmp[5].GetHeight() * status / 5)
 					);
@@ -272,7 +300,7 @@ public:
 					CRect
 						(
 						rect.Left(), 
-						rect.Bottom() - m_imgTmp[6].GetHeight(), 
+						rect.Bottom() - m_imgTmp[6].GetHeight() / 5, 
 						rect.Left() + m_imgTmp[6].GetWidth(), 
 						rect.Bottom()
 						), 
@@ -285,7 +313,7 @@ public:
 					CRect
 						(
 						rect.Left() + m_imgTmp[6].GetWidth(), 
-						rect.Bottom() - m_imgTmp[7].GetHeight(), 
+						rect.Bottom() - m_imgTmp[7].GetHeight() / 5, 
 						rect.Right() - m_imgTmp[8].GetWidth(), 
 						rect.Bottom()
 						), 
@@ -298,7 +326,7 @@ public:
 					CRect
 						(
 						rect.Right() - m_imgTmp[8].GetWidth(), 
-						rect.Bottom() - m_imgTmp[8].GetHeight(), 
+						rect.Bottom() - m_imgTmp[8].GetHeight() / 5, 
 						rect.Right(), 
 						rect.Bottom()
 						), 
@@ -312,9 +340,10 @@ public:
 						mem_img->Get(), txt_img, 
 						CRect
 							(
-							(rect.Right() - txt_img.GetWidth()) / 2, 
-							(rect.Bottom() - txt_img.GetHeight()) / 2, 
-							rect.Right(), rect.Bottom()
+							rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+							rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2, 
+							rect.Right(), 
+							rect.Bottom()
 							), 
 						CPoint()
 						);

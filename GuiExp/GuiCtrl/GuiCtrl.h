@@ -33,13 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
-// Version:	1.0.0002.1517
+// Date:	2010-05-26
+// Version:	1.0.0003.1746
 //
 // History:
 //	- 1.0.0001.2236(2010-05-23)	+ IGuiCtrl添加效果对象相关接口
 //								+ 添加IGuiCtrl::IsUpdated()接口
 //	- 1.0.0002.1517(2010-05-25)	# 当控件无效时IGuiCtrl::SetFocus()应该直接返回
+//	- 1.0.0003.1746(2010-05-26)	# IGuiCtrl::SetFocus()应该同时递归设置父控件焦点
+//								# IGuiCtrl::GetFocus()应该直接返回最底层的焦点控件
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -69,37 +71,22 @@ public:
 	};
 
 protected:
-	IGuiCtrl** m_Focus;
+	static IGuiCtrl* m_Focus;
 	IGuiEffect* m_Effect;
 
 public:
 	IGuiCtrl()
-		: m_Focus(NULL)
-		, m_Effect(NULL)
+		: m_Effect(NULL)
 	{}
 
 protected:
 	void Init(IGuiComp* pComp)
 	{
 		EXP_BASE::Init(pComp);
-		if (!pComp) return;
-		if (pComp->Empty())
-		{
-			m_Focus = ExMem::Alloc<IGuiCtrl*>();
-			(*m_Focus) = NULL;
-		}
-		else
-		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pComp->LastItem());
-			ExAssert(ctrl);
-			m_Focus = ctrl->m_Focus;
-		}
 		SetFocus();
 	}
 	void Fina()
 	{
-		if (m_Pare && m_Pare->Empty())
-			ExMem::Free(m_Focus);
 		m_Focus = NULL;
 		EXP_BASE::Fina();
 	}
@@ -159,24 +146,26 @@ public:
 	static bool IsEffect(IGuiCtrl* pCtrl)
 	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
 
-	virtual IGuiCtrl* SetFocus(IGuiCtrl* pFocus = NULL)
+	virtual IGuiCtrl* SetFocus()
 	{
-		if (!m_Focus) return NULL;
+		IGuiBoard* board = GetBoard();
+		if (!board) return NULL;
 		if (!IsEffect(this)) return NULL;
 		// 设置焦点
-		IGuiCtrl* old_fc = (*m_Focus);
-		(*m_Focus) = pFocus ? pFocus : this;
-		if (old_fc == (*m_Focus)) return NULL;
+		IGuiCtrl* old_fc = m_Focus;
+		m_Focus = this;
+		if (old_fc == m_Focus) return NULL;
+		board->SetFocus();
 		// 发送焦点改变消息
-		ExAssert(*m_Focus);
-		(*m_Focus)->Send(ExDynCast<IGuiObject>(*m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
+		m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
 		if (!old_fc) return old_fc;
-		old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(*m_Focus));
+		old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
+		board->Invalidate();
 		return old_fc;
 	}
-	virtual IGuiCtrl* GetFocus()
+	static IGuiCtrl* GetFocus()
 	{
-		return (*m_Focus);
+		return m_Focus;
 	}
 	virtual bool IsFocus()
 	{
@@ -184,10 +173,10 @@ public:
 		if (board && !board->IsFocus())
 			return false;
 		if (!m_Focus) return false;
-		IGuiCtrl* foc = GetFocus();
+		IGuiCtrl* foc = m_Focus;
 		if (foc == this)
 			return IsEffect(this);
-		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
 		{
 			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 			if (!ctrl) continue;

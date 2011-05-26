@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
-// Version:	1.0.0005.2202
+// Date:	2010-05-26
+// Version:	1.0.0006.1411
 //
 // History:
 //	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -43,6 +43,7 @@
 //	- 1.0.0004.1000(2010-05-19)	= IGuiBoard的基类改为IGuiBase
 //								+ 添加IGuiBoard::LayeredWindow();IGuiBoard::DefProc();IGuiBoard::GethWnd()
 //	- 1.0.0005.2202(2010-05-23)	= 调整IGuiBoard::LayeredWindow()接口
+//	- 1.0.0006.1411(2010-05-26)	+ 添加IGuiBoard::GetRealRect()接口实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -105,6 +106,7 @@ public:
 	// 获得窗口大小
 	virtual bool GetWindowRect(CRect& lpRect) = 0;
 	virtual bool GetClientRect(CRect& lpRect) = 0;
+	virtual bool GetRealRect(CRect& rc) { return GetClientRect(rc); }
 
 	// 窗口移动
 	virtual void MoveWindow(int x, int y, int nWidth, int nHeight, bool bRepaint = true) = 0;

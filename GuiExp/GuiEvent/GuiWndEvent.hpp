@@ -33,12 +33,14 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
-// Version:	1.0.0002.1611
+// Date:	2010-05-26
+// Version:	1.0.0003.1911
 //
 // History:
 //	- 1.0.0001.2202(2010-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
 //	- 1.0.0002.1611(2010-05-25)	# 修正当控件被设置为不可见并且其特效正在处理时,特效定时器将不会自动关闭的问题
+//	- 1.0.0003.1911(2010-05-26)	+ 添加针对性的控件消息转发
+//								+ 添加WM_MOUSELEAVE的消息发送
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -60,45 +62,170 @@ class CGuiWndEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
 
 protected:
+	static UINT_PTR s_MLCheckID;
+	static HWND s_MLCheckWD;
+	static IGuiCtrl* s_MLMove;
+	static void CALLBACK MouseLeaveCheck(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+	{
+		// 得到鼠标坐标
+		POINT pt_tmp = {0};
+		::GetCursorPos(&pt_tmp);
+		// 得到对应的窗口句柄
+		hWnd = ::WindowFromPoint(pt_tmp);
+		// 给原先的窗口句柄发送消息
+		if (s_MLCheckWD && s_MLCheckWD != hWnd)
+		{
+			::SendMessage(s_MLCheckWD, WM_MOUSELEAVE, 0, NULL);
+			s_MLCheckWD = NULL;
+		}
+	}
+
 	// 消息转发
 	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui) return 0;
+		IGuiCtrl* ctrl = NULL;
 		// 向控件转发消息
-		for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+		switch (nMessage)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-			if (!ctrl) continue;
-			// 初始化返回值
-			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
-			// 转发消息
-			switch( nMessage )
+			// 鼠标消息
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONDBLCLK:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		case WM_NCLBUTTONDOWN:
+		case WM_NCLBUTTONDBLCLK:
+		case WM_NCRBUTTONDOWN:
+		case WM_NCRBUTTONDBLCLK:
+		case WM_NCMBUTTONDOWN:
+		case WM_NCMBUTTONDBLCLK:
+		case WM_MOUSEMOVE:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_MOUSEWHEEL:
+		case WM_NCHITTEST:
+		case WM_NCMOUSEMOVE:
+		case WM_NCLBUTTONUP:
+		case WM_NCRBUTTONUP:
+		case WM_NCMBUTTONUP:
 			{
-			case WM_PAINT:
-				if (ctrl->IsVisible())
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp);
+			//	ExTrace(_T("0x%04X, (%d, %d)\n"), nMessage, pt_tmp.x, pt_tmp.y);
+				CPoint pt(pt_tmp);
+				pGui->ScreenToClient(pt);
+				ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
+				switch (nMessage)
 				{
-					IGuiEffect* eff = ctrl->GetEffect();
-					if (eff)
+					// 预存鼠标移动
+				case WM_MOUSEMOVE:
+				case WM_NCMOUSEMOVE:
 					{
-						if(!eff->IsInit())
-							eff->Init(*(CImage*)lParam);
-						ctrl->Send(*ite, nMessage, wParam, lParam);
-						eff->Show(*ite, *(CImage*)lParam);
+						s_MLCheckWD = pGui->GethWnd();
+						IGuiCtrl* cur = ctrl;
+						if (cur == s_MLMove) break;
+						if (s_MLMove)
+							s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+						s_MLMove = cur;
+					}
+					break;
+					// 设置控件焦点
+				case WM_LBUTTONDOWN:
+				case WM_LBUTTONDBLCLK:
+				case WM_RBUTTONDOWN:
+				case WM_RBUTTONDBLCLK:
+				case WM_MBUTTONDOWN:
+				case WM_MBUTTONDBLCLK:
+				case WM_NCLBUTTONDOWN:
+				case WM_NCLBUTTONDBLCLK:
+				case WM_NCRBUTTONDOWN:
+				case WM_NCRBUTTONDBLCLK:
+				case WM_NCMBUTTONDOWN:
+				case WM_NCMBUTTONDBLCLK:
+					if (ctrl) ctrl->SetFocus();
+					break;
+				}
+				if (!ctrl) break;
+				// 初始化返回值
+				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				// 转发消息
+				ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
+				// 判断返回值
+				lrDef = ctrl->GetResult(lrDef);
+			}
+			break;
+		case WM_MOUSELEAVE:
+			// 给尚未离开的控件发送消息
+			if (s_MLMove)
+			{
+				s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+				s_MLMove = NULL;
+			}
+			break;
+			// 键盘消息
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_CHAR:
+		case WM_DEADCHAR:
+		case WM_SYSKEYDOWN:
+		case WM_SYSKEYUP:
+		case WM_SYSCHAR:
+		case WM_SYSDEADCHAR:
+			{
+				ctrl = IGuiCtrl::GetFocus();
+				if (!ctrl) break;
+				// 初始化返回值
+				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				// 转发消息
+				ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
+				// 判断返回值
+				lrDef = ctrl->GetResult(lrDef);
+			}
+			break;
+			// 焦点消息
+		case WM_SETFOCUS:
+		case WM_KILLFOCUS:
+			pGui->Invalidate();
+			break;
+		default:
+			for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			{
+				ctrl = ExDynCast<IGuiCtrl>(*ite);
+				if (!ctrl) continue;
+				// 初始化返回值
+				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				// 转发消息
+				switch( nMessage )
+				{
+				case WM_PAINT:
+					if (ctrl->IsVisible())
+					{
+						IGuiEffect* eff = ctrl->GetEffect();
+						if (eff)
+						{
+							if(!eff->IsInit())
+								eff->Init(*(CImage*)lParam);
+							ctrl->Send(*ite, nMessage, wParam, lParam);
+							eff->Show(*ite, *(CImage*)lParam);
+						}
+						else
+							ctrl->Send(*ite, nMessage, wParam, lParam);
 					}
 					else
-						ctrl->Send(*ite, nMessage, wParam, lParam);
+					{
+						IGuiEffect* eff = ctrl->GetEffect();
+						if (eff) eff->KillTimer(pGui->GethWnd());
+					}
+					break;
+				default:
+					ctrl->Send(*ite, nMessage, wParam, lParam);
 				}
-				else
-				{
-					IGuiEffect* eff = ctrl->GetEffect();
-					if (eff) eff->KillTimer(pGui->GethWnd());
-				}
-				break;
-			default:
-				ctrl->Send(*ite, nMessage, wParam, lParam);
+				// 判断返回值
+				lrDef = ctrl->GetResult(lrDef);
 			}
-			// 判断返回值
-			ctrl->GetResult(lrDef);
 		}
 		return lrDef;
 	}
@@ -112,6 +239,11 @@ public:
 		LRESULT ret = 0;
 		switch( nMessage )
 		{
+		case WM_SHOWWINDOW:
+			// 鼠标离开事件检测定时器
+			if (s_MLCheckID == 0)
+				s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
+			break;
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps = {0};
@@ -147,6 +279,9 @@ public:
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
+UINT_PTR CGuiWndEvent::s_MLCheckID = 0;
+HWND CGuiWndEvent::s_MLCheckWD = NULL;
+IGuiCtrl* CGuiWndEvent::s_MLMove = NULL;
 
 //////////////////////////////////////////////////////////////////
 

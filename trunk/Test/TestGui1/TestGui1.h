@@ -12,16 +12,8 @@ public:
 		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
 		if (!board) return;
 
-		ExTrace(_T("0x%04X\n"), nMessage);
-
 		switch( nMessage )
 		{
-		case WM_NCHITTEST:
-			{
-				LRESULT hit_test = GetResult();
-				SetResult((hit_test == HTCLIENT) ? HTCAPTION : hit_test);
-			}
-			break;
 		case WM_KEYDOWN:
 			{
 				int nKey = wParam;
@@ -48,6 +40,12 @@ public:
 
 		switch( nMessage )
 		{
+		case WM_NCHITTEST:
+			{
+				LRESULT hit_test = GetResult();
+				SetResult((hit_test == HTCLIENT) ? HTCAPTION : hit_test);
+			}
+			break;
 		case WM_NCLBUTTONDOWN:
 			{
 				CGC gc;

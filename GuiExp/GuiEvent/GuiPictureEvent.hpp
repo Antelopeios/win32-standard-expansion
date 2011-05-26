@@ -81,8 +81,9 @@ public:
 		case WM_PAINT:
 			if (lParam)
 			{
-				// 获得属性
 				CGC gc;
+
+				// 获得属性
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("image"), &gc);
 				if (!state) break;
 				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
@@ -102,6 +103,7 @@ public:
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
 				ctrl->GetRealRect(rect);
+
 				// 处理
 				if (m_rcOld != rect)
 				{
@@ -109,6 +111,7 @@ public:
 					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), rect.Height()));
 					m_rcOld = rect;
 				}
+
 				// 绘图
 				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
 				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());

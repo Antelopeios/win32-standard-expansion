@@ -34,10 +34,11 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-25
-// Version:	1.0.0000.1658
+// Version:	1.0.0000.2258
 //
 // History:
-//	- 1.0.0000.1658(2010-05-25)	@ 开始构建CGuiButtonEvent
+//	- 1.0.0000.2258(2010-05-25)	@ 开始构建CGuiButtonEvent
+//								@ 基本完成CGuiButtonEvent的绘图部分
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -58,6 +59,8 @@ class CGuiButtonEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
 
 protected:
+	CRect m_rcOld;
+	CImage m_imgTmp[9];
 
 public:
 	~CGuiButtonEvent()
@@ -67,6 +70,258 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_PAINT:
+			if (lParam)
+			{
+				CGC gc;
+
+				// 获得属性
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				if (!ctrl->IsEnabled()) status = 4;
+
+				state = ctrl->GetState(_T("image"), &gc);
+				if (!state) break;
+				CImage* (image[9]);
+				for(int i = 0; i < _countof(image); ++i)
+				{
+					image[i] = (CImage*)(((void**)state->sta_arr)[i]);
+					if (!image[i] || image[i]->IsNull()) break;
+				}
+
+				state = ctrl->GetState(_T("color"), &gc);
+				if (!state) break;
+				pixel_t* pixel = (pixel_t*)(((void**)state->sta_arr)[status]);
+				if (!pixel) break;
+
+				state = ctrl->GetState(_T("text"), &gc);
+				if (!state) break;
+				CText* text = (CText*)(((void**)state->sta_arr)[status]);
+				if (!text) break;
+
+				CImage* mem_img = (CImage*)lParam;
+				if (!mem_img || mem_img->IsNull()) break;
+				CRect rect;
+				ctrl->GetRealRect(rect);
+
+				// 处理
+				if (m_rcOld != rect)
+				{
+					// l-t
+					m_imgTmp[0].Delete();
+					m_imgTmp[0].Set(image[0]->Get());
+					// m-t
+					m_imgTmp[1].Delete();
+					m_imgTmp[1].Set
+						(
+						CImgDeformer::ZomDeform
+							(
+							image[1]->Get(), 
+							rect.Width() - image[0]->GetWidth() - image[2]->GetWidth(), 
+							image[1]->GetHeight()
+							)
+						);
+					// r-t
+					m_imgTmp[2].Delete();
+					m_imgTmp[2].Set(image[2]->Get());
+					// l-m
+					m_imgTmp[3].Delete();
+					m_imgTmp[3].Set
+						(
+						CImgDeformer::ZomDeform
+							(
+							image[3]->Get(), 
+							image[3]->GetWidth(), 
+							rect.Height() - image[0]->GetHeight() - image[6]->GetHeight()
+							)
+						);
+					// m-m
+					m_imgTmp[4].Delete();
+					m_imgTmp[4].Set
+						(
+						CImgDeformer::ZomDeform
+							(
+							image[4]->Get(), 
+							rect.Width() - image[3]->GetWidth() - image[5]->GetWidth(), 
+							rect.Height() - image[1]->GetHeight() - image[7]->GetHeight()
+							)
+						);
+					// r-m
+					m_imgTmp[5].Delete();
+					m_imgTmp[5].Set
+						(
+						CImgDeformer::ZomDeform
+							(
+							image[5]->Get(), 
+							image[5]->GetWidth(), 
+							rect.Height() - image[2]->GetHeight() - image[8]->GetHeight()
+							)
+						);
+					// l-b
+					m_imgTmp[6].Delete();
+					m_imgTmp[6].Set(image[6]->Get());
+					// m-b
+					m_imgTmp[7].Delete();
+					m_imgTmp[7].Set
+						(
+						CImgDeformer::ZomDeform
+							(
+							image[7]->Get(), 
+							rect.Width() - image[6]->GetWidth() - image[8]->GetWidth(), 
+							image[7]->GetHeight()
+							)
+						);
+					// r-b
+					m_imgTmp[8].Delete();
+					m_imgTmp[8].Set(image[8]->Get());
+					// Save
+					m_rcOld = rect;
+				}
+
+				// 绘图
+				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
+				// l-t
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[0], 
+					CRect
+						(
+						rect.Left(), 
+						rect.Top(), 
+						rect.Left() + m_imgTmp[0].GetWidth(), 
+						rect.Top() + m_imgTmp[0].GetHeight()
+						), 
+					CPoint(0, m_imgTmp[0].GetHeight() * status / 5)
+					);
+				// m-t
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[1], 
+					CRect
+						(
+						rect.Left() + m_imgTmp[0].GetWidth(), 
+						rect.Top(), 
+						rect.Right() - m_imgTmp[2].GetWidth(), 
+						rect.Top() + m_imgTmp[1].GetHeight()
+						), 
+					CPoint(0, m_imgTmp[1].GetHeight() * status / 5)
+					);
+				// r-t
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[2], 
+					CRect
+						(
+						rect.Right() - m_imgTmp[2].GetWidth(), 
+						rect.Top(), 
+						rect.Right(), 
+						rect.Top() + m_imgTmp[2].GetHeight()
+						), 
+					CPoint(0, m_imgTmp[2].GetHeight() * status / 5)
+					);
+				// l-m
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[3], 
+					CRect
+						(
+						rect.Left(), 
+						rect.Top() + m_imgTmp[0].GetHeight(), 
+						rect.Left() + m_imgTmp[3].GetWidth(), 
+						rect.Bottom() - m_imgTmp[6].GetHeight()
+						), 
+					CPoint(0, m_imgTmp[3].GetHeight() * status / 5)
+					);
+				// m-m
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[4], 
+					CRect
+						(
+						rect.Left() + m_imgTmp[3].GetWidth(), 
+						rect.Top() + m_imgTmp[1].GetHeight(), 
+						rect.Right() - m_imgTmp[5].GetWidth(), 
+						rect.Bottom() - m_imgTmp[7].GetHeight()
+						), 
+					CPoint(0, m_imgTmp[4].GetHeight() * status / 5)
+					);
+				// r-m
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[5], 
+					CRect
+						(
+						rect.Right() - m_imgTmp[5].GetWidth(), 
+						rect.Top() + m_imgTmp[2].GetHeight(), 
+						rect.Right(), 
+						rect.Bottom() - m_imgTmp[8].GetHeight()
+						), 
+					CPoint(0, m_imgTmp[5].GetHeight() * status / 5)
+					);
+				// l-b
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[6], 
+					CRect
+						(
+						rect.Left(), 
+						rect.Bottom() - m_imgTmp[6].GetHeight(), 
+						rect.Left() + m_imgTmp[6].GetWidth(), 
+						rect.Bottom()
+						), 
+					CPoint(0, m_imgTmp[6].GetHeight() * status / 5)
+					);
+				// m-b
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[7], 
+					CRect
+						(
+						rect.Left() + m_imgTmp[6].GetWidth(), 
+						rect.Bottom() - m_imgTmp[7].GetHeight(), 
+						rect.Right() - m_imgTmp[8].GetWidth(), 
+						rect.Bottom()
+						), 
+					CPoint(0, m_imgTmp[7].GetHeight() * status / 5)
+					);
+				// r-b
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp[8], 
+					CRect
+						(
+						rect.Right() - m_imgTmp[8].GetWidth(), 
+						rect.Bottom() - m_imgTmp[8].GetHeight(), 
+						rect.Right(), 
+						rect.Bottom()
+						), 
+					CPoint(0, m_imgTmp[8].GetHeight() * status / 5)
+					);
+				// 绘文字
+				CImage txt_img(text->GetImage());
+				if (!txt_img.IsNull())
+					CImgRenderer::Render
+						(
+						mem_img->Get(), txt_img, 
+						CRect
+							(
+							(rect.Right() - txt_img.GetWidth()) / 2, 
+							(rect.Bottom() - txt_img.GetHeight()) / 2, 
+							rect.Right(), rect.Bottom()
+							), 
+						CPoint()
+						);
+				txt_img.Delete();
+			}
+			break;
+		}
 	}
 };
 

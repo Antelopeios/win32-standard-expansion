@@ -34,10 +34,12 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-25
-// Version:	1.0.0001.1718
+// Version:	1.0.0001.2305
 //
 // History:
-//	- 1.0.0001.1718(2010-05-25)	+ CGuiButton添加状态属性
+//	- 1.0.0001.2305(2010-05-25)	+ CGuiButton添加状态属性
+//								= CGuiButton::m_Status初始化为nor
+//								= CGuiButton不再托管内部的图片资源
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -69,6 +71,7 @@ protected:
 
 public:
 	CGuiButton()
+		: m_Status(nor)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
 		// 添加事件对象
@@ -76,8 +79,6 @@ public:
 	}
 	~CGuiButton()
 	{
-		for(int i = 0; i < _countof(m_Image); ++i)
-			m_Image[i].Delete();
 	}
 
 public:
@@ -125,10 +126,7 @@ public:
 		if (sType == _T("image"))
 		{
 			for(int i = 0; i < _countof(m_Image); ++i)
-			{
-				m_Image[i].Delete();
 				m_Image[i].Set(((CImage*)pState + i)->Get());
-			}
 			EXP_BASE::SetState(sType, pState);
 		}
 		else

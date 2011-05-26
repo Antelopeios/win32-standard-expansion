@@ -34,13 +34,14 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-25
-// Version:	1.0.0003.1406
+// Version:	1.0.0003.2305
 //
 // History:
 //	- 1.0.0001.2236(2010-05-23)	+ 添加CGuiPicture::IsUpdated()接口
 //	- 1.0.0002.1500(2010-05-24)	+ CGuiPicture添加Color属性
-//	- 1.0.0003.1406(2010-05-25)	+ CGuiPicture添加Text属性
+//	- 1.0.0003.2305(2010-05-25)	+ CGuiPicture添加Text属性
 //								= CGuiPicture调整控件状态接口
+//								= CGuiPicture不再托管内部的图片资源
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPicture_hpp__
@@ -72,7 +73,6 @@ public:
 	}
 	~CGuiPicture()
 	{
-		m_Image.Delete();
 	}
 
 public:
@@ -104,7 +104,6 @@ public:
 		else
 		if (sType == _T("image"))
 		{
-			m_Image.Delete();
 			m_Image.Set(((CImage*)pState)->Get());
 			EXP_BASE::SetState(sType, pState);
 		}

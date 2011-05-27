@@ -33,14 +33,15 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-26
-// Version:	1.0.0003.1911
+// Date:	2010-05-27
+// Version:	1.0.0004.1103
 //
 // History:
 //	- 1.0.0001.2202(2010-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
 //	- 1.0.0002.1611(2010-05-25)	# 修正当控件被设置为不可见并且其特效正在处理时,特效定时器将不会自动关闭的问题
 //	- 1.0.0003.1911(2010-05-26)	+ 添加针对性的控件消息转发
 //								+ 添加WM_MOUSELEAVE的消息发送
+//	- 1.0.0004.1103(2010-05-27)	+ 添加Tab键焦点切换的响应
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -62,6 +63,7 @@ class CGuiWndEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
 
 protected:
+	// 鼠标离开检测
 	static UINT_PTR s_MLCheckID;
 	static HWND s_MLCheckWD;
 	static IGuiCtrl* s_MLMove;
@@ -81,6 +83,7 @@ protected:
 	}
 
 	// 消息转发
+	bool m_ShiftDown;
 	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui) return 0;
@@ -183,12 +186,48 @@ protected:
 				ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
 				// 判断返回值
 				lrDef = ctrl->GetResult(lrDef);
+				// 处理焦点切换
+				if (WM_KEYDOWN == nMessage)
+				{
+					if (wParam == VK_TAB)
+					{
+						IGuiComp* comp = ctrl->GetParent();
+						IGuiComp::list_t::iterator_t ite = comp->Find(ExDynCast<IGuiComp>(ctrl));
+						if (ite == comp->GetChildren().Tail()) break;
+						if (m_ShiftDown)
+						{
+							if (ite == comp->GetChildren().Head())
+								ite = comp->GetChildren().Last();
+							else
+								--ite;
+						}
+						else
+						{
+							if (ite == comp->GetChildren().Last())
+								ite = comp->GetChildren().Head();
+							else
+								++ite;
+						}
+						IGuiCtrl* next = ExDynCast<IGuiCtrl>(*ite);
+						if (!next) break;
+						next->SetFocus();
+					}
+					else
+					if (wParam == VK_SHIFT)
+						m_ShiftDown = true;
+				}
+				else
+				if (WM_KEYUP == nMessage)
+					if (wParam == VK_SHIFT)
+						m_ShiftDown = false;
 			}
 			break;
 			// 焦点消息
 		case WM_SETFOCUS:
 		case WM_KILLFOCUS:
 			pGui->Invalidate();
+			if (WM_KILLFOCUS == nMessage)
+				m_ShiftDown = false;
 			break;
 		default:
 			for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
@@ -231,6 +270,10 @@ protected:
 	}
 
 public:
+	CGuiWndEvent()
+		: m_ShiftDown(false)
+	{}
+
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);

@@ -16,8 +16,7 @@ public:
 		{
 		case WM_KEYDOWN:
 			{
-				int nKey = wParam;
-				if (nKey == 27) // ESC
+				if (wParam == VK_ESCAPE) // ESC
 					board->PostMessage(WM_CLOSE);
 			}
 			break;
@@ -48,8 +47,7 @@ public:
 			break;
 		case WM_KEYDOWN:
 			{
-				int nKey = wParam;
-				if (nKey == 13) // Enter
+				if (wParam == VK_RETURN) // Enter
 					ctrl->SetVisible(!ctrl->IsVisible());
 			}
 			break;

@@ -34,13 +34,15 @@
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-05-26
-// Version:	1.0.0001.2006
+// Version:	1.0.0001.2302
 //
 // History:
 //	- 1.0.0000.2258(2010-05-25)	@ 开始构建CGuiButtonEvent
 //								@ 基本完成CGuiButtonEvent的绘图部分
-//	- 1.0.0001.2006(2010-05-26)	# 修正CGuiButtonEvent绘图中的错误
+//	- 1.0.0001.2302(2010-05-26)	# 修正CGuiButtonEvent绘图中的错误
 //								+ CGuiButtonEvent添加状态变化消息处理
+//								# 当鼠标按下后移动,按钮状态会变为未按下的状态
+//								+ 添加按钮单击消息转发及Enter键响应
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -80,19 +82,36 @@ public:
 		{
 		case WM_MOUSEMOVE:
 			{
-				DWORD status = 1;
-				ctrl->SetState(_T("status"), &status);
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				if (status != 2)
+				{
+					status = 1;
+					ctrl->SetState(_T("status"), &status);
+				}
 			}
 			break;
+		case WM_KEYDOWN:
+			if (wParam != 13) break; // Enter
 		case WM_LBUTTONDOWN:
 			{
 				DWORD status = 2;
 				ctrl->SetState(_T("status"), &status);
 			}
 			break;
+		case WM_KEYUP:
+			if (wParam != 13) break; // Enter
 		case WM_LBUTTONUP:
 			{
-				DWORD status = 1;
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				if (status == 2) // 当按下后抬起,视为一次Click
+					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_COMMAND, BN_CLICKED);
+				status = 1;
 				ctrl->SetState(_T("status"), &status);
 			}
 			break;

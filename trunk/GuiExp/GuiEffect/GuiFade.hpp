@@ -59,7 +59,7 @@ public:
 		static int alpha = 0;
 		if (alpha >= EXP_CM) alpha = 0;
 		if (alpha > EXP_CM - 25) alpha = EXP_CM;
-		ExTrace(_T("fade alpha: %d\n"), alpha);
+	//	ExTrace(_T("fade alpha: %d\n"), alpha);
 
 		CImage tmp_old(tOld.Clone());
 		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(alpha));

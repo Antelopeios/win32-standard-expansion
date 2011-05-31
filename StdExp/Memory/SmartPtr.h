@@ -33,8 +33,8 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.3.0027.1619
+// Date:	2011-05-30
+// Version:	1.3.0028.1804
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -73,6 +73,9 @@
 //	- 1.3.0025.1858(2011-05-11)	^ 优化CPtrManagerT的单例实现方式
 //	- 1.3.0026.1724(2011-05-12)	# 修正CSmartPtrT对裸指针的构造函数在实现上存在无限递归的问题
 //	- 1.3.0027.1619(2011-05-19)	= CPtrManagerT在单例情况下,内部对象会被内存池自动回收,因此析构函数不做任何工作
+//	- 1.3.0028.1804(2011-05-30)	= 将CPtrManagerT独立作为一个单独的模块维护
+//								= 调整CSmartPtrT模板内部定义,参数TypeT直接作为内部变量的类型,而不是TypeT*
+//								+ CSmartPtrT支持不托管内部对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -83,180 +86,9 @@
 #endif // _MSC_VER > 1000
 
 #include "Memory/MemAlloc.h"
-#include "Container/Map.h"
+#include "Memory/PtrManager.h"
 
 EXP_BEG
-
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-class CPtrManagerT : INonCopyable, public EXP_SINGLETON<CPtrManagerT<AllocT, ModelT> >
-{
-protected:
-	// 计数指针接口
-	class IReferPtr
-	{
-	protected:
-		void*		  p_ptr;
-		volatile LONG n_ref;
-
-	public:
-		IReferPtr()
-			: p_ptr(NULL)
-			, n_ref(0)
-		{}
-		virtual ~IReferPtr()
-		{}
-
-	public:
-		EXP_INLINE void InitPtr(void* pt)
-		{
-			p_ptr = pt;
-			n_ref = 1;
-		}
-
-		EXP_INLINE long GetRefCount()
-		{ return n_ref; }
-		EXP_INLINE void* GetPtr()
-		{ return p_ptr; }
-
-		EXP_INLINE bool operator==(void* pt) const
-		{ return (p_ptr == pt); }
-		EXP_INLINE bool operator!=(void* pt) const
-		{ return (p_ptr != pt); }
-
-		virtual void Inc() = 0;
-		virtual bool Dec() = 0;
-
-		virtual void Free() = 0;
-	};
-	// 计数指针类
-	template <typename RefAllocT = EXP_MEMORY_ALLOC, typename RefModelT = EXP_THREAD_MODEL>
-	class CReferPtrT : public IReferPtr
-	{
-	public:
-		CReferPtrT()
-			: IReferPtr()
-		{}
-		~CReferPtrT()
-		{ if (p_ptr) RefAllocT::Free(p_ptr); }
-
-	public:
-		void Inc()
-		{
-			RefModelT::Inc(&n_ref);
-		}
-		bool Dec()
-		{
-			if (RefModelT::Dec(&n_ref) == 0)
-			{
-				Free();
-				return true;
-			}
-			else
-				return false;
-		}
-
-		EXP_INLINE static CReferPtrT* Alloc()
-		{ return AllocT::Alloc<CReferPtrT>(); }
-		void Free()
-		{ AllocT::Free(this); }
-	};
-
-public:
-	typedef AllocT alloc_t;
-	typedef ModelT model_t;
-	typedef typename model_t::_LockPolicy mutex_policy_t;
-	typedef CLockT<mutex_policy_t> mutex_t;
-	typedef CMapT<void*, IReferPtr*, _MapPolicyT<CHash, alloc_t> > ptr_map_t;
-
-protected:
-	mutex_t		m_Mutex;
-	ptr_map_t	m_ReferPtrs;
-
-public:
-	CPtrManagerT()
-		: m_ReferPtrs(1021)
-	{}
-	~CPtrManagerT()
-	{ /*Clear(true);*//*单例情况下,内部对象会被内存池自动回收*/ }
-
-public:
-	// 获取指针引用计数
-	EXP_INLINE long Get(void* pPtr)
-	{
-		if (!pPtr) return 0;
-		ExLock(m_Mutex, true, mutex_t);
-		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
-		if (ite == m_ReferPtrs.Tail()) return 0;
-		IReferPtr* ref_ptr = ite->Val();
-		if (ref_ptr && ref_ptr->GetPtr())
-			return ref_ptr->GetRefCount();
-		else
-			return 0;
-	}
-	// 添加指针引用计数
-	template <typename RefAllocT, typename RefModelT>
-	EXP_INLINE void Add(void* pPtr)
-	{
-		if (!pPtr) return;
-		IReferPtr* ref_ptr = NULL;
-		ExLock(m_Mutex, false, mutex_t);
-		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
-		if (ite == m_ReferPtrs.Tail())
-		{
-			ref_ptr = CReferPtrT<RefAllocT, RefModelT>::Alloc();
-			ref_ptr->InitPtr(pPtr);
-			m_ReferPtrs.Add(pPtr, ref_ptr);
-		}
-		else
-		{
-			ref_ptr = ite->Val();
-			if (ref_ptr && ref_ptr->GetPtr())
-				ref_ptr->Inc();
-			else
-			{
-				if (ref_ptr) ref_ptr->Free();
-				m_ReferPtrs.Del(ite);
-			}
-		}
-	}
-	// 删除指针引用计数
-	EXP_INLINE void Del(void* pPtr, bool bRelease = false)
-	{
-		if (!pPtr) return;
-		ExLock(m_Mutex, false, mutex_t);
-		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
-		if (ite == m_ReferPtrs.Tail()) return;
-		IReferPtr* ref_ptr = ite->Val();
-		if (!bRelease && ref_ptr && ref_ptr->GetPtr())
-		{
-			if (ref_ptr->Dec())
-				m_ReferPtrs.Del(ite);
-		}
-		else
-		{
-			if (ref_ptr) ref_ptr->Free();
-			m_ReferPtrs.Del(ite);
-		}
-	}
-	// 清空指针记录表
-	EXP_INLINE void Clear(bool bNull = false)
-	{
-		ExLock(m_Mutex, false, mutex_t);
-		for(ptr_map_t::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)
-		{
-			IReferPtr* ref_ptr = ite->Val();
-			if (ref_ptr) ref_ptr->Free();
-		}
-		if (bNull)
-			m_ReferPtrs.Null();
-		else
-			m_ReferPtrs.Clear();
-	}
-};
-
-typedef CPtrManagerT<> CPtrManager;
 
 //////////////////////////////////////////////////////////////////
 
@@ -265,34 +97,41 @@ template <typename TypeT, typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = 
 class CSmartPtrT
 {
 public:
+	typedef TypeT type_t;
 	typedef AllocT alloc_t;
 	typedef ModelT model_t;
 
 	// 成员变量
 protected:
-	TypeT* m_Ptr;
+	type_t m_Ptr;
+	bool m_bTru;
 
 	// 构造/析构
 public:
 	CSmartPtrT(void)
 		: m_Ptr(NULL)
+		, m_bTru(true)
 	{}
-	CSmartPtrT(TypeT* ptr)
+	CSmartPtrT(type_t ptr)
 		: m_Ptr(NULL)
+		, m_bTru(true)
 	{ (*this) = ptr; }
 	CSmartPtrT(const CSmartPtrT& ptr)
 		: m_Ptr(NULL)
+		, m_bTru(true)
 	{ (*this) = ptr; }
 
 	//////////////////////////////////
 
 	template <typename Type2T>
-	CSmartPtrT(Type2T* ptr)
+	CSmartPtrT(Type2T ptr)
 		: m_Ptr(NULL)
+		, m_bTru(true)
 	{ (*this) = ptr; }
 	template <typename Type2T>
 	CSmartPtrT(const CSmartPtrT<Type2T>& ptr)
 		: m_Ptr(NULL)
+		, m_bTru(true)
 	{ (*this) = ptr; }
 
 	//////////////////////////////////
@@ -305,10 +144,14 @@ public:
 	long GetRefCount()
 	{ return CPtrManager::Instance().Get(m_Ptr); }
 
+	// 是否做托管
+	void SetTrust(bool bTru = true) { m_bTru = bTru; }
+	bool IsTrust() { return m_bTru; }
+
 	void Inc()
-	{ CPtrManager::Instance().Add<alloc_t, model_t>(m_Ptr); }
+	{ if (m_bTru) CPtrManager::Instance().Add<alloc_t, model_t>(m_Ptr); }
 	void Dec()
-	{ CPtrManager::Instance().Del(m_Ptr); }
+	{ if (m_bTru) CPtrManager::Instance().Del(m_Ptr); }
 
 	void Release()
 	{
@@ -318,7 +161,7 @@ public:
 
 	//////////////////////////////////
 
-	CSmartPtrT& operator=(TypeT* ptr)
+	CSmartPtrT& operator=(type_t ptr)
 	{
 		if ((*this) == ptr) return (*this);
 		Dec();
@@ -329,7 +172,7 @@ public:
 	CSmartPtrT& operator=(const CSmartPtrT& ptr)
 	{ return ((*this) = ptr.m_Ptr); }
 
-	bool operator==(TypeT* ptr) const
+	bool operator==(type_t ptr) const
 	{
 		if( m_Ptr )
 			return (m_Ptr == ptr);
@@ -340,7 +183,7 @@ public:
 	}
 	bool operator==(const CSmartPtrT& ptr) const
 	{ return (m_Ptr == ptr.m_Ptr); }
-	bool operator!=(TypeT* ptr) const
+	bool operator!=(type_t ptr) const
 	{
 		if( m_Ptr )
 			return (m_Ptr != ptr);
@@ -352,27 +195,27 @@ public:
 	bool operator!=(const CSmartPtrT& ptr) const
 	{ return (m_Ptr != ptr.m_Ptr); }
 
-	TypeT* operator+(DWORD offset) const
+	type_t operator+(DWORD offset) const
 	{ return (m_Ptr + offset); }
-	TypeT* operator-(DWORD offset) const
+	type_t operator-(DWORD offset) const
 	{ return (m_Ptr - offset); }
 
 	bool operator!() const
 	{ return !m_Ptr; }
 
-	TypeT* operator->() const
+	type_t operator->() const
 	{ return m_Ptr; }
-	operator TypeT*() const
+	operator type_t() const
 	{ return m_Ptr; }
 
 	//////////////////////////////////
 
 	template <typename Type2T>
-	CSmartPtrT& operator=(Type2T* ptr)
+	CSmartPtrT& operator=(Type2T ptr)
 	{
 		if ((*this) == ptr) return (*this);
 		Dec();
-		m_Ptr = (TypeT*)ptr;
+		m_Ptr = (type_t)ptr;
 		Inc();
 		return (*this);
 	}
@@ -381,21 +224,21 @@ public:
 	{ return ((*this) = ptr.m_Ptr); }
 
 	template <typename Type2T>
-	bool operator==(Type2T* ptr) const
-	{ return ((*this) == (TypeT*)ptr); }
+	bool operator==(Type2T ptr) const
+	{ return ((*this) == (type_t)ptr); }
 	template <typename Type2T>
 	bool operator==(const CSmartPtrT<Type2T>& ptr) const
-	{ return (m_Ptr == (TypeT*)ptr.m_Ptr); }
+	{ return (m_Ptr == (type_t)ptr.m_Ptr); }
 	template <typename Type2T>
-	bool operator!=(Type2T* ptr) const
-	{ return ((*this) != (TypeT*)ptr); }
+	bool operator!=(Type2T ptr) const
+	{ return ((*this) != (type_t)ptr); }
 	template <typename Type2T>
 	bool operator!=(const CSmartPtrT<Type2T>& ptr) const
-	{ return (m_Ptr != (TypeT*)ptr.m_Ptr); }
+	{ return (m_Ptr != (type_t)ptr.m_Ptr); }
 
 	template <typename Type2T>
-	operator Type2T*() const
-	{ return (Type2T*)m_Ptr; }
+	operator Type2T() const
+	{ return (Type2T)m_Ptr; }
 };
 
 //////////////////////////////////////////////////////////////////

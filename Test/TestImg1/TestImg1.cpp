@@ -12,7 +12,7 @@
 HINSTANCE hInst;								// 当前实例
 TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
 TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
-image_t imgShow = NULL, imgOrig = NULL;
+CImage imgShow, imgOrig;
 
 // 此代码模块中包含的函数的前向声明:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -54,9 +54,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			DispatchMessage(&msg);
 		}
 	}
-
-	ICoderObject::DeleteImage(imgShow);
-	ICoderObject::DeleteImage(imgOrig);
 
 	return (int) msg.wParam;
 }
@@ -129,7 +126,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	// 解码文件
 	imgOrig = coder->Decode();
-	imgShow = CImage(imgOrig).Clone();
+	imgShow = imgOrig.Clone();
 	// 关闭资源
 	CResGetter::ReleaseBinary(hres);
 
@@ -158,16 +155,14 @@ BOOL OpenFile(HWND hWnd, CString& sPath)
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	if (!coder) return FALSE;
 	// 解码文件
-	ICoderObject::DeleteImage(imgShow);
-	ICoderObject::DeleteImage(imgOrig);
 	imgOrig = coder->Decode();
-	imgShow = CImage(imgOrig).Clone();
+	imgShow = imgOrig.Clone();
 	return TRUE;
 } 
 
 BOOL SaveFile(DWORD nInx, CString& sPath)
 {
-	if (!imgShow) return FALSE;
+	if (imgShow.IsNull()) return FALSE;
 	if (sPath.Empty()) return FALSE;
 	// 获取解码器
 	CGC gc;
@@ -182,14 +177,8 @@ BOOL SaveFile(DWORD nInx, CString& sPath)
 
 void Render(HWND hWnd, IFilterObject* pFilter = NULL)
 {
-	if (!imgShow) return;
-	CImage bmp_img(imgShow), tmp;
-	CRect rc(0, 0, bmp_img.GetWidth(), bmp_img.GetHeight());
-	tmp.Create(rc.Width(), rc.Height());
-	if (!tmp) return;
-	CImgRenderer::Render(tmp, bmp_img, rc, CPoint(), pFilter);
-	ICoderObject::DeleteImage(imgShow);
-	imgShow = tmp;
+	if (imgShow.IsNull()) return;
+	CImgRenderer::Render(imgShow, imgShow, CRect(), CPoint(), pFilter);
 	// 刷新窗口
 	Invalidate(hWnd);
 }
@@ -242,8 +231,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_ORI:
 			if (imgOrig)
 			{
-				ICoderObject::DeleteImage(imgShow);
-				imgShow = CImage(imgOrig).Clone();
+				imgShow = imgOrig.Clone();
 				// 刷新窗口
 				Invalidate(hWnd);
 			}
@@ -259,7 +247,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				};
 				image_t tmp = CImgDeformer::PlgDeform(imgShow, var);
 				if(!tmp) break;
-				ICoderObject::DeleteImage(imgShow);
 				imgShow = tmp;
 				// 刷新窗口
 				Invalidate(hWnd);
@@ -270,7 +257,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				image_t tmp = CImgDeformer::WhlDeform(imgShow, -45);
 				if(!tmp) break;
-				ICoderObject::DeleteImage(imgShow);
 				imgShow = tmp;
 				// 刷新窗口
 				Invalidate(hWnd);
@@ -282,7 +268,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CImage bmp_img(imgShow);
 				image_t tmp = CImgDeformer::ZomDeform(imgShow, (LONG)(bmp_img.GetWidth() * -1.2), (LONG)(bmp_img.GetHeight() * 1.5));
 				if(!tmp) break;
-				ICoderObject::DeleteImage(imgShow);
 				imgShow = tmp;
 				// 刷新窗口
 				Invalidate(hWnd);
@@ -310,11 +295,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CFilterOuterGlowT<CFilterCopy> filter;
 				CPoint pt_flt(filter.GetRadius(), filter.GetRadius());
 				// 将图片扩大
-				CImage bmp_img(imgShow);
-				CRect rc(0, 0, bmp_img.GetWidth(), bmp_img.GetHeight());
-				image_t tmp = bmp_img.Clone(rc + pt_flt);
+				CRect rc(0, 0, imgShow.GetWidth(), imgShow.GetHeight());
+				image_t tmp = imgShow.Clone(rc + pt_flt);
 				if (!tmp) break;
-				ICoderObject::DeleteImage(imgShow);
 				imgShow = tmp;
 				// 渲染图片
 				Render(hWnd, &filter);
@@ -352,25 +335,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
 			FillRect(mem_grp, &rect, brh);
 
-			CImage bmp_img(imgShow);
-			if(!bmp_img.IsNull())
+			if(!imgShow.IsNull())
 			{
 				CImgRenderer::Render
 					(
-					mem_img, bmp_img, 
+					mem_img, imgShow, 
 					CRect
 						(
-						(rect.right - bmp_img.GetWidth()) / 2, 
-						(rect.bottom - bmp_img.GetHeight()) / 2, 
+						(rect.right - imgShow.GetWidth()) / 2, 
+						(rect.bottom - imgShow.GetHeight()) / 2, 
 						rect.right, 
-						(rect.bottom - bmp_img.GetHeight()) / 2 + 100
+						rect.bottom
 						), 
-					CPoint(0, 100)
+					CPoint()
 					);
 			}
 
 			CText text(_T("Dark C.at"), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
-			bmp_img.Set(text.GetImage());
+			CImage bmp_img(text.GetImage());
 			if(!bmp_img.IsNull())
 			{
 				CImgRenderer::Render
@@ -386,12 +368,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					CPoint()
 					);
 			}
-			bmp_img.Delete();
 
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 
 			mem_grp.Delete();
-			mem_img.Delete();
 		}
 		EndPaint(hWnd, &ps);
 		break;

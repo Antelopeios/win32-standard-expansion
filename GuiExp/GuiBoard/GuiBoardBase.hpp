@@ -54,15 +54,25 @@
 #endif // _MSC_VER > 1000
 
 EXP_BEG
+//////////////////////////////////////////////////////////////////
+
+struct _GuiBoardAlloc
+{
+	EXP_INLINE static void Free(void* pPtr)
+	{
+		if (!pPtr) return;
+		::DestroyWindow((HWND)pPtr);
+	}
+};
 
 //////////////////////////////////////////////////////////////////
 
 // GUI ´°¿Ú¶ÔÏó
-interface IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t>
+interface IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
 
-	typedef ITypeObjectT<wnd_t> type_base_t;
+	typedef ITypeObjectT<wnd_t, _GuiBoardAlloc> type_base_t;
 
 protected:
 	static const CString s_ClassName;
@@ -102,19 +112,18 @@ protected:
 
 public:
 	bool Create(LPCTSTR sWndName, CRect& rcWnd, 
-		int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
-		wnd_t wndParent = NULL)
+				int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
+				wnd_t wndParent = NULL)
 	{
-		Destroy();
-
 		RegisterWndClass(s_ClassName);
-		Attach(
-			::CreateWindowEx
+		Attach
 			(
-			dwExStyle, s_ClassName, sWndName, dwStyle, 
-			rcWnd.Left(), rcWnd.Top(), rcWnd.Width(), rcWnd.Height(), 
-			wndParent, NULL, m_hIns, NULL
-			)
+			::CreateWindowEx
+				(
+				dwExStyle, s_ClassName, sWndName, dwStyle, 
+				rcWnd.Left(), rcWnd.Top(), rcWnd.Width(), rcWnd.Height(), 
+				wndParent, NULL, m_hIns, NULL
+				)
 			);
 		if( IsNull() ) return false;
 
@@ -123,16 +132,15 @@ public:
 
 		return true;
 	}
-	bool Destroy()
-	{
-		bool ret = true;
-		if (!IsNull())
-			ret = ::DestroyWindow(Get());
-		Detach();
-		return ret;
-	}
+
 	bool IsNull() const
 	{ return type_base_t::IsNull(); }
+
+	wnd_t operator=(wnd_t tType)
+	{
+		Set(tType);
+		return Get();
+	}
 
 	bool Attach(wnd_t hWnd)
 	{

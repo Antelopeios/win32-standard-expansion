@@ -55,10 +55,21 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGraph : public ITypeObjectT<graph_t>
+struct _GraphAlloc
+{
+	EXP_INLINE static void Free(void* pPtr)
+	{
+		if (!pPtr) return;
+		::DeleteDC((HDC)pPtr);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CGraph : public ITypeObjectT<graph_t, _GraphAlloc>
 {
 public:
-	typedef ITypeObjectT<graph_t> base_obj_t;
+	typedef ITypeObjectT<graph_t, _GraphAlloc> base_obj_t;
 
 protected:
 	typedef CListT<DWORD>	typlst_t;
@@ -75,31 +86,35 @@ public:
 	{}
 
 public:
-	bool Delete()
+	void Set(graph_t tGraph)
 	{
-		bool ret = true;
+		if (Get() == tGraph) return;
 		if (!IsNull())
 		{
 			for(objlst_t::iterator_t ite = m_ObjLst.Head(); ite != m_ObjLst.Tail(); ++ite)
-				SelectObject(Get(), (*ite));
-			ret = DeleteDC(Get());
+				::SelectObject(Get(), (*ite));
 		}
-		Set(NULL);
 		m_ObjLst.Clear();
 		m_TypLst.Clear();
-		return ret;
+		base_obj_t::Set(tGraph);
 	}
+
+	graph_t operator=(graph_t tType)
+	{
+		Set(tType);
+		return Get();
+	}
+
 	graph_t Create(graph_t tGraph = NULL)
 	{
-		Delete();
-		Set(CreateCompatibleDC(tGraph));
+		Set(::CreateCompatibleDC(tGraph));
 		return Get();
 	}
 
 	HGDIOBJ SetObject(HGDIOBJ hObj)
 	{
-		HGDIOBJ tmp_obj(SelectObject(Get(), hObj));
-		DWORD type = GetObjectType(hObj);
+		HGDIOBJ tmp_obj(::SelectObject(Get(), hObj));
+		DWORD type = ::GetObjectType(hObj);
 		if (typlst_t::finder_t::Find(m_TypLst, type) == m_TypLst.Tail())
 		{
 			m_TypLst.Add(type);
@@ -109,7 +124,7 @@ public:
 		return tmp_obj;
 	}
 	HGDIOBJ GetObject(UINT uType) const
-	{ return GetCurrentObject(Get(), uType); }
+	{ return ::GetCurrentObject(Get(), uType); }
 };
 
 //////////////////////////////////////////////////////////////////

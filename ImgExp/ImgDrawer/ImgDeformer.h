@@ -140,7 +140,9 @@ protected:
 	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const CPointT<double> (&ptVer)[2], 
 										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
 	{
-		CImage exp_src(imgSrc);
+		CImage exp_src;
+		exp_src.SetTrust(false);
+		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
 		CPointT<double> ver_src[4] = 
@@ -171,6 +173,7 @@ protected:
 		};
 		// 创建目标图像
 		CImage exp_des;
+		exp_des.SetTrust(false);
 		exp_des.Create(w_des, h_des);
 		if (exp_des.IsNull()) return NULL;
 		// 映射坐标点
@@ -199,7 +202,9 @@ public:
 	// 矩阵变换
 	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
 	{
-		CImage exp_src(imgSrc);
+		CImage exp_src;
+		exp_src.SetTrust(false);
+		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
 		CPointT<double> ver_src[2] = 
@@ -219,7 +224,9 @@ public:
 	// 平行四边形变换
 	EXP_INLINE static image_t PlgDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], inter_proc_t interProc = InterBilinear)
 	{
-		CImage exp_src(imgSrc);
+		CImage exp_src;
+		exp_src.SetTrust(false);
+		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
 		CPointT<double> ver_src[2] = 
@@ -241,7 +248,9 @@ public:
 	// 旋转变换
 	EXP_INLINE static image_t WhlDeform(_IN_ image_t imgSrc, _IN_ int16_t nDegree, inter_proc_t interProc = InterBilinear)
 	{
-		CImage exp_src(imgSrc);
+		CImage exp_src;
+		exp_src.SetTrust(false);
+		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 角度换算弧度
 		nDegree = nDegree % 360;
@@ -259,7 +268,9 @@ public:
 	// 缩放变换
 	EXP_INLINE static image_t ZomDeform(_IN_ image_t imgSrc, _IN_ LONG nW, _IN_ LONG nH, inter_proc_t interProc = InterBilinear)
 	{
-		CImage exp_src(imgSrc);
+		CImage exp_src;
+		exp_src.SetTrust(false);
+		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 计算形变矩阵
 		double matrix[4] = 

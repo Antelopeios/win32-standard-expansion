@@ -55,7 +55,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/SmartPtr.h"
+#include "Memory/PtrManager.h"
 
 EXP_BEG
 

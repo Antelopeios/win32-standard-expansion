@@ -69,8 +69,7 @@ protected:
 
 public:
 	~CGuiButtonEvent()
-	{
-	}
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -176,10 +175,8 @@ public:
 				{
 					LONG r_h = rect.Height() * 5;
 					// l-t
-					m_imgTmp[0].Delete();
 					m_imgTmp[0].Set(image[0]->Get());
 					// m-t
-					m_imgTmp[1].Delete();
 					m_imgTmp[1].Set
 						(
 						CImgDeformer::ZomDeform
@@ -190,10 +187,8 @@ public:
 							)
 						);
 					// r-t
-					m_imgTmp[2].Delete();
 					m_imgTmp[2].Set(image[2]->Get());
 					// l-m
-					m_imgTmp[3].Delete();
 					m_imgTmp[3].Set
 						(
 						CImgDeformer::ZomDeform
@@ -204,7 +199,6 @@ public:
 							)
 						);
 					// m-m
-					m_imgTmp[4].Delete();
 					m_imgTmp[4].Set
 						(
 						CImgDeformer::ZomDeform
@@ -215,7 +209,6 @@ public:
 							)
 						);
 					// r-m
-					m_imgTmp[5].Delete();
 					m_imgTmp[5].Set
 						(
 						CImgDeformer::ZomDeform
@@ -226,10 +219,8 @@ public:
 							)
 						);
 					// l-b
-					m_imgTmp[6].Delete();
 					m_imgTmp[6].Set(image[6]->Get());
 					// m-b
-					m_imgTmp[7].Delete();
 					m_imgTmp[7].Set
 						(
 						CImgDeformer::ZomDeform
@@ -240,7 +231,6 @@ public:
 							)
 						);
 					// r-b
-					m_imgTmp[8].Delete();
 					m_imgTmp[8].Set(image[8]->Get());
 					// Save
 					m_rcOld = rect;
@@ -380,7 +370,6 @@ public:
 							), 
 						CPoint()
 						);
-				txt_img.Delete();
 			}
 			break;
 		}

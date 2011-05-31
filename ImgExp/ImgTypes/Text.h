@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0001.1425
+// Date:	2011-05-30
+// Version:	1.0.0002.1553
 //
 // History:
 //	- 1.0.0001.1425(2010-05-25)	# 修正CText::operator=()的赋值及返回值错误
 //								# 修正CText::GetImage()接口对颜色处理的错误
+//	- 1.0.0002.1553(2010-05-30)	= 调整CText的基类,改为同时向CString与CFont继承,以统一他们之间的接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -58,16 +59,15 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CText : public CString
+class CText : public CString, public CFont
 {
 protected:
-	CFont m_Font;
 	pixel_t m_Color;
 
 public:
 	CText(LPCTSTR sCont = NULL, font_t tFont = NULL, pixel_t tColor = ExRGBA(0, 0, 0, EXP_CM))
 		: CString(sCont)
-		, m_Font(tFont)
+		, CFont(tFont)
 		, m_Color(tColor)
 	{}
 	virtual ~CText()
@@ -76,12 +76,11 @@ public:
 public:
 	const CFont& GetFont() const
 	{
-		return m_Font;
+		return (*this);
 	}
 	void SetFont(const CFont& Font)
 	{
-		m_Font.Delete();
-		m_Font.Set(Font.Clone());
+		Set(Font.Get());
 	}
 
 	pixel_t GetColor() const
@@ -95,7 +94,7 @@ public:
 
 	CText& operator=(const CText& txt)
 	{
-		this->SetString((LPCTSTR)txt);
+		SetString((LPCTSTR)txt);
 		SetColor(txt.GetColor());
 		SetFont(txt.GetFont());
 		return (*this);
@@ -106,8 +105,8 @@ public:
 		if ((CString)txt1 != (CString)txt2) return false;
 		if (txt1.m_Color != txt2.m_Color) return false;
 		LOGFONT lf1 = {0}, lf2 = {0};
-		txt1.m_Font.GetLogFont(&lf1);
-		txt2.m_Font.GetLogFont(&lf2);
+		txt1.GetLogFont(&lf1);
+		txt2.GetLogFont(&lf2);
 		return (memcmp(&lf1, &lf2, sizeof(LOGFONT)) == 0);
 	}
 	friend bool operator!=(const CText& txt1, const CText& txt2)
@@ -128,13 +127,14 @@ public:
 		// 创建临时画板
 		CGraph tmp_grp;
 		tmp_grp.Create();
-		tmp_grp.SetObject(m_Font.Get());
+		tmp_grp.SetObject(Get());
 		::SetBkMode(tmp_grp, TRANSPARENT);
 		// 获得文字区域
 		CSize sz;
 		GetSize(tmp_grp, sz);
 		// 创建文字图像
 		CImage img;
+		img.SetTrust(false);
 		img.Create(sz.cx, sz.cy);
 		if (img.IsNull()) return NULL;
 		tmp_grp.SetObject(img.Get());

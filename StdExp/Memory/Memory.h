@@ -53,6 +53,7 @@
 #include "Memory/ObjPool.h"
 #include "Memory/MemPool.h"
 #include "Memory/MemAlloc.h"
+#include "Memory/PtrManager.h"
 #include "Memory/SmartPtr.h"
 #include "Memory/GC.h"
 

@@ -52,7 +52,7 @@ class CGuiFade : public IGuiEffectBase
 {
 	EXP_DECLARE_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
 
-public:
+protected:
 	bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld)
 	{
 		if (!pCtrl) return false;
@@ -64,7 +64,6 @@ public:
 		CImage tmp_old(tOld.Clone());
 		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(alpha));
 		CImgRenderer::Render(tNew, tmp_old, CRect(), CPoint(), &CFilterCopy());
-		tmp_old.Delete();
 
 		alpha += 25;
 		return (alpha < EXP_CM);

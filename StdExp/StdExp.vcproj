@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Memory\PtrManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Memory\RegistAlloc.h"
 				>
 			</File>

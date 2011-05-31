@@ -305,7 +305,6 @@ public:
 				board->LayeredWindow(hdc, mem_grp);
 				// ½áÊø»æÍ¼
 				mem_grp.Delete();
-				mem_img.Delete();
 				::EndPaint(board->GethWnd(), &ps);
 			}
 			break;

@@ -104,7 +104,7 @@ public:
 		else
 		if (sType == _T("image"))
 		{
-			m_Image.Set(((CImage*)pState)->Get());
+			m_Image = *(CImage*)pState;
 			EXP_BASE::SetState(sType, pState);
 		}
 		else

@@ -92,10 +92,5 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		DispatchMessage(&msg);
 	}
 
-	// Ïú»Ù×ÊÔ´
-	for(int i = 0; i < _countof(img_btn); ++i)
-		img_btn[i].Delete();
-	img_pic.Delete();
-
 	return 0;
 }

@@ -64,12 +64,6 @@ protected:
 	CImage m_imgTmp;
 
 public:
-	~CGuiPictureEvent()
-	{
-		m_imgTmp.Delete();
-	}
-
-public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
@@ -107,7 +101,6 @@ public:
 				// ´¦Àí
 				if (m_rcOld != rect)
 				{
-					m_imgTmp.Delete();
 					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), rect.Height()));
 					m_rcOld = rect;
 				}
@@ -128,7 +121,6 @@ public:
 							), 
 						CPoint()
 						);
-				txt_img.Delete();
 			}
 			break;
 		}

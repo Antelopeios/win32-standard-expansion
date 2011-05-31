@@ -80,10 +80,11 @@ protected:
 	{
 		if (nWidth <= 0 || nHeight <= 0) return NULL;
 		CImage exp_image;
+		exp_image.SetTrust(false);
 		pBuff = NULL;
-		image_t image = exp_image.Create(nWidth, nHeight);
-		if (image) pBuff = (BYTE*)exp_image.GetPixels();
-		return image;
+		exp_image.Create(nWidth, nHeight);
+		if (!exp_image.IsNull()) pBuff = (BYTE*)exp_image.GetPixels();
+		return exp_image;
 	}
 
 public:
@@ -106,9 +107,6 @@ public:
 	virtual image_t Decode() = 0;
 
 	void Free() { ExMem::Free(this); }
-
-	EXP_INLINE static bool DeleteImage(image_t Image)
-	{ return Image ? CImage(Image).Delete() : true; }
 };
 
 //////////////////////////////////////////////////////////////////

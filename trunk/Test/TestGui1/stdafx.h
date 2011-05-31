@@ -13,8 +13,3 @@
 #pragma comment(lib, "../../_Output/Release/ImgExp.lib")
 #pragma comment(lib, "../../_Output/Release/GuiExp.lib")
 #endif
-
-//#include <stdio.h>
-//#include <tchar.h>
-//
-//#include <windows.h>

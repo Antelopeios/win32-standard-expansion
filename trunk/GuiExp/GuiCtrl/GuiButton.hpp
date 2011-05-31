@@ -126,7 +126,7 @@ public:
 		if (sType == _T("image"))
 		{
 			for(int i = 0; i < _countof(m_Image); ++i)
-				m_Image[i].Set(((CImage*)pState + i)->Get());
+				m_Image[i] = *((CImage*)pState + i);
 			EXP_BASE::SetState(sType, pState);
 		}
 		else

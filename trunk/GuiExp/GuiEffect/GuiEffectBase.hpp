@@ -77,10 +77,12 @@ public:
 		: m_idEvent(0)
 	{}
 
+protected:
+	virtual bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
+
 public:
 	void Init(CImage& tImg)
 	{
-		m_imgCac.Delete();
 		m_imgCac.Set(tImg.Clone());
 	}
 	bool IsInit()
@@ -108,12 +110,10 @@ public:
 		if (m_idEvent && !Overlap(ctrl, tImg, m_imgCac))
 		{
 			KillTimer(board->GethWnd());
-			m_imgCac.Delete();
 			m_imgCac.Set(tImg.Clone());
 			board->Invalidate();
 		}
 	}
-	virtual bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
 
 	void SetTimer(wnd_t hWnd)
 	{

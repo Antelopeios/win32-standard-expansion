@@ -63,18 +63,15 @@ public:
 	{}
 
 public:
-	bool Delete()
+	font_t operator=(font_t tType)
 	{
-		bool ret = true;
-		if (!IsNull())
-			ret = ::DeleteObject(Get());
-		Set(NULL);
-		return ret;
+		Set(tType);
+		return Get();
 	}
+
 	font_t Create(const LOGFONT* lpLogFont)
 	{
 		if (!lpLogFont) return Get();
-		Delete();
 		Set(::CreateFontIndirect(lpLogFont));
 		return Get();
 	}

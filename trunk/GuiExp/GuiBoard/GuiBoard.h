@@ -72,7 +72,6 @@ public:
 	virtual bool Create(LPCTSTR sWndName, CRect& rcWnd, 
 						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
 						wnd_t wndParent = NULL) = 0;
-	virtual bool Destroy() = 0;
 	virtual bool IsNull() const = 0;
 
 	virtual bool Attach(wnd_t hWnd) = 0;

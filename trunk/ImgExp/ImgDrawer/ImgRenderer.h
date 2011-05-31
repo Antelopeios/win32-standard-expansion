@@ -111,9 +111,13 @@ public:
 	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc, 
 								  IFilterObject* pFilter = NULL)
 	{
-		CImage exp_des(imgDes);
+		CImage exp_des;
+		exp_des.SetTrust(false);
+		exp_des = imgDes;
 		if (exp_des.IsNull()) return false;
-		CImage exp_src(imgSrc);
+		CImage exp_src;
+		exp_src.SetTrust(false);
+		exp_src = imgSrc;
 		if (exp_src.IsNull()) return false;
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		CSize sz_src(exp_src.GetWidth(), exp_src.GetHeight());

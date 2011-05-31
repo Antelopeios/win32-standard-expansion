@@ -33,12 +33,13 @@
 // Author:	木头云
 // Blog:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-24
-// Version:	1.0.0002.2319
+// Date:	2010-05-30
+// Version:	1.0.0003.1557
 //
 // History:
 //	- 1.0.0001.1730(2010-05-05)	+ ITypeObjectT::IsNull()添加const类型接口
 //	- 1.0.0002.2319(2010-05-24)	+ ITypeObjectT::Get()添加const类型接口
+//	- 1.0.0003.1557(2010-05-30)	- ITypeObjectT移除INonCopyable接口继承
 //////////////////////////////////////////////////////////////////
 
 #ifndef __TypeObject_h__
@@ -52,38 +53,69 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT>
-interface ITypeObjectT : INonCopyable
+struct _TypeAlloc
 {
+	EXP_INLINE static void Free(void* pPtr)
+	{
+		if (!pPtr) return;
+		::DeleteObject((HGDIOBJ)pPtr);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+template <typename TypeT, typename TypeAllocT = _TypeAlloc>
+interface ITypeObjectT
+{
+public:
+	typedef TypeT type_t;
+	typedef TypeAllocT type_alloc_t;
+
 protected:
-	TypeT m_Type;
+	CSmartPtrT<type_t, type_alloc_t> m_Type;
 
 public:
 	ITypeObjectT()
-		: m_Type(NULL)
 	{}
-	ITypeObjectT(TypeT tType)
-		: m_Type(NULL)
+	ITypeObjectT(type_t tType)
 	{ Set(tType); }
+	ITypeObjectT(const ITypeObjectT& tType)
+	{ Set(tType.m_Type); }
 	virtual ~ITypeObjectT()
 	{}
 
 public:
-	virtual void Set(TypeT tType)
+	// 是否做托管
+	void SetTrust(bool bTru = true) { m_Type.SetTrust(bTru); }
+	bool IsTrust() { return m_Type.GetTrust(); }
+
+	virtual void Set(type_t tType)
 	{ m_Type = tType; }
-	virtual TypeT Get() const
+	virtual type_t Get() const
 	{ return m_Type; }
 
-	TypeT operator=(TypeT tType)
+	type_t operator=(type_t tType)
 	{
 		Set(tType);
 		return m_Type;
 	}
-	operator TypeT()
+	ITypeObjectT& operator=(const ITypeObjectT& tType)
+	{
+		Set(tType.m_Type);
+		return (*this);
+	}
+
+	operator type_t() const
 	{ return Get(); }
 
 	virtual bool IsNull() const
 	{ return (m_Type == NULL); }
+
+	virtual bool Delete()
+	{
+		Set(NULL);
+		return true;
+	}
 };
 
 //////////////////////////////////////////////////////////////////

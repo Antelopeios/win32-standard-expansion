@@ -174,7 +174,9 @@ public:
 	{
 		IFileObject* file = GetFile();
 		if(!file) return false;
-		CImage exp_image(Image);
+		CImage exp_image;
+		exp_image.SetTrust(false);
+		exp_image = Image;
 		if (exp_image.IsNull()) return false;
 		// 声明并初始化压缩对象
 		struct jpeg_compress_struct cinfo;

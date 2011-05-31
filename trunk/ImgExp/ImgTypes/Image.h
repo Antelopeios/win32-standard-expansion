@@ -89,7 +89,7 @@ public:
 		base_obj_t::Set(tImage);
 		ZeroMemory(&m_Bitmap, sizeof(m_Bitmap));
 		if (base_obj_t::IsNull()) return;
-		GetObject(Get(), sizeof(m_Bitmap), &m_Bitmap);
+		::GetObject(Get(), sizeof(m_Bitmap), &m_Bitmap);
 	}
 	bool IsNull()
 	{
@@ -99,18 +99,15 @@ public:
 			return (!(bool)(GetPixels()));
 	}
 
-	bool Delete()
+	image_t operator=(image_t tType)
 	{
-		bool ret = true;
-		if (!IsNull())
-			ret = ::DeleteObject(Get());
-		Set(NULL);
-		return ret;
+		Set(tType);
+		return Get();
 	}
+
 	image_t Create(DWORD nWidth, DWORD nHeight)
 	{
 		if (nWidth <= 0 || nHeight <= 0) return Get();
-		Delete();
 		BITMAPINFO bmi = {0};
 		bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
 		bmi.bmiHeader.biBitCount	= 32;
@@ -123,6 +120,7 @@ public:
 		if(!img_buf) Delete();
 		return Get();
 	}
+
 	image_t Clone(CRect& tRect = CRect()) const
 	{
 		CRect rc_tmp(tRect);
@@ -130,21 +128,15 @@ public:
 			rc_tmp.Set(CPoint(0, 0), CPoint(GetWidth(), GetHeight()));
 		// 创建临时对象
 		CImage exp_img;
+		exp_img.SetTrust(false);
 		if(!exp_img.Create(rc_tmp.Width(), rc_tmp.Height()))
 			return NULL;
 		CGraph exp_gra;
 		if(!exp_gra.Create())
-		{
-			exp_img.Delete();
 			return NULL;
-		}
 		CGraph exp_mem;
 		if(!exp_mem.Create())
-		{
-			exp_img.Delete();
-			exp_gra.Delete();
 			return NULL;
-		}
 		// 拷贝图像
 		exp_gra.SetObject(exp_img.Get());
 		exp_mem.SetObject(Get());
@@ -153,7 +145,7 @@ public:
 		// 清理并返回对象
 		exp_mem.Delete();
 		exp_gra.Delete();
-		return exp_img.Get();
+		return exp_img;
 	}
 
 	LONG GetWidth() const

@@ -31,7 +31,7 @@
 // Container - ÈÝÆ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-22
 // Version:	1.0.0009.1730

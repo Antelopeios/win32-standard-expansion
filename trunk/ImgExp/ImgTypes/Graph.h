@@ -31,7 +31,7 @@
 // Graph - 画布对象类
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-24
 // Version:	1.0.0002.2319
@@ -39,7 +39,7 @@
 // History:
 //	- 1.0.0001.1334(2011-04-12)	^ 移除IGraphObject接口,通过ITypeObjectT接口模板统一通用的接口
 //								= CExpGraph更名为CGraph
-//	- 1.0.0002.2319(2010-05-24)	+ 为CGraph的属性获取接口添加const类型
+//	- 1.0.0002.2319(2011-05-24)	+ 为CGraph的属性获取接口添加const类型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Graph_h__

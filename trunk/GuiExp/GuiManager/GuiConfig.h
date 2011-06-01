@@ -28,28 +28,36 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// dllmain.cpp - GuiExp Dll 入口点
+// GuiConfig - 界面配置文件接口
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-03
-// Version:	1.0.0000.1430
+// Date:	2011-05-31
+// Version:	1.0.0000.1714
+//
+// History:
+//	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#ifndef __GuiConfig_h__
+#define __GuiConfig_h__
 
-BOOL APIENTRY DllMain(HMODULE hModule,
-                      DWORD ul_reason_for_call,
-                      LPVOID lpReserved)
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+EXP_BEG
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiConfig
 {
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-	return TRUE;
-}
+protected:
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiConfig_h__*/

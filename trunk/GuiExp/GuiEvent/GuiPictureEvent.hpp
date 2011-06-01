@@ -31,14 +31,14 @@
 // GuiPictureEvent - 绘图板控件事件
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
+// Date:	2011-05-25
 // Version:	1.0.0002.1424
 //
 // History:
-//	- 1.0.0001.1500(2010-05-24)	+ CGuiPictureEvent添加Color属性的处理
-//	- 1.0.0002.1424(2010-05-25)	+ CGuiPictureEvent添加Text属性的处理
+//	- 1.0.0001.1500(2011-05-24)	+ CGuiPictureEvent添加Color属性的处理
+//	- 1.0.0002.1424(2011-05-25)	+ CGuiPictureEvent添加Text属性的处理
 //								# 修正CGuiPictureEvent添对Text属性处理过程中的内存泄漏
 //////////////////////////////////////////////////////////////////
 

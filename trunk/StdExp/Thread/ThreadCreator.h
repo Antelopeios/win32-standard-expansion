@@ -31,7 +31,7 @@
 // ThreadCreator - 线程创建器
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-23
 // Version:	1.0.0001.1124

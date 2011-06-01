@@ -31,7 +31,7 @@
 // ObjPool - ¶ÔÏó³Ø
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-18
 // Version:	1.0.0015.1419

@@ -31,7 +31,7 @@
 // NonLock - 无锁(非阻塞型同步(Non-blocking Synchronization))
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-11
 // Version:	1.0.0001.2354

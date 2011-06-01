@@ -31,13 +31,13 @@
 // GuiWnd - 窗口类
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-19
+// Date:	2011-05-19
 // Version:	1.0.0001.1100
 //
 // History:
-//	- 1.0.0001.1100(2010-05-19)	= 将CGuiWnd与事件处理分离,处理过程放入CGuiWndEvent
+//	- 1.0.0001.1100(2011-05-19)	= 将CGuiWnd与事件处理分离,处理过程放入CGuiWndEvent
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWnd_hpp__

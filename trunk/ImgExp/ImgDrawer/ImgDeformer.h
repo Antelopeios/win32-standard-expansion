@@ -31,7 +31,7 @@
 // ImgDeformer - Í¼Ïñ±ä»»Æ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-25
 // Version:	1.0.0001.1630

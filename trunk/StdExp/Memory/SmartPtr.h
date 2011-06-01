@@ -31,7 +31,7 @@
 // SmartPtr - ÖÇÄÜÖ¸Õë
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-30
 // Version:	1.3.0028.1804

@@ -31,15 +31,15 @@
 // GuiPicture - 绘图板控件
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
+// Date:	2011-05-25
 // Version:	1.0.0003.2305
 //
 // History:
-//	- 1.0.0001.2236(2010-05-23)	+ 添加CGuiPicture::IsUpdated()接口
-//	- 1.0.0002.1500(2010-05-24)	+ CGuiPicture添加Color属性
-//	- 1.0.0003.2305(2010-05-25)	+ CGuiPicture添加Text属性
+//	- 1.0.0001.2236(2011-05-23)	+ 添加CGuiPicture::IsUpdated()接口
+//	- 1.0.0002.1500(2011-05-24)	+ CGuiPicture添加Color属性
+//	- 1.0.0003.2305(2011-05-25)	+ CGuiPicture添加Text属性
 //								= CGuiPicture调整控件状态接口
 //								= CGuiPicture不再托管内部的图片资源
 //////////////////////////////////////////////////////////////////

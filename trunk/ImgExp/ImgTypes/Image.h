@@ -31,7 +31,7 @@
 // Image - 图像对象类
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-24
 // Version:	1.0.0008.2319
@@ -47,7 +47,7 @@
 //								# 修正CImage::IsNull()中的一个逻辑错误
 //	- 1.0.0006.1730(2011-04-26)	= 将部分接口的返回值由DWORD改为LONG
 //	- 1.0.0007.1343(2011-04-28)	= CImage::Clone()具有默认参数
-//	- 1.0.0008.2319(2010-05-24)	+ 为CImage的属性获取接口及一些常量接口添加const类型
+//	- 1.0.0008.2319(2011-05-24)	+ 为CImage的属性获取接口及一些常量接口添加const类型
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口

@@ -31,7 +31,7 @@
 // PtrManager - 指针管理器
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-31
 // Version:	1.3.0029.1116

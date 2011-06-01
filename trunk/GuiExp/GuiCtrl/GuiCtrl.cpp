@@ -31,13 +31,13 @@
 // GuiCtrl - 控件对象
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-13
+// Date:	2011-05-13
 // Version:	1.0.0000.1600
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "GuiCommon/GuiCommon.h"
 #include "GuiCtrl.h"
 
 EXP_BEG

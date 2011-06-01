@@ -31,25 +31,25 @@
 // GuiInterface - 界面公用接口
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-26
+// Date:	2011-05-26
 // Version:	1.0.0009.1411
 //
 // History:
-//	- 1.0.0001.1730(2010-05-05)	= GuiInterface里仅保留最基本的公共接口
-//	- 1.0.0002.1525(2010-05-11)	+ IGuiComp添加托管行为及对应接口
-//	- 1.0.0003.1428(2010-05-13)	= 调整IGuiComp在托管时的行为
+//	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
+//	- 1.0.0002.1525(2011-05-11)	+ IGuiComp添加托管行为及对应接口
+//	- 1.0.0003.1428(2011-05-13)	= 调整IGuiComp在托管时的行为
 //								= 调整IGuiEvent对外的接口及行为
 //								+ GUI 事件转发器(IGuiSender)
-//	- 1.0.0004.1527(2010-05-16)	+ 添加IGuiComp::Init()与IGuiComp::Fina()接口
-//	- 1.0.0005.1652(2010-05-18)	# 修正IGuiComp::Init()里的逻辑错误
-//	- 1.0.0006.1620(2010-05-19)	+ 添加IGuiBase界面对象基础类定义
+//	- 1.0.0004.1527(2011-05-16)	+ 添加IGuiComp::Init()与IGuiComp::Fina()接口
+//	- 1.0.0005.1652(2011-05-18)	# 修正IGuiComp::Init()里的逻辑错误
+//	- 1.0.0006.1620(2011-05-19)	+ 添加IGuiBase界面对象基础类定义
 //								+ 添加IGuiObject::Free()接口,方便ExGui()构造对象后手动释放指针资源
-//	- 1.0.0007.1000(2010-05-23)	+ 添加IGuiEffect效果对象基础定义
+//	- 1.0.0007.1000(2011-05-23)	+ 添加IGuiEffect效果对象基础定义
 //								= 调整IGuiObject::Free()为虚函数
-//	- 1.0.0008.1600(2010-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
-//	- 1.0.0009.1411(2010-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
+//	- 1.0.0008.1600(2011-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
+//	- 1.0.0009.1411(2011-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__

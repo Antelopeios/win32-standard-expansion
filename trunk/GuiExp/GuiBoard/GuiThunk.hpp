@@ -31,9 +31,9 @@
 // GuiThunk - 窗口过程重定向
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-11
+// Date:	2011-05-11
 // Version:	1.0.0000.1100
 //////////////////////////////////////////////////////////////////
 

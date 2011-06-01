@@ -31,7 +31,7 @@
 // GC - À¬»ø»ØÊÕÆ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-19
 // Version:	1.1.0017.1640

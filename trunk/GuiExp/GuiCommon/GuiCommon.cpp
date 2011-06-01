@@ -31,16 +31,16 @@
 // GuiCommon - 界面拓展库公用定义
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-19
-// Version:	1.0.0003.1354
+// Date:	2011-06-01
+// Version:	1.0.0004.1130
 //
 // History:
-//	- 1.0.0003.1354(2010-05-19)	= 调整ExGui()的内部实现,始终在模块内构造对象
+//	- 1.0.0003.1354(2011-05-19)	= 调整ExGui()的内部实现,始终在模块内构造对象
+//	- 1.0.0004.1130(2011-06-01)	= 将DllMain()入口点放入GuiCommon.cpp内
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
 #include "GuiCommon.h"
 
 EXP_BEG
@@ -51,6 +51,24 @@ EXP_BEG
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
 {
 	return ExDynCast<IGuiObject>(ExDynCreate(sGuiType, pGC));
+}
+
+//////////////////////////////////////////////////////////////////
+
+// GuiExp Dll 入口点
+BOOL APIENTRY DllMain(HMODULE hModule,
+					  DWORD ul_reason_for_call,
+					  LPVOID lpReserved)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////

@@ -31,13 +31,13 @@
 // GuiButton - 按钮控件
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
+// Date:	2011-05-25
 // Version:	1.0.0001.2305
 //
 // History:
-//	- 1.0.0001.2305(2010-05-25)	+ CGuiButton添加状态属性
+//	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
 //								= CGuiButton::m_Status初始化为nor
 //								= CGuiButton不再托管内部的图片资源
 //////////////////////////////////////////////////////////////////

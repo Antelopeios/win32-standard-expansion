@@ -31,7 +31,7 @@
 // Iterator - µü´úÆ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-11
 // Version:	1.0.0006.2325

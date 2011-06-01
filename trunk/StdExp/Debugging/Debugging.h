@@ -31,7 +31,7 @@
 // Debugging - µ÷ÊÔ
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-12-04
 // Version:	1.0.0001.2202

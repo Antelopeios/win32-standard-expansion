@@ -31,7 +31,7 @@
 // File - 文件操作
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-22
 // Version:	1.0.0003.1730

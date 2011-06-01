@@ -31,7 +31,7 @@
 // StdExp - 标准拓展库(Standard Expansion)
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-12
 // Version:	0.1.0012.1730

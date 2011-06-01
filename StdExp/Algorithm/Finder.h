@@ -31,7 +31,7 @@
 // Finder - ²éÕÒÆ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-01-06
 // Version:	1.0.0001.1040

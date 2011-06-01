@@ -31,19 +31,19 @@
 // GuiBoard - 界面绘图板(Win32窗口对象)
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-26
+// Date:	2011-05-26
 // Version:	1.0.0006.1411
 //
 // History:
-//	- 1.0.0001.1054(2010-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
-//	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoard::Send()和IGuiBoard::Post()接口
-//	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoard::Layer()窗口图层化接口
-//	- 1.0.0004.1000(2010-05-19)	= IGuiBoard的基类改为IGuiBase
+//	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
+//	- 1.0.0002.1525(2011-05-13)	+ 添加IGuiBoard::Send()和IGuiBoard::Post()接口
+//	- 1.0.0003.1705(2011-05-18)	+ 添加IGuiBoard::Layer()窗口图层化接口
+//	- 1.0.0004.1000(2011-05-19)	= IGuiBoard的基类改为IGuiBase
 //								+ 添加IGuiBoard::LayeredWindow();IGuiBoard::DefProc();IGuiBoard::GethWnd()
-//	- 1.0.0005.2202(2010-05-23)	= 调整IGuiBoard::LayeredWindow()接口
-//	- 1.0.0006.1411(2010-05-26)	+ 添加IGuiBoard::GetRealRect()接口实现
+//	- 1.0.0005.2202(2011-05-23)	= 调整IGuiBoard::LayeredWindow()接口
+//	- 1.0.0006.1411(2011-05-26)	+ 添加IGuiBoard::GetRealRect()接口实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__

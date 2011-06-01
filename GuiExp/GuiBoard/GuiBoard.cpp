@@ -31,16 +31,16 @@
 // GuiBoard - 界面绘图板(Win32窗口对象)
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-13
+// Date:	2011-05-13
 // Version:	1.0.0002.1525
 //
 // History:
-//	- 1.0.0002.1525(2010-05-13)	^ 将IGuiBoardBase接口实现与GuiBoard的实现分离
+//	- 1.0.0002.1525(2011-05-13)	^ 将IGuiBoardBase接口实现与GuiBoard的实现分离
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "GuiCommon/GuiCommon.h"
 #include "GuiBoard.h"
 
 EXP_BEG

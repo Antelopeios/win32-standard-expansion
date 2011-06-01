@@ -31,7 +31,7 @@
 // ThreadPool - Ïß³Ì³Ø
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-03-02
 // Version:	1.0.0006.1520

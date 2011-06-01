@@ -31,14 +31,14 @@
 // GuiEffectBase - 效果基础实现
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-25
+// Date:	2011-05-25
 // Version:	1.0.0002.1600
 //
 // History:
-//	- 1.0.0001.1515(2010-05-24)	# 修正IGuiEffectBase::SetTimer里的id赋值错误
-//	- 1.0.0002.1600(2010-05-25)	+ 添加IGuiEffectBase::IsFinished()接口实现
+//	- 1.0.0001.1515(2011-05-24)	# 修正IGuiEffectBase::SetTimer里的id赋值错误
+//	- 1.0.0002.1600(2011-05-25)	+ 添加IGuiEffectBase::IsFinished()接口实现
 //								= 调整IGuiEffectBase::SetTimer();KillTimer()接口
 //////////////////////////////////////////////////////////////////
 

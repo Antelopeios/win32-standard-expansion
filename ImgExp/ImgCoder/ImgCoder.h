@@ -31,7 +31,7 @@
 // ImgCoder - Í¼Ïñ±à/½âÂëÆ÷
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-04-03
 // Version:	1.0.0000.1718

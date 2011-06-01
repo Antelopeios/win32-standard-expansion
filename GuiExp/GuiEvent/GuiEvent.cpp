@@ -31,13 +31,13 @@
 // GuiEvent - 事件对象
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-18
+// Date:	2011-05-18
 // Version:	1.0.0000.1150
 //////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "GuiCommon/GuiCommon.h"
 
 //////////////////////////////////////////////////////////////////
 

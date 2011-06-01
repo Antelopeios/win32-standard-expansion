@@ -31,7 +31,7 @@
 // Event - ÊÂ¼þ
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-02-15
 // Version:	1.1.0003.1000

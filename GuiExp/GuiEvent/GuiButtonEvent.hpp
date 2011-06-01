@@ -31,19 +31,19 @@
 // GuiButtonEvent - 按钮控件事件
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-27
+// Date:	2011-05-27
 // Version:	1.0.0002.1020
 //
 // History:
-//	- 1.0.0000.2258(2010-05-25)	@ 开始构建CGuiButtonEvent
+//	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
 //								@ 基本完成CGuiButtonEvent的绘图部分
-//	- 1.0.0001.2302(2010-05-26)	# 修正CGuiButtonEvent绘图中的错误
+//	- 1.0.0001.2302(2011-05-26)	# 修正CGuiButtonEvent绘图中的错误
 //								+ CGuiButtonEvent添加状态变化消息处理
 //								# 当鼠标按下后移动,按钮状态会变为未按下的状态
 //								+ 添加按钮单击消息转发及Enter键响应
-//	- 1.0.0002.1020(2010-05-27)	# 修正CGuiButtonEvent当WM_KEYUP之后无法响应焦点切换绘图
+//	- 1.0.0002.1020(2011-05-27)	# 修正CGuiButtonEvent当WM_KEYUP之后无法响应焦点切换绘图
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__

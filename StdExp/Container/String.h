@@ -31,7 +31,7 @@
 // String - ×Ö·û´®
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-24
 // Version:	1.0.0017.2220

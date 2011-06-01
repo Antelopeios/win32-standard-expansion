@@ -31,7 +31,7 @@
 // LibStd - 标准库定义
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2010-12-03
 // Version:	1.2.0004.0954

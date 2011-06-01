@@ -31,7 +31,7 @@
 // Algorithm - Ëã·¨
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-01-26
 // Version:	1.0.0003.1730

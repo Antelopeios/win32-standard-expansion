@@ -31,19 +31,19 @@
 // GuiBoardBase - 窗口基础实现
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-23
+// Date:	2011-05-23
 // Version:	1.0.0004.2202
 //
 // History:
-//	- 1.0.0001.1420(2010-05-11)	+ 添加CGuiWnd::Attach()和CGuiWnd::Detach()接口实现
+//	- 1.0.0001.1420(2011-05-11)	+ 添加CGuiWnd::Attach()和CGuiWnd::Detach()接口实现
 //								- 移除一些接口中的ExAssert,直接忽略一些特殊情况
 //								= 将CGuiWnd调整为IGuiBoardBase接口类
-//	- 1.0.0002.1525(2010-05-13)	+ 添加IGuiBoardBase::Send()和IGuiBoardBase::Post()接口实现
-//	- 1.0.0003.1705(2010-05-18)	+ 添加IGuiBoardBase::Layer()窗口图层化接口实现
-//	- 1.0.0004.1636(2010-05-19)	# 修正IGuiBoardBase::LayeredWindow()的内部逻辑错误
-//	- 1.0.0005.2202(2010-05-23)	= 调整IGuiBoardBase::LayeredWindow()接口
+//	- 1.0.0002.1525(2011-05-13)	+ 添加IGuiBoardBase::Send()和IGuiBoardBase::Post()接口实现
+//	- 1.0.0003.1705(2011-05-18)	+ 添加IGuiBoardBase::Layer()窗口图层化接口实现
+//	- 1.0.0004.1636(2011-05-19)	# 修正IGuiBoardBase::LayeredWindow()的内部逻辑错误
+//	- 1.0.0005.2202(2011-05-23)	= 调整IGuiBoardBase::LayeredWindow()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoardBase_hpp__
@@ -54,6 +54,7 @@
 #endif // _MSC_VER > 1000
 
 EXP_BEG
+
 //////////////////////////////////////////////////////////////////
 
 struct _GuiBoardAlloc

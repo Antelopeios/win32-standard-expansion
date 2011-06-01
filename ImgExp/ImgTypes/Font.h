@@ -31,7 +31,7 @@
 // Font - 字体对象类
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-24
 // Version:	1.0.0000.2204

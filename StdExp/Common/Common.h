@@ -31,7 +31,7 @@
 // Common - 标准拓展库公用定义
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-05
 // Version:	1.2.0008.1000

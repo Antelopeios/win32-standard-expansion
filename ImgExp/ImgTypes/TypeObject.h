@@ -31,15 +31,15 @@
 // TypeObject - 类型基类
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-30
+// Date:	2011-05-30
 // Version:	1.0.0003.1557
 //
 // History:
-//	- 1.0.0001.1730(2010-05-05)	+ ITypeObjectT::IsNull()添加const类型接口
-//	- 1.0.0002.2319(2010-05-24)	+ ITypeObjectT::Get()添加const类型接口
-//	- 1.0.0003.1557(2010-05-30)	- ITypeObjectT移除INonCopyable接口继承
+//	- 1.0.0001.1730(2011-05-05)	+ ITypeObjectT::IsNull()添加const类型接口
+//	- 1.0.0002.2319(2011-05-24)	+ ITypeObjectT::Get()添加const类型接口
+//	- 1.0.0003.1557(2011-05-30)	- ITypeObjectT移除INonCopyable接口继承
 //////////////////////////////////////////////////////////////////
 
 #ifndef __TypeObject_h__

@@ -31,7 +31,7 @@
 // ImgExp - Í¼ÏñÍØÕ¹¿â(Image Expansion)
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-30
 // Version:	0.1.0003.1750

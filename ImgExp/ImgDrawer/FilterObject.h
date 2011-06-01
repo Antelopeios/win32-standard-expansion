@@ -31,7 +31,7 @@
 // FilterObject - ÂË¾µ¶ÔÏó
 //
 // Author:	Ä¾Í·ÔÆ
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-05-25
 // Version:	1.0.0004.1022

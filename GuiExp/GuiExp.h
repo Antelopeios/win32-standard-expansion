@@ -31,13 +31,15 @@
 // GuiExp - 界面拓展库(GUI Expansion)
 //
 // Author:	木头云
-// Blog:	dark-c.at
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-05-31
-// Version:	1.0.0001.1539
+// Date:	2011-06-01
+// Version:	1.0.0002.1138
 //
 // History:
-//	- 1.0.0001.1539(2010-05-31)	@ 基本完成GuiBoard;GuiCtrl;GuiEffect;GuiEvent等模块的架构构建
+//	- 1.0.0001.1539(2011-05-31)	@ 基本完成GuiBoard;GuiCtrl;GuiEffect;GuiEvent等模块的架构构建
+//	- 1.0.0002.1138(2011-06-01)	# 修改一些注释文字中的错误
+//								^ 去掉预编译;调整结构;精简文件
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiExp_h__

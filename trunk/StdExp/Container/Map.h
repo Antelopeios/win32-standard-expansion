@@ -73,11 +73,16 @@ public:
 		key_t	Key;
 		type_t	Val;
 	} pair_t;
+
 	typedef struct _Assoc : public pair_t, public IPoolTypeT<_Assoc, alloc_t>
 	{
 		DWORD	nHash;
 		bool	bSet;
-		_Assoc(bool s = true) : nHash(0), bSet(s) {}
+
+		_Assoc(bool s = true)
+			: nHash(0)
+			, bSet(s)
+		{}
 	} assoc_t;
 
 	typedef CListT<assoc_t*, _ListPolicyT<alloc_t> > alist_t;

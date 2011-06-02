@@ -56,7 +56,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT>
-class ISingletonT
+interface ISingletonT
 {
 public:
 	EXP_INLINE static TypeT& Instance()

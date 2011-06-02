@@ -332,6 +332,10 @@
 				RelativePath=".\Container\String.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Container\Tree.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="File"

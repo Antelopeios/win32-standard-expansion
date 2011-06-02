@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-01-27
-// Version:	1.0.0008.1730
+// Date:	2011-06-02
+// Version:	1.0.0009.1617
+//
+// History:
+//	- 1.0.0009.1617(2011-06-02)	+ 添加默认的IContainerObjectT::Del()接口,支持直接定位元素删除
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ContainerObject_h__
@@ -94,6 +97,9 @@ public:
 	{ return This()->container_t::HeadItem(); }
 	type_t& LastItem()
 	{ return This()->container_t::LastItem(); }
+
+	bool Del(type_t& Type)
+	{ return This()->container_t::Del(finder_t::Find(*(This()), Type)); }
 };
 
 //////////////////////////////////////////////////////////////////

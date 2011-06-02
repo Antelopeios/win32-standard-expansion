@@ -33,11 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.0.0010.1600
+// Date:	2011-06-02
+// Version:	1.0.0011.1742
 //
 // History:
 //	- 1.0.0010.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
+//	- 1.0.0011.1742(2011-06-02)	# 修正CListT::Del()当传入的迭代器为Tail时会导致意外的结果
+//								# 修正CListT::AddList()里的迭代器赋值错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __List_h__
@@ -63,7 +65,7 @@ class CListT : public IContainerObjectT<TypeT, PolicyT, CListT<TypeT, PolicyT> >
 public:
 	typedef struct _Block : public IPoolTypeT<_Block, alloc_t>
 	{
-		TypeT	Buff;	// 数据块
+		type_t	Buff;	// 数据块
 		_Block*	pPrev;	// 上一个结点
 		_Block*	pNext;	// 下一个结点
 		_Block()
@@ -237,7 +239,7 @@ public:
 	bool AddList(block_t* pList)
 	{ return AddList(pList, Tail()); }
 	bool AddList(const CListT& List, iterator_t Iter)
-	{ return AddList(List.m_pHead, Tail()); }
+	{ return AddList(List.m_pHead, Iter); }
 	bool AddList(const CListT& List)
 	{ return AddList(List, Tail()); }
 
@@ -277,6 +279,7 @@ public:
 		if (Empty()) return true;
 		if (!(iteStt->InThis(this))) return false;
 		if (!(iteEnd->InThis(this))) return false;
+		if (iteStt == Tail()) return false;
 		if (iteStt == iteEnd)
 		{
 			// 定位待删除结点

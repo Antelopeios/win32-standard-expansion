@@ -53,6 +53,7 @@
 #include "Container/String.h"
 #include "Container/List.h"
 #include "Container/Map.h"
+#include "Container/Tree.h"
 
 //////////////////////////////////////////////////////////////////
 

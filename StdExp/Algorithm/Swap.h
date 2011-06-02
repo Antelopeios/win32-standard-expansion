@@ -44,6 +44,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+EXP_BEG
+
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT>
@@ -67,5 +69,7 @@ TypeT ExSwap(TypeT& Type1, TypeT& Type2)
 { return CSwapT<TypeT>::Swap(Type1, Type2); }
 
 //////////////////////////////////////////////////////////////////
+
+EXP_END
 
 #endif/*__Swap_h__*/

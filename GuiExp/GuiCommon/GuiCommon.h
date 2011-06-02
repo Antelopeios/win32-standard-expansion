@@ -67,7 +67,7 @@ EXP_BEG
 
 // 模块内部单例定义
 template <typename TypeT>
-class EXP_API IGuiSingletonT
+interface EXP_API IGuiSingletonT
 {
 public:
 	EXP_INLINE static TypeT& Instance()

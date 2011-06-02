@@ -61,7 +61,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // ObjPool接口,方便上层直接操作统一接口
-class IObjPool
+interface IObjPool
 {
 public:
 	virtual ~IObjPool() {}
@@ -233,7 +233,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 template <typename TypeT, typename AllocT, typename ModelT = EXP_THREAD_MODEL>
-class IPoolTypeT
+interface IPoolTypeT
 {
 public:
 	typedef CObjPoolT<TypeT, _ObjPoolPolicyT<AllocT, ModelT> > alloc_t;

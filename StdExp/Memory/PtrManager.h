@@ -59,7 +59,7 @@ class CPtrManagerT : INonCopyable, public EXP_SINGLETON<CPtrManagerT<AllocT, Mod
 {
 protected:
 	// 计数指针接口
-	class IReferPtr
+	interface IReferPtr
 	{
 	protected:
 		void*		  p_ptr;

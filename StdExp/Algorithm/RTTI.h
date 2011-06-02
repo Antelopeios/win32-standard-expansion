@@ -62,20 +62,20 @@ EXP_BEG
 
 // RTTI 起始类声明
 template <int IntT = 0>
-class IBaseObjectT;
+interface IBaseObjectT;
 
 typedef IBaseObjectT<> IBaseObject;
 
 //////////////////////////////////////////////////////////////////
 
 // 类型信息结构
-struct TypeInfo
+struct _TypeInfo
 {
 	typedef IBaseObject* (*creator_t)(CGC*);
 
 	LPTSTR		className;
 	int			type_id;
-	TypeInfo*	pBaseClass[3];
+	_TypeInfo*	pBaseClass[3];
 	creator_t	m_Creator;	// NULL => abstract class
 
 	EXP_INLINE IBaseObject* CreateObject(CGC* gc = NULL)
@@ -83,7 +83,7 @@ struct TypeInfo
 		if (!m_Creator) return NULL;
 		return (*m_Creator)(gc);
 	}
-	EXP_INLINE bool IsKindOf(TypeInfo& cls)
+	EXP_INLINE bool IsKindOf(_TypeInfo& cls)
 	{
 		if( type_id == cls.type_id )
 			return true;
@@ -95,21 +95,21 @@ struct TypeInfo
 		}
 		return false;
 	}
-	EXP_INLINE bool operator==(const TypeInfo& info)
+	EXP_INLINE bool operator==(const _TypeInfo& info)
 	{ return this == &info; }
-	EXP_INLINE bool operator!=(const TypeInfo& info)
+	EXP_INLINE bool operator!=(const _TypeInfo& info)
 	{ return this != &info; }
 };
 
 //////////////////////////////////////////////////////////////////
 
-// TypeInfo 指针单例工厂
+// _TypeInfo 指针单例工厂
 class CTypeInfoFactory : INonCopyable, public EXP_SINGLETON<CTypeInfoFactory>
 {
-	friend class EXP_SINGLETON<CTypeInfoFactory>;
+	friend interface EXP_SINGLETON<CTypeInfoFactory>;
 
 private:
-	typedef CMapT<CString, TypeInfo*> key_map;
+	typedef CMapT<CString, _TypeInfo*> key_map;
 	key_map dc_funcs;
 
 private:
@@ -117,7 +117,7 @@ private:
 
 public:
 	// 向工厂注册一个类名
-	bool RegTypeInfo(LPCTSTR c_key, TypeInfo* inf)
+	bool RegTypeInfo(LPCTSTR c_key, _TypeInfo* inf)
 	{
 		if (!c_key) return false;
 		CString key(c_key);
@@ -129,8 +129,8 @@ public:
 		else
 			return false;
 	}
-	// 从工厂获得一个 TypeInfo
-	TypeInfo* GetTypeInfo(LPCTSTR c_key)
+	// 从工厂获得一个 _TypeInfo
+	_TypeInfo* GetTypeInfo(LPCTSTR c_key)
 	{
 		if (!c_key) return false;
 		CString key(c_key);
@@ -142,9 +142,9 @@ public:
 	}
 };
 
-// 向工厂注册 TypeInfo 指针
+// 向工厂注册 _TypeInfo 指针
 #define ExRegTypeInfo(key, inf)	CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
-// 从工厂得到 TypeInfo 指针
+// 从工厂得到 _TypeInfo 指针
 #define ExGetTypeInfo(key)		CTypeInfoFactory::Instance().GetTypeInfo(key)
 
 //////////////////////////////////////////////////////////////////
@@ -189,10 +189,10 @@ public:																						\
 public:																						\
 	virtual int GetTypeID()				{ return EXP_TYPEINFO_MEMBER.type_id; }				\
 	virtual LPCTSTR GetTypeName()		{ return EXP_TYPEINFO_MEMBER.className; }			\
-	virtual TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }						\
-	static TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }						\
+	virtual _TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }					\
+	static _TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }					\
 private:																					\
-	static TypeInfo EXP_TYPEINFO_MEMBER;													\
+	static _TypeInfo EXP_TYPEINFO_MEMBER;													\
 
 #define EXP_DECLARE_TYPEINFO_CLS(cls_name, base_name)										\
 	EXP_DEF_MULTTYPE(cls_name)																\
@@ -221,7 +221,7 @@ private:																					\
 	EXP_DEF_MULTTYPE(cls_name)																\
 	EXP_DECLARE_TYPEINFO(cls_name)															\
 public:																						\
-	bool IsKindOf(TypeInfo& cls);
+	bool IsKindOf(_TypeInfo& cls);
 
 // dynamically typeinfo
 
@@ -272,7 +272,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)						\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
@@ -285,7 +285,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, pfn_new, tmp)			\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
@@ -295,7 +295,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, pfn_new, tmp)	\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
@@ -305,7 +305,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, pfn_new, tmp)									\
 	tmp																						\
-	TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
 	{																						\
 		_T(#cls_name), 																		\
 		IBaseObject::TypeInfoOrder++, 														\
@@ -313,9 +313,9 @@ private:																					\
 		pfn_new																				\
 	};																						\
 	tmp																						\
-	bool cls_name::IsKindOf(TypeInfo& cls)													\
+	bool cls_name::IsKindOf(_TypeInfo& cls)													\
 	{																						\
-		TypeInfo* p = &(this->GetTypeInfo());												\
+		_TypeInfo* p = &(this->GetTypeInfo());												\
 		return (p ? p->IsKindOf(cls) : false);												\
 	}
 
@@ -370,7 +370,7 @@ private:																					\
 
 // RTTI 起始类
 template <int IntT/* = 0*/>
-class IBaseObjectT
+interface IBaseObjectT
 {
 	EXP_DECLARE_DYNCREATE_NULL(IBaseObjectT)
 
@@ -391,7 +391,7 @@ EXP_INLINE bool ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
 {
 	if( ptr )
 	{
-		TypeInfo* inf = ExGetTypeInfo(c_key);
+		_TypeInfo* inf = ExGetTypeInfo(c_key);
 		if( inf )
 			return ptr->IsKindOf(*inf);
 		else
@@ -415,7 +415,7 @@ EXP_INLINE TypeT* ExDynCast(void* ptr)
 EXP_INLINE void* ExDynCreate(LPCTSTR c_key, CGC* gc = NULL)
 {
 	if( c_key == NULL ) return NULL;
-	TypeInfo* inf = ExGetTypeInfo(c_key);
+	_TypeInfo* inf = ExGetTypeInfo(c_key);
 	if( inf )
 		return inf->CreateObject(gc);
 	else

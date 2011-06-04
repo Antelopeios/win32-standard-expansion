@@ -229,6 +229,51 @@ protected:
 			if (WM_KILLFOCUS == nMessage)
 				m_ShiftDown = false;
 			break;
+		case WM_PAINT:
+			{
+				// 得到全局图片
+				CImage* glb_img = (CImage*)lParam;
+				if (!glb_img) break;
+				// 遍历控件列表
+				for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+				{
+					ctrl = ExDynCast<IGuiCtrl>(*ite);
+					if (!ctrl) continue;
+					// 初始化返回值
+					ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+					// 转发消息
+					if (ctrl->IsVisible())
+					{
+						// 创建控件图片
+						CRect ctl_rct;
+						ctrl->GetWindowRect(ctl_rct);
+						CImage ctl_img;
+						ctl_img.Create(ctl_rct.Width(), ctl_rct.Height());
+						// 控件绘图
+						IGuiEffect* eff = ctrl->GetEffect();
+						if (eff)
+						{
+							if(!eff->IsInit())
+								eff->Init(ctl_img);
+							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+							eff->Show(*ite, ctl_img);
+						}
+						else
+							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+						// 覆盖全局绘图
+						CImgRenderer::Render(glb_img->Get(), ctl_img, ctl_rct, CPoint());
+					}
+					else
+					{
+						// 停止特效
+						IGuiEffect* eff = ctrl->GetEffect();
+						if (eff) eff->KillTimer(pGui->GethWnd());
+					}
+					// 判断返回值
+					lrDef = ctrl->GetResult(lrDef);
+				}
+			}
+			break;
 		default:
 			for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
@@ -237,31 +282,7 @@ protected:
 				// 初始化返回值
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				switch( nMessage )
-				{
-				case WM_PAINT:
-					if (ctrl->IsVisible())
-					{
-						IGuiEffect* eff = ctrl->GetEffect();
-						if (eff)
-						{
-							if(!eff->IsInit())
-								eff->Init(*(CImage*)lParam);
-							ctrl->Send(*ite, nMessage, wParam, lParam);
-							eff->Show(*ite, *(CImage*)lParam);
-						}
-						else
-							ctrl->Send(*ite, nMessage, wParam, lParam);
-					}
-					else
-					{
-						IGuiEffect* eff = ctrl->GetEffect();
-						if (eff) eff->KillTimer(pGui->GethWnd());
-					}
-					break;
-				default:
-					ctrl->Send(*ite, nMessage, wParam, lParam);
-				}
+				ctrl->Send(*ite, nMessage, wParam, lParam);
 				// 判断返回值
 				lrDef = ctrl->GetResult(lrDef);
 			}

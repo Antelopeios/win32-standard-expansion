@@ -96,7 +96,7 @@ public:
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
-				ctrl->GetRealRect(rect);
+				ctrl->GetClientRect(rect);
 
 				// ´¦Àí
 				if (m_rcOld != rect)
@@ -106,8 +106,8 @@ public:
 				}
 
 				// »æÍ¼
-				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
-				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
+				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFillT<CFilterOverlay>(*pixel));
+				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint(), &CFilterOverlay());
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
 					CImgRenderer::Render

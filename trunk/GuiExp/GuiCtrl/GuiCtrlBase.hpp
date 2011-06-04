@@ -33,13 +33,16 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0001.1500
+// Date:	2011-06-03
+// Version:	1.0.0002.1710
 //
 // History:
 //	- 1.0.0001.1500(2011-05-25)	+ IGuiCtrlBase添加控件状态接口基本实现
 //								= 将控件GC统一到IGuiCtrlBase内定义
 //								= 当可见性或可用性发生改变时,控件将设置更新状态
+//	- 1.0.0002.1710(2011-06-03)	= 调整IGuiCtrlBase区域控制接口的命名
+//								+ 添加IGuiCtrlBase::GetClientRect()接口
+//								+ IGuiCtrlBase里添加默认的事件对象CGuiCtrlEvent
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrlBase_hpp__
@@ -73,7 +76,10 @@ public:
 		: m_bEnable(true)
 		, m_bVisible(true)
 		, m_Updated(true)
-	{}
+	{
+		// 添加事件对象
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiCtrlEvent"), &m_GC));
+	}
 
 public:
 	// 更新状态
@@ -124,13 +130,13 @@ public:
 		if (ctrl) return ctrl->C2B(rc);
 		return ExDynCast<IGuiBoard>(m_Pare) ? true : false;
 	}
-	bool SetRect(const CRect& rc)
+	bool SetWindowRect(const CRect& rc)
 	{
 		m_Rect = rc;
 		Refresh(false);
 		return true;
 	}
-	bool GetRect(CRect& rc)
+	bool GetWindowRect(CRect& rc)
 	{
 		rc = m_Rect;
 		return true;
@@ -139,15 +145,21 @@ public:
 	{
 		CRect rc_tmp(rc);
 		if (!B2C(rc_tmp)) return false;
-		return SetRect(rc_tmp);
+		return SetWindowRect(rc_tmp);
 	}
 	bool GetRealRect(CRect& rc)
 	{
 		if (!m_Pare) return false;
-		if (!GetRect(rc)) return false;
+		if (!GetWindowRect(rc)) return false;
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
 		if (ctrl) return ctrl->C2B(rc);
 		return ExDynCast<IGuiBoard>(m_Pare) ? true : false;
+	}
+	bool GetClientRect(CRect& rc)
+	{
+		if (!GetWindowRect(rc)) return false;
+		rc.MoveTo(CPoint());
+		return true;
 	}
 
 	// 刷新绘图

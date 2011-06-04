@@ -168,7 +168,7 @@ public:
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
-				ctrl->GetRealRect(rect);
+				ctrl->GetClientRect(rect);
 
 				// ¥¶¿Ì
 				if (m_rcOld != rect)

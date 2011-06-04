@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0004.1022
+// Date:	2011-06-03
+// Version:	1.0.0005.1733
 //
 // History:
 //	- 1.0.0001.1328(2011-05-02)	+ 添加渐变滤镜
@@ -43,6 +43,7 @@
 //								+ 添加CFilterFill颜色画刷
 //	- 1.0.0004.1022(2011-05-25)	+ CFilterFill支持跳过指定颜色
 //								+ CFilterInverse支持屏蔽通道
+//	- 1.0.0005.1733(2011-06-03)	+ 添加CFilterOverlay图片叠加滤镜
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FilterObject_h__
@@ -113,6 +114,45 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+// 图片叠加
+class CFilterOverlay : public IFilterObject
+{
+protected:
+	BYTE m_Alpha;
+
+public:
+	CFilterOverlay(BYTE a = EXP_CM)
+		: IFilterObject()
+	{
+		m_Radius = 1;
+		m_Alpha = a;
+	}
+
+	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
+	{
+		BYTE a_s = (ExGetA(pixSrc[nKey]) * m_Alpha) / EXP_CM;
+		if (a_s == 0) return pixDes;
+		if (a_s == EXP_CM) return pixSrc[nKey];
+		BYTE r_s = ExGetR(pixSrc[nKey]);
+		BYTE g_s = ExGetG(pixSrc[nKey]);
+		BYTE b_s = ExGetB(pixSrc[nKey]);
+		BYTE a_d = ExGetA(pixDes);
+		BYTE r_d = ExGetR(pixDes);
+		BYTE g_d = ExGetG(pixDes);
+		BYTE b_d = ExGetB(pixDes);
+		BYTE a_i = EXP_CM - a_s;
+		return ExRGBA
+			(
+			(r_d * a_d * a_i + EXP_CM * r_s * a_s) / (EXP_CM * (a_d + a_s) - a_d * a_s), 
+			(g_d * a_d * a_i + EXP_CM * g_s * a_s) / (EXP_CM * (a_d + a_s) - a_d * a_s), 
+			(b_d * a_d * a_i + EXP_CM * b_s * a_s) / (EXP_CM * (a_d + a_s) - a_d * a_s), 
+			(a_d + a_s) - a_d * a_s / EXP_CM
+			);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
 // 正常渲染
 class CFilterNormal : public IFilterObject
 {
@@ -145,7 +185,7 @@ public:
 			(r_s * a_s + r_d * a_i) / EXP_CM, 
 			(g_s * a_s + g_d * a_i) / EXP_CM, 
 			(b_s * a_s + b_d * a_i) / EXP_CM, 
-			(a_d + a_s) - a_d * a_s / EXP_CM
+			(a_s * a_s + a_d * a_i) / EXP_CM
 			);
 	}
 };

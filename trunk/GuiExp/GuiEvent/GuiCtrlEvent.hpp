@@ -28,36 +28,55 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiConfig - 界面配置文件接口
+// GuiCtrlEvent - 控件事件
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-31
-// Version:	1.0.0000.1714
+// Date:	2011-06-03
+// Version:	1.0.0000.1635
 //
 // History:
-//	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
+//	- 1.0.0000.1635(2011-06-03)	@ 开始构建GuiCtrlEvent
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiConfig_h__
-#define __GuiConfig_h__
+#ifndef __GuiCtrlEvent_hpp__
+#define __GuiCtrlEvent_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-EXP_BEG
-
 //////////////////////////////////////////////////////////////////
 
-class EXP_API CGuiConfig
+class CGuiCtrlEvent : public IGuiEvent
 {
-protected:
+	EXP_DECLARE_DYNCREATE_CLS(CGuiCtrlEvent, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		// 筛选消息
+		switch( nMessage )
+		{
+		case WM_PAINT:
+			if (lParam)
+			{
+				CImage* mem_img = (CImage*)lParam;
+				if (!mem_img || mem_img->IsNull()) break;
+			}
+			break;
+		}
+	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_END
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiCtrlEvent, IGuiEvent)
 
-#endif/*__GuiConfig_h__*/
+//////////////////////////////////////////////////////////////////
+
+#endif/*__GuiCtrlEvent_hpp__*/

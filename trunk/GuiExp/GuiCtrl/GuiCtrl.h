@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-26
-// Version:	1.0.0003.1746
+// Date:	2011-06-03
+// Version:	1.0.0004.1709
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -42,6 +42,8 @@
 //	- 1.0.0002.1517(2011-05-25)	# 当控件无效时IGuiCtrl::SetFocus()应该直接返回
 //	- 1.0.0003.1746(2011-05-26)	# IGuiCtrl::SetFocus()应该同时递归设置父控件焦点
 //								# IGuiCtrl::GetFocus()应该直接返回最底层的焦点控件
+//	- 1.0.0004.1709(2011-06-03)	= 调整IGuiCtrl区域控制接口的命名
+//								+ 添加IGuiCtrl::GetClientRect()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -126,10 +128,11 @@ public:
 	virtual bool C2P(CRect& rc) = 0;
 	virtual bool B2C(CRect& rc) = 0;
 	virtual bool C2B(CRect& rc) = 0;
-	virtual bool SetRect(const CRect& rc) = 0;
-	virtual bool GetRect(CRect& rc) = 0;
+	virtual bool SetWindowRect(const CRect& rc) = 0;
+	virtual bool GetWindowRect(CRect& rc) = 0;
 	virtual bool SetRealRect(const CRect& rc) = 0;
 	virtual bool GetRealRect(CRect& rc) = 0;
+	virtual bool GetClientRect(CRect& rc) = 0;
 
 	// 刷新绘图
 	virtual void Refresh(bool bSelf = true) = 0;

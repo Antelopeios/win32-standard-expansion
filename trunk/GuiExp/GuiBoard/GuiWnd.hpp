@@ -57,15 +57,9 @@ class CGuiWnd : public IGuiThunk
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiWnd, IGuiThunk)
 
-protected:
-	CGC m_GC;
-
 public:
 	CGuiWnd()
-	{
-		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), &m_GC));
-	}
+	{}
 };
 
 //////////////////////////////////////////////////////////////////

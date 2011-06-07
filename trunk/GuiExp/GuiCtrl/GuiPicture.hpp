@@ -69,7 +69,7 @@ public:
 		: m_Color(0)
 	{
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), &m_GC));
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), GetGC()));
 	}
 	~CGuiPicture()
 	{

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-27
-// Version:	1.0.0004.1103
+// Date:	2011-06-08
+// Version:	1.0.0005.0047
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -42,6 +42,7 @@
 //	- 1.0.0003.1911(2011-05-26)	+ 添加针对性的控件消息转发
 //								+ 添加WM_MOUSELEAVE的消息发送
 //	- 1.0.0004.1103(2011-05-27)	+ 添加Tab键焦点切换的响应
+//	- 1.0.0005.0047(2011-06-08)	+ 将GuiWndEvent拓展为全局通用消息预处理事件类
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -87,7 +88,6 @@ protected:
 	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui) return 0;
-		IGuiCtrl* ctrl = NULL;
 		// 向控件转发消息
 		switch (nMessage)
 		{
@@ -120,7 +120,7 @@ protected:
 			//	ExTrace(_T("0x%04X, (%d, %d)\n"), nMessage, pt_tmp.x, pt_tmp.y);
 				CPoint pt(pt_tmp);
 				pGui->ScreenToClient(pt);
-				ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
+				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
 				switch (nMessage)
 				{
 					// 预存鼠标移动
@@ -178,7 +178,7 @@ protected:
 		case WM_SYSCHAR:
 		case WM_SYSDEADCHAR:
 			{
-				ctrl = IGuiCtrl::GetFocus();
+				IGuiCtrl* ctrl = IGuiCtrl::GetFocus();
 				if (!ctrl) break;
 				// 初始化返回值
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
@@ -229,15 +229,27 @@ protected:
 			if (WM_KILLFOCUS == nMessage)
 				m_ShiftDown = false;
 			break;
+		default:
+			lrDef = BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
+		}
+		return lrDef;
+	}
+	// 基础全局消息转发
+	LRESULT BaseSend(IGuiBase* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
+	{
+		if (!pGui) return 0;
+		// 向控件转发消息
+		switch (nMessage)
+		{
 		case WM_PAINT:
 			{
 				// 得到全局图片
-				CImage* glb_img = (CImage*)lParam;
-				if (!glb_img) break;
+				CImage* mem_img = (CImage*)lParam;
+				if (!mem_img || mem_img->IsNull()) break;
 				// 遍历控件列表
-				for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+				for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 				{
-					ctrl = ExDynCast<IGuiCtrl>(*ite);
+					IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 					if (!ctrl) continue;
 					// 初始化返回值
 					ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
@@ -261,7 +273,7 @@ protected:
 						else
 							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
 						// 覆盖全局绘图
-						CImgRenderer::Render(glb_img->Get(), ctl_img, ctl_rct, CPoint());
+						CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint());
 					}
 					else
 					{
@@ -275,9 +287,9 @@ protected:
 			}
 			break;
 		default:
-			for(IGuiBoard::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
-				ctrl = ExDynCast<IGuiCtrl>(*ite);
+				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 				if (!ctrl) continue;
 				// 初始化返回值
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
@@ -297,44 +309,50 @@ public:
 
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiBase* base = ExDynCast<IGuiBase>(pGui);
+		if (!base) return;
 		// 筛选消息
 		LRESULT ret = 0;
-		switch( nMessage )
+		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
+		if (board)
 		{
-		case WM_SHOWWINDOW:
-			// 鼠标离开事件检测定时器
-			if (s_MLCheckID == 0)
-				s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
-			break;
-		case WM_PAINT:
+			switch( nMessage )
 			{
-				PAINTSTRUCT ps = {0};
-				HDC hdc = ::BeginPaint(board->GethWnd(), &ps);
-				// 构建绘图缓存
-				CRect rect;
-				board->GetClientRect(rect);
-				CImage mem_img;
-				mem_img.Create(rect.Width(), rect.Height());
-				// 覆盖控件绘图
-				ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
-				// 覆盖缓存绘图
-				CGraph mem_grp;
-				mem_grp.Create();
-				mem_grp.SetObject(mem_img.Get());
-				board->LayeredWindow(hdc, mem_grp);
-				// 结束绘图
-				mem_grp.Delete();
-				::EndPaint(board->GethWnd(), &ps);
+			case WM_SHOWWINDOW:
+				// 鼠标离开事件检测定时器
+				if (s_MLCheckID == 0)
+					s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
+				break;
+			case WM_PAINT:
+				{
+					PAINTSTRUCT ps = {0};
+					HDC hdc = ::BeginPaint(board->GethWnd(), &ps);
+					// 构建绘图缓存
+					CRect rect;
+					board->GetClientRect(rect);
+					CImage mem_img;
+					mem_img.Create(rect.Width(), rect.Height());
+					// 覆盖控件绘图
+					ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
+					// 覆盖缓存绘图
+					CGraph mem_grp;
+					mem_grp.Create();
+					mem_grp.SetObject(mem_img.Get());
+					board->LayeredWindow(hdc, mem_grp);
+					// 结束绘图
+					mem_grp.Delete();
+					::EndPaint(board->GethWnd(), &ps);
+				}
+				break;
+			case WM_ERASEBKGND:
+				ret = WndSend(board, nMessage, wParam, lParam);
+				break;
+			default:
+				ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));
 			}
-			break;
-		case WM_ERASEBKGND:
-			ret = WndSend(board, nMessage, wParam, lParam);
-			break;
-		default:
-			ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));
 		}
+		else
+			ret = BaseSend(base, nMessage, wParam, lParam);
 		SetResult(ret);
 	}
 };

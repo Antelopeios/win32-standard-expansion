@@ -62,8 +62,6 @@ interface IGuiCtrlBase : public IGuiCtrl
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
 
 protected:
-	CGC m_GC;
-
 	bool m_bEnable;		// 是否可用
 	bool m_bVisible;	// 是否可见
 
@@ -76,10 +74,7 @@ public:
 		: m_bEnable(true)
 		, m_bVisible(true)
 		, m_Updated(true)
-	{
-		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiCtrlEvent"), &m_GC));
-	}
+	{}
 
 public:
 	// 更新状态

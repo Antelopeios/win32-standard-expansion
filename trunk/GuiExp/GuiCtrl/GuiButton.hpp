@@ -75,7 +75,7 @@ public:
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiButtonEvent"), &m_GC));
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiButtonEvent"), GetGC()));
 	}
 	~CGuiButton()
 	{

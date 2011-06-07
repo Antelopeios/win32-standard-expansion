@@ -76,7 +76,6 @@ public:
 
 	virtual bool Attach(wnd_t hWnd) = 0;
 	virtual wnd_t Detach() = 0;
-	virtual wnd_t GethWnd() = 0;
 
 	// ´°¿ÚÏûÏ¢
 	virtual LRESULT DefProc(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;

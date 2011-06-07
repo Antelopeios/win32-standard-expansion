@@ -171,6 +171,14 @@
 			Name="GuiCommon"
 			>
 			<File
+				RelativePath=".\GuiCommon\GuiBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiCommon\GuiBase.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiCommon\GuiCommon.cpp"
 				>
 			</File>
@@ -240,10 +248,6 @@
 			>
 			<File
 				RelativePath=".\GuiEvent\GuiButtonEvent.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiEvent\GuiCtrlEvent.hpp"
 				>
 			</File>
 			<File

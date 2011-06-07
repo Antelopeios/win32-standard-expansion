@@ -141,12 +141,13 @@ public:
 		BYTE g_d = ExGetG(pixDes);
 		BYTE b_d = ExGetB(pixDes);
 		BYTE a_i = EXP_CM - a_s;
+		BYTE a_r = (a_d + a_s) - a_d * a_s / EXP_CM;
 		return ExRGBA
 			(
-			(r_d * a_d * a_i + EXP_CM * r_s * a_s) / (EXP_CM * (a_d + a_s) - a_d * a_s), 
-			(g_d * a_d * a_i + EXP_CM * g_s * a_s) / (EXP_CM * (a_d + a_s) - a_d * a_s), 
-			(b_d * a_d * a_i + EXP_CM * b_s * a_s) / (EXP_CM * (a_d + a_s) - a_d * a_s), 
-			(a_d + a_s) - a_d * a_s / EXP_CM
+			(r_d * a_d * a_i + EXP_CM * r_s * a_s) / (EXP_CM * a_r), 
+			(g_d * a_d * a_i + EXP_CM * g_s * a_s) / (EXP_CM * a_r), 
+			(b_d * a_d * a_i + EXP_CM * b_s * a_s) / (EXP_CM * a_r), 
+			a_r
 			);
 	}
 };
@@ -185,7 +186,7 @@ public:
 			(r_s * a_s + r_d * a_i) / EXP_CM, 
 			(g_s * a_s + g_d * a_i) / EXP_CM, 
 			(b_s * a_s + b_d * a_i) / EXP_CM, 
-			(a_s * a_s + a_d * a_i) / EXP_CM
+			(a_d + a_s) - a_d * a_s / EXP_CM//(a_s * a_s + a_d * a_i) / EXP_CM
 			);
 	}
 };

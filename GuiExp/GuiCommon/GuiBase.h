@@ -28,34 +28,87 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiInterface - 界面公用接口
+// IGuiBase - 界面对象基础
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-06-08
-// Version:	1.0.0004.0047
+// Version:	1.0.0002.0047
 //
 // History:
-//	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
-//	- 1.0.0002.1000(2011-05-19)	+ 添加IGuiBase界面对象基础类实现
-//	- 1.0.0003.1000(2011-05-23)	+ 添加IGuiEffect效果对象基础类实现
-//	- 1.0.0004.0047(2011-06-08)	^ 将IGuiBase移出并单独实现
+//	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
-#include "GuiInterface.h"
+#ifndef __GuiBase_h__
+#define __GuiBase_h__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffect, IGuiObject)
+// GUI 界面对象基础
+interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
+{
+	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+
+protected:
+	CGC* m_GC;
+
+public:
+	IGuiBase()
+		: m_GC(ExMem::Alloc<CGC>())
+	{
+		// 添加事件对象
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), GetGC()));
+	}
+	virtual ~IGuiBase(void)
+	{
+		ExMem::Free(m_GC);
+	}
+
+public:
+	virtual CGC* GetGC() { return m_GC; }
+
+	virtual bool GetRealRect(CRect& rc) = 0;
+
+	IGuiBase* GetPtCtrl(const CPoint& pt)
+	{
+		CRect rc;
+		GetRealRect(rc);
+		if (rc.PtInRect(pt))
+		{
+			if (GetChildren().Empty()) return this;
+			for(list_t::iterator_t ite = GetChildren().Last(); ite != GetChildren().Head(); --ite)
+			{
+				IGuiBase* base = ExDynCast<IGuiBase>(*ite);
+				if (!base) continue;
+				base = base->GetPtCtrl(pt);
+				if (base) return base;
+			}
+			IGuiBase* base = ExDynCast<IGuiBase>(GetChildren().HeadItem());
+			if (base)
+			{
+				base = base->GetPtCtrl(pt);
+				if (base) return base;
+			}
+			return this;
+		}
+		else
+			return NULL;
+	}
+
+	void Free() { EXP_MULT::Free(); }
+
+	virtual wnd_t GethWnd() = 0;
+};
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiBase_h__*/

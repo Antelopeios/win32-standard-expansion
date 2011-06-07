@@ -14,11 +14,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	// 加载资源
+	// 垃圾回收器
 	CGC gc;
+
+	// 加载资源
 	CIOFile file(_T("../TestImg1/ground.png"));
+	// 解码器
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	if (!coder) return 0;
+	// 图片资源
 	CImage img_pic(coder->Decode());
 	CImage img_btn[9];
 	file.Open(_T("btn_bg_cap_left.png"));
@@ -39,17 +43,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	img_btn[7].Set(coder->Decode());
 	file.Open(_T("btn_bg_bottom_right.png"));
 	img_btn[8].Set(coder->Decode());
+	// 文字资源
 	CText txt_btn[5];
-	for(int i = 0; i < _countof(txt_btn); ++i)
-	{
-		txt_btn[i].SetString(_T("Dark C.at"));
-		txt_btn[i].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
-		txt_btn[i].SetColor(ExRGBA(0, 60, 116, 200));
-	}
+	txt_btn[0].SetString(_T("Dark C.at"));
+	txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
+	txt_btn[0].SetColor(ExRGBA(0, 60, 116, 200));
+	for(int i = 1; i < _countof(txt_btn); ++i)
+		txt_btn[i] = txt_btn[0];
 
 	// 创建效果对象并设置
 	IGuiEffect* eff1 = ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"), &gc));
 	IGuiEffect* eff2 = ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"), &gc));
+
+	// 创建按钮控件对象并设置
+	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc));
+	btn->SetState(_T("image"), img_btn);
+	btn->SetState(_T("text"), txt_btn);
+	btn->SetWindowRect(CRect(70, 100, 180, 140));
+	//btn->SetEffect(eff1);
 
 	// 创建图片控件对象并设置
 	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc));
@@ -58,14 +69,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//pic->SetState(_T("text"), &text);
 	CRect rect(0, 0, img_pic.GetWidth(), img_pic.GetHeight());
 	pic->SetWindowRect(rect);
-	//pic->SetEffect(eff1);
-
-	// 创建按钮控件对象并设置
-	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc));
-	btn->SetState(_T("image"), img_btn);
-	btn->SetState(_T("text"), txt_btn);
-	btn->SetWindowRect(CRect(70, 100, 180, 140));
-	//btn->SetEffect(eff2);
+	//pic->SetEffect(eff2);
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
@@ -82,8 +86,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 将窗口与控件及事件对象关联
 	pic->AddEvent(&pic_evt);
 	btn->AddEvent(&btn_evt);
+	pic->AddComp(btn);
 	wnd->AddComp(pic);
-	wnd->AddComp(btn);
 	wnd->AddEvent(&cus_evt);
 
 	// 主消息循环:

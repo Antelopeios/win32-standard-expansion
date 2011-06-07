@@ -119,7 +119,7 @@ public:
 							(rect.Bottom() - txt_img.GetHeight()) / 2, 
 							rect.Right(), rect.Bottom()
 							), 
-						CPoint()
+						CPoint(), &CFilterOverlay()
 						);
 			}
 			break;

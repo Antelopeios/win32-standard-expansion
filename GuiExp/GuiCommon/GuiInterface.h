@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-26
-// Version:	1.0.0009.1411
+// Date:	2011-06-08
+// Version:	1.0.0010.0047
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -50,6 +50,8 @@
 //								= 调整IGuiObject::Free()为虚函数
 //	- 1.0.0008.1600(2011-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
 //	- 1.0.0009.1411(2011-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
+//	- 1.0.0010.0047(2011-06-08)	= IGuiSender优先向后添加的事件对象转发消息
+//								^ 将IGuiBase移出并单独实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -79,7 +81,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 组合接口
-interface EXP_API IGuiComp : public IGuiObject, protected CListT<IGuiComp*>
+interface EXP_API IGuiComp : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiComp, IGuiObject)
 
@@ -89,14 +91,20 @@ public:
 protected:
 	bool		m_bTru;		// 子容器链托管标记
 	IGuiComp*	m_Pare;		// 父对象指针
+private:
+	list_t* m_Cldr;
 
 public:
 	IGuiComp(void)
 		: m_bTru(false)
 		, m_Pare(NULL)
+		, m_Cldr(ExMem::Alloc<list_t>())
 	{}
 	virtual ~IGuiComp(void)
-	{ ClearComp(); }
+	{
+		ClearComp();
+		ExMem::Free(m_Cldr);
+	}
 
 protected:
 	virtual void Init(IGuiComp* pComp) { m_Pare = pComp; }
@@ -108,10 +116,10 @@ public:
 	bool IsTrust() { return m_bTru; }
 	// 获得内部对象
 	IGuiComp* GetParent() { return m_Pare; }
-	list_t& GetChildren() { return *((list_t*)this); }
+	list_t& GetChildren() { return *m_Cldr; }
 
 	// 查找
-	iterator_t& Find(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
+	list_t::iterator_t& Find(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
 
 	// 组合接口
 	virtual void AddComp(IGuiComp* pComp)
@@ -119,33 +127,33 @@ public:
 		if (!pComp) return ;
 		// 定位对象
 		list_t::iterator_t ite = Find(pComp);
-		if (ite != list_t::Tail()) return;
+		if (ite != GetChildren().Tail()) return;
 		// 添加新对象
 		if( pComp->m_Pare )
 			pComp->m_Pare->DelComp(pComp);
 		pComp->Init(this);
-		list_t::Add(pComp);
+		GetChildren().Add(pComp);
 	}
 	virtual void DelComp(IGuiComp* pComp)
 	{
 		if (!pComp) return ;
 		// 定位对象
 		list_t::iterator_t ite = Find(pComp);
-		if (ite == list_t::Tail()) return;
+		if (ite == GetChildren().Tail()) return;
 		// 删除对象
-		list_t::Del(ite);
+		GetChildren().Del(ite);
 		pComp->Fina();
 		if (m_bTru) pComp->Free();
 	}
 	virtual void ClearComp()
 	{
-		for(list_t::iterator_t ite = list_t::Head(); ite != list_t::Tail(); ++ite)
+		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->Fina();
 			if (m_bTru) (*ite)->Free();
 		}
-		list_t::Clear();
+		GetChildren().Clear();
 	}
 };
 
@@ -186,23 +194,29 @@ public:
 
 protected:
 	bool m_bTru;		// 子容器链托管标记
+private:
+	evt_list_t* m_CldrEvt;
 
 public:
 	IGuiSender(void)
 		: m_bTru(false)
+		, m_CldrEvt(ExMem::Alloc<evt_list_t>())
 	{}
 	virtual ~IGuiSender(void)
-	{ ClearEvent(); }
+	{
+		ClearEvent();
+		ExMem::Free(m_CldrEvt);
+	}
 
 public:
 	// 是否对子容器做托管
 	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
 	bool IsTrust() { return m_bTru; }
 	// 获得内部对象
-	evt_list_t& GetEvent() { return *((evt_list_t*)this); }
+	evt_list_t& GetEvent() { return *m_CldrEvt; }
 
 	// 查找
-	iterator_t& Find(IGuiEvent* pEvent) { return evt_list_t::finder_t::Find(GetEvent(), pEvent); }
+	evt_list_t::iterator_t& Find(IGuiEvent* pEvent) { return evt_list_t::finder_t::Find(GetEvent(), pEvent); }
 
 	// 组合接口
 	virtual void AddEvent(IGuiEvent* pEvent)
@@ -210,35 +224,35 @@ public:
 		if (!pEvent) return ;
 		// 定位对象
 		evt_list_t::iterator_t ite = Find(pEvent);
-		if (ite != evt_list_t::Tail()) return;
+		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
-		evt_list_t::Add(pEvent);
+		GetEvent().Add(pEvent);
 	}
 	virtual void DelEvent(IGuiEvent* pEvent)
 	{
 		if (!pEvent) return ;
 		// 定位对象
 		evt_list_t::iterator_t ite = Find(pEvent);
-		if (ite == evt_list_t::Tail()) return;
+		if (ite == GetEvent().Tail()) return;
 		// 删除对象
-		evt_list_t::Del(ite);
+		GetEvent().Del(ite);
 		if (m_bTru) pEvent->Free();
 	}
 	virtual void ClearEvent()
 	{
 		if (m_bTru)
-			for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
+			for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 			{
 				if (!(*ite)) continue;
 				(*ite)->Free();
 			}
-		evt_list_t::Clear();
+		GetEvent().Clear();
 	}
 
 	// 事件结果接口
 	void SetResult(LRESULT lrRet = 0)
 	{
-		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
+		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->SetResult(lrRet);
@@ -246,7 +260,7 @@ public:
 	}
 	LRESULT GetResult(LRESULT lrDef = 0)
 	{
-		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
+		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
 			LRESULT r = (*ite)->GetResult();
@@ -257,13 +271,22 @@ public:
 	// 事件发送接口
 	virtual void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
+		if (GetEvent().Empty()) return;
 		LRESULT ret = GetResult();
-		for(evt_list_t::iterator_t ite = evt_list_t::Head(); ite != evt_list_t::Tail(); ++ite)
+		// 后添加的事件优先执行
+		evt_list_t::iterator_t ite = GetEvent().Last();
+		for(; ite != GetEvent().Head(); --ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 			ret = (*ite)->GetResult();
+		}
+		ite = GetEvent().Head();
+		if (*ite)
+		{
+			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
+			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 		}
 	}
 };
@@ -286,45 +309,6 @@ public:
 	// 定时器
 	virtual void SetTimer(wnd_t hWnd) = 0;
 	virtual void KillTimer(wnd_t hWnd) = 0;
-};
-
-//////////////////////////////////////////////////////////////////
-
-// GUI 界面对象基础
-interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
-{
-	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
-
-public:
-	virtual bool GetRealRect(CRect& rc) = 0;
-
-	IGuiBase* GetPtCtrl(const CPoint& pt)
-	{
-		CRect rc;
-		GetRealRect(rc);
-		if (rc.PtInRect(pt))
-		{
-			if (GetChildren().Empty()) return this;
-			for(list_t::iterator_t ite = GetChildren().Last(); ite != GetChildren().Head(); --ite)
-			{
-				IGuiBase* base = ExDynCast<IGuiBase>(*ite);
-				if (!base) continue;
-				base = base->GetPtCtrl(pt);
-				if (base) return base;
-			}
-			IGuiBase* base = ExDynCast<IGuiBase>(GetChildren().HeadItem());
-			if (base)
-			{
-				base = base->GetPtCtrl(pt);
-				if (base) return base;
-			}
-			return this;
-		}
-		else
-			return NULL;
-	}
-
-	void Free() { EXP_MULT::Free(); }
 };
 
 //////////////////////////////////////////////////////////////////

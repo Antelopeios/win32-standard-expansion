@@ -66,7 +66,7 @@ interface EXP_API IGuiCtrl : public IGuiBase
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
 
 public:
-	struct state_t : IPoolTypeT<state_t, EXP_MULT::alloc_t>
+	struct state_t : IPoolTypeT<state_t, EXP_MEMORY_ALLOC>
 	{
 		CString			sta_typ;
 		CArrayT<void*>	sta_arr;
@@ -121,6 +121,11 @@ public:
 			if (board) return board;
 		}
 		return NULL;
+	}
+	virtual wnd_t GethWnd()
+	{
+		IGuiBoard* board = GetBoard();
+		return board ? board->GethWnd() : NULL;
 	}
 
 	// ÇøÓò¿ØÖÆ

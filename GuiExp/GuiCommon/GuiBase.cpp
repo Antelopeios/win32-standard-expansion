@@ -28,55 +28,27 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiCtrlEvent - 控件事件
+// IGuiBase - 界面对象基础
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-03
-// Version:	1.0.0000.1635
+// Date:	2011-06-08
+// Version:	1.0.0002.0047
 //
 // History:
-//	- 1.0.0000.1635(2011-06-03)	@ 开始构建GuiCtrlEvent
+//	- 1.0.0002.0047(2011-06-08)	@ 单独实现IGuiBase
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiCtrlEvent_hpp__
-#define __GuiCtrlEvent_hpp__
+#include "GuiCommon/GuiCommon.h"
+#include "GuiBase.h"
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-//////////////////////////////////////////////////////////////////
-
-class CGuiCtrlEvent : public IGuiEvent
-{
-	EXP_DECLARE_DYNCREATE_CLS(CGuiCtrlEvent, IGuiEvent)
-
-public:
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
-
-		// 筛选消息
-		switch( nMessage )
-		{
-		case WM_PAINT:
-			if (lParam)
-			{
-				CImage* mem_img = (CImage*)lParam;
-				if (!mem_img || mem_img->IsNull()) break;
-			}
-			break;
-		}
-	}
-};
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiCtrlEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__GuiCtrlEvent_hpp__*/
+EXP_END

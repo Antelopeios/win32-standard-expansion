@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-03
-// Version:	1.0.0004.1709
+// Date:	2011-06-08
+// Version:	1.0.0005.2304
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -44,6 +44,8 @@
 //								# IGuiCtrl::GetFocus()应该直接返回最底层的焦点控件
 //	- 1.0.0004.1709(2011-06-03)	= 调整IGuiCtrl区域控制接口的命名
 //								+ 添加IGuiCtrl::GetClientRect()接口
+//	- 1.0.0005.2304(2011-06-08)	+ 添加IGuiCtrl::UpdateState()接口
+//								+ 在IGuiCtrl::SetFocus()接口实现中添加更新状态逻辑
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -97,6 +99,7 @@ public:
 	// 获得控件状态
 	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
 	virtual void SetState(const CString& sType, void* pState) = 0;
+	virtual void UpdateState(bool bRefreshSelf = true) = 0;
 	virtual bool IsUpdated() = 0;
 
 	// 设置效果对象
@@ -166,9 +169,10 @@ public:
 		board->SetFocus();
 		// 发送焦点改变消息
 		m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
+		m_Focus->UpdateState();
 		if (!old_fc) return old_fc;
 		old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
-		board->Invalidate();
+		old_fc->UpdateState();
 		return old_fc;
 	}
 	static IGuiCtrl* GetFocus()

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-03
-// Version:	1.0.0002.1710
+// Date:	2011-06-08
+// Version:	1.0.0003.2304
 //
 // History:
 //	- 1.0.0001.1500(2011-05-25)	+ IGuiCtrlBase添加控件状态接口基本实现
@@ -43,6 +43,7 @@
 //	- 1.0.0002.1710(2011-06-03)	= 调整IGuiCtrlBase区域控制接口的命名
 //								+ 添加IGuiCtrlBase::GetClientRect()接口
 //								+ IGuiCtrlBase里添加默认的事件对象CGuiCtrlEvent
+//	- 1.0.0003.2304(2011-06-08)	+ 添加IGuiCtrlBase::UpdateState()接口实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrlBase_hpp__
@@ -88,8 +89,12 @@ public:
 	void SetState(const CString& sType, void* pState)
 	{
 		if (!pState) return;
+		UpdateState();
+	}
+	void UpdateState(bool bRefreshSelf = true)
+	{
 		m_Updated = true;
-		Refresh();
+		Refresh(bRefreshSelf);
 	}
 	bool IsUpdated()
 	{
@@ -177,8 +182,7 @@ public:
 	{
 		bool old = m_bEnable;
 		m_bEnable = bEnable;
-		m_Updated = true;
-		Refresh();
+		UpdateState();
 		return old;
 	}
 	bool IsEnabled() const { return m_bEnable; }
@@ -188,8 +192,7 @@ public:
 	{
 		bool old = m_bVisible;
 		m_bVisible = bVisible;
-		m_Updated = true;
-		Refresh();
+		UpdateState();
 		return old;
 	}
 	bool IsVisible() const { return m_bVisible; }

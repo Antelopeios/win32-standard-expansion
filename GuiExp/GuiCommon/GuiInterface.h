@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-06-08
-// Version:	1.0.0010.0047
+// Version:	1.0.0010.1447
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -50,8 +50,9 @@
 //								= 调整IGuiObject::Free()为虚函数
 //	- 1.0.0008.1600(2011-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
 //	- 1.0.0009.1411(2011-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
-//	- 1.0.0010.0047(2011-06-08)	= IGuiSender优先向后添加的事件对象转发消息
+//	- 1.0.0010.1447(2011-06-08)	= IGuiSender优先向后添加的事件对象转发消息
 //								^ 将IGuiBase移出并单独实现
+//								= IGuiSender::GetResult()获取第一个非默认返回值
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -264,7 +265,7 @@ public:
 		{
 			if (!(*ite)) continue;
 			LRESULT r = (*ite)->GetResult();
-			if (r != 0 && lrDef != r) lrDef = r;
+			if (r != 0 && lrDef != r) { lrDef = r; break; }
 		}
 		return lrDef;
 	}

@@ -124,7 +124,7 @@ public:
 		if (rcDes.IsEmpty())
 			rcDes.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
 		// ±éÀúÏñËØ»æÍ¼
-		if (!pFilter) pFilter = &CFilterNormal();
+		if (!pFilter) pFilter = &EXP_IMG_FILTER();
 		pFilter->SetSize(sz_des.cx, sz_des.cy);
 		LONG radius = pFilter->GetRadius();
 		if (radius <= 0) return false;

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-27
-// Version:	1.0.0002.1020
+// Date:	2011-06-08
+// Version:	1.0.0003.1426
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -44,6 +44,7 @@
 //								# 当鼠标按下后移动,按钮状态会变为未按下的状态
 //								+ 添加按钮单击消息转发及Enter键响应
 //	- 1.0.0002.1020(2011-05-27)	# 修正CGuiButtonEvent当WM_KEYUP之后无法响应焦点切换绘图
+//	- 1.0.0003.1426(2011-06-08)	# 修正CGuiButtonEvent不响应非工作区鼠标事件的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -81,6 +82,7 @@ public:
 		switch( nMessage )
 		{
 		case WM_MOUSEMOVE:
+		case WM_NCMOUSEMOVE:
 			{
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
@@ -96,6 +98,7 @@ public:
 		case WM_KEYDOWN:
 			if (wParam != VK_RETURN) break; // Enter
 		case WM_LBUTTONDOWN:
+		case WM_NCLBUTTONDOWN:
 			{
 				DWORD status = 2;
 				ctrl->SetState(_T("status"), &status);
@@ -104,6 +107,7 @@ public:
 		case WM_KEYUP:
 			if (wParam != VK_RETURN) break; // Enter
 		case WM_LBUTTONUP:
+		case WM_NCLBUTTONUP:
 			{
 				IGuiBoard* board = ctrl->GetBoard();
 				if (!board) break;

@@ -60,7 +60,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	btn->SetState(_T("image"), img_btn);
 	btn->SetState(_T("text"), txt_btn);
 	btn->SetWindowRect(CRect(70, 100, 180, 140));
-	//btn->SetEffect(eff1);
+	btn->SetEffect(eff1);
 
 	// 创建图片控件对象并设置
 	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc));
@@ -69,7 +69,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//pic->SetState(_T("text"), &text);
 	CRect rect(0, 0, img_pic.GetWidth(), img_pic.GetHeight());
 	pic->SetWindowRect(rect);
-	//pic->SetEffect(eff2);
+	pic->SetEffect(eff2);
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
@@ -86,8 +86,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 将窗口与控件及事件对象关联
 	pic->AddEvent(&pic_evt);
 	btn->AddEvent(&btn_evt);
-	pic->AddComp(btn);
 	wnd->AddComp(pic);
+	wnd->AddComp(btn);
 	wnd->AddEvent(&cus_evt);
 
 	// 主消息循环:

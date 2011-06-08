@@ -106,8 +106,8 @@ public:
 				}
 
 				// »æÍ¼
-				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFillT<CFilterOverlay>(*pixel));
-				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint(), &CFilterOverlay());
+				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
+				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
 					CImgRenderer::Render
@@ -119,7 +119,7 @@ public:
 							(rect.Bottom() - txt_img.GetHeight()) / 2, 
 							rect.Right(), rect.Bottom()
 							), 
-						CPoint(), &CFilterOverlay()
+						CPoint()
 						);
 			}
 			break;

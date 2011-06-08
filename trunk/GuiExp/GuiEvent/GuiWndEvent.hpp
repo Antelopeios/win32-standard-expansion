@@ -78,7 +78,12 @@ protected:
 		// 给原先的窗口句柄发送消息
 		if (s_MLCheckWD && s_MLCheckWD != hWnd)
 		{
-			::SendMessage(s_MLCheckWD, WM_MOUSELEAVE, 0, NULL);
+			// 给尚未离开的控件发送消息
+			if (s_MLMove)
+			{
+				s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+				s_MLMove = NULL;
+			}
 			s_MLCheckWD = NULL;
 		}
 	}
@@ -89,149 +94,114 @@ protected:
 	{
 		if (!pGui) return 0;
 		// 向控件转发消息
-		switch (nMessage)
+		if (nMessage >= WM_MOUSEFIRST && 
+			nMessage <= WM_MOUSELAST || 
+			nMessage >= WM_NCMOUSEMOVE && 
+			nMessage <= WM_NCMBUTTONDBLCLK || 
+			nMessage == WM_NCHITTEST)
 		{
-			// 鼠标消息
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONDBLCLK:
-		case WM_RBUTTONDOWN:
-		case WM_RBUTTONDBLCLK:
-		case WM_MBUTTONDOWN:
-		case WM_MBUTTONDBLCLK:
-		case WM_NCLBUTTONDOWN:
-		case WM_NCLBUTTONDBLCLK:
-		case WM_NCRBUTTONDOWN:
-		case WM_NCRBUTTONDBLCLK:
-		case WM_NCMBUTTONDOWN:
-		case WM_NCMBUTTONDBLCLK:
-		case WM_MOUSEMOVE:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MBUTTONUP:
-		case WM_MOUSEWHEEL:
-		case WM_NCHITTEST:
-		case WM_NCMOUSEMOVE:
-		case WM_NCLBUTTONUP:
-		case WM_NCRBUTTONUP:
-		case WM_NCMBUTTONUP:
-			{
-				POINT pt_tmp = {0};
-				::GetCursorPos(&pt_tmp);
+			POINT pt_tmp = {0};
+			::GetCursorPos(&pt_tmp);
 			//	ExTrace(_T("0x%04X, (%d, %d)\n"), nMessage, pt_tmp.x, pt_tmp.y);
-				CPoint pt(pt_tmp);
-				pGui->ScreenToClient(pt);
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
-				switch (nMessage)
+			CPoint pt(pt_tmp);
+			pGui->ScreenToClient(pt);
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
+			switch (nMessage)
+			{
+				// 预存鼠标移动
+			case WM_MOUSEMOVE:
+			case WM_NCMOUSEMOVE:
 				{
-					// 预存鼠标移动
-				case WM_MOUSEMOVE:
-				case WM_NCMOUSEMOVE:
-					{
-						s_MLCheckWD = pGui->GethWnd();
-						IGuiCtrl* cur = ctrl;
-						if (cur == s_MLMove) break;
-						if (s_MLMove)
-							s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
-						s_MLMove = cur;
-					}
-					break;
-					// 设置控件焦点
-				case WM_LBUTTONDOWN:
-				case WM_LBUTTONDBLCLK:
-				case WM_RBUTTONDOWN:
-				case WM_RBUTTONDBLCLK:
-				case WM_MBUTTONDOWN:
-				case WM_MBUTTONDBLCLK:
-				case WM_NCLBUTTONDOWN:
-				case WM_NCLBUTTONDBLCLK:
-				case WM_NCRBUTTONDOWN:
-				case WM_NCRBUTTONDBLCLK:
-				case WM_NCMBUTTONDOWN:
-				case WM_NCMBUTTONDBLCLK:
-					if (ctrl) ctrl->SetFocus();
-					break;
+					s_MLCheckWD = pGui->GethWnd();
+					IGuiCtrl* cur = ctrl;
+					if (cur == s_MLMove) break;
+					if (s_MLMove)
+						s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+					s_MLMove = cur;
 				}
-				if (!ctrl) break;
-				// 初始化返回值
-				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
-				// 转发消息
-				ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
-				// 判断返回值
-				lrDef = ctrl->GetResult(lrDef);
+				break;
+				// 设置控件焦点
+			case WM_LBUTTONDOWN:
+			case WM_LBUTTONDBLCLK:
+			case WM_RBUTTONDOWN:
+			case WM_RBUTTONDBLCLK:
+			case WM_MBUTTONDOWN:
+			case WM_MBUTTONDBLCLK:
+			case WM_NCLBUTTONDOWN:
+			case WM_NCLBUTTONDBLCLK:
+			case WM_NCRBUTTONDOWN:
+			case WM_NCRBUTTONDBLCLK:
+			case WM_NCMBUTTONDOWN:
+			case WM_NCMBUTTONDBLCLK:
+				if (ctrl) ctrl->SetFocus();
+				break;
 			}
-			break;
-		case WM_MOUSELEAVE:
-			// 给尚未离开的控件发送消息
-			if (s_MLMove)
+			if (!ctrl) goto EndWndSend;
+			// 初始化返回值
+			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+			// 转发消息
+			ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
+			// 判断返回值
+			lrDef = ctrl->GetResult(lrDef);
+		}
+		else
+		if (nMessage >= WM_KEYFIRST && 
+			nMessage <= WM_KEYLAST)
+		{
+			IGuiCtrl* ctrl = IGuiCtrl::GetFocus();
+			if (!ctrl) goto EndWndSend;
+			// 初始化返回值
+			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+			// 转发消息
+			ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
+			// 判断返回值
+			lrDef = ctrl->GetResult(lrDef);
+			// 处理焦点切换
+			if (WM_KEYDOWN == nMessage)
 			{
-				s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
-				s_MLMove = NULL;
-			}
-			break;
-			// 键盘消息
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		case WM_CHAR:
-		case WM_DEADCHAR:
-		case WM_SYSKEYDOWN:
-		case WM_SYSKEYUP:
-		case WM_SYSCHAR:
-		case WM_SYSDEADCHAR:
-			{
-				IGuiCtrl* ctrl = IGuiCtrl::GetFocus();
-				if (!ctrl) break;
-				// 初始化返回值
-				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
-				// 转发消息
-				ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
-				// 判断返回值
-				lrDef = ctrl->GetResult(lrDef);
-				// 处理焦点切换
-				if (WM_KEYDOWN == nMessage)
+				if (wParam == VK_TAB)
 				{
-					if (wParam == VK_TAB)
+					IGuiComp* comp = ctrl->GetParent();
+					IGuiComp::list_t::iterator_t ite = comp->Find(ExDynCast<IGuiComp>(ctrl));
+					if (ite == comp->GetChildren().Tail()) goto EndWndSend;
+					if (m_ShiftDown)
 					{
-						IGuiComp* comp = ctrl->GetParent();
-						IGuiComp::list_t::iterator_t ite = comp->Find(ExDynCast<IGuiComp>(ctrl));
-						if (ite == comp->GetChildren().Tail()) break;
-						if (m_ShiftDown)
-						{
-							if (ite == comp->GetChildren().Head())
-								ite = comp->GetChildren().Last();
-							else
-								--ite;
-						}
+						if (ite == comp->GetChildren().Head())
+							ite = comp->GetChildren().Last();
 						else
-						{
-							if (ite == comp->GetChildren().Last())
-								ite = comp->GetChildren().Head();
-							else
-								++ite;
-						}
-						IGuiCtrl* next = ExDynCast<IGuiCtrl>(*ite);
-						if (!next) break;
-						next->SetFocus();
+							--ite;
 					}
 					else
-					if (wParam == VK_SHIFT)
-						m_ShiftDown = true;
+					{
+						if (ite == comp->GetChildren().Last())
+							ite = comp->GetChildren().Head();
+						else
+							++ite;
+					}
+					IGuiCtrl* next = ExDynCast<IGuiCtrl>(*ite);
+					if (!next) goto EndWndSend;
+					next->SetFocus();
 				}
 				else
-				if (WM_KEYUP == nMessage)
-					if (wParam == VK_SHIFT)
-						m_ShiftDown = false;
+				if (wParam == VK_SHIFT)
+					m_ShiftDown = true;
 			}
-			break;
-			// 焦点消息
-		case WM_SETFOCUS:
-		case WM_KILLFOCUS:
-			pGui->Invalidate();
-			if (WM_KILLFOCUS == nMessage)
-				m_ShiftDown = false;
-			break;
-		default:
-			lrDef = BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
+			else
+			if (WM_KEYUP == nMessage)
+				if (wParam == VK_SHIFT)
+					m_ShiftDown = false;
 		}
+		else
+		if (nMessage == WM_SETFOCUS || 
+			nMessage == WM_KILLFOCUS)
+		{
+			pGui->Invalidate();
+			if (nMessage == WM_KILLFOCUS)
+				m_ShiftDown = false;
+		}
+		else
+			lrDef = BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
+	EndWndSend:
 		return lrDef;
 	}
 	// 基础全局消息转发
@@ -239,54 +209,23 @@ protected:
 	{
 		if (!pGui) return 0;
 		// 向控件转发消息
-		switch (nMessage)
+		if (nMessage >= WM_MOUSEFIRST && 
+			nMessage <= WM_MOUSELAST || 
+			nMessage >= WM_NCMOUSEMOVE && 
+			nMessage <= WM_NCMBUTTONDBLCLK || 
+			nMessage >= WM_KEYFIRST && 
+			nMessage <= WM_KEYLAST || 
+			nMessage == WM_SETFOCUS || 
+			nMessage == WM_KILLFOCUS || 
+			nMessage == WM_NCHITTEST)
+			goto EndBaseSend;
+		else
+		if (nMessage == WM_PAINT)
 		{
-		case WM_PAINT:
-			{
-				// 得到全局图片
-				CImage* mem_img = (CImage*)lParam;
-				if (!mem_img || mem_img->IsNull()) break;
-				// 遍历控件列表
-				for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
-				{
-					IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-					if (!ctrl) continue;
-					// 初始化返回值
-					ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
-					// 转发消息
-					if (ctrl->IsVisible())
-					{
-						// 创建控件图片
-						CRect ctl_rct;
-						ctrl->GetWindowRect(ctl_rct);
-						CImage ctl_img;
-						ctl_img.Create(ctl_rct.Width(), ctl_rct.Height());
-						// 控件绘图
-						IGuiEffect* eff = ctrl->GetEffect();
-						if (eff)
-						{
-							if(!eff->IsInit())
-								eff->Init(ctl_img);
-							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-							eff->Show(*ite, ctl_img);
-						}
-						else
-							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-						// 覆盖全局绘图
-						CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint());
-					}
-					else
-					{
-						// 停止特效
-						IGuiEffect* eff = ctrl->GetEffect();
-						if (eff) eff->KillTimer(pGui->GethWnd());
-					}
-					// 判断返回值
-					lrDef = ctrl->GetResult(lrDef);
-				}
-			}
-			break;
-		default:
+			// 得到全局图片
+			CImage* mem_img = (CImage*)lParam;
+			if (!mem_img || mem_img->IsNull()) goto EndBaseSend;
+			// 遍历控件列表
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
 				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
@@ -294,11 +233,50 @@ protected:
 				// 初始化返回值
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				ctrl->Send(*ite, nMessage, wParam, lParam);
+				if (ctrl->IsVisible())
+				{
+					// 创建控件图片
+					CRect ctl_rct;
+					ctrl->GetWindowRect(ctl_rct);
+					CImage ctl_img;
+					ctl_img.Create(ctl_rct.Width(), ctl_rct.Height());
+					// 控件绘图
+					IGuiEffect* eff = ctrl->GetEffect();
+					if (eff)
+					{
+						if(!eff->IsInit())
+							eff->Init(ctl_img);
+						ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+						eff->Show(*ite, ctl_img);
+					}
+					else
+						ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+					// 覆盖全局绘图
+					CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint(), &CFilterNormal());
+				}
+				else
+				{
+					// 停止特效
+					IGuiEffect* eff = ctrl->GetEffect();
+					if (eff) eff->KillTimer(pGui->GethWnd());
+				}
 				// 判断返回值
 				lrDef = ctrl->GetResult(lrDef);
 			}
 		}
+		else
+		for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+		{
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+			if (!ctrl) continue;
+			// 初始化返回值
+			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+			// 转发消息
+			ctrl->Send(*ite, nMessage, wParam, lParam);
+			// 判断返回值
+			lrDef = ctrl->GetResult(lrDef);
+		}
+	EndBaseSend:
 		return lrDef;
 	}
 

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-03
-// Version:	1.0.0005.1733
+// Date:	2011-06-08
+// Version:	1.0.0006.1615
 //
 // History:
 //	- 1.0.0001.1328(2011-05-02)	+ 添加渐变滤镜
@@ -44,6 +44,7 @@
 //	- 1.0.0004.1022(2011-05-25)	+ CFilterFill支持跳过指定颜色
 //								+ CFilterInverse支持屏蔽通道
 //	- 1.0.0005.1733(2011-06-03)	+ 添加CFilterOverlay图片叠加滤镜
+//	- 1.0.0006.1615(2011-06-08)	+ 添加EXP_IMG_FILTER宏定义,方便外部置换默认的Normal滤镜
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FilterObject_h__
@@ -114,6 +115,49 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+// 正常渲染
+class CFilterNormal : public IFilterObject
+{
+protected:
+	BYTE m_Alpha;
+
+public:
+	CFilterNormal(BYTE a = EXP_CM)
+		: IFilterObject()
+	{
+		m_Radius = 1;
+		m_Alpha = a;
+	}
+
+	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
+	{
+		BYTE a_s = (ExGetA(pixSrc[nKey]) * m_Alpha) / EXP_CM;
+		if (a_s == 0) return pixDes;
+		if (a_s == EXP_CM) return pixSrc[nKey];
+		BYTE r_s = ExGetR(pixSrc[nKey]);
+		BYTE g_s = ExGetG(pixSrc[nKey]);
+		BYTE b_s = ExGetB(pixSrc[nKey]);
+		BYTE a_d = ExGetA(pixDes);
+		BYTE r_d = ExGetR(pixDes);
+		BYTE g_d = ExGetG(pixDes);
+		BYTE b_d = ExGetB(pixDes);
+		BYTE a_i = EXP_CM - a_s;
+		return ExRGBA
+			(
+			(r_s * a_s + r_d * a_i) / EXP_CM, 
+			(g_s * a_s + g_d * a_i) / EXP_CM, 
+			(b_s * a_s + b_d * a_i) / EXP_CM, 
+			(a_d + a_s) - a_d * a_s / EXP_CM//(a_s * a_s + a_d * a_i) / EXP_CM
+			);
+	}
+};
+
+#ifndef EXP_IMG_FILTER
+#define EXP_IMG_FILTER CFilterNormal
+#endif/*EXP_IMG_FILTER*/
+
+//////////////////////////////////////////////////////////////////
+
 // 图片叠加
 class CFilterOverlay : public IFilterObject
 {
@@ -154,47 +198,8 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-// 正常渲染
-class CFilterNormal : public IFilterObject
-{
-protected:
-	BYTE m_Alpha;
-
-public:
-	CFilterNormal(BYTE a = EXP_CM)
-		: IFilterObject()
-	{
-		m_Radius = 1;
-		m_Alpha = a;
-	}
-
-	pixel_t Render(pixel_t* pixSrc, pixel_t pixDes, LONG nKey)
-	{
-		BYTE a_s = (ExGetA(pixSrc[nKey]) * m_Alpha) / EXP_CM;
-		if (a_s == 0) return pixDes;
-		if (a_s == EXP_CM) return pixSrc[nKey];
-		BYTE r_s = ExGetR(pixSrc[nKey]);
-		BYTE g_s = ExGetG(pixSrc[nKey]);
-		BYTE b_s = ExGetB(pixSrc[nKey]);
-		BYTE a_d = ExGetA(pixDes);
-		BYTE r_d = ExGetR(pixDes);
-		BYTE g_d = ExGetG(pixDes);
-		BYTE b_d = ExGetB(pixDes);
-		BYTE a_i = EXP_CM - a_s;
-		return ExRGBA
-			(
-			(r_s * a_s + r_d * a_i) / EXP_CM, 
-			(g_s * a_s + g_d * a_i) / EXP_CM, 
-			(b_s * a_s + b_d * a_i) / EXP_CM, 
-			(a_d + a_s) - a_d * a_s / EXP_CM//(a_s * a_s + a_d * a_i) / EXP_CM
-			);
-	}
-};
-
-//////////////////////////////////////////////////////////////////
-
 // 颜色画刷
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterFillT : public BaseT
 {
 public:
@@ -232,7 +237,7 @@ typedef CFilterFillT<> CFilterFill;
 //////////////////////////////////////////////////////////////////
 
 // 灰度化
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterGrayT : public BaseT
 {
 public:
@@ -249,7 +254,7 @@ typedef CFilterGrayT<> CFilterGray;
 //////////////////////////////////////////////////////////////////
 
 // 反色
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterInverseT : public BaseT
 {
 public:
@@ -278,7 +283,7 @@ typedef CFilterInverseT<> CFilterInverse;
 //////////////////////////////////////////////////////////////////
 
 // 浮雕
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterReliefT : public BaseT
 {
 protected:
@@ -315,7 +320,7 @@ typedef CFilterReliefT<> CFilterRelief;
 //////////////////////////////////////////////////////////////////
 
 // 扩散
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterDiffuseT : public BaseT
 {
 protected:
@@ -343,7 +348,7 @@ typedef CFilterDiffuseT<> CFilterDiffuse;
 //////////////////////////////////////////////////////////////////
 
 // 高斯模糊
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterGaussT : public BaseT
 {
 protected:
@@ -405,7 +410,7 @@ typedef CFilterGaussT<> CFilterGauss;
 //////////////////////////////////////////////////////////////////
 
 // 外发光
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterOuterGlowT : public CFilterGaussT<BaseT>
 {
 protected:
@@ -473,7 +478,7 @@ typedef CFilterOuterGlowT<> CFilterOuterGlow;
 //////////////////////////////////////////////////////////////////
 
 // 渐变
-template <typename BaseT = CFilterNormal>
+template <typename BaseT = EXP_IMG_FILTER>
 class CFilterGradientT : public BaseT
 {
 protected:

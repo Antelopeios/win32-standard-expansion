@@ -33,8 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-24
-// Version:	1.0.0000.0935
+// Date:	2011-06-09
+// Version:	1.0.0001.1616
+//
+// History:
+//	- 1.0.0000.0935(2011-05-24)	@ 构建完CGuiFade的第一个版本
+//	- 1.0.0001.1616(2011-06-09)	# 修正当多个渐变对象同时执行时会因静态的alpha值而产生冲突的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiFade_hpp__
@@ -53,20 +57,27 @@ class CGuiFade : public IGuiEffectBase
 	EXP_DECLARE_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
 
 protected:
+	int m_Alpha;
+
+public:
+	CGuiFade()
+		: m_Alpha(0)
+	{}
+
+protected:
 	bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld)
 	{
 		if (!pCtrl) return false;
-		static int alpha = 0;
-		if (alpha >= EXP_CM) alpha = 0;
-		if (alpha > EXP_CM - 25) alpha = EXP_CM;
-	//	ExTrace(_T("fade alpha: %d\n"), alpha);
+		if (m_Alpha >= EXP_CM) m_Alpha = 0;
+		if (m_Alpha > EXP_CM - 25) m_Alpha = EXP_CM;
+		//ExTrace(_T("0x%08X fade alpha: %d\n"), pCtrl, m_Alpha);
 
 		CImage tmp_old(tOld.Clone());
-		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(alpha));
+		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(m_Alpha));
 		CImgRenderer::Render(tNew, tmp_old, CRect(), CPoint(), &CFilterCopy());
 
-		alpha += 25;
-		return (alpha < EXP_CM);
+		m_Alpha += 25;
+		return (m_Alpha < EXP_CM);
 	}
 };
 

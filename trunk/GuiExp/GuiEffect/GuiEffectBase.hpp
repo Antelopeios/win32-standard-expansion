@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0002.1600
+// Date:	2011-06-09
+// Version:	1.0.0003.1131
 //
 // History:
 //	- 1.0.0001.1515(2011-05-24)	# 修正IGuiEffectBase::SetTimer里的id赋值错误
 //	- 1.0.0002.1600(2011-05-25)	+ 添加IGuiEffectBase::IsFinished()接口实现
 //								= 调整IGuiEffectBase::SetTimer();KillTimer()接口
+//	- 1.0.0003.1131(2011-06-09)	^ 采用引用计数改进IGuiEffectBase::SetTimer();KillTimer()接口,针对一个hWnd只会打开一个定时器
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEffectBase_hpp__
@@ -61,8 +62,10 @@ interface IGuiEffectBase : public IGuiEffect
 	EXP_DECLARE_DYNAMIC_CLS(IGuiEffectBase, IGuiEffect)
 
 protected:
-	UINT_PTR m_idEvent;
 	CImage m_imgCac;
+	bool m_IsRunning;
+	typedef CMapT<HWND, UINT> map_t;
+	static map_t s_TimerMap;
 
 protected:
 	static void CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -74,7 +77,7 @@ protected:
 
 public:
 	IGuiEffectBase()
-		: m_idEvent(0)
+		: m_IsRunning(false)
 	{}
 
 protected:
@@ -90,11 +93,6 @@ public:
 		return !(m_imgCac.IsNull());
 	}
 
-	bool IsFinished()
-	{
-		return (m_idEvent == 0);
-	}
-
 	void Show(IGuiObject* pGui, CImage& tImg)
 	{
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
@@ -107,7 +105,7 @@ public:
 			SetTimer(board->GethWnd());
 		}
 		else
-		if (m_idEvent && !Overlap(ctrl, tImg, m_imgCac))
+		if (m_IsRunning && !Overlap(ctrl, tImg, m_imgCac))
 		{
 			KillTimer(board->GethWnd());
 			m_imgCac.Set(tImg.Clone());
@@ -117,21 +115,33 @@ public:
 
 	void SetTimer(wnd_t hWnd)
 	{
-		static UINT_PTR id = 1;
-		::SetTimer(hWnd, id, 40, TimerProc);
-		m_idEvent = id++;
+		map_t::iterator_t ite = s_TimerMap.Locate(hWnd);
+		if (ite == s_TimerMap.Tail())
+		{
+			s_TimerMap.Add(hWnd, 0);
+			ite = s_TimerMap.Last();
+		}
+		if (ite->Val() == 0)
+			::SetTimer(hWnd, 1, 40, TimerProc);
+		++(ite->Val());
+		m_IsRunning = true;
 	}
 
 	void KillTimer(wnd_t hWnd)
 	{
-		::KillTimer(hWnd, m_idEvent);
-		m_idEvent = 0;
+		map_t::iterator_t ite = s_TimerMap.Locate(hWnd);
+		if (ite == s_TimerMap.Tail()) return;
+		m_IsRunning = false;
+		if ((--(ite->Val())) != 0) return;
+		::KillTimer(hWnd, 1);
+		s_TimerMap.Del(hWnd);
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffectBase, IGuiEffect)
+IGuiEffectBase::map_t IGuiEffectBase::s_TimerMap;
 
 //////////////////////////////////////////////////////////////////
 

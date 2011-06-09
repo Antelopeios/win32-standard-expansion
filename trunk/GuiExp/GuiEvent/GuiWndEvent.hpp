@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0005.0047
+// Date:	2011-06-09
+// Version:	1.0.0006.1616
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -43,6 +43,7 @@
 //								+ 添加WM_MOUSELEAVE的消息发送
 //	- 1.0.0004.1103(2011-05-27)	+ 添加Tab键焦点切换的响应
 //	- 1.0.0005.0047(2011-06-08)	+ 将GuiWndEvent拓展为全局通用消息预处理事件类
+//	- 1.0.0006.1616(2011-06-09)	# 采用三缓冲绘图修正控件的子控件在半透明贴图时出现的颜色失真
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -252,7 +253,7 @@ protected:
 					else
 						ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
 					// 覆盖全局绘图
-					CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint(), &CFilterNormal());
+					CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint());
 				}
 				else
 				{
@@ -311,7 +312,10 @@ public:
 					CImage mem_img;
 					mem_img.Create(rect.Width(), rect.Height());
 					// 覆盖控件绘图
-					ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
+					CImage pnt_img;
+					pnt_img.Create(rect.Width(), rect.Height());
+					ret = WndSend(board, nMessage, wParam, (LPARAM)&pnt_img);
+					CImgRenderer::Render(mem_img, pnt_img, CRect(), CPoint(), &CFilterNormal());
 					// 覆盖缓存绘图
 					CGraph mem_grp;
 					mem_grp.Create();

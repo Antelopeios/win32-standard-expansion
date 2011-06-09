@@ -186,7 +186,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 事件转发器
-interface EXP_API IGuiSender : public IGuiObject, protected CListT<IGuiEvent*>
+interface EXP_API IGuiSender : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiObject)
 
@@ -303,8 +303,6 @@ public:
 	// 初始化
 	virtual void Init(CImage& tImg) = 0;
 	virtual bool IsInit() = 0;
-	// 完毕
-	virtual bool IsFinished() = 0;
 	// 效果显示接口
 	virtual void Show(IGuiObject* pGui, CImage& tImg) = 0;
 	// 定时器

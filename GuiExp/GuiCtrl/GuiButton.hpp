@@ -78,8 +78,7 @@ public:
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiButtonEvent"), GetGC()));
 	}
 	~CGuiButton()
-	{
-	}
+	{}
 
 public:
 	// »ñµÃ¿Ø¼þ×´Ì¬

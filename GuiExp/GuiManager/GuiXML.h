@@ -93,12 +93,12 @@ protected:
 		if (eSta != sta_nor && 
 			eSta != sta_tce && 
 			eSta != sta_wat) return false;
-		char buf = '\0';
-		if (m_mFile.Read(&buf, 1, sizeof(buf)) != 1)
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return true;
 		switch (buf)
 		{
-		case '<':	// 标签
+		case _T('<'):	// 标签
 			return Tag(sta_nor, ite);
 		default:	// 正常
 			return Nor(sta_nor, ite);
@@ -112,16 +112,16 @@ protected:
 			eSta != sta_nor && 
 			eSta != sta_tco && 
 			eSta != sta_ace) return false;
-		char buf = '\0';
-		if (m_mFile.Read(&buf, 1, sizeof(buf)) != 1)
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
 		switch (buf)
 		{
-		case '>':	// 标签内容
+		case _T('>'):	// 标签内容
 			return Tco(sta_tag, ite);
-		case ' ':	// 等待属性
+		case _T(' '):	// 等待属性
 			return Wat(sta_tag, ite);
-		case '/':	// 标签内容赋值完毕
+		case _T('/'):	// 标签内容赋值完毕
 			return Tce(sta_tag, ite);
 		default:
 			if (eSta == sta_nor || 
@@ -129,19 +129,13 @@ protected:
 			{
 				m_xData.Add(ExMem::Alloc<node_t>(&m_GC), ite);
 				node_t* node = *ite;
-				char ac[2] = {buf, 0};
-				TCHAR tc[2] = {0};
-				::OemToChar(ac, tc);
-				node->nam += tc;
+				node->nam += buf;
 			}
 			else
 			if (eSta == sta_tag)
 			{
 				node_t* node = *ite;
-				char ac[2] = {buf, 0};
-				TCHAR tc[2] = {0};
-				::OemToChar(ac, tc);
-				node->nam += tc;
+				node->nam += buf;
 			}
 			return Tag(sta_tag, ite);
 		}
@@ -154,20 +148,17 @@ protected:
 			eSta != sta_tag && 
 			eSta != sta_wat) return false;
 		if (ite == m_xData.Head()) return false;
-		char buf = '\0';
-		if (m_mFile.Read(&buf, 1, sizeof(buf)) != 1)
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
 		switch (buf)
 		{
-		case '<':
+		case _T('<'):
 			return Tag(sta_tco, ite);
 		default:
 			{
 				node_t* node = *ite;
-				char ac[2] = {buf, 0};
-				TCHAR tc[2] = {0};
-				::OemToChar(ac, tc);
-				node->val += tc;
+				node->val += buf;
 			}
 			return Tco(sta_tco, ite);
 		}
@@ -184,19 +175,19 @@ protected:
 	{
 		if (eSta != sta_wat && 
 			eSta != sta_tag) return false;
-		char buf = '\0';
-		if (m_mFile.Read(&buf, 1, sizeof(buf)) != 1)
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
 		switch (buf)
 		{
-		case '<':
-		case ' ':
-		case '\"':
-		case '/':
+		case _T('<'):
+		case _T(' '):
+		case _T('\"'):
+		case _T('/'):
 			return Wat(sta_wat, ite);
-		case '>':
+		case _T('>'):
 			return Tco(sta_wat, ite);
-		case '=':
+		case _T('='):
 			{
 				node_t* node = *ite;
 				if (node->tmp.Empty())
@@ -208,10 +199,7 @@ protected:
 		default:
 			{
 				node_t* node = *ite;
-				char ac[2] = {buf, 0};
-				TCHAR tc[2] = {0};
-				::OemToChar(ac, tc);
-				node->tmp += tc;
+				node->tmp += buf;
 			}
 			return Wat(sta_wat, ite);
 		}
@@ -222,12 +210,12 @@ protected:
 	{
 		if (eSta != sta_avl && 
 			eSta != sta_wat) return false;
-		char buf = '\0';
-		if (m_mFile.Read(&buf, 1, sizeof(buf)) != 1)
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
 		switch (buf)
 		{
-		case '\"':
+		case _T('\"'):
 			return Aco(sta_avl, ite);
 		default:
 			return Avl(sta_avl, ite);
@@ -239,20 +227,17 @@ protected:
 	{
 		if (eSta != sta_aco && 
 			eSta != sta_avl) return false;
-		char buf = '\0';
-		if (m_mFile.Read(&buf, 1, sizeof(buf)) != 1)
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
 		switch (buf)
 		{
-		case '\"':
+		case _T('\"'):
 			return Ace(sta_aco, ite);
 		default:
 			{
 				node_t* node = *ite;
-				char ac[2] = {buf, 0};
-				TCHAR tc[2] = {0};
-				::OemToChar(ac, tc);
-				node->att[node->tmp] += tc;
+				node->att[node->tmp] += buf;
 			}
 			return Aco(sta_aco, ite);
 		}
@@ -285,7 +270,7 @@ public:
 		m_xData.Clear();
 		m_GC.Clear();
 		m_xData.Add(ExMem::Alloc<node_t>(&m_GC)); // 添加默认的根节点
-		m_mFile.Close();
+		m_mFile.Open();
 	}
 
 	// 编码
@@ -314,6 +299,8 @@ public:
 		if (!::OemToChar(buf, oem.GetCStr(len)))
 			return false;
 		if (m_mFile.Write(oem.GetCStr(), oem.GetLength()) != oem.GetLength())
+			return false;
+		if (!m_mFile.Seek(0, IFileObject::begin))
 			return false;
 		// 开始解析
 		return Nor(sta_nor, m_xData.Head());

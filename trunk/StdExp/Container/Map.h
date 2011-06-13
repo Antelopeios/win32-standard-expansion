@@ -115,7 +115,7 @@ protected:
 	}
 
 public:
-	CMapT(DWORD nSize = PolicyT::s_nDefSize)
+	CMapT(DWORD nSize = PolicyT::DEF_SIZE)
 	{ SetSize(nSize); }
 	~CMapT()
 	{}
@@ -123,7 +123,7 @@ public:
 public:
 	DWORD GetSize() const
 	{ return m_Table.GetCount(); }
-	void SetSize(DWORD nSize = PolicyT::s_nDefSize)
+	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if (nSize == 0 || GetSize() == nSize) return;
 		Null();
@@ -328,7 +328,7 @@ struct _MapPolicyT
 		{ Next(-nOff); }
 	};
 
-	static const DWORD s_nDefSize = 17;
+	static const DWORD DEF_SIZE = 17;
 };
 
 //////////////////////////////////////////////////////////////////

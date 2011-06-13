@@ -1,4 +1,4 @@
-// Copyright 2010-2011, 木头云
+// Copyright 2011, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,52 +28,36 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// StdExp - 标准拓展库(Standard Expansion)
+// GuiConfig - 界面配置文件接口
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-13
-// Version:	0.1.0013.1050
+// Date:	2011-05-31
+// Version:	1.0.0000.1714
 //
 // History:
-//	- 0.1.0005.2000(2010-12-11)	@ 完成Memory部分所有类的构建
-//	- 0.1.0006.2200(2010-12-29)	@ 完成Container部分Array与String的构建
-//	- 0.1.0007.2220(2011-01-19)	@ 完成File部分IOFile与MemFile的构建
-//	- 0.1.0008.1200(2011-02-23)	@ 完成Thread部分的构建
-//	- 0.1.0009.2359(2011-03-01)	^ 统一所有对外功能宏的命名方式
-//	- 0.1.0010.2110(2011-03-04)	^ 大幅优化内存池随机分配/释放的效率
-//	- 0.1.0011.1605(2011-04-07)	^ 统一所有Object基类的类型(interface)及命名前缀(I)
-//	- 0.1.0012.1730(2011-05-12)	+ 添加无锁数据访问的通用算法
-//								^ 优化各个模块的细节处理与对外接口
-//								# 修正一些接口的内部实现错误
-//	- 0.1.0013.1050(2011-06-13)	+ 添加Tree的容器算法;给一些模块添加一些方便外部调用的接口
-//								# 修正若干个bug
-//								^ 调整并统一static const类型变量的命名
+//	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
 //////////////////////////////////////////////////////////////////
 
-#ifndef __StdExp_h__
-#define __StdExp_h__
+#ifndef __GuiConfig_hpp__
+#define __GuiConfig_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-//////////////////////////////////////////////////////////////////
-
-#include "Common/Common.h"
-#include "Debugging/Debugging.h"
-#include "Memory/Memory.h"
-#include "Pattern/Pattern.h"
-#include "Thread/Thread.h"
-#include "Container/Container.h"
-#include "File/File.h"
-#include "Algorithm/Algorithm.h"
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#ifndef EXP_UNUSED_NAMESPACE
-EXP_USING_NAMESPACE
-#endif/*EXP_UNUSED_NAMESPACE*/
+class CGuiConfig
+{
+protected:
+};
 
-#endif/*__StdExp_h__*/
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiConfig_hpp__*/

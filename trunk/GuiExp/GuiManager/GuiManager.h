@@ -28,36 +28,43 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiConfig - 界面配置文件接口
+// GuiManager - 界面管理器
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-31
-// Version:	1.0.0000.1714
+// Date:	2011-06-13
+// Version:	1.0.0000.1622
 //
 // History:
-//	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
+//	- 1.0.0000.1622(2011-06-13)	@ 开始构建GuiManager接口
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiConfig_h__
-#define __GuiConfig_h__
+#ifndef __GuiManager_h__
+#define __GuiManager_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "GuiCommon/GuiCommon.h"
+#include "GuiManager/GuiXML.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class EXP_API CGuiConfig
+class EXP_API CGuiManager
 {
 protected:
+	static CGuiXML* s_XML;
+
+public:
+	static bool Load(IFileObject* pFile);
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiConfig_h__*/
+#endif/*__GuiManager_h__*/

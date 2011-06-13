@@ -80,7 +80,7 @@ protected:
 	DWORD	m_nIndx;
 
 public:
-	CGCT(DWORD nSize = PolicyT::s_nDefSize)
+	CGCT(DWORD nSize = PolicyT::DEF_SIZE)
 		: m_BlockArray	(NULL)
 		, m_nSize		(0)
 		, m_nIndx		(0)
@@ -123,7 +123,7 @@ public:
 		ExLock(m_Mutex, true, mutex_t);
 		return m_nSize;
 	}
-	void SetGCSize(DWORD nSize = PolicyT::s_nDefSize)
+	void SetGCSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		ExLock(m_Mutex, false, mutex_t);
 		if( GetGCSize() >= nSize ) return;
@@ -254,7 +254,7 @@ struct _GCPolicyT
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	static const DWORD s_nDefSize = 100;
+	static const DWORD DEF_SIZE = 100;
 	static DWORD Expan(DWORD nSize)
 	{ return nSize ? (nSize << 1) : 1; }
 };

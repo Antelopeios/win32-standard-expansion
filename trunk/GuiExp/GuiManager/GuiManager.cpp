@@ -28,25 +28,34 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiConfig - 界面配置文件接口
+// GuiManager - 界面管理器
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-31
-// Version:	1.0.0000.1714
+// Date:	2011-06-10
+// Version:	1.0.0000.1427
 //
 // History:
-//	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
+//	- 1.0.0000.1427(2011-06-10)	@ 开始构建GuiManager
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
-#include "GuiConfig.h"
+#include "GuiManager.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+CGC g_GC;
+CGuiXML* CGuiManager::s_XML = ExMem::Alloc<CGuiXML>(&g_GC);
+
+bool CGuiManager::Load(IFileObject* pFile)
+{
+	ExAssert(s_XML);
+	s_XML->SetFile(pFile);
+	return s_XML->Decode();
+}
 
 //////////////////////////////////////////////////////////////////
 

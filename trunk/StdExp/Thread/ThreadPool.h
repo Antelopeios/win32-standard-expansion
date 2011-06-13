@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-02
-// Version:	1.0.0006.1520
+// Date:	2011-06-13
+// Version:	1.0.0007.1048
 //
 // History:
 //	- 1.0.0004.0400(2011-02-25)	^ 简化CallProc中锁的调用
 //	- 1.0.0005.2136(2011-02-27)	+ CThreadPoolT::Create()支持返回线程ID
 //	- 1.0.0006.1520(2011-03-02)	+ 支持通过策略控制CThreadPoolT是否限制最大线程数
 //								# 修正当线程数为空时,CThreadPoolT::Clear(INFINITE)死锁的问题
+//	- 1.0.0007.1048(2011-06-13)	# 修正CThreadPoolT的限制最大线程数策略无效的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadPool_h__
@@ -77,7 +78,7 @@ struct _ThreadPoolPolicyT
 	EXP_INLINE static DWORD MaxSize()
 	{ return DefSize(); }
 
-	static const bool s_bLimitMax = true;
+	static const bool LIMIT_MAX = true;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -279,8 +280,8 @@ public:
 			if (m_nUseSize >= m_TrdList.GetCount())
 			{
 				if (m_nMaxSize <= m_TrdList.GetCount())
-					is_limited = true;
-				else
+					is_limited = PolicyT::LIMIT_MAX;
+				if(!is_limited)
 					hdl = AddTrd(dwFlag, lpIDThread);
 			}
 			// 添加任务

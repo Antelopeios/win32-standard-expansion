@@ -14,6 +14,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	CIOFile f_xml(_T("C:\\Users\\Working\\Desktop\\test.xml"));
+	CGuiManager::Load(&f_xml);
+
 	// À¬»ø»ØÊÕÆ÷
 	CGC gc;
 

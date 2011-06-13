@@ -83,7 +83,7 @@ protected:
 	}
 
 public:
-	CArrayT(DWORD nSize = PolicyT::s_nDefSize)
+	CArrayT(DWORD nSize = PolicyT::DEF_SIZE)
 		: m_Array(NULL)
 		, m_nSize(0)
 		, m_nCont(0)
@@ -112,7 +112,7 @@ public:
 public:
 	DWORD GetSize() const
 	{ return m_nSize; }
-	void SetSize(DWORD nSize = PolicyT::s_nDefSize)
+	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if( GetSize() >= nSize ) return;
 		type_t* pArray = alloc_t::Alloc<type_t>(nSize);
@@ -125,7 +125,7 @@ public:
 		m_Array = pArray;
 		m_nSize = nSize;
 	}
-	void SetSizeExpan(DWORD nSize = PolicyT::s_nDefSize)
+	void SetSizeExpan(DWORD nSize = PolicyT::DEF_SIZE)
 	{ SetSize(PolicyT::Expan(nSize)); }
 	DWORD GetCount() const
 	{ return m_nCont; }
@@ -355,7 +355,7 @@ struct _ArrayPolicyT
 		void Prev(long nOff = 1) { nIndx -= nOff; }
 	};
 
-	static const DWORD s_nDefSize = 0;
+	static const DWORD DEF_SIZE = 0;
 	static DWORD Expan(DWORD nSize)
 	{ return nSize ? (nSize << 1) : 1; }
 };

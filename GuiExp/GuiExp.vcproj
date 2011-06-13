@@ -283,11 +283,19 @@
 			Name="GuiManager"
 			>
 			<File
-				RelativePath=".\GuiManager\GuiConfig.cpp"
+				RelativePath=".\GuiManager\GuiConfig.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GuiManager\GuiConfig.h"
+				RelativePath=".\GuiManager\GuiManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiManager\GuiManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiManager\GuiXML.h"
 				>
 			</File>
 		</Filter>

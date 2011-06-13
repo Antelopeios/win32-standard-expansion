@@ -104,7 +104,7 @@ public:
 public:
 	DWORD GetSize()
 	{ return m_nSize; }
-	void SetSize(DWORD nSize = PolicyT::s_nDefSize)
+	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if( GetSize() >= nSize ) return;
 		type_t* pArray = (type_t*)ZeroMemory(alloc_t::Alloc<type_t>(nSize), sizeof(type_t) * nSize);
@@ -116,7 +116,7 @@ public:
 		m_Array = pArray;
 		m_nSize = nSize;
 	}
-	void SetSizeExpan(DWORD nSize = PolicyT::s_nDefSize)
+	void SetSizeExpan(DWORD nSize = PolicyT::DEF_SIZE)
 	{ SetSize(PolicyT::Expan(nSize)); }
 
 	DWORD GetLength() const

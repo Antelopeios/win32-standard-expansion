@@ -113,10 +113,10 @@ protected:
 	DWORD		m_nMaxSize;	// 池大小上限
 
 public:
-	CObjPoolT(DWORD nSize = PolicyT::s_nDefSize)
+	CObjPoolT(DWORD nSize = PolicyT::DEF_SIZE)
 		: m_FreeList(NULL)
 		, m_nFreSize(0)
-		, m_nMaxSize(PolicyT::s_nMaxSize)
+		, m_nMaxSize(PolicyT::MAX_SIZE)
 	{ SetPoolSize(nSize); }
 	virtual ~CObjPoolT()
 	{ Clear(); }
@@ -128,7 +128,7 @@ public:
 		ExLock(m_Mutex, true, mutex_t);
 		return m_nFreSize;
 	}
-	void SetPoolSize(DWORD nSize = PolicyT::s_nDefSize)
+	void SetPoolSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		DWORD diff_size = 0;
 		{
@@ -258,8 +258,8 @@ struct _ObjPoolPolicyT
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	static const DWORD	s_nDefSize = 100;
-	static const DWORD	s_nMaxSize = 10000;
+	static const DWORD DEF_SIZE = 100;
+	static const DWORD MAX_SIZE = 10000;
 };
 
 //////////////////////////////////////////////////////////////////

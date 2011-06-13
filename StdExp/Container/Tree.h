@@ -33,12 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-02
-// Version:	1.0.0001.1955
+// Date:	2011-06-13
+// Version:	1.0.0003.1120
 //
 // History:
 //	- 1.0.0000.1336(2011-06-01)	@ 开始构建Tree
 //	- 1.0.0001.1955(2011-06-02)	@ Tree的基本功能构建完毕
+//	- 1.0.0002.1830(2011-06-12)	# 修正CTreeT::item_t中导致无法正确编译通过的一些问题
+//								= CTreeT::Add()将通过参数返回新结点的迭代器位置
+//	- 1.0.0003.1120(2011-06-13)	= 调整CTreeT策略,迭代器支持获取父节点迭代器与子节点迭代器列表
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Tree_h__
@@ -83,7 +86,7 @@ public:
 			// 从父节点中移除自身
 			if (Pare)
 			{
-				Pare->Chdr.Del(this);
+				Pare->Chdr.Replace((_Item*)this);
 				Pare = NULL;
 			}
 			// 清理子节点树
@@ -147,7 +150,7 @@ public:
 		void DelChdr(_Item* item)
 		{
 			if (!item) return;
-			Chdr.Del(item);
+			Chdr.Replace(item);
 			item->Pare = NULL;
 		}
 		void ClrChdr()
@@ -245,23 +248,18 @@ public:
 	type_t& LastItem()
 	{ return Last()->Val(); }
 
-	bool LinkTree(item_t* tTree, iterator_t Iter)
+	/*
+		树连接算法,默认将新树连接到Iter的子节点上
+		若Iter为Tail,新树将挂接到老树的最后
+	*/
+	bool LinkTree(item_t* tTree, iterator_t& Iter)
 	{	// 连接树
 		if (!tTree) return true;
 		if (!(Iter->InThis(this))) return false;
 		m_nCont += tTree->GetCount();
 		item_t* item = Iter->Index();
 		if (item)
-		{
-			if (item->Pare)
-			{
-				item->Pare->AddChdr(tTree, item);
-				item->Pare->DelChdr(item);
-			}
-			else
-				m_pTree = tTree;
-			tTree->GetChdrLast()->AddChdr(item);
-		}
+			item->AddChdr(tTree);
 		else
 		{
 			if (m_pTree)
@@ -269,6 +267,7 @@ public:
 			else
 				m_pTree = tTree;
 		}
+		Iter->nIndx = tTree;
 		return true;
 	}
 
@@ -348,10 +347,15 @@ struct _TreePolicyT
 	struct node_t
 	{
 		typedef ContainerT container_t;
+
 		typedef typename container_t::type_t type_t;
 		typedef typename container_t::item_t item_t;
 		typedef typename container_t::list_t list_t;
 		typedef typename container_t::ite_t ite_t;
+
+		typedef typename container_t::iterator_t iter_t;
+		typedef CListT<iter_t> iter_list_t;
+		typedef typename iter_list_t::iterator_t iterator_t;
 
 		container_t* pCont;
 		item_t* nIndx;
@@ -365,8 +369,27 @@ struct _TreePolicyT
 
 		bool InThis(container_t* cnt) { return pCont == cnt; }
 		item_t* Index() { return nIndx; }
-		item_t* Parent() { return nIndx->Pare; }
-		list_t& Children() { return nIndx->Chdr; }
+
+		const iter_t& Parent()
+		{
+			static iter_t iter;
+			iter = node_t(pCont);
+			iter->nIndx = nIndx ? nIndx->Pare : NULL;
+			return iter;
+		}
+		const iter_list_t& Children()
+		{
+			static iter_list_t list;
+			list.Clear();
+			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++nIndx->Chdr)
+			{
+				if (!(*ite)) continue;
+				iter_t iter(node_t(pCont));
+				iter->nIndx = (*ite);
+				list.Add(iter);
+			}
+			return list;
+		}
 
 		bool operator==(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }

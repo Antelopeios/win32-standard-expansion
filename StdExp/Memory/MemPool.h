@@ -179,7 +179,7 @@ protected:
 	// 对象池策略
 	template <DWORD SizeT>
 	struct pool_policy_t : public PolicyT::pool_policy_t
-	{ static const DWORD s_nMaxSize = (((DWORD)~0) / sizeof(_TypeT<SizeT>) >> 1); };
+	{ static const DWORD MAX_SIZE = (((DWORD)~0) / sizeof(_TypeT<SizeT>) >> 1); };
 
 	// 对象池
 	template <typename PolicyT>
@@ -252,7 +252,7 @@ public:
 	}
 	~CMemPoolT()
 	{
-		Clear(PolicyT::s_bDumpMemLeaks);
+		Clear(PolicyT::DUMP_MEM_LEAKS);
 		int i = 0;
 		m_Alloc.Free(CTraits::Destruct<pool_00_t>(m_PoolList[i]));
 		m_Alloc.Free(CTraits::Destruct<pool_01_t>(m_PoolList[++i]));
@@ -442,7 +442,7 @@ struct _MemPoolPolicy
 	typedef _ObjPoolPolicyT<alloc_t, _SingleModel> pool_policy_t;
 	typedef DWORD byte;
 
-	static const bool	s_bDumpMemLeaks = true;
+	static const bool DUMP_MEM_LEAKS = true;
 };
 
 //////////////////////////////////////////////////////////////////

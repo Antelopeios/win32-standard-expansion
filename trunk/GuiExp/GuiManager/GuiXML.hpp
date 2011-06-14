@@ -104,7 +104,7 @@ protected:
 		case _T('<'):	// 标签
 			eSta = sta_tag;
 			break;
-		default:	// 正常
+		default:		// 正常
 			eSta = sta_nor;
 		}
 		return true;
@@ -310,7 +310,9 @@ public:
 			return false;
 		Clear();
 		// 编码转换
-		DWORD len = (DWORD)m_pFile->Size() + 1;
+		uint64_t len64 = m_pFile->Size();
+		if (len64 > (1 << 30)) return false;
+		DWORD len = (DWORD)len64 + 1;
 		char* buf = ExMem::Alloc<char>(&m_GC, len);
 		ZeroMemory(buf, len);
 		if (m_pFile->Read(buf, len - 1, sizeof(char)) != len - 1)

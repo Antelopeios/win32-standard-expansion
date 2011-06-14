@@ -54,6 +54,21 @@ EXP_BEG
 class CGuiConfig
 {
 protected:
+	CGuiXML m_XML;
+
+public:
+	CGuiConfig()
+	{}
+	virtual ~CGuiConfig()
+	{}
+
+public:
+	bool Load(IFileObject* pFile)
+	{
+		if (!pFile) return false;
+		m_XML.SetFile(pFile);
+		if (!m_XML.Decode()) return false;
+	}
 };
 
 //////////////////////////////////////////////////////////////////

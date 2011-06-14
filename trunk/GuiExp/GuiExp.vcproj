@@ -295,7 +295,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GuiManager\GuiXML.h"
+				RelativePath=".\GuiManager\GuiXML.hpp"
 				>
 			</File>
 		</Filter>

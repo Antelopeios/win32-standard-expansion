@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-18
-// Version:	1.0.0015.1419
+// Date:	2011-06-14
+// Version:	1.0.0016.1640
 //
 // History:
 //	- 1.0.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
 //	- 1.0.0014.2140(2011-03-03)	+ CObjPoolT支持对任意大小进行分配
 //	- 1.0.0015.1419(2011-05-18)	+ CPoolTypeT支持重写CPoolTypeT::Free()
 //								= CPoolTypeT改名为IPoolTypeT
+//	- 1.0.0016.1640(2011-06-14)	# 修正因IObjPool由于某些原因(如单例)被提前析构,从而导致IPoolTypeT::Free()的R6025错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -64,7 +65,11 @@ EXP_BEG
 interface IObjPool
 {
 public:
-	virtual ~IObjPool() {}
+	bool m_IsDest;
+
+public:
+	IObjPool() : m_IsDest(false) {}
+	virtual ~IObjPool() { m_IsDest = true; }
 
 public:
 	virtual DWORD GetObjSize() = 0;
@@ -245,7 +250,10 @@ public:
 	static TypeT* Alloc()
 	{ return (TypeT*)GetAlloc().Alloc(); }
 	virtual void Free()
-	{ GetAlloc().Free(static_cast<TypeT*>(this)); }
+	{
+		if (GetAlloc().m_IsDest) return;
+		GetAlloc().Free(static_cast<TypeT*>(this));
+	}
 };
 
 //////////////////////////////////////////////////////////////////

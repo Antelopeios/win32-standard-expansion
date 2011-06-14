@@ -43,18 +43,18 @@
 #include "GuiCommon/GuiCommon.h"
 #include "GuiManager.h"
 
+#include "GuiManager/GuiXML.hpp"
+#include "GuiManager/GuiConfig.hpp"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-CGC g_GC;
-CGuiXML* CGuiManager::s_XML = ExMem::Alloc<CGuiXML>(&g_GC);
-
 bool CGuiManager::Load(IFileObject* pFile)
 {
-	ExAssert(s_XML);
-	s_XML->SetFile(pFile);
-	return s_XML->Decode();
+	CGuiXML& xml = ExSingleton<CGuiXML>();
+	xml.SetFile(pFile);
+	return xml.Decode();
 }
 
 //////////////////////////////////////////////////////////////////

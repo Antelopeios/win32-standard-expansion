@@ -33,21 +33,20 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-10
-// Version:	1.0.0000.1420
+// Date:	2011-06-14
+// Version:	1.0.0001.1205
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
+//	- 1.0.0001.1205(2011-06-14)	@ 基本完成GuiXML的核心功能
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiXML_h__
-#define __GuiXML_h__
+#ifndef __GuiXML_hpp__
+#define __GuiXML_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-
-#include "GuiCommon/GuiCommon.h"
 
 EXP_BEG
 
@@ -77,7 +76,8 @@ public:
 		sta_wat, // 等待属性
 		sta_avl, // 属性赋值
 		sta_aco, // 属性内容
-		sta_ace  // 属性内容完毕
+		sta_ace, // 属性内容完毕
+		sta_end	 // 文件读取完毕
 	};
 
 protected:
@@ -88,25 +88,29 @@ protected:
 
 protected:
 	// 正常
-	bool Nor(state_t eSta, iter_t ite)
+	bool Nor(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_nor && 
 			eSta != sta_tce && 
 			eSta != sta_wat) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
+		{
+			eSta = sta_end;
 			return true;
+		}
 		switch (buf)
 		{
 		case _T('<'):	// 标签
-			return Tag(sta_nor, ite);
+			eSta = sta_tag;
+			break;
 		default:	// 正常
-			return Nor(sta_nor, ite);
+			eSta = sta_nor;
 		}
-		return false;
+		return true;
 	}
 	// 标签
-	bool Tag(state_t eSta, iter_t ite)
+	bool Tag(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_tag && 
 			eSta != sta_nor && 
@@ -118,11 +122,14 @@ protected:
 		switch (buf)
 		{
 		case _T('>'):	// 标签内容
-			return Tco(sta_tag, ite);
+			eSta = sta_tco;
+			break;
 		case _T(' '):	// 等待属性
-			return Wat(sta_tag, ite);
+			eSta = sta_wat;
+			break;
 		case _T('/'):	// 标签内容赋值完毕
-			return Tce(sta_tag, ite);
+			eSta = sta_tce;
+			break;
 		default:
 			if (eSta == sta_nor || 
 				eSta == sta_tco)
@@ -137,12 +144,12 @@ protected:
 				node_t* node = *ite;
 				node->nam += buf;
 			}
-			return Tag(sta_tag, ite);
+			eSta = sta_tag;
 		}
-		return false;
+		return true;
 	}
 	// 标签内容
-	bool Tco(state_t eSta, iter_t ite)
+	bool Tco(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_tco && 
 			eSta != sta_tag && 
@@ -154,24 +161,28 @@ protected:
 		switch (buf)
 		{
 		case _T('<'):
-			return Tag(sta_tco, ite);
+			eSta = sta_tag;
+			break;
 		default:
 			{
 				node_t* node = *ite;
 				node->val += buf;
 			}
-			return Tco(sta_tco, ite);
+			eSta = sta_tco;
+			break;
 		}
-		return false;
+		return true;
 	}
 	// 标签内容完毕
-	bool Tce(state_t eSta, iter_t ite)
+	bool Tce(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_tag) return false;
-		return Nor(sta_tce, ite->Parent());
+		ite = ite->Parent();
+		eSta = sta_nor;
+		return true;
 	}
 	// 等待属性
-	bool Wat(state_t eSta, iter_t ite)
+	bool Wat(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_wat && 
 			eSta != sta_tag) return false;
@@ -184,9 +195,11 @@ protected:
 		case _T(' '):
 		case _T('\"'):
 		case _T('/'):
-			return Wat(sta_wat, ite);
+			eSta = sta_wat;
+			break;
 		case _T('>'):
-			return Tco(sta_wat, ite);
+			eSta = sta_tco;
+			break;
 		case _T('='):
 			{
 				node_t* node = *ite;
@@ -195,18 +208,20 @@ protected:
 				else
 					node->att[node->tmp] = _T("");
 			}
-			return Avl(sta_wat, ite);
+			eSta = sta_avl;
+			break;
 		default:
 			{
 				node_t* node = *ite;
 				node->tmp += buf;
 			}
-			return Wat(sta_wat, ite);
+			eSta = sta_wat;
+			break;
 		}
-		return false;
+		return true;
 	}
 	// 属性赋值
-	bool Avl(state_t eSta, iter_t ite)
+	bool Avl(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_avl && 
 			eSta != sta_wat) return false;
@@ -216,14 +231,16 @@ protected:
 		switch (buf)
 		{
 		case _T('\"'):
-			return Aco(sta_avl, ite);
+			eSta = sta_aco;
+			break;
 		default:
-			return Avl(sta_avl, ite);
+			eSta = sta_avl;
+			break;
 		}
-		return false;
+		return true;
 	}
 	// 属性内容
-	bool Aco(state_t eSta, iter_t ite)
+	bool Aco(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_aco && 
 			eSta != sta_avl) return false;
@@ -233,23 +250,26 @@ protected:
 		switch (buf)
 		{
 		case _T('\"'):
-			return Ace(sta_aco, ite);
+			eSta = sta_ace;
+			break;
 		default:
 			{
 				node_t* node = *ite;
 				node->att[node->tmp] += buf;
 			}
-			return Aco(sta_aco, ite);
+			eSta = sta_aco;
+			break;
 		}
-		return false;
+		return true;
 	}
 	// 属性内容完毕
-	bool Ace(state_t eSta, iter_t ite)
+	bool Ace(state_t& eSta, iter_t& ite)
 	{
 		if (eSta != sta_aco) return false;
 		node_t* node = *ite;
 		node->tmp.Clear();
-		return Tag(sta_ace, ite);
+		eSta = sta_tag;
+		return true;
 	}
 
 public:
@@ -303,7 +323,61 @@ public:
 		if (!m_mFile.Seek(0, IFileObject::begin))
 			return false;
 		// 开始解析
-		return Nor(sta_nor, m_xData.Head());
+		bool ret = false;
+		state_t cur_sta = sta_nor, old_sta = sta_nor;
+		iter_t ite = m_xData.Head();
+		while(1)
+		{
+			switch(cur_sta)
+			{
+			case sta_nor:
+				cur_sta = old_sta;
+				if (!Nor(cur_sta, ite)) goto Return;
+				old_sta = sta_nor;
+				break;
+			case sta_tag:
+				cur_sta = old_sta;
+				if (!Tag(cur_sta, ite)) goto Return;
+				old_sta = sta_tag;
+				break;
+			case sta_tco:
+				cur_sta = old_sta;
+				if (!Tco(cur_sta, ite)) goto Return;
+				old_sta = sta_tco;
+				break;
+			case sta_tce:
+				cur_sta = old_sta;
+				if (!Tce(cur_sta, ite)) goto Return;
+				old_sta = sta_tce;
+				break;
+			case sta_wat:
+				cur_sta = old_sta;
+				if (!Wat(cur_sta, ite)) goto Return;
+				old_sta = sta_wat;
+				break;
+			case sta_avl:
+				cur_sta = old_sta;
+				if (!Avl(cur_sta, ite)) goto Return;
+				old_sta = sta_avl;
+				break;
+			case sta_aco:
+				cur_sta = old_sta;
+				if (!Aco(cur_sta, ite)) goto Return;
+				old_sta = sta_aco;
+				break;
+			case sta_ace:
+				cur_sta = old_sta;
+				if (!Ace(cur_sta, ite)) goto Return;
+				old_sta = sta_ace;
+				break;
+			case sta_end:
+				ret = true;
+			default:
+				goto Return;
+			}
+		}
+	Return:
+		return ret;
 	}
 };
 
@@ -311,4 +385,4 @@ public:
 
 EXP_END
 
-#endif/*__GuiXML_h__*/
+#endif/*__GuiXML_hpp__*/

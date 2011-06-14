@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-13
-// Version:	1.0.0003.1120
+// Date:	2011-06-14
+// Version:	1.0.0004.1650
 //
 // History:
 //	- 1.0.0000.1336(2011-06-01)	@ 开始构建Tree
@@ -42,6 +42,8 @@
 //	- 1.0.0002.1830(2011-06-12)	# 修正CTreeT::item_t中导致无法正确编译通过的一些问题
 //								= CTreeT::Add()将通过参数返回新结点的迭代器位置
 //	- 1.0.0003.1120(2011-06-13)	= 调整CTreeT策略,迭代器支持获取父节点迭代器与子节点迭代器列表
+//	- 1.0.0004.1650(2011-06-14)	# 修正CTreeT::_Item内部的alloc_t单例析构时内存异常的问题
+//								# 修正CTreeT::Del()直接删除根节点时,不会清空根节点标记指针的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Tree_h__
@@ -64,7 +66,7 @@ template <typename TypeT, typename PolicyT = _TreePolicyT<> >
 class CTreeT : public IContainerObjectT<TypeT, PolicyT, CTreeT<TypeT, PolicyT> >
 {
 public:
-	typedef struct _Item : public IPoolTypeT<_Item, alloc_t>
+	typedef struct _Item
 	{
 		typedef CListT<_Item*, _ListPolicyT<alloc_t> > list_t;
 		typedef typename list_t::iterator_t ite_t;
@@ -73,6 +75,11 @@ public:
 		list_t Chdr;
 
 		type_t Val;
+
+		static _Item* Alloc()
+		{ return ExMem::Alloc<_Item>(); }
+		void Free()
+		{ ExMem::Free(static_cast<_Item*>(this)); }
 
 		_Item()
 			: Pare(NULL)
@@ -300,6 +307,17 @@ public:
 	bool Add(const type_t& Item)
 	{ return Add(Item, Tail()); }
 
+	/*
+		树删除算法
+		头尾迭代器一致,则将迭代器指向的树结点及其子节点完全删除
+		不一致,则头迭代器到尾迭代器之间的结点及其子节点将被删除
+		尾迭代器将代替头迭代器被连接到头迭代器父节点下作为其子节点
+
+		例如,删除根节点,新的根节点为其下第二个子节点:
+		tree_t::iterator_t ite_head = tree.Head();
+		tree_t::iterator_t ite_newh = ite_head->Children()[1];
+		tree.Del(ite_head, ite_newh);
+	*/
 	bool Del(iterator_t& iteStt, iterator_t& iteEnd)
 	{
 		if (Empty()) return true;
@@ -309,8 +327,13 @@ public:
 		if (iteStt == iteEnd)
 		{
 			item_t* stt_inx = iteStt->Index();
-			m_nCont -= stt_inx->GetCount();
-			stt_inx->Free();
+			if (stt_inx == m_pTree)
+				Clear();
+			else
+			{
+				m_nCont -= stt_inx->GetCount();
+				stt_inx->Free();
+			}
 		}
 		else
 		{

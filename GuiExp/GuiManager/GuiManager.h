@@ -48,7 +48,6 @@
 #endif // _MSC_VER > 1000
 
 #include "GuiCommon/GuiCommon.h"
-#include "GuiManager/GuiXML.h"
 
 EXP_BEG
 
@@ -56,9 +55,6 @@ EXP_BEG
 
 class EXP_API CGuiManager
 {
-protected:
-	static CGuiXML* s_XML;
-
 public:
 	static bool Load(IFileObject* pFile);
 };

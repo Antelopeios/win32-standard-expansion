@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-09
-// Version:	1.0.0006.1616
+// Date:	2011-06-14
+// Version:	1.0.0007.1232
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -44,6 +44,7 @@
 //	- 1.0.0004.1103(2011-05-27)	+ 添加Tab键焦点切换的响应
 //	- 1.0.0005.0047(2011-06-08)	+ 将GuiWndEvent拓展为全局通用消息预处理事件类
 //	- 1.0.0006.1616(2011-06-09)	# 采用三缓冲绘图修正控件的子控件在半透明贴图时出现的颜色失真
+//	- 1.0.0007.1232(2011-06-14)	# 当程序退出CGuiWndEvent的静态变量均析构后,MouseLeaveCheck仍然被调用导致内存访问异常的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -66,7 +67,7 @@ class CGuiWndEvent : public IGuiEvent
 
 protected:
 	// 鼠标离开检测
-	static UINT_PTR s_MLCheckID;
+	static UINT_PTR s_MLCheckID, s_MLCheckCT;
 	static HWND s_MLCheckWD;
 	static IGuiCtrl* s_MLMove;
 	static void CALLBACK MouseLeaveCheck(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -285,6 +286,11 @@ public:
 	CGuiWndEvent()
 		: m_ShiftDown(false)
 	{}
+	~CGuiWndEvent()
+	{
+		if (--s_MLCheckCT == 0)
+			::KillTimer(NULL, s_MLCheckID);
+	}
 
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
@@ -301,6 +307,7 @@ public:
 				// 鼠标离开事件检测定时器
 				if (s_MLCheckID == 0)
 					s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
+				++s_MLCheckCT;
 				break;
 			case WM_PAINT:
 				{
@@ -342,7 +349,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
-UINT_PTR CGuiWndEvent::s_MLCheckID = 0;
+UINT_PTR CGuiWndEvent::s_MLCheckID = 0, CGuiWndEvent::s_MLCheckCT = 0;
 HWND CGuiWndEvent::s_MLCheckWD = NULL;
 IGuiCtrl* CGuiWndEvent::s_MLMove = NULL;
 

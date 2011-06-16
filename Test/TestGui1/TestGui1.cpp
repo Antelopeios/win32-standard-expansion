@@ -14,7 +14,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	CIOFile f_xml(_T("E:/Administrator/桌面/test.xml")/*_T("C:/Users/Working/Desktop/test.xml")*/);
+	CIOFile f_xml(/*_T("E:/Administrator/桌面/test.xml")*/_T("C:/Users/Working/Desktop/test.xml"));
 	CGuiManager::Load(&f_xml);
 
 	// 垃圾回收器
@@ -76,7 +76,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
-	wnd->Create(_T("Test"), /*CRect(0, 0, 500, 300)*/rect, SW_HIDE);
+	wnd->Create(_T("Test"), CRect(0, 0, 500, 300)/*rect*/, SW_HIDE);
 	wnd->CenterWindow();
 	wnd->SetLayered();
 	wnd->ShowWindow(SW_SHOW);
@@ -90,7 +90,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	pic->AddEvent(&pic_evt);
 	btn->AddEvent(&btn_evt);
 	wnd->AddComp(pic);
-	wnd->AddComp(btn);
+	pic->AddComp(btn);
 	wnd->AddEvent(&cus_evt);
 
 	// 主消息循环:

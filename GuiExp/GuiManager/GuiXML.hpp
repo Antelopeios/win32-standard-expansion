@@ -33,12 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-14
-// Version:	1.0.0001.1205
+// Date:	2011-06-15
+// Version:	1.0.0002.1926
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
 //	- 1.0.0001.1205(2011-06-14)	@ 基本完成GuiXML的核心功能
+//	- 1.0.0002.1926(2011-06-15)	# 修正当遇到换行与tab键时无法识别,并添加入字段中的问题
+//								+ 添加一些数据获取接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -64,7 +66,7 @@ public:
 		CString tmp; // 临时存储
 	} node_t;
 	typedef CTreeT<node_t*> tree_t;
-	typedef tree_t::iterator_t iter_t;
+	typedef tree_t::iterator_t iterator_t;
 
 	// 读取状态
 	enum state_t
@@ -86,9 +88,16 @@ protected:
 	tree_t		 m_xData;
 	CGC			 m_GC;
 
+public:
+	CGuiXML()
+		: m_pFile(NULL)
+	{ Clear(); }
+	virtual ~CGuiXML()
+	{}
+
 protected:
 	// 正常
-	bool Nor(state_t& eSta, iter_t& ite)
+	bool Nor(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_nor && 
 			eSta != sta_tce && 
@@ -110,7 +119,7 @@ protected:
 		return true;
 	}
 	// 标签
-	bool Tag(state_t& eSta, iter_t& ite)
+	bool Tag(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_tag && 
 			eSta != sta_nor && 
@@ -125,6 +134,9 @@ protected:
 			eSta = sta_tco;
 			break;
 		case _T(' '):	// 等待属性
+		case _T('\r'):
+		case _T('\n'):
+		case _T('\t'):
 			eSta = sta_wat;
 			break;
 		case _T('/'):	// 标签内容赋值完毕
@@ -149,7 +161,7 @@ protected:
 		return true;
 	}
 	// 标签内容
-	bool Tco(state_t& eSta, iter_t& ite)
+	bool Tco(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_tco && 
 			eSta != sta_tag && 
@@ -174,15 +186,16 @@ protected:
 		return true;
 	}
 	// 标签内容完毕
-	bool Tce(state_t& eSta, iter_t& ite)
+	bool Tce(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_tag) return false;
+		if (eSta != sta_tag && 
+			eSta != sta_wat) return false;
 		ite = ite->Parent();
 		eSta = sta_nor;
 		return true;
 	}
 	// 等待属性
-	bool Wat(state_t& eSta, iter_t& ite)
+	bool Wat(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_wat && 
 			eSta != sta_tag) return false;
@@ -193,9 +206,14 @@ protected:
 		{
 		case _T('<'):
 		case _T(' '):
+		case _T('\r'):
+		case _T('\n'):
+		case _T('\t'):
 		case _T('\"'):
-		case _T('/'):
 			eSta = sta_wat;
+			break;
+		case _T('/'):
+			eSta = sta_tce;
 			break;
 		case _T('>'):
 			eSta = sta_tco;
@@ -221,7 +239,7 @@ protected:
 		return true;
 	}
 	// 属性赋值
-	bool Avl(state_t& eSta, iter_t& ite)
+	bool Avl(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_avl && 
 			eSta != sta_wat) return false;
@@ -240,7 +258,7 @@ protected:
 		return true;
 	}
 	// 属性内容
-	bool Aco(state_t& eSta, iter_t& ite)
+	bool Aco(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_aco && 
 			eSta != sta_avl) return false;
@@ -263,7 +281,7 @@ protected:
 		return true;
 	}
 	// 属性内容完毕
-	bool Ace(state_t& eSta, iter_t& ite)
+	bool Ace(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_aco) return false;
 		node_t* node = *ite;
@@ -271,13 +289,6 @@ protected:
 		eSta = sta_tag;
 		return true;
 	}
-
-public:
-	CGuiXML()
-		: m_pFile(NULL)
-	{ Clear(); }
-	virtual ~CGuiXML()
-	{}
 
 public:
 	void SetFile(IFileObject* pFile)
@@ -327,7 +338,7 @@ public:
 		// 开始解析
 		bool ret = false;
 		state_t cur_sta = sta_nor, old_sta = sta_nor;
-		iter_t ite = m_xData.Head();
+		iterator_t ite = m_xData.Head();
 		while(1)
 		{
 			switch(cur_sta)
@@ -380,6 +391,34 @@ public:
 		}
 	Return:
 		return ret;
+	}
+
+	iterator_t& GetRoot()
+	{
+		return m_xData.Head();
+	}
+	bool GetNode(_IN_ LPCTSTR sName, _IN_OT_ iterator_t& rIte)
+	{
+		if (!sName) return false;
+		if (rIte == iterator_t())
+			rIte = m_xData.Head();
+		++rIte;
+		for(; rIte != m_xData.Tail(); ++rIte)
+		{
+			if (!(*rIte)) continue;
+			if ((*rIte)->nam == sName)
+				return true;
+		}
+		return false;
+	}
+	CString GetAttr(_IN_ LPCTSTR sAttr, _IN_ iterator_t& rIte)
+	{
+		if (!sAttr) return _T("");
+		if (rIte == m_xData.Head() || 
+			rIte == m_xData.Tail()) return _T("");
+		map_t::iterator_t ite_att = (*rIte)->att.Locate(sAttr);
+		if (ite_att == (*rIte)->att.Tail()) return _T("");
+		return ite_att->Val();
 	}
 };
 

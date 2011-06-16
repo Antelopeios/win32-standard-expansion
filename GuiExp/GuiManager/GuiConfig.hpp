@@ -53,8 +53,21 @@ EXP_BEG
 
 class CGuiConfig
 {
+public:
+	// 摘要
+	struct detail_t
+	{
+		CString name;		// 名称
+		CString author;		// 作者
+		CString home;		// 主页
+		CString email;		// 邮箱
+		CString version;	// 版本
+		CString date;		// 日期
+	};
+
 protected:
-	CGuiXML m_XML;
+	CGuiXML	 m_XML;
+	detail_t m_Detail;
 
 public:
 	CGuiConfig()
@@ -62,13 +75,31 @@ public:
 	virtual ~CGuiConfig()
 	{}
 
+protected:
+	bool CreateUI()
+	{
+	}
+
 public:
 	bool Load(IFileObject* pFile)
 	{
 		if (!pFile) return false;
 		m_XML.SetFile(pFile);
 		if (!m_XML.Decode()) return false;
+		CGuiXML::iterator_t ite;
+		if (!m_XML.GetNode(_T("detail"), ite)) return false;
+		// 开始读取配置文件内容
+		m_Detail.name	 = m_XML.GetAttr(_T("name"),	ite);
+		m_Detail.author	 = m_XML.GetAttr(_T("author"),	ite);
+		m_Detail.home	 = m_XML.GetAttr(_T("home"),	ite);
+		m_Detail.email	 = m_XML.GetAttr(_T("email"),	ite);
+		m_Detail.version = m_XML.GetAttr(_T("version"),	ite);
+		m_Detail.date	 = m_XML.GetAttr(_T("date"),	ite);
+		// 开始创建界面对象
+		return true;
 	}
+
+	const detail_t& GetDetail() { return m_Detail; }
 };
 
 //////////////////////////////////////////////////////////////////

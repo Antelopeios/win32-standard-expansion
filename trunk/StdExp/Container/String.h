@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-24
-// Version:	1.0.0017.2220
+// Date:	2011-06-15
+// Version:	1.0.0018.1638
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -42,6 +42,7 @@
 //	- 1.0.0015.1714(2011-05-10)	# 修正bool operator==()与bool operator!=()在对字符串常量做比较时无法通过编译的问题
 //	- 1.0.0016.1642(2011-05-18)	= 使用友元方式重载bool operator==()与bool operator!=()
 //	- 1.0.0017.2220(2011-05-24)	# 修正CStringT::SetString()当参数为NULL时的崩溃问题
+//	- 1.0.0018.1638(2011-06-15)	# 修正CStringT::Compare()当参数为NULL时的崩溃问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -202,7 +203,12 @@ public:
 	{ return SetString(pString); }
 
 	int Compare(const type_t* pString) const
-	{ return _tcscmp(m_Array, pString); }
+	{
+		if (m_Array == pString) return true;
+		if (m_Array == NULL || 
+			pString == NULL) return false;
+		return _tcscmp(m_Array, pString);
+	}
 
 	friend bool operator==(const CStringT& str1, const CStringT& str2)
 	{ return (str1.Compare(str2) == 0); }

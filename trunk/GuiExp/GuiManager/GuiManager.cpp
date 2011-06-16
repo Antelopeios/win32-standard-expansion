@@ -52,9 +52,8 @@ EXP_BEG
 
 bool CGuiManager::Load(IFileObject* pFile)
 {
-	CGuiXML& xml = ExSingleton<CGuiXML>();
-	xml.SetFile(pFile);
-	return xml.Decode();
+	CGuiConfig& config = ExSingleton<CGuiConfig>();
+	return config.Load(pFile);
 }
 
 //////////////////////////////////////////////////////////////////

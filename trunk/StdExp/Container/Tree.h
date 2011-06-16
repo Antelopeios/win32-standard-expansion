@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-14
-// Version:	1.0.0004.1650
+// Date:	2011-06-15
+// Version:	1.0.0005.1651
 //
 // History:
 //	- 1.0.0000.1336(2011-06-01)	@ 开始构建Tree
@@ -44,6 +44,8 @@
 //	- 1.0.0003.1120(2011-06-13)	= 调整CTreeT策略,迭代器支持获取父节点迭代器与子节点迭代器列表
 //	- 1.0.0004.1650(2011-06-14)	# 修正CTreeT::_Item内部的alloc_t单例析构时内存异常的问题
 //								# 修正CTreeT::Del()直接删除根节点时,不会清空根节点标记指针的问题
+//	- 1.0.0005.1651(2011-06-15)	# 修正CTreeT::_Item内部调用finder_t::Find()时不规范导致的编译错误
+//								# 修正当迭代器已移到Last的位置时,_TreePolicyT::node_t::Next()会将迭代器重新送回Head位置的问题(正常应该是Tail)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Tree_h__
@@ -123,8 +125,9 @@ public:
 
 		_Item* GetPareNext()
 		{
-			if (!Pare) return this;
-			ite_t ite = list_t::finder_t::Find(Pare->Chdr, this);
+			if (!Pare) return NULL;
+			_Item* item = this;
+			ite_t ite = list_t::finder_t::Find(Pare->Chdr, item);
 			if (ite == Pare->Chdr.Tail()) return NULL;
 			if ((++ite) != Pare->Chdr.Tail()) return *ite;
 			// Tail, 递归遍历
@@ -138,8 +141,9 @@ public:
 		}
 		_Item* GetParePrev()
 		{
-			if (!Pare) return this;
-			ite_t ite = list_t::finder_t::Find(Pare->Chdr, this);
+			if (!Pare) return NULL;
+			_Item* item = this;
+			ite_t ite = list_t::finder_t::Find(Pare->Chdr, item);
 			if (ite == Pare->Chdr.Tail()) return NULL;
 			if (ite == Pare->Chdr.Head()) return Pare;
 			return (*(--ite))->GetChdrLast();

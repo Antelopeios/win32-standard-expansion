@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-06-08
-// Version:	1.0.0005.2304
+// Version:	1.0.0006.1010
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -46,6 +46,7 @@
 //								+ 添加IGuiCtrl::GetClientRect()接口
 //	- 1.0.0005.2304(2011-06-08)	+ 添加IGuiCtrl::UpdateState()接口
 //								+ 在IGuiCtrl::SetFocus()接口实现中添加更新状态逻辑
+//	- 1.0.0006.1010(2011-06-17)	= 将IGuiCtrlBase接口移动到GuiCtrl.h中,使外部可以使用此接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -196,6 +197,58 @@ public:
 		}
 		return false;
 	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 控件对象接口
+interface EXP_API IGuiCtrlBase : public IGuiCtrl
+{
+	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
+
+	// 导出的基础类定义
+	template class EXP_API CPointT<>;
+	template class EXP_API CRectT<>;
+
+protected:
+	bool m_bEnable;		// 是否可用
+	bool m_bVisible;	// 是否可见
+
+	CRect m_Rect;		// 控件区域
+
+	bool m_Updated;
+
+public:
+	IGuiCtrlBase();
+
+public:
+	// 更新状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL);
+	void SetState(const CString& sType, void* pState);
+	void UpdateState(bool bRefreshSelf = true);
+	bool IsUpdated();
+
+	// 区域控制
+	bool P2C(CRect& rc);
+	bool C2P(CRect& rc);
+	bool B2C(CRect& rc);
+	bool C2B(CRect& rc);
+	bool SetWindowRect(const CRect& rc);
+	bool GetWindowRect(CRect& rc);
+	bool SetRealRect(const CRect& rc);
+	bool GetRealRect(CRect& rc);
+	bool GetClientRect(CRect& rc);
+
+	// 刷新绘图
+	void Refresh(bool bSelf = true);
+
+	// 设置可用性
+	bool SetEnable(bool bEnable = true);
+	bool IsEnabled() const;
+
+	// 设置可见性
+	bool SetVisible(bool bVisible = true);
+	bool IsVisible() const;
 };
 
 //////////////////////////////////////////////////////////////////

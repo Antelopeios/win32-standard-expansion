@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)GuiExp&quot;;&quot;$(SolutionDir)ImgExp&quot;;&quot;$(SolutionDir)StdExp&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;EXP_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -115,7 +115,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)GuiExp&quot;;&quot;$(SolutionDir)ImgExp&quot;;&quot;$(SolutionDir)StdExp&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;EXP_EXPORTS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -207,10 +207,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GuiBoard\GuiBoardBase.hpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GuiBoard\GuiThunk.hpp"
 				>
 			</File>
@@ -232,10 +228,6 @@
 			</File>
 			<File
 				RelativePath=".\GuiCtrl\GuiCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiCtrl\GuiCtrlBase.hpp"
 				>
 			</File>
 			<File

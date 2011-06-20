@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-15
-// Version:	1.0.0018.1638
+// Date:	2011-06-17
+// Version:	1.0.0019.1555
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -43,6 +43,9 @@
 //	- 1.0.0016.1642(2011-05-18)	= 使用友元方式重载bool operator==()与bool operator!=()
 //	- 1.0.0017.2220(2011-05-24)	# 修正CStringT::SetString()当参数为NULL时的崩溃问题
 //	- 1.0.0018.1638(2011-06-15)	# 修正CStringT::Compare()当参数为NULL时的崩溃问题
+//	- 1.0.0019.1555(2011-06-17)	# 修正CStringT在不跟随项目Unicode设置的情况下调整TypeT,引起CStringT::GetLength()等函数结果错误的问题
+//								# 修正CStringT::operator+=()可能导致路径递归的问题
+//								+ 支持CStringT::operator[]()支持由迭代器获取值
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -66,7 +69,7 @@ template <typename TypeT = TCHAR, typename PolicyT = _StringPolicyT<> >
 class CStringT : public IContainerObjectT<TypeT, PolicyT, CStringT<TypeT, PolicyT> >
 {
 public:
-	typedef typename PolicyT::array_t<type_t> array_t;
+	typedef typename CArrayT<type_t> array_t;
 
 protected:
 	type_t*	m_Array;
@@ -111,7 +114,10 @@ public:
 		type_t* pArray = (type_t*)ZeroMemory(alloc_t::Alloc<type_t>(nSize), sizeof(type_t) * nSize);
 		if (m_Array)
 		{
-			StringCchCopy(pArray, nSize, m_Array);
+			if (sizeof(type_t) == 1)
+				StringCchCopyA((char*)pArray, nSize, (char*)m_Array);
+			else
+				StringCchCopyW((wchar_t*)pArray, nSize, (wchar_t*)m_Array);
 			alloc_t::Free(m_Array);
 		}
 		m_Array = pArray;
@@ -121,12 +127,12 @@ public:
 	{ SetSize(PolicyT::Expan(nSize)); }
 
 	DWORD GetLength() const
-	{ return m_Array ? _tcslen(m_Array) : 0; }
+	{ return m_Array ? (sizeof(type_t) == 1 ? strlen((char*)m_Array) : wcslen((wchar_t*)m_Array)) : 0; }
 	DWORD GetCount() const
 	{ return GetLength() + 1; }
 
 	bool Empty() const
-	{ return (!m_Array) || (_tcscmp(m_Array, _T("")) == 0); }
+	{ return (!m_Array) || (GetLength() == 0); }
 	void Clear()
 	{
 		if (m_Array)
@@ -144,7 +150,12 @@ public:
 			DWORD count = GetCount();
 			type_t* pArray = alloc_t::Alloc<type_t>(count);
 			if (pArray)
-				StringCchCopy(pArray, count, m_Array);
+			{
+				if (sizeof(type_t) == 1)
+					StringCchCopyA((char*)pArray, count, (char*)m_Array);
+				else
+					StringCchCopyW((wchar_t*)pArray, count, (wchar_t*)m_Array);
+			}
 			alloc_t::Free(m_Array);
 			m_Array = pArray;
 			m_nSize = count;
@@ -153,41 +164,54 @@ public:
 			m_nSize = 0;
 	}
 
-	type_t& operator[](DWORD nIndex)
-	{ return GetAt(nIndex); }
-	const type_t& operator[](DWORD nIndex) const
-	{ return GetAt(nIndex); }
 	type_t& GetAt(DWORD nIndex)
-	{
-		ExAssert(nIndex < m_nCont);
-		return m_Array[nIndex];
-	}
+	{ return m_Array[nIndex]; }
 	const type_t& GetAt(DWORD nIndex) const
-	{
-		ExAssert(nIndex < m_nCont);
-		return m_Array[nIndex];
-	}
+	{ return m_Array[nIndex]; }
 	type_t& GetAt(iterator_t& nIndex)
 	{ return nIndex->Val(); }
 	const type_t& GetAt(iterator_t& nIndex) const
 	{ return nIndex->Val(); }
 
-	void Format(LPCTSTR lpFormat, ...)
+	type_t& operator[](DWORD nIndex)
+	{ return GetAt(nIndex); }
+	const type_t& operator[](DWORD nIndex) const
+	{ return GetAt(nIndex); }
+	type_t& operator[](iterator_t& nIndex)
+	{ return GetAt(nIndex); }
+	const type_t& operator[](iterator_t& nIndex) const
+	{ return GetAt(nIndex); }
+
+	void Format(const type_t* lpFormat, ...)
 	{
 		va_list args;
 		va_start(args, lpFormat);
-
-		size_t len = _vsctprintf(lpFormat, args) + 1;
-		StringCchVPrintf(GetCStr(len), len, lpFormat, args);
-
+		if (sizeof(type_t) == 1)
+		{
+			size_t len = _vscprintf((char*)lpFormat, args) + 1;
+			StringCchVPrintfA((char*)GetCStr(len), len, (char*)lpFormat, args);
+		}
+		else
+		{
+			size_t len = _vscwprintf((wchar_t*)lpFormat, args) + 1;
+			StringCchVPrintfW((wchar_t*)GetCStr(len), len, (wchar_t*)lpFormat, args);
+		}
 		va_end(args);
 	}
 
 	CStringT& SetString(const type_t* pString)
 	{
 		if (!pString) return (*this);
-		GetCStr(_tcslen(pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
-		StringCchCopy(m_Array, GetSize(), pString);
+		if (sizeof(type_t) == 1)
+		{
+			GetCStr(strlen((char*)pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
+			StringCchCopyA((char*)m_Array, GetSize(), (char*)pString);
+		}
+		else
+		{
+			GetCStr(wcslen((wchar_t*)pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
+			StringCchCopyW((wchar_t*)m_Array, GetSize(), (wchar_t*)pString);
+		}
 		return (*this);
 	}
 	CStringT& SetString(const array_t& aString)
@@ -207,7 +231,10 @@ public:
 		if (m_Array == pString) return true;
 		if (m_Array == NULL || 
 			pString == NULL) return false;
-		return _tcscmp(m_Array, pString);
+		if (sizeof(type_t) == 1)
+			return strcmp((char*)m_Array, (char*)pString);
+		else
+			return wcscmp((wchar_t*)m_Array, (wchar_t*)pString);
 	}
 
 	friend bool operator==(const CStringT& str1, const CStringT& str2)
@@ -225,18 +252,26 @@ public:
 
 	CStringT& operator+=(const type_t* pString)
 	{
-		if (!pString || _tcslen(pString) == 0) return (*this);
-		GetCStr(GetLength() + _tcslen(pString));
-		StringCchCat(m_Array, GetSize(), pString);
+		if (!pString || pString[0] == 0) return (*this);
+		if (sizeof(type_t) == 1)
+		{
+			GetCStr(GetLength() + strlen((char*)pString));
+			StringCchCatA((char*)m_Array, GetSize(), (char*)pString);
+		}
+		else
+		{
+			GetCStr(GetLength() + wcslen((wchar_t*)pString));
+			StringCchCatW((wchar_t*)m_Array, GetSize(), (wchar_t*)pString);
+		}
 		return (*this);
 	}
 	CStringT& operator+=(const array_t& aString)
-	{ return operator+=(aString); }
+	{ return operator+=((const type_t*)aString); }
 	CStringT& operator+=(const CStringT& String)
-	{ return operator+=(String); }
+	{ return operator+=((const type_t*)String); }
 	CStringT& operator+=(const type_t Char)
 	{
-		type_t tmp_chr[2] = {Char, _T('\0')};
+		type_t tmp_chr[2] = {Char, 0};
 		return operator+=(tmp_chr);
 	}
 
@@ -246,9 +281,9 @@ public:
 		return tmp_str += pString;
 	}
 	CStringT operator+(const array_t& aString)
-	{ return operator+(aString); }
+	{ return operator+((const type_t*)aString); }
 	CStringT operator+(const CStringT& String)
-	{ return operator+(String); }
+	{ return operator+((const type_t*)String); }
 	CStringT operator+(const type_t Char)
 	{
 		CStringT tmp_str(*this);
@@ -272,21 +307,21 @@ public:
 	iterator_t& Head() const
 	{
 		static iterator_t iter;
-		iter = node_t(this);
+		iter = node_t((CStringT*)this);
 		iter->nIndx = 0;
 		return iter;
 	}
 	iterator_t& Tail() const
 	{
 		static iterator_t iter;
-		iter = node_t(this);
+		iter = node_t((CStringT*)this);
 		iter->nIndx = GetLength() + 1;
 		return iter;
 	}
 	iterator_t& Last()
 	{
 		static iterator_t iter;
-		iter = node_t(this);
+		iter = node_t((CStringT*)this);
 		iter->nIndx = GetLength();
 		return iter;
 	}
@@ -361,10 +396,41 @@ typedef CStringT<> CString;
 //////////////////////////////////////////////////////////////////
 
 template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _StringPolicyT : public _ArrayPolicyT<AllocT>
+struct _StringPolicyT
 {
-	template <typename TypeT>
-	class array_t : public CArrayT<TypeT, _StringPolicyT> {};
+	typedef AllocT alloc_t;
+
+	template <typename ContainerT>
+	struct node_t
+	{
+		typedef ContainerT container_t;
+		typedef typename container_t::type_t type_t;
+
+		container_t* pCont;
+		DWORD	nIndx;
+
+		node_t(container_t* p = NULL)
+			: pCont(p)
+			, nIndx(0)
+		{}
+
+		type_t& Val() { return pCont->GetAt(nIndx); }
+
+		bool InThis(container_t* cnt) { return pCont == cnt; }
+		DWORD Index() { return nIndx; }
+
+		bool operator==(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
+		bool operator!=(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
+
+		void Next(long nOff = 1) { nIndx += nOff; }
+		void Prev(long nOff = 1) { nIndx -= nOff; }
+	};
+
+	static const DWORD DEF_SIZE = 0;
+	static DWORD Expan(DWORD nSize)
+	{ return nSize ? (nSize << 1) : 1; }
 };
 
 //////////////////////////////////////////////////////////////////

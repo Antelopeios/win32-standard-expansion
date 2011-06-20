@@ -6,4 +6,4 @@
 #pragma once
 
 #include <atlbase.h>
-#include "../../ImgExp/ImgExp.h"
+#include "ImgExp.h"

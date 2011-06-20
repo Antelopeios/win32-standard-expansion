@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-26
-// Version:	1.0.0006.1411
+// Date:	2011-06-17
+// Version:	1.0.0007.0942
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -44,6 +44,7 @@
 //								+ 添加IGuiBoard::LayeredWindow();IGuiBoard::DefProc();IGuiBoard::GethWnd()
 //	- 1.0.0005.2202(2011-05-23)	= 调整IGuiBoard::LayeredWindow()接口
 //	- 1.0.0006.1411(2011-05-26)	+ 添加IGuiBoard::GetRealRect()接口实现
+//	- 1.0.0007.0942(2011-06-17)	= 将IGuiBoardBase接口移动到GuiBoard.h中,使外部可以使用此接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -129,6 +130,109 @@ public:
 	virtual void SetLayered(bool bLayered = true) = 0;
 	virtual bool IsLayered() = 0;
 	virtual void LayeredWindow(HDC hDC, HDC tGrp) = 0;
+};
+
+//////////////////////////////////////////////////////////////////
+
+// 自定义的内存分配器
+struct _GuiBoardAlloc
+{
+	EXP_INLINE static void Free(void* pPtr)
+	{
+		if (!pPtr) return;
+		::DestroyWindow((HWND)pPtr);
+	}
+};
+
+// 导出的基础类定义
+template <typename TypeT, typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
+class EXP_API CSmartPtrT;
+template <typename TypeT, typename TypeAllocT = _TypeAlloc>
+interface EXP_API ITypeObjectT;
+
+// GUI 窗口对象
+interface EXP_API IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
+{
+	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
+
+	typedef ITypeObjectT<wnd_t, _GuiBoardAlloc> type_base_t;
+
+protected:
+	static const LPCTSTR s_ClassName;
+	HINSTANCE m_hIns;
+
+	bool m_bLayered;
+
+public:
+	IGuiBoardBase(void);
+	IGuiBoardBase(wnd_t hWnd);
+	virtual ~IGuiBoardBase(void);
+
+protected:
+	ATOM RegisterWndClass(LPCTSTR sClassName);
+
+public:
+	bool Create(LPCTSTR sWndName, CRect& rcWnd, 
+				int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
+				wnd_t wndParent = NULL);
+
+	bool IsNull() const;
+
+	wnd_t operator=(wnd_t tType);
+
+	bool Attach(wnd_t hWnd);
+	wnd_t Detach();
+	wnd_t GethWnd();
+
+	// 窗口消息
+	LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+	bool PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+
+	// 窗口属性修改
+	DWORD GetStyle();
+	DWORD GetExStyle();
+	bool ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);
+	bool ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE);
+	LONG SetWindowLong(int nIndex, LONG dwNewLong);
+	LONG GetWindowLong(int nIndex);
+
+	// 窗口移动
+	void MoveWindow(int x, int y, int nWidth, int nHeight, bool bRepaint = true);
+	void MoveWindow(CRect& lpRect, bool bRepaint = true);
+	void CenterWindow(wnd_t hWndCenter = NULL);
+
+	// 窗口坐标转换
+	void ClientToScreen(CPoint& lpPoint);
+	void ClientToScreen(CRect& lpRect);
+	void ScreenToClient(CPoint& lpPoint);
+	void ScreenToClient(CRect& lpRect);
+
+	// 窗口刷新
+	void Invalidate();
+	void InvalidateRect(CRect& rcInv);
+	void InvalidateRgn(HRGN hRgn);
+	bool ShowWindow(int nCmdShow);
+	bool UpdateWindow();
+
+	// 窗口DC
+	graph_t GetDC();
+	bool ReleaseDC(graph_t hdc);
+
+	// 获得窗口大小
+	bool GetWindowRect(CRect& lpRect);
+	bool GetClientRect(CRect& lpRect);
+
+	// 窗口关系控制
+	wnd_t GetParent();
+
+	// 设置焦点
+	wnd_t SetFocus();
+	bool IsFocus();
+
+	// 窗口图层化
+	void SetLayered(bool bLayered = true);
+	bool IsLayered();
+	void LayeredWindow(HDC hDC, HDC tGrp);
 };
 
 //////////////////////////////////////////////////////////////////

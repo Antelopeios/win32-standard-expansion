@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "../../GuiExp/GuiExp.h"
+#include "GuiExp.h"
 #ifdef _DEBUG
 #pragma comment(lib, "../../_Output/Debug/ImgExp.lib")
 #pragma comment(lib, "../../_Output/Debug/GuiExp.lib")

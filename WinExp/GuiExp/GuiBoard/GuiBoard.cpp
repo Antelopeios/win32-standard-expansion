@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-17
-// Version:	1.0.0003.0942
+// Date:	2011-06-24
+// Version:	1.0.0004.1253
 //
 // History:
 //	- 1.0.0002.1525(2011-05-13)	^ 将IGuiBoardBase接口实现与GuiBoard的实现分离
 //	- 1.0.0003.0942(2011-06-17)	= 将IGuiBoardBase接口重新移回到GuiBoard.cpp中
+//	- 1.0.0004.1253(2011-06-24)	+ 添加WNDCLASSEX::style控制接口实现
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -68,12 +69,17 @@ IGuiBoardBase::IGuiBoardBase(wnd_t hWnd)
 IGuiBoardBase::~IGuiBoardBase(void)
 {}
 
-ATOM IGuiBoardBase::RegisterWndClass(LPCTSTR sClassName)
+LRESULT CALLBACK IGuiBoardBase::BoardProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
+{
+	return ::DefWindowProc(hWnd, nMessage, wParam, lParam);
+}
+
+ATOM IGuiBoardBase::RegisterWndClass(LPCTSTR sClassName, UINT uStyle)
 {
 	WNDCLASSEX wcex		= {0};
 	wcex.cbSize			= sizeof(WNDCLASSEX);
-	wcex.style			= CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= DefWindowProc;
+	wcex.style			= uStyle;
+	wcex.lpfnWndProc	= BoardProc;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= m_hIns;
@@ -87,9 +93,9 @@ ATOM IGuiBoardBase::RegisterWndClass(LPCTSTR sClassName)
 
 bool IGuiBoardBase::Create(LPCTSTR sWndName, CRect& rcWnd, 
 			int nCmdShow/* = SW_SHOWNORMAL*/, DWORD dwStyle/* = WS_POPUP*/, DWORD dwExStyle/* = NULL*/, 
-			wnd_t wndParent/* = NULL*/)
+			wnd_t wndParent/* = NULL*/, UINT uStyle/* = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW*/)
 {
-	RegisterWndClass(s_ClassName);
+	RegisterWndClass(s_ClassName, uStyle);
 	Attach
 		(
 		::CreateWindowEx

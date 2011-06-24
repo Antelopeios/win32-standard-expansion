@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiCtrl\GuiEdit.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiCtrl\GuiPicture.hpp"
 				>
 			</File>
@@ -239,7 +243,15 @@
 			Name="GuiEvent"
 			>
 			<File
+				RelativePath="..\..\BarClient\BarClient.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiEvent\GuiButtonEvent.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiEvent\GuiEditEvent.hpp"
 				>
 			</File>
 			<File

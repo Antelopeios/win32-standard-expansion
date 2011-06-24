@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-30
-// Version:	1.0.0002.1553
+// Date:	2011-06-24
+// Version:	1.0.0003.1919
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
 //								# 修正CText::GetImage()接口对颜色处理的错误
 //	- 1.0.0002.1553(2011-05-30)	= 调整CText的基类,改为同时向CString与CFont继承,以统一他们之间的接口
+//	- 1.0.0003.1919(2011-06-24)	# 修正CText::GetSize()无法自动匹配字体获取大小的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -53,7 +54,7 @@
 #include "ImgTypes/Graph.h"
 #include "ImgTypes/Image.h"
 #include "ImgTypes/Font.h"
-#include "ImgDrawer/ImgRenderer.h"
+#include "ImgPainter/ImgRenderer.h"
 
 EXP_BEG
 
@@ -116,9 +117,11 @@ public:
 
 	void GetSize(graph_t tGrp, CSize& szCont)
 	{
+		HGDIOBJ old = ::SelectObject(tGrp, Get());
 		SIZE size = {0};
 		::GetTextExtentPoint32(tGrp, GetCStr(), (int)GetLength(), &size);
 		szCont = size;
+		::SelectObject(tGrp, old);
 	}
 
 	image_t GetImage()

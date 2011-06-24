@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-17
-// Version:	1.0.0019.1555
+// Date:	2011-06-24
+// Version:	1.0.0020.1817
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -46,6 +46,7 @@
 //	- 1.0.0019.1555(2011-06-17)	# 修正CStringT在不跟随项目Unicode设置的情况下调整TypeT,引起CStringT::GetLength()等函数结果错误的问题
 //								# 修正CStringT::operator+=()可能导致路径递归的问题
 //								+ 支持CStringT::operator[]()支持由迭代器获取值
+//	- 1.0.0020.1817(2011-06-24)	# 修正CStringT::AddString()无法向字符串末尾添加字符的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -315,14 +316,14 @@ public:
 	{
 		static iterator_t iter;
 		iter = node_t((CStringT*)this);
-		iter->nIndx = GetLength() + 1;
+		iter->nIndx = GetLength();
 		return iter;
 	}
 	iterator_t& Last()
 	{
 		static iterator_t iter;
 		iter = node_t((CStringT*)this);
-		iter->nIndx = GetLength();
+		iter->nIndx = GetLength() - 1;
 		return iter;
 	}
 	type_t& HeadItem() const

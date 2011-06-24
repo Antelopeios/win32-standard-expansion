@@ -87,7 +87,7 @@ public:
 public:
 	// ÊÇ·ñ×öÍÐ¹Ü
 	void SetTrust(bool bTru = true) { m_Type.SetTrust(bTru); }
-	bool IsTrust() { return m_Type.GetTrust(); }
+	bool IsTrust() { return m_Type.IsTrust(); }
 
 	virtual void Set(type_t tType)
 	{ m_Type = tType; }

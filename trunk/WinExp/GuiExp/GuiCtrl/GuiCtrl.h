@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0006.1010
+// Date:	2011-06-24
+// Version:	1.0.0007.1732
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -47,6 +47,7 @@
 //	- 1.0.0005.2304(2011-06-08)	+ 添加IGuiCtrl::UpdateState()接口
 //								+ 在IGuiCtrl::SetFocus()接口实现中添加更新状态逻辑
 //	- 1.0.0006.1010(2011-06-17)	= 将IGuiCtrlBase接口移动到GuiCtrl.h中,使外部可以使用此接口
+//	- 1.0.0007.1732(2011-06-24)	+ 添加静态IGuiCtrl::SetFocus()接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -158,23 +159,35 @@ public:
 	static bool IsEffect(IGuiCtrl* pCtrl)
 	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
 
+	static IGuiCtrl* SetFocus(IGuiCtrl* pFoc)
+	{
+		if (pFoc && !IsEffect(pFoc)) return NULL;
+		// 设置控件焦点
+		IGuiCtrl* old_fc = m_Focus;
+		m_Focus = pFoc;
+		if (old_fc == m_Focus) return NULL;
+		// 设置窗口焦点
+		if (m_Focus)
+		{
+			IGuiBoard* board = m_Focus->GetBoard();
+			if (board) board->SetFocus();
+		}
+		// 发送焦点改变消息
+		if (m_Focus)
+		{
+			m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
+			m_Focus->UpdateState();
+		}
+		if (old_fc)
+		{
+			old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
+			old_fc->UpdateState();
+		}
+		return old_fc;
+	}
 	virtual IGuiCtrl* SetFocus()
 	{
-		IGuiBoard* board = GetBoard();
-		if (!board) return NULL;
-		if (!IsEffect(this)) return NULL;
-		// 设置焦点
-		IGuiCtrl* old_fc = m_Focus;
-		m_Focus = this;
-		if (old_fc == m_Focus) return NULL;
-		board->SetFocus();
-		// 发送焦点改变消息
-		m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
-		m_Focus->UpdateState();
-		if (!old_fc) return old_fc;
-		old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
-		old_fc->UpdateState();
-		return old_fc;
+		return SetFocus(this);
 	}
 	static IGuiCtrl* GetFocus()
 	{
@@ -201,14 +214,12 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+#pragma warning(disable: 4251)
+
 // GUI 控件对象接口
 interface EXP_API IGuiCtrlBase : public IGuiCtrl
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
-
-	// 导出的基础类定义
-	template class EXP_API CPointT<>;
-	template class EXP_API CRectT<>;
 
 protected:
 	bool m_bEnable;		// 是否可用

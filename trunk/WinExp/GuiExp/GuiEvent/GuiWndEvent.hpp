@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-14
-// Version:	1.0.0007.1232
+// Date:	2011-06-22
+// Version:	1.0.0008.1654
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -45,6 +45,7 @@
 //	- 1.0.0005.0047(2011-06-08)	+ 将GuiWndEvent拓展为全局通用消息预处理事件类
 //	- 1.0.0006.1616(2011-06-09)	# 采用三缓冲绘图修正控件的子控件在半透明贴图时出现的颜色失真
 //	- 1.0.0007.1232(2011-06-14)	# 当程序退出CGuiWndEvent的静态变量均析构后,MouseLeaveCheck仍然被调用导致内存访问异常的问题
+//	- 1.0.0008.1654(2011-06-22)	# 修正GuiWndEvent没有向子控件通知焦点改变事件的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -92,6 +93,7 @@ protected:
 
 	// 消息转发
 	bool m_ShiftDown;
+	IGuiCtrl* m_pOldFoc;
 	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui) return 0;
@@ -104,7 +106,6 @@ protected:
 		{
 			POINT pt_tmp = {0};
 			::GetCursorPos(&pt_tmp);
-			//	ExTrace(_T("0x%04X, (%d, %d)\n"), nMessage, pt_tmp.x, pt_tmp.y);
 			CPoint pt(pt_tmp);
 			pGui->ScreenToClient(pt);
 			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
@@ -194,12 +195,17 @@ protected:
 					m_ShiftDown = false;
 		}
 		else
-		if (nMessage == WM_SETFOCUS || 
-			nMessage == WM_KILLFOCUS)
+		if (nMessage == WM_SETFOCUS)
 		{
+			IGuiCtrl::SetFocus(m_pOldFoc);
 			pGui->Invalidate();
-			if (nMessage == WM_KILLFOCUS)
-				m_ShiftDown = false;
+		}
+		else
+		if (nMessage == WM_KILLFOCUS)
+		{
+			m_ShiftDown = false;
+			m_pOldFoc = IGuiCtrl::SetFocus(NULL);
+			pGui->Invalidate();
 		}
 		else
 			lrDef = BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
@@ -267,16 +273,19 @@ protected:
 			}
 		}
 		else
-		for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-			if (!ctrl) continue;
-			// 初始化返回值
-			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
-			// 转发消息
-			ctrl->Send(*ite, nMessage, wParam, lParam);
-			// 判断返回值
-			lrDef = ctrl->GetResult(lrDef);
+		//	ExTrace(_T("0x%04X\n"), nMessage);
+			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			{
+				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+				if (!ctrl) continue;
+				// 初始化返回值
+				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				// 转发消息
+				ctrl->Send(*ite, nMessage, wParam, lParam);
+				// 判断返回值
+				lrDef = ctrl->GetResult(lrDef);
+			}
 		}
 	EndBaseSend:
 		return lrDef;
@@ -285,6 +294,7 @@ protected:
 public:
 	CGuiWndEvent()
 		: m_ShiftDown(false)
+		, m_pOldFoc(NULL)
 	{}
 	~CGuiWndEvent()
 	{

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0003.1426
+// Date:	2011-06-21
+// Version:	1.0.0004.1708
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -45,6 +45,7 @@
 //								+ 添加按钮单击消息转发及Enter键响应
 //	- 1.0.0002.1020(2011-05-27)	# 修正CGuiButtonEvent当WM_KEYUP之后无法响应焦点切换绘图
 //	- 1.0.0003.1426(2011-06-08)	# 修正CGuiButtonEvent不响应非工作区鼠标事件的问题
+//	- 1.0.0004.1708(2011-06-21)	# 修正当按钮控件没有加载图片时CGuiButtonEvent绘图出现的内存异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -154,10 +155,7 @@ public:
 				if (!state) break;
 				CImage* (image[9]);
 				for(int i = 0; i < _countof(image); ++i)
-				{
 					image[i] = (CImage*)(((void**)state->sta_arr)[i]);
-					if (!image[i] || image[i]->IsNull()) break;
-				}
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;

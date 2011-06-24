@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-17
-// Version:	1.0.0007.0942
+// Date:	2011-06-24
+// Version:	1.0.0008.1253
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -45,6 +45,7 @@
 //	- 1.0.0005.2202(2011-05-23)	= 调整IGuiBoard::LayeredWindow()接口
 //	- 1.0.0006.1411(2011-05-26)	+ 添加IGuiBoard::GetRealRect()接口实现
 //	- 1.0.0007.0942(2011-06-17)	= 将IGuiBoardBase接口移动到GuiBoard.h中,使外部可以使用此接口
+//	- 1.0.0008.1253(2011-06-24)	+ 将IGuiBoard支持通过Create接口控制WNDCLASSEX的style
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -72,7 +73,7 @@ public:
 public:
 	virtual bool Create(LPCTSTR sWndName, CRect& rcWnd, 
 						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
-						wnd_t wndParent = NULL) = 0;
+						wnd_t wndParent = NULL, UINT uStyle = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW) = 0;
 	virtual bool IsNull() const = 0;
 
 	virtual bool Attach(wnd_t hWnd) = 0;
@@ -169,12 +170,13 @@ public:
 	virtual ~IGuiBoardBase(void);
 
 protected:
-	ATOM RegisterWndClass(LPCTSTR sClassName);
+	static LRESULT CALLBACK BoardProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam);
+	ATOM RegisterWndClass(LPCTSTR sClassName, UINT uStyle);
 
 public:
 	bool Create(LPCTSTR sWndName, CRect& rcWnd, 
 				int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
-				wnd_t wndParent = NULL);
+				wnd_t wndParent = NULL, UINT uStyle = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW);
 
 	bool IsNull() const;
 

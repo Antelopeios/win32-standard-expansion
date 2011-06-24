@@ -50,9 +50,7 @@
 //								= 调整IGuiObject::Free()为虚函数
 //	- 1.0.0008.1600(2011-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
 //	- 1.0.0009.1411(2011-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
-//	- 1.0.0010.1447(2011-06-08)	= IGuiSender优先向后添加的事件对象转发消息
-//								^ 将IGuiBase移出并单独实现
-//								= IGuiSender::GetResult()获取第一个非默认返回值
+//	- 1.0.0010.1447(2011-06-08)	^ 将IGuiBase移出并单独实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -265,7 +263,7 @@ public:
 		{
 			if (!(*ite)) continue;
 			LRESULT r = (*ite)->GetResult();
-			if (r != 0 && lrDef != r) { lrDef = r; break; }
+			if (r != 0 && lrDef != r) { lrDef = r; }
 		}
 		return lrDef;
 	}
@@ -275,19 +273,12 @@ public:
 		if (GetEvent().Empty()) return;
 		LRESULT ret = GetResult();
 		// 后添加的事件优先执行
-		evt_list_t::iterator_t ite = GetEvent().Last();
-		for(; ite != GetEvent().Head(); --ite)
+		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 			ret = (*ite)->GetResult();
-		}
-		ite = GetEvent().Head();
-		if (*ite)
-		{
-			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
-			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 		}
 	}
 };

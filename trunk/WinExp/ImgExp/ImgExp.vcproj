@@ -642,22 +642,26 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="ImgDrawer"
+			Name="ImgPainter"
 			>
 			<File
-				RelativePath=".\ImgDrawer\FilterObject.h"
+				RelativePath=".\ImgPainter\FilterObject.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ImgDrawer\ImgDeformer.h"
+				RelativePath=".\ImgPainter\ImgDeformer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ImgDrawer\ImgDrawer.h"
+				RelativePath=".\ImgPainter\ImgDrawer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ImgDrawer\ImgRenderer.h"
+				RelativePath=".\ImgPainter\ImgPainter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgPainter\ImgRenderer.h"
 				>
 			</File>
 		</Filter>

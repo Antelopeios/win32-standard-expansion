@@ -28,17 +28,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImgTypes - 图像绘制引擎
+// ImgPainter - 图像绘制引擎
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-26
-// Version:	1.0.0000.1514
+// Date:	2011-06-20
+// Version:	1.0.0001.1623
+//
+// History:
+//	- 1.0.0001.1623(2011-06-20)	= ImgDrawer重命名为ImgPainter,新构建的ImgDrawer作为ImgPainter的子模块,用于绘制基本图形
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImgDrawer_h__
-#define __ImgDrawer_h__
+#ifndef __ImgPainter_h__
+#define __ImgPainter_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -48,10 +51,11 @@
 
 //////////////////////////////////////////////////////////////////
 
-#include "ImgDrawer/ImgDeformer.h"
-#include "ImgDrawer/FilterObject.h"
-#include "ImgDrawer/ImgRenderer.h"
+#include "ImgPainter/ImgDeformer.h"
+#include "ImgPainter/FilterObject.h"
+#include "ImgPainter/ImgRenderer.h"
+#include "ImgPainter/ImgDrawer.h"
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__ImgDrawer_h__*/
+#endif/*__ImgPainter_h__*/

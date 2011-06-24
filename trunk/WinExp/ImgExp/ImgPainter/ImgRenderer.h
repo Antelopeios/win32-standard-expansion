@@ -57,7 +57,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgDrawer/FilterObject.h"
+#include "ImgPainter/FilterObject.h"
 
 EXP_BEG
 

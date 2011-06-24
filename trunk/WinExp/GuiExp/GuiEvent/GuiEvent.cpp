@@ -44,5 +44,6 @@
 #include "GuiEvent/GuiWndEvent.hpp"
 #include "GuiEvent/GuiPictureEvent.hpp"
 #include "GuiEvent/GuiButtonEvent.hpp"
+#include "GuiEvent/GuiEditEvent.hpp"
 
 //////////////////////////////////////////////////////////////////

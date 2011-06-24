@@ -191,8 +191,8 @@ bool IGuiCtrlBase::IsVisible() const
 
 EXP_END
 
-//#include "GuiCtrl/GuiCtrlBase.hpp"
 #include "GuiCtrl/GuiPicture.hpp"
 #include "GuiCtrl/GuiButton.hpp"
+#include "GuiCtrl/GuiEdit.hpp"
 
 //////////////////////////////////////////////////////////////////

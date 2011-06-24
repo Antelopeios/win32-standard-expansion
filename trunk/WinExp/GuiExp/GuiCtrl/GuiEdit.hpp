@@ -28,36 +28,85 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImgExp - 图像拓展库(Image Expansion)
+// GuiEdit - 编辑框控件
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-20
-// Version:	0.1.0004.1630
+// Date:	2011-06-21
+// Version:	1.0.0000.1030
 //
 // History:
-//	- 0.1.0001.2300(2011-04-19)	@ 完成ImgCoder部分所有类的构建
-//								@ 完成ImgTypes部分所有类的构建
-//	- 0.1.0002.1400(2011-05-02)	@ 完成ImgDrawer部分所有类的构建
-//	- 0.1.0003.1750(2011-05-30)	^ ImgTypes部分基于引用计数重新构建,支持自动回收机制
-//	- 0.1.0004.1630(2011-06-20)	@ ImgDrawer重命名为ImgPainter,并添加基本绘图模块
+//	- 1.0.0000.1030(2011-06-21)	@ 开始构建GuiEdit
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImgExp_h__
-#define __ImgExp_h__
+#ifndef __GuiEdit_h__
+#define __GuiEdit_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-//////////////////////////////////////////////////////////////////
-
-#include "ImgCommon/ImgCommon.h"
-#include "ImgTypes/ImgTypes.h"
-#include "ImgCoder/ImgCoder.h"
-#include "ImgPainter/ImgPainter.h"
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__ImgExp_h__*/
+class CGuiEdit : public CGuiButton
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiEdit, CGuiButton)
+
+protected:
+	CString m_Edit;
+
+public:
+	CGuiEdit()
+	{
+		// 添加事件对象
+		AddEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC()));
+		pixel_t pix[5] = 
+		{
+			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
+			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
+			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
+			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
+			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM)
+		};
+		SetState(_T("color"), pix);
+	}
+
+public:
+	// 获得控件状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+		if (state)
+		{
+			if (state->sta_typ == _T("edit"))
+				state->sta_arr.Add(&m_Edit);
+			else
+				state = EXP_BASE::GetState(sType, pGC);
+		}
+		return state;
+	}
+	void SetState(const CString& sType, void* pState)
+	{
+		if (!pState) return;
+		if (sType == _T("edit"))
+		{
+			m_Edit = *((CString*)pState);
+			IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+			EXP_BASE::SetState(sType, pState);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiEdit, CGuiButton);
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiEdit_h__*/

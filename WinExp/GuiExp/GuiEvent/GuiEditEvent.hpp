@@ -58,10 +58,11 @@ class CGuiEditEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiEditEvent, IGuiEvent)
 
 protected:
+	bool m_ShiftDown;
 	bool m_bFlicker;
 	UINT_PTR m_uFlicker;
 	IGuiCtrl* m_Ctrl;
-	CString::iterator_t m_iteFlicker;
+	CString::iterator_t m_iteFlicker, m_iteSelect;
 
 	typedef CMapT<UINT_PTR, CGuiEditEvent*> map_t;
 	static map_t s_TimerToEvent;
@@ -77,7 +78,8 @@ protected:
 
 public:
 	CGuiEditEvent()
-		: m_bFlicker(false)
+		: m_ShiftDown(false)
+		, m_bFlicker(false)
 		, m_uFlicker(0)
 		, m_Ctrl(NULL)
 	{}
@@ -134,6 +136,7 @@ public:
 				do 
 				{
 					text->SetString(*edit);
+					if (text->Empty()) break;
 					text->GetAt(ite2) = _T('\0');
 					text->GetSize(tmp_grp, sz);
 					if (sz.cx > point.x)
@@ -146,26 +149,143 @@ public:
 					ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
 				} while(ite2->nIndx > ite1->nIndx);
 
-				m_iteFlicker->nIndx = ite2->nIndx;
+				if (m_ShiftDown)
+				{
+					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+					m_iteSelect->nIndx = ite2->nIndx;
+				}
+				else
+				{
+					m_iteFlicker->nIndx = ite2->nIndx;
+					m_iteSelect = m_iteFlicker;
+				}
 				text->SetString(_T(""));
 				tmp_grp.Delete();
 				ctrl->Refresh();
 			}
 			break;
-		case WM_CHAR:
-			// 字符输入
-			if (wParam != VK_RETURN)
+		case WM_KEYDOWN:
+			// WM_CHAR接收不到的字符输入
+			if (wParam == VK_SHIFT)
+				m_ShiftDown = true;
+			else
 			{
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("edit"), &gc);
 				if (!state) break;
 				CString* edit = (CString*)(((void**)state->sta_arr)[0]);
 				if (!edit) break;
-
 				if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
-				edit->Add((TCHAR)wParam);
-				++m_iteFlicker;
-
+				// 判断字符
+				if (wParam == VK_LEFT)
+				{
+					if (edit->Empty()) break;
+					if (m_ShiftDown)
+					{
+						if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+						--m_iteSelect;
+					}
+					else
+					{
+						--m_iteFlicker;
+						m_iteSelect = m_iteFlicker;
+					}
+				}
+				else
+				if (wParam == VK_RIGHT)
+				{
+					if (edit->Empty()) break;
+					if (m_ShiftDown)
+					{
+						if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+						++m_iteSelect;
+					}
+					else
+					{
+						++m_iteFlicker;
+						m_iteSelect = m_iteFlicker;
+					}
+				}
+				else
+				if (wParam == VK_DELETE)
+				{
+					if (edit->Empty()) break;
+					// 定位选区
+					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+					CString::iterator_t ite1, ite2;
+					if (m_iteSelect->Index() < m_iteFlicker->Index())
+					{
+						ite1 = m_iteSelect;
+						ite2 = m_iteFlicker;
+					}
+					else
+					if (m_iteSelect->Index() > m_iteFlicker->Index())
+					{
+						ite1 = m_iteFlicker;
+						ite2 = m_iteSelect;
+					}
+					else
+						ite1 = ite2 = m_iteFlicker;
+					// 删除选区
+					edit->Del(ite1, ite2->Index() - ite1->Index() + 1);
+					m_iteSelect = m_iteFlicker;
+				}
+				// 刷新界面
+				m_bFlicker = true;
+				ctrl->Refresh();
+			}
+			break;
+		case WM_KEYUP:
+			if (wParam == VK_SHIFT)
+				m_ShiftDown = false;
+			break;
+		case WM_CHAR:
+			// 字符输入
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("edit"), &gc);
+				if (!state) break;
+				CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+				if (!edit) break;
+				if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
+				// 定位选区
+				if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+				CString::iterator_t ite1, ite2;
+				if (m_iteSelect->Index() < m_iteFlicker->Index())
+				{
+					ite1 = m_iteSelect;
+					ite2 = m_iteFlicker;
+				}
+				else
+				if (m_iteSelect->Index() > m_iteFlicker->Index())
+				{
+					ite1 = m_iteFlicker;
+					ite2 = m_iteSelect;
+				}
+				else
+					ite1 = ite2 = m_iteFlicker;
+				// 判断字符
+				if (wParam == VK_BACK)
+				{
+					if (edit->Empty()) break;
+					if (ite1 == ite2)
+					{
+						--m_iteFlicker;
+						edit->Del(m_iteFlicker);
+					}
+					else
+						edit->Del(ite1, ite2->Index() - ite1->Index() + 1);
+				}
+				else
+				if (wParam >= VK_SPACE)
+				{
+					edit->Del(ite1, ite2->Index() - ite1->Index() + 1);
+					m_iteFlicker = ite1;
+					edit->Add((TCHAR)wParam, m_iteFlicker);
+					++m_iteFlicker;
+				}
+				m_iteSelect = m_iteFlicker;
+				// 刷新界面
 				m_bFlicker = true;
 				ctrl->Refresh();
 			}
@@ -177,6 +297,7 @@ public:
 			s_TimerToEvent[m_uFlicker] = this;
 			break;
 		case WM_KILLFOCUS:
+			m_ShiftDown = false;
 			// 失去焦点时隐藏光标
 			if (m_uFlicker == 0) break;
 			::KillTimer(NULL, m_uFlicker);
@@ -200,37 +321,101 @@ public:
 				if (!state) break;
 				CText* text = (CText*)(((void**)state->sta_arr)[status]);
 				if (!text) break;
+				CText tmp_text = (*text);
 
 				state = ctrl->GetState(_T("edit"), &gc);
 				if (!state) break;
 				CString* edit = (CString*)(((void**)state->sta_arr)[0]);
 				if (!edit) break;
 
+				state = ctrl->GetState(_T("txt_sel_color"), &gc);
+				if (!state) break;
+				pixel_t* txt_sel_color = (pixel_t*)(((void**)state->sta_arr)[status]);
+				if (!txt_sel_color) break;
+
+				state = ctrl->GetState(_T("bkg_sel_color"), &gc);
+				if (!state) break;
+				pixel_t* bkg_sel_color = (pixel_t*)(((void**)state->sta_arr)[status]);
+				if (!bkg_sel_color) break;
+
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
 				ctrl->GetClientRect(rect);
 
+				// 定位选区
+				if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+				CString::iterator_t ite1, ite2;
+				if (m_iteSelect->Index() < m_iteFlicker->Index())
+				{
+					ite1 = m_iteSelect;
+					ite2 = m_iteFlicker;
+				}
+				else
+				if (m_iteSelect->Index() > m_iteFlicker->Index())
+				{
+					ite1 = m_iteFlicker;
+					ite2 = m_iteSelect;
+				}
+				else
+					ite1 = ite2 = m_iteFlicker;
+				CSize sz_off, sz_sel;
+				if (ite1 != ite2)
+				{
+					CGraph tmp_grp;
+					tmp_grp.Create();
+
+					tmp_text.SetString(*edit);
+					tmp_text[ite1] = _T('\0');
+					tmp_text.GetSize(tmp_grp, sz_off);
+
+					tmp_text.SetString(*edit);
+					tmp_text[ite2] = _T('\0');
+					tmp_text.Del(tmp_text.Head(), ite1->Index() + 1);
+					tmp_text.GetSize(tmp_grp, sz_sel);
+
+					tmp_grp.Delete();
+				}
+
 				// 绘文字
-				text->SetString(*edit);
-				CImage txt_img(text->GetImage());
-				if (!txt_img.IsNull())
+				tmp_text.SetString(*edit);
+				CImage txt_img(tmp_text.GetImage());
+				if(!txt_img.IsNull())
+				{
+					CRect sel_rc(sz_off.cx, 0, sz_off.cx + sz_sel.cx, sz_sel.cy);
+					CPoint sel_pt(sz_off.cx, 0);
+					if (!sel_rc.IsEmpty())
+					{
+						CImgRenderer::Render
+							(
+							txt_img, txt_img, 
+							sel_rc, sel_pt, 
+							&CFilterFillT<CFilterCopy>(*txt_sel_color, 0xf, true)
+							);
+						CImgRenderer::Render
+							(
+							txt_img, txt_img, 
+							sel_rc, sel_pt, 
+							&CFilterFillT<CFilterCopy>(*bkg_sel_color, 0xf, true, tmp_text.GetColor())
+							);
+					}
 					CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint());
+				}
 
 				// 绘光标
 				if (m_bFlicker)
 				{
 					// 获得光标高度
-					text->SetString(_T("lq"));
+					tmp_text.SetString(_T("lq"));
 					CGraph tmp_grp;
 					tmp_grp.Create();
 					CSize sz_flk;
-					text->GetSize(tmp_grp, sz_flk);
+					tmp_text.GetSize(tmp_grp, sz_flk);
 					// 获得文字宽度
-					text->SetString(*edit);
-					text->GetAt(m_iteFlicker->nIndx) = _T('\0');
+					tmp_text.SetString(*edit);
+					tmp_text.GetAt(m_iteFlicker->nIndx) = _T('\0');
 					CSize sz_txt;
-					text->GetSize(tmp_grp, sz_txt);
+					tmp_text.GetSize(tmp_grp, sz_txt);
 					tmp_grp.Delete();
 					// 画线
 					CImgDrawer::Line(
@@ -238,7 +423,6 @@ public:
 						CLine(sz_txt.cx, 0, sz_txt.cx, sz_flk.cy), 
 						ExRGBA(0, 0, 0, EXP_CM));
 				}
-				text->SetString(_T(""));
 			}
 			break;
 		}

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="TestGui1 - Btn+Pic"
-	ProjectGUID="{31C9A933-1B5E-4CA2-9C0D-89DC33D7BF14}"
-	RootNamespace="TestGui1"
+	Name="TestGui2 - Edit"
+	ProjectGUID="{FC7C5606-4E29-4321-8408-396B9B99EC7B}"
+	RootNamespace="TestGui2"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -193,7 +193,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TestGui1.cpp"
+				RelativePath=".\TestGui2.cpp"
 				>
 			</File>
 		</Filter>
@@ -210,10 +210,6 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TestGui1.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="资源文件"
@@ -225,11 +221,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TestGui1.ico"
+				RelativePath=".\TestGui2.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\TestGui1.rc"
+				RelativePath=".\TestGui2.rc"
 				>
 			</File>
 		</Filter>

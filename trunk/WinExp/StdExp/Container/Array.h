@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-12
-// Version:	1.0.0017.0035
+// Date:	2011-06-27
+// Version:	1.0.0018.1520
 //
 // History:
 //	- 1.0.0015.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -42,6 +42,7 @@
 //	- 1.0.0016.2202(2011-05-10)	# 修正bool operator==()与bool operator!=()在对指针做比较时无法通过编译的问题
 //	- 1.0.0017.0035(2011-05-12)	= 调整bool operator==()与bool operator!=()的内部实现,支持对整个CArrayT做比较
 //								- 移除CArrayT中直接与指针做比较的接口
+//	- 1.0.0018.1520(2011-06-27)	# 修正当CArrayT的迭代器走到上/下限时可以继续移动的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Array_h__
@@ -351,8 +352,8 @@ struct _ArrayPolicyT
 		bool operator!=(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
 
-		void Next(long nOff = 1) { nIndx += nOff; }
-		void Prev(long nOff = 1) { nIndx -= nOff; }
+		void Next(long nOff = 1) { if (nIndx < pCont->Tail()->Index()) nIndx += nOff; }
+		void Prev(long nOff = 1) { if (nIndx > pCont->Head()->Index()) nIndx -= nOff; }
 	};
 
 	static const DWORD DEF_SIZE = 0;

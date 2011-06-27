@@ -372,10 +372,9 @@ public:
 
 	bool Del(iterator_t& Iter, DWORD nLen = 1)
 	{
-		if (Iter->Index() >= Tail()->Index()) return true;
-		if (nLen == 0) return true;
-		if (Empty()) return true;
-		if (!(Iter->InThis(this))) return false;
+		if (Iter->Index() >= Tail()->Index()) return false;
+		if (nLen == 0 || Empty()) return true;
+		if(!(Iter->InThis(this))) return false;
 		// ¶¨Î»ÇøÓò
 		if (Iter->Index() + nLen > GetCount())
 			nLen = GetCount() - Iter->Index();
@@ -397,42 +396,8 @@ typedef CStringT<> CString;
 //////////////////////////////////////////////////////////////////
 
 template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _StringPolicyT
-{
-	typedef AllocT alloc_t;
-
-	template <typename ContainerT>
-	struct node_t
-	{
-		typedef ContainerT container_t;
-		typedef typename container_t::type_t type_t;
-
-		container_t* pCont;
-		DWORD	nIndx;
-
-		node_t(container_t* p = NULL)
-			: pCont(p)
-			, nIndx(0)
-		{}
-
-		type_t& Val() { return pCont->GetAt(nIndx); }
-
-		bool InThis(container_t* cnt) { return pCont == cnt; }
-		DWORD Index() { return nIndx; }
-
-		bool operator==(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		bool operator!=(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
-
-		void Next(long nOff = 1) { nIndx += nOff; }
-		void Prev(long nOff = 1) { nIndx -= nOff; }
-	};
-
-	static const DWORD DEF_SIZE = 0;
-	static DWORD Expan(DWORD nSize)
-	{ return nSize ? (nSize << 1) : 1; }
-};
+struct _StringPolicyT : public _ArrayPolicyT<AllocT>
+{};
 
 //////////////////////////////////////////////////////////////////
 

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-21
-// Version:	1.0.0000.1030
+// Date:	2011-06-27
+// Version:	1.0.0001.1615
 //
 // History:
 //	- 1.0.0000.1030(2011-06-21)	@ 开始构建GuiEdit
+//	- 1.0.0001.1615(2011-06-27)	+ 添加txt_sel_color与bkg_sel_color属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEdit_h__
@@ -57,21 +58,24 @@ class CGuiEdit : public CGuiButton
 
 protected:
 	CString m_Edit;
+	pixel_t m_ColorSelTxt[5];
+	pixel_t m_ColorSelBkg[5];
 
 public:
 	CGuiEdit()
 	{
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC()));
-		pixel_t pix[5] = 
-		{
-			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
-			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
-			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
-			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
-			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM)
-		};
+		pixel_t pix[5] = {0};
+		for(int i = 0; i < _countof(pix); ++i)
+			pix[i] = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
 		SetState(_T("color"), pix);
+		for(int i = 0; i < _countof(pix); ++i)
+			pix[i] = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
+		SetState(_T("txt_sel_color"), pix);
+		for(int i = 0; i < _countof(pix); ++i)
+			pix[i] = ExRGBA(51, 153, EXP_CM, EXP_CM);
+		SetState(_T("bkg_sel_color"), pix);
 	}
 
 public:
@@ -84,6 +88,14 @@ public:
 			if (state->sta_typ == _T("edit"))
 				state->sta_arr.Add(&m_Edit);
 			else
+			if (state->sta_typ == _T("txt_sel_color"))
+				for(int i = 0; i < _countof(m_ColorSelTxt); ++i)
+					state->sta_arr.Add(m_Color + i);
+			else
+			if (state->sta_typ == _T("bkg_sel_color"))
+				for(int i = 0; i < _countof(m_ColorSelBkg); ++i)
+					state->sta_arr.Add(m_Color + i);
+			else
 				state = EXP_BASE::GetState(sType, pGC);
 		}
 		return state;
@@ -94,6 +106,20 @@ public:
 		if (sType == _T("edit"))
 		{
 			m_Edit = *((CString*)pState);
+			IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("txt_sel_color"))
+		{
+			for(int i = 0; i < _countof(m_ColorSelTxt); ++i)
+				m_ColorSelTxt[i] = *((pixel_t*)pState + i);
+			IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("bkg_sel_color"))
+		{
+			for(int i = 0; i < _countof(m_ColorSelBkg); ++i)
+				m_ColorSelBkg[i] = *((pixel_t*)pState + i);
 			IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

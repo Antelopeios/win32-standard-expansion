@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-24
-// Version:	1.0.0020.1817
+// Date:	2011-06-28
+// Version:	1.0.0021.1755
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -47,6 +47,7 @@
 //								# 修正CStringT::operator+=()可能导致路径递归的问题
 //								+ 支持CStringT::operator[]()支持由迭代器获取值
 //	- 1.0.0020.1817(2011-06-24)	# 修正CStringT::AddString()无法向字符串末尾添加字符的问题
+//	- 1.0.0021.1755(2011-06-28)	# 修正CStringT::AddString()在针对字符串添加时包含了待添加字符串的结尾'\0'符,导致结果被意外截断的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -361,7 +362,7 @@ public:
 	bool AddString(const TypeT (&aString)[SizeT])
 	{ return AddString<SizeT>(aString, Tail()); }
 	bool AddString(const CStringT& String, iterator_t& Iter)
-	{ return AddString(String, String.GetCount(), Iter); }
+	{ return AddString(String, String.GetLength(), Iter); }
 	bool AddString(const CStringT& String)
 	{ return AddString(String, Tail()); }
 

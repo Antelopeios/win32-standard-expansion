@@ -61,7 +61,7 @@ protected:
 	bool m_ShiftDown, m_CtrlDown, m_MouseDown, m_bFlicker;
 	UINT_PTR m_uFlicker;
 	IGuiCtrl* m_Ctrl;
-	CString::iterator_t m_iteFlicker, m_iteSelect;
+	CString::iterator_t m_iteFlicker, m_iteSelect, m_iteOffset;
 
 	typedef CMapT<UINT_PTR, CGuiEditEvent*> map_t;
 	static map_t s_TimerToEvent;
@@ -88,6 +88,104 @@ public:
 	{ ShowFlicker(false); }
 
 public:
+	// 获得属性
+	DWORD GetStatus(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("status"), pGC);
+		if (!state) return 0;
+		DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+		if (m_Ctrl->IsFocus() && status == 0) status = 3;
+		if (!m_Ctrl->IsEnabled()) status = 4;
+		return status;
+	}
+	CText* GetText(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
+		if (!state) return NULL;
+		CText* text = (CText*)(((void**)state->sta_arr)[GetStatus(pGC)]);
+		if (!text) return NULL;
+		return text;
+	}
+	CString* GetEdit(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
+		if (!state) return NULL;
+		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		if (!edit) return NULL;
+		return edit;
+	}
+
+	// 获得显示的文本内容
+	CString* GetShowEdit(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+
+		// 获得属性
+		CText* text = GetText(pGC);
+		if (!text) return NULL;
+		CString* edit = GetEdit(pGC);
+		if (!edit) return NULL;
+		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
+		static CString show;
+		show = ((LPCTSTR)(*edit) + m_iteOffset->Index());
+
+		// 获得显示区域
+		CRect rect;
+		m_Ctrl->GetClientRect(rect);
+
+		// 获得能显示的文本区域
+		CString::iterator_t ite1 = text->Head(), ite2 = text->Head(), ite3 = text->Head();
+		ite1->nIndx = m_iteOffset->Index();
+		ite3->nIndx = edit->Tail()->nIndx;
+		ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
+
+		CGraph tmp_grp;
+		tmp_grp.Create();
+		CSize sz;
+
+		text->SetString(show);
+		if (text->Empty()) return NULL;
+		text->GetSize(tmp_grp, sz);
+		if (sz.cx < rect.Width())
+			ite2->nIndx = ite3->nIndx;
+		else
+		do
+		{
+			text->SetString(show);
+			if (text->Empty()) break;
+			text->GetAt(ite2) = _T('\0');
+			text->GetSize(tmp_grp, sz);
+			if (sz.cx > rect.Width())
+				ite3->nIndx = ite2->nIndx;
+			else
+			if (sz.cx < rect.Width())
+				ite1->nIndx = ite2->nIndx;
+			else
+				break;
+			ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
+		} while(ite2->nIndx > ite1->nIndx);
+		text->SetString(_T(""));
+		tmp_grp.Delete();
+
+		// 定位区域
+		show.GetAt(ite2->nIndx) = _T('\0');
+		return &show;
+	}
+
+	// 偏移显示位置
+	void OffsetShow()
+	{
+		if (m_iteFlicker->Index() > m_iteOffset->Index())
+		{
+		}
+		else
+		if (m_iteFlicker->Index() < m_iteOffset->Index())
+			m_iteOffset = m_iteFlicker;
+	}
+
 	// 光标显示
 	void ShowFlicker(bool bShow)
 	{
@@ -115,20 +213,9 @@ public:
 		CGC gc;
 
 		// 获得属性
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("status"), &gc);
-		if (!state) return;
-		DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
-		if (m_Ctrl->IsFocus() && status == 0) status = 3;
-		if (!m_Ctrl->IsEnabled()) status = 4;
-
-		state = m_Ctrl->GetState(_T("text"), &gc);
-		if (!state) return;
-		CText* text = (CText*)(((void**)state->sta_arr)[status]);
+		CText* text = GetText(&gc);
 		if (!text) return;
-
-		state = m_Ctrl->GetState(_T("edit"), &gc);
-		if (!state) return;
-		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		CString* edit = GetEdit(&gc);
 		if (!edit) return;
 
 		// 搜索字符位置
@@ -147,7 +234,7 @@ public:
 		if (sz.cx < point.x)
 			ite2->nIndx = ite3->nIndx;
 		else
-		do 
+		do
 		{
 			text->SetString(*edit);
 			if (text->Empty()) break;
@@ -201,13 +288,9 @@ public:
 	{
 		ExAssert(m_Ctrl);
 		CGC gc;
-
 		// 获得属性
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), &gc);
-		if (!state) return;
-		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		CString* edit = GetEdit(&gc);
 		if (!edit) return;
-
 		// 全选文本
 		m_iteSelect = edit->Head();
 		m_iteFlicker = edit->Tail();
@@ -228,9 +311,7 @@ public:
 			CGC gc;
 
 			// 获得属性
-			IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), &gc);
-			if (!state) return;
-			CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+			CString* edit = GetEdit(&gc);
 			if (!edit) return;
 			if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
 
@@ -384,9 +465,7 @@ public:
 		CGC gc;
 
 		// 获得属性
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), &gc);
-		if (!state) return;
-		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		CString* edit = GetEdit(&gc);
 		if (!edit) return;
 		if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
 
@@ -541,7 +620,14 @@ public:
 		// 处理消息
 		switch( nMessage )
 		{
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_IBEAM));
+			break;
 		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_IBEAM));
 			m_Ctrl->SetCapture();
 			// 鼠标点击时定位光标
 			{
@@ -551,10 +637,12 @@ public:
 			m_MouseDown = true;
 			break;
 		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_IBEAM));
 			m_MouseDown = false;
 			m_Ctrl->ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_IBEAM));
 			// 鼠标移动时定位光标
 			if (m_MouseDown)
 			{

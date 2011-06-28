@@ -90,11 +90,11 @@ public:
 			else
 			if (state->sta_typ == _T("txt_sel_color"))
 				for(int i = 0; i < _countof(m_ColorSelTxt); ++i)
-					state->sta_arr.Add(m_Color + i);
+					state->sta_arr.Add(m_ColorSelTxt + i);
 			else
 			if (state->sta_typ == _T("bkg_sel_color"))
 				for(int i = 0; i < _countof(m_ColorSelBkg); ++i)
-					state->sta_arr.Add(m_Color + i);
+					state->sta_arr.Add(m_ColorSelBkg + i);
 			else
 				state = EXP_BASE::GetState(sType, pGC);
 		}

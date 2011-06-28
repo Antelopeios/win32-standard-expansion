@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0002.0047
+// Date:	2011-06-28
+// Version:	1.0.0003.1544
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
+//	- 1.0.0003.1544(2011-06-28)	+ 添加事件捕获接口,支持针对一个IGuiBase设置捕获所有的事件
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -58,6 +59,8 @@ interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
 
 protected:
 	CGC* m_GC;
+
+	static IGuiBase* s_pCapture;
 
 public:
 	IGuiBase()
@@ -105,6 +108,22 @@ public:
 	void Free() { EXP_MULT::Free(); }
 
 	virtual wnd_t GethWnd() = 0;
+
+	// 设置事件捕获
+	void SetCapture()
+	{
+		::SetCapture(GethWnd());
+		s_pCapture = this;
+	}
+	static IGuiBase* GetCapture()
+	{
+		return s_pCapture;
+	}
+	void ReleaseCapture()
+	{
+		s_pCapture = NULL;
+		::ReleaseCapture();
+	}
 };
 
 //////////////////////////////////////////////////////////////////

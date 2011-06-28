@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-22
-// Version:	1.0.0008.1654
+// Date:	2011-06-28
+// Version:	1.0.0009.1630
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -46,6 +46,8 @@
 //	- 1.0.0006.1616(2011-06-09)	# 采用三缓冲绘图修正控件的子控件在半透明贴图时出现的颜色失真
 //	- 1.0.0007.1232(2011-06-14)	# 当程序退出CGuiWndEvent的静态变量均析构后,MouseLeaveCheck仍然被调用导致内存访问异常的问题
 //	- 1.0.0008.1654(2011-06-22)	# 修正GuiWndEvent没有向子控件通知焦点改变事件的问题
+//	- 1.0.0009.1630(2011-06-28)	# 修正GuiWndEvent无法向下发送WM_SHOWWINDOW消息的问题
+//								+ 添加事件捕获支持,允许控件设置所有消息的捕获
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -104,11 +106,15 @@ protected:
 			nMessage <= WM_NCMBUTTONDBLCLK || 
 			nMessage == WM_NCHITTEST)
 		{
-			POINT pt_tmp = {0};
-			::GetCursorPos(&pt_tmp);
-			CPoint pt(pt_tmp);
-			pGui->ScreenToClient(pt);
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(IGuiBase::GetCapture());
+			if (!ctrl)
+			{
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp);
+				CPoint pt(pt_tmp);
+				pGui->ScreenToClient(pt);
+				ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
+			}
 			switch (nMessage)
 			{
 				// 预存鼠标移动
@@ -318,6 +324,7 @@ public:
 				if (s_MLCheckID == 0)
 					s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
 				++s_MLCheckCT;
+				ret = WndSend(board, nMessage, wParam, lParam);
 				break;
 			case WM_PAINT:
 				{

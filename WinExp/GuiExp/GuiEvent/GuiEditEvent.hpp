@@ -85,14 +85,30 @@ public:
 		, m_Ctrl(NULL)
 	{}
 	~CGuiEditEvent()
-	{
-		if (m_uFlicker == 0) return;
-		::KillTimer(NULL, m_uFlicker);
-		s_TimerToEvent.Del(m_uFlicker);
-	}
+	{ ShowFlicker(false); }
 
 public:
-	//根据坐标定位光标
+	// 光标显示
+	void ShowFlicker(bool bShow)
+	{
+		if (bShow)
+		{
+			if (m_uFlicker != 0) return;
+			m_uFlicker = ::SetTimer(NULL, 0, 500, FlickerTimer);
+			s_TimerToEvent[m_uFlicker] = this;
+			m_bFlicker = true;
+		}
+		else
+		{
+			if (m_uFlicker == 0) return;
+			m_bFlicker = false;
+			::KillTimer(NULL, m_uFlicker);
+			s_TimerToEvent.Del(m_uFlicker);
+			m_uFlicker = 0;
+		}
+	}
+
+	// 根据坐标定位光标
 	void PosFlicker(const CPoint& point)
 	{
 		ExAssert(m_Ctrl);
@@ -197,17 +213,336 @@ public:
 		m_iteFlicker = edit->Tail();
 	}
 
+	// 按键输入
+	void OnKey(TCHAR cInput)
+	{
+		ExAssert(m_Ctrl);
+
+		if (cInput == VK_SHIFT)
+			m_ShiftDown = true;
+		else
+		if (cInput == VK_CONTROL)
+			m_CtrlDown = true;
+		else
+		{
+			CGC gc;
+
+			// 获得属性
+			IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), &gc);
+			if (!state) return;
+			CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+			if (!edit) return;
+			if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
+
+			// 判断字符
+			if (cInput == VK_HOME)
+			{
+				if (edit->Empty()) return;
+				m_iteSelect = m_iteFlicker = edit->Head();
+			}
+			else
+			if (cInput == VK_END)
+			{
+				if (edit->Empty()) return;
+				m_iteSelect = m_iteFlicker = edit->Tail();
+			}
+			else
+			if (cInput == VK_LEFT)
+			{
+				if (edit->Empty()) return;
+				if (m_ShiftDown)
+				{
+					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+					--m_iteFlicker;
+				}
+				else
+				{
+					--m_iteFlicker;
+					m_iteSelect = m_iteFlicker;
+				}
+			}
+			else
+			if (cInput == VK_RIGHT)
+			{
+				if (edit->Empty()) return;
+				if (m_ShiftDown)
+				{
+					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+					++m_iteFlicker;
+				}
+				else
+				{
+					++m_iteFlicker;
+					m_iteSelect = m_iteFlicker;
+				}
+			}
+			else
+			if (cInput == VK_DELETE)
+			{
+				if (edit->Empty()) return;
+				// 定位选区
+				if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+				CString::iterator_t ite1, ite2;
+				PosSelect(ite1, ite2);
+				// 删除选区
+				if (ite1 == ite2)
+					edit->Del(ite1);
+				else
+					edit->Del(ite1, ite2->Index() - ite1->Index());
+				m_iteSelect = m_iteFlicker = ite1;
+			}
+			else
+			if (m_CtrlDown)
+			{
+				if (cInput == 'C')
+				{
+					// 获得选区
+					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+					CString::iterator_t ite1, ite2;
+					PosSelect(ite1, ite2);
+					if (ite1 == ite2) return;
+					// 拷贝选区文本
+					CString temp(((LPCTSTR)(*edit)) + ite1->Index());
+					temp[ite2->Index()] = _T('\0');
+					// 操作剪切板
+					if (!::OpenClipboard(NULL)) return;
+					::EmptyClipboard();
+					SIZE_T siz_buf = (temp.GetLength() + 1) * sizeof(TCHAR);
+					HGLOBAL clp_buf = ::GlobalAlloc(GMEM_DDESHARE, siz_buf);
+					TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
+					StringCchCopy(buff, temp.GetLength() + 1, (LPCTSTR)temp);
+					::GlobalUnlock(clp_buf);
+					::SetClipboardData(CF_UNICODETEXT, clp_buf);
+					::CloseClipboard();
+				}
+				else
+				if (cInput == 'V')
+				{
+					if (!::OpenClipboard(NULL)) return;
+					HGLOBAL clp_buf = GetClipboardData(CF_UNICODETEXT);
+					if (clp_buf)
+					{
+						TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
+						if (buff)
+						{
+							if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+							CString::iterator_t ite1, ite2;
+							PosSelect(ite1, ite2);
+							// 添加文本
+							edit->Del(ite1, ite2->Index() - ite1->Index());
+							edit->AddString(buff, ite1);
+							m_iteSelect = ite1;
+							m_iteFlicker = ite1 += _tcslen(buff);
+							// 解锁句柄
+							::GlobalUnlock(clp_buf);
+						}
+					}
+					::CloseClipboard();
+				}
+				else
+				if (cInput == 'X')
+				{
+					// 获得选区
+					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+					CString::iterator_t ite1, ite2;
+					PosSelect(ite1, ite2);
+					if (ite1 == ite2) return;
+					// 拷贝选区文本
+					CString temp(((LPCTSTR)(*edit)) + ite1->Index());
+					temp[ite2->Index()] = _T('\0');
+					// 操作剪切板
+					if (!::OpenClipboard(NULL)) return;
+					::EmptyClipboard();
+					SIZE_T siz_buf = (temp.GetLength() + 1) * sizeof(TCHAR);
+					HGLOBAL clp_buf = ::GlobalAlloc(GMEM_DDESHARE, siz_buf);
+					TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
+					StringCchCopy(buff, temp.GetLength() + 1, (LPCTSTR)temp);
+					::GlobalUnlock(clp_buf);
+					::SetClipboardData(CF_UNICODETEXT, clp_buf);
+					::CloseClipboard();
+					// 删除选区内容
+					edit->Del(ite1, ite2->Index() - ite1->Index());
+					m_iteSelect = m_iteFlicker = ite1;
+				}
+				else
+				if (cInput == 'A')
+				{
+					SelectAll();
+				}
+			}
+
+			// 刷新界面
+			m_bFlicker = true;
+			m_Ctrl->Refresh();
+		}
+	}
+
+	// 字符输入
+	void OnChar(TCHAR cInput)
+	{
+		ExAssert(m_Ctrl);
+		CGC gc;
+
+		// 获得属性
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), &gc);
+		if (!state) return;
+		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		if (!edit) return;
+		if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
+
+		// 判断字符
+		if (cInput == VK_BACK)
+		{
+			if (edit->Empty()) return;
+			// 定位选区
+			if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+			CString::iterator_t ite1, ite2;
+			PosSelect(ite1, ite2);
+			// 删除选区
+			if (ite1 == ite2)
+				edit->Del(--ite1);
+			else
+				edit->Del(ite1, ite2->Index() - ite1->Index());
+			m_iteSelect = m_iteFlicker = ite1;
+		}
+		else
+		if (cInput >= VK_SPACE)
+		{
+			// 定位选区
+			if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+			CString::iterator_t ite1, ite2;
+			PosSelect(ite1, ite2);
+			// 添加字符
+			edit->Del(ite1, ite2->Index() - ite1->Index());
+			edit->Add(cInput, ite1);
+			++ite1; /*此处若在上面使用ite1++,当输入第一个字符之前edit为空,则++运算将被忽略*/
+			m_iteSelect = m_iteFlicker = ite1;
+		}
+
+		// 刷新界面
+		m_bFlicker = true;
+		m_Ctrl->Refresh();
+	}
+
+	// 界面绘图
+	void OnPaint(CImage* mem_img)
+	{
+		ExAssert(m_Ctrl);
+		if (!mem_img || mem_img->IsNull()) return;
+		CGC gc;
+
+		// 获得属性
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("status"), &gc);
+		if (!state) return;
+		DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+		if (m_Ctrl->IsFocus() && status == 0) status = 3;
+		if (!m_Ctrl->IsEnabled()) status = 4;
+
+		state = m_Ctrl->GetState(_T("text"), &gc);
+		if (!state) return;
+		CText* text = (CText*)(((void**)state->sta_arr)[status]);
+		if (!text) return;
+		CText tmp_text = (*text);
+
+		state = m_Ctrl->GetState(_T("edit"), &gc);
+		if (!state) return;
+		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		if (!edit) return;
+
+		state = m_Ctrl->GetState(_T("txt_sel_color"), &gc);
+		if (!state) return;
+		pixel_t txt_sel_color = *(pixel_t*)(((void**)state->sta_arr)[status]);
+
+		state = m_Ctrl->GetState(_T("bkg_sel_color"), &gc);
+		if (!state) return;
+		pixel_t bkg_sel_color = *(pixel_t*)(((void**)state->sta_arr)[status]);
+
+		CRect rect;
+		m_Ctrl->GetClientRect(rect);
+
+		// 定位选区
+		if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
+		CString::iterator_t ite1, ite2;
+		PosSelect(ite1, ite2);
+		CSize sz_off, sz_sel;
+		if (ite1 != ite2)
+		{
+			CGraph tmp_grp;
+			tmp_grp.Create();
+
+			tmp_text.SetString(*edit);
+			tmp_text[ite1->Index()] = _T('\0');
+			tmp_text.GetSize(tmp_grp, sz_off);
+
+			tmp_text.SetString(*edit);
+			tmp_text[ite2->Index()] = _T('\0');
+			tmp_text.Del(tmp_text.Head(), ite1->Index());
+			tmp_text.GetSize(tmp_grp, sz_sel);
+
+			tmp_grp.Delete();
+		}
+
+		// 绘文字
+		tmp_text.SetString(*edit);
+		CImage txt_img(tmp_text.GetImage());
+		if(!txt_img.IsNull())
+		{
+			CRect sel_rc(sz_off.cx, 0, sz_off.cx + sz_sel.cx, sz_sel.cy);
+			CPoint sel_pt(sz_off.cx, 0);
+			if (!sel_rc.IsEmpty())
+			{
+				CImgRenderer::Render
+					(
+					txt_img, txt_img, 
+					sel_rc, sel_pt, 
+					&CFilterFillT<CFilterCopy>(ExRevColor(txt_sel_color), 0xf, true)
+					);
+				CImgRenderer::Render
+					(
+					txt_img, txt_img, 
+					sel_rc, sel_pt, 
+					&CFilterFillT<CFilterCopy>(ExRevColor(bkg_sel_color), 0xf, true, txt_sel_color)
+					);
+			}
+			CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint());
+		}
+
+		// 绘光标
+		if (m_bFlicker)
+		{
+			// 获得光标高度
+			tmp_text.SetString(_T("lq"));
+			CGraph tmp_grp;
+			tmp_grp.Create();
+			CSize sz_flk;
+			tmp_text.GetSize(tmp_grp, sz_flk);
+			// 获得文字宽度
+			tmp_text.SetString(*edit);
+			tmp_text.GetAt(m_iteFlicker->Index()) = _T('\0');
+			CSize sz_txt;
+			tmp_text.GetSize(tmp_grp, sz_txt);
+			tmp_grp.Delete();
+			// 画线
+			CImgDrawer::Line
+				(
+				mem_img->Get(), 
+				CLine(sz_txt.cx, 0, sz_txt.cx, sz_flk.cy), 
+				ExRGBA(0, 0, 0, EXP_CM)
+				);
+		}
+	}
+
+	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
-		m_Ctrl = ctrl;
+		m_Ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!m_Ctrl) return;
 
 		// 处理消息
 		switch( nMessage )
 		{
 		case WM_LBUTTONDOWN:
-			ctrl->SetCapture();
+			m_Ctrl->SetCapture();
 			// 鼠标点击时定位光标
 			{
 				CPoint point(ExLoWord(lParam), ExHiWord(lParam));
@@ -217,7 +552,7 @@ public:
 			break;
 		case WM_LBUTTONUP:
 			m_MouseDown = false;
-			ctrl->ReleaseCapture();
+			m_Ctrl->ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
 			// 鼠标移动时定位光标
@@ -231,160 +566,6 @@ public:
 			// 双击全选
 			SelectAll();
 			break;
-		case WM_KEYDOWN:
-			// WM_CHAR接收不到的字符输入
-			if (wParam == VK_SHIFT)
-				m_ShiftDown = true;
-			else
-			if (wParam == VK_CONTROL)
-				m_CtrlDown = true;
-			else
-			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("edit"), &gc);
-				if (!state) break;
-				CString* edit = (CString*)(((void**)state->sta_arr)[0]);
-				if (!edit) break;
-				if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
-				// 判断字符
-				if (wParam == VK_LEFT)
-				{
-					if (edit->Empty()) break;
-					if (m_ShiftDown)
-					{
-						if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-						--m_iteFlicker;
-					}
-					else
-					{
-						--m_iteFlicker;
-						m_iteSelect = m_iteFlicker;
-					}
-				}
-				else
-				if (wParam == VK_RIGHT)
-				{
-					if (edit->Empty()) break;
-					if (m_ShiftDown)
-					{
-						if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-						++m_iteFlicker;
-					}
-					else
-					{
-						++m_iteFlicker;
-						m_iteSelect = m_iteFlicker;
-					}
-				}
-				else
-				if (wParam == VK_DELETE)
-				{
-					if (edit->Empty()) break;
-					// 定位选区
-					if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-					CString::iterator_t ite1, ite2;
-					PosSelect(ite1, ite2);
-					// 删除选区
-					if (ite1 == ite2)
-						edit->Del(ite1);
-					else
-						edit->Del(ite1, ite2->Index() - ite1->Index());
-					m_iteSelect = m_iteFlicker = ite1;
-				}
-				else
-				if (m_CtrlDown)
-				{
-					if (wParam == 'C')
-					{
-						// 获得选区
-						if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-						CString::iterator_t ite1, ite2;
-						PosSelect(ite1, ite2);
-						if (ite1 != ite2)
-						{
-							// 拷贝选区文本
-							CString temp(((LPCTSTR)(*edit)) + ite1->Index());
-							temp[ite2->Index()] = _T('\0');
-							if (::OpenClipboard(NULL))
-							{
-								// 操作剪切板
-								::EmptyClipboard();
-								SIZE_T siz_buf = (temp.GetLength() + 1) * sizeof(TCHAR);
-								HGLOBAL clp_buf = ::GlobalAlloc(GMEM_DDESHARE, siz_buf);
-								TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
-								StringCchCopy(buff, temp.GetLength() + 1, (LPCTSTR)temp);
-								::GlobalUnlock(clp_buf);
-								::SetClipboardData(CF_UNICODETEXT, clp_buf);
-								::CloseClipboard();
-							}
-						}
-					}
-					else
-					if (wParam == 'V')
-					{
-						if (::OpenClipboard(NULL))
-						{
-							HGLOBAL clp_buf = GetClipboardData(CF_UNICODETEXT);
-							if (clp_buf)
-							{
-								TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
-								if (buff)
-								{
-									if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-									CString::iterator_t ite1, ite2;
-									PosSelect(ite1, ite2);
-									// 设置文字
-									edit->Del(ite1, ite2->Index() - ite1->Index());
-									m_iteFlicker = ite1;
-									edit->AddString(buff, m_iteFlicker);
-									m_iteFlicker += _tcslen(buff);
-									// 解锁句柄
-									::GlobalUnlock(clp_buf);
-								}
-							}
-							::CloseClipboard();
-						}
-					}
-					else
-					if (wParam == 'X')
-					{
-						// 获得选区
-						if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-						CString::iterator_t ite1, ite2;
-						PosSelect(ite1, ite2);
-						if (ite1 != ite2)
-						{
-							// 拷贝选区文本
-							CString temp(((LPCTSTR)(*edit)) + ite1->Index());
-							temp[ite2->Index()] = _T('\0');
-							if (::OpenClipboard(NULL))
-							{
-								// 操作剪切板
-								::EmptyClipboard();
-								SIZE_T siz_buf = (temp.GetLength() + 1) * sizeof(TCHAR);
-								HGLOBAL clp_buf = ::GlobalAlloc(GMEM_DDESHARE, siz_buf);
-								TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
-								StringCchCopy(buff, temp.GetLength() + 1, (LPCTSTR)temp);
-								::GlobalUnlock(clp_buf);
-								::SetClipboardData(CF_UNICODETEXT, clp_buf);
-								::CloseClipboard();
-							}
-							// 删除选区内容
-							edit->Del(ite1, ite2->Index() - ite1->Index());
-							m_iteSelect = m_iteFlicker = ite1;
-						}
-					}
-					else
-					if (wParam == 'A')
-					{
-						SelectAll();
-					}
-				}
-				// 刷新界面
-				m_bFlicker = true;
-				ctrl->Refresh();
-			}
-			break;
 		case WM_KEYUP:
 			if (wParam == VK_SHIFT)
 				m_ShiftDown = false;
@@ -392,173 +573,28 @@ public:
 			if (wParam == VK_CONTROL)
 				m_CtrlDown = false;
 			break;
+		case WM_KEYDOWN:
+			// 按键输入
+			OnKey((TCHAR)wParam);
+			break;
 		case WM_CHAR:
 			// 字符输入
-			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("edit"), &gc);
-				if (!state) break;
-				CString* edit = (CString*)(((void**)state->sta_arr)[0]);
-				if (!edit) break;
-				if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
-				// 定位选区
-				if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-				CString::iterator_t ite1, ite2;
-				PosSelect(ite1, ite2);
-				// 判断字符
-				if (wParam == VK_BACK)
-				{
-					if (edit->Empty()) break;
-					if (ite1 == ite2)
-					{
-						--m_iteFlicker;
-						edit->Del(m_iteFlicker);
-					}
-					else
-					{
-						edit->Del(ite1, ite2->Index() - ite1->Index());
-						m_iteFlicker = ite1;
-					}
-				}
-				else
-				if (wParam >= VK_SPACE)
-				{
-					edit->Del(ite1, ite2->Index() - ite1->Index());
-					m_iteFlicker = ite1;
-					edit->Add((TCHAR)wParam, m_iteFlicker);
-					++m_iteFlicker;
-				}
-				m_iteSelect = m_iteFlicker;
-				// 刷新界面
-				m_bFlicker = true;
-				ctrl->Refresh();
-			}
+			OnChar((TCHAR)wParam);
 			break;
 		case WM_SETFOCUS:
 			// 获得焦点时显示光标
-			if (m_uFlicker != 0) break;
-			m_uFlicker = ::SetTimer(NULL, 0, 500, FlickerTimer);
-			s_TimerToEvent[m_uFlicker] = this;
+			ShowFlicker(true);
 			break;
 		case WM_KILLFOCUS:
 			m_ShiftDown = false;
 			m_CtrlDown = false;
 			m_MouseDown = false;
-			ctrl->ReleaseCapture();
+			m_Ctrl->ReleaseCapture();
 			// 失去焦点时隐藏光标
-			if (m_uFlicker == 0) break;
-			::KillTimer(NULL, m_uFlicker);
-			s_TimerToEvent.Del(m_uFlicker);
-			m_uFlicker = 0;
-			m_bFlicker = false;
+			ShowFlicker(false);
 			break;
 		case WM_PAINT:
-			if (lParam)
-			{
-				CGC gc;
-
-				// 获得属性
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
-				if (ctrl->IsFocus() && status == 0) status = 3;
-				if (!ctrl->IsEnabled()) status = 4;
-
-				state = ctrl->GetState(_T("text"), &gc);
-				if (!state) break;
-				CText* text = (CText*)(((void**)state->sta_arr)[status]);
-				if (!text) break;
-				CText tmp_text = (*text);
-
-				state = ctrl->GetState(_T("edit"), &gc);
-				if (!state) break;
-				CString* edit = (CString*)(((void**)state->sta_arr)[0]);
-				if (!edit) break;
-
-				state = ctrl->GetState(_T("txt_sel_color"), &gc);
-				if (!state) break;
-				pixel_t txt_sel_color = *(pixel_t*)(((void**)state->sta_arr)[status]);
-
-				state = ctrl->GetState(_T("bkg_sel_color"), &gc);
-				if (!state) break;
-				pixel_t bkg_sel_color = *(pixel_t*)(((void**)state->sta_arr)[status]);
-
-				CImage* mem_img = (CImage*)lParam;
-				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect;
-				ctrl->GetClientRect(rect);
-
-				// 定位选区
-				if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
-				CString::iterator_t ite1, ite2;
-				PosSelect(ite1, ite2);
-				CSize sz_off, sz_sel;
-				if (ite1 != ite2)
-				{
-					CGraph tmp_grp;
-					tmp_grp.Create();
-
-					tmp_text.SetString(*edit);
-					tmp_text[ite1->Index()] = _T('\0');
-					tmp_text.GetSize(tmp_grp, sz_off);
-
-					tmp_text.SetString(*edit);
-					tmp_text[ite2->Index()] = _T('\0');
-					tmp_text.Del(tmp_text.Head(), ite1->Index());
-					tmp_text.GetSize(tmp_grp, sz_sel);
-
-					tmp_grp.Delete();
-				}
-
-				// 绘文字
-				tmp_text.SetString(*edit);
-				CImage txt_img(tmp_text.GetImage());
-				if(!txt_img.IsNull())
-				{
-					CRect sel_rc(sz_off.cx, 0, sz_off.cx + sz_sel.cx, sz_sel.cy);
-					CPoint sel_pt(sz_off.cx, 0);
-					if (!sel_rc.IsEmpty())
-					{
-						CImgRenderer::Render
-							(
-							txt_img, txt_img, 
-							sel_rc, sel_pt, 
-							&CFilterFillT<CFilterCopy>(ExRevColor(txt_sel_color), 0xf, true)
-							);
-						CImgRenderer::Render
-							(
-							txt_img, txt_img, 
-							sel_rc, sel_pt, 
-							&CFilterFillT<CFilterCopy>(ExRevColor(bkg_sel_color), 0xf, true, txt_sel_color)
-							);
-					}
-					CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint());
-				}
-
-				// 绘光标
-				if (m_bFlicker)
-				{
-					// 获得光标高度
-					tmp_text.SetString(_T("lq"));
-					CGraph tmp_grp;
-					tmp_grp.Create();
-					CSize sz_flk;
-					tmp_text.GetSize(tmp_grp, sz_flk);
-					// 获得文字宽度
-					tmp_text.SetString(*edit);
-					tmp_text.GetAt(m_iteFlicker->Index()) = _T('\0');
-					CSize sz_txt;
-					tmp_text.GetSize(tmp_grp, sz_txt);
-					tmp_grp.Delete();
-					// 画线
-					CImgDrawer::Line
-						(
-						mem_img->Get(), 
-						CLine(sz_txt.cx, 0, sz_txt.cx, sz_flk.cy), 
-						ExRGBA(0, 0, 0, EXP_CM)
-						);
-				}
-			}
+			OnPaint((CImage*)lParam);
 			break;
 		}
 	}

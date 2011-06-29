@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-09
-// Version:	1.0.0003.1131
+// Date:	2011-06-29
+// Version:	1.0.0004.1518
 //
 // History:
 //	- 1.0.0001.1515(2011-05-24)	# 修正IGuiEffectBase::SetTimer里的id赋值错误
 //	- 1.0.0002.1600(2011-05-25)	+ 添加IGuiEffectBase::IsFinished()接口实现
 //								= 调整IGuiEffectBase::SetTimer();KillTimer()接口
 //	- 1.0.0003.1131(2011-06-09)	^ 采用引用计数改进IGuiEffectBase::SetTimer();KillTimer()接口,针对一个hWnd只会打开一个定时器
+//	- 1.0.0004.1518(2011-06-29)	^ 优化定时器控制,自动忽略重复的定时器打开操作
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEffectBase_hpp__
@@ -115,6 +116,7 @@ public:
 
 	void SetTimer(wnd_t hWnd)
 	{
+		if (m_IsRunning) return;
 		map_t::iterator_t ite = s_TimerMap.Locate(hWnd);
 		if (ite == s_TimerMap.Tail())
 		{

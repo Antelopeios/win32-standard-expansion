@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-21
-// Version:	1.0.0000.1055
+// Date:	2011-06-29
+// Version:	1.0.0001.1730
 //
 // History:
 //	- 1.0.0000.1055(2011-06-21)	@ 开始构建GuiEditEvent
+//	- 1.0.0001.1730(2011-06-29)	@ 基本完成GuiEditEvent
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEditEvent_h__
@@ -111,15 +112,15 @@ public:
 	CString* GetEdit(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), pGC);
 		if (!state) return NULL;
 		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
 		if (!edit) return NULL;
 		return edit;
 	}
 
-	// 获得显示的文本内容
-	CString* GetShowEdit(CGC* pGC)
+	// 获得显示的文本内容,迭代器返回范围上限
+	CString* GetShowEdit(CString::iterator_t& ite2, CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
 
@@ -137,9 +138,10 @@ public:
 		m_Ctrl->GetClientRect(rect);
 
 		// 获得能显示的文本区域
-		CString::iterator_t ite1 = text->Head(), ite2 = text->Head(), ite3 = text->Head();
-		ite1->nIndx = m_iteOffset->Index();
-		ite3->nIndx = edit->Tail()->nIndx;
+		CString::iterator_t ite1 = text->Head(), ite3 = text->Head();
+		ite1->nIndx = show.Head()->Index();
+		ite3->nIndx = show.Tail()->Index();
+		ite2 = text->Head();
 		ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
 
 		CGraph tmp_grp;
@@ -176,14 +178,37 @@ public:
 	}
 
 	// 偏移显示位置
-	void OffsetShow()
+	void CheckFlicker()
 	{
 		if (m_iteFlicker->Index() > m_iteOffset->Index())
 		{
+			do
+			{
+				// 获得显示上限迭代器
+				CGC gc;
+				CString::iterator_t ite;
+				GetShowEdit(ite, &gc);
+				ite->nIndx += m_iteOffset->Index();
+				// 判断是否超限并调整下限
+				if (m_iteFlicker->Index() > ite->Index())
+					++m_iteOffset;
+				else
+					break;
+			} while (1);
+
+			// 刷新界面
+			m_bFlicker = true;
+			m_Ctrl->Refresh();
 		}
 		else
 		if (m_iteFlicker->Index() < m_iteOffset->Index())
+		{
 			m_iteOffset = m_iteFlicker;
+
+			// 刷新界面
+			m_bFlicker = true;
+			m_Ctrl->Refresh();
+		}
 	}
 
 	// 光标显示
@@ -207,7 +232,7 @@ public:
 	}
 
 	// 根据坐标定位光标
-	void PosFlicker(const CPoint& point)
+	void PosFlicker(const CPoint& ptPos)
 	{
 		ExAssert(m_Ctrl);
 		CGC gc;
@@ -217,6 +242,23 @@ public:
 		if (!text) return;
 		CString* edit = GetEdit(&gc);
 		if (!edit) return;
+
+		// 拿到偏移量
+		CSize sz_off;
+		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
+		if (m_iteOffset->Index() > edit->Head()->Index())
+		{
+			CGraph tmp_grp;
+			tmp_grp.Create();
+
+			text->SetString(*edit);
+			text->GetAt(m_iteOffset->Index()) = _T('\0');
+			text->GetSize(tmp_grp, sz_off);
+
+			tmp_grp.Delete();
+		}
+		CPoint point(ptPos);
+		point.x += sz_off.cx;
 
 		// 搜索字符位置
 		if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
@@ -262,7 +304,7 @@ public:
 		}
 		text->SetString(_T(""));
 		tmp_grp.Delete();
-		m_Ctrl->Refresh();
+		CheckFlicker();
 	}
 	
 	// 定位选区
@@ -294,6 +336,7 @@ public:
 		// 全选文本
 		m_iteSelect = edit->Head();
 		m_iteFlicker = edit->Tail();
+		CheckFlicker();
 	}
 
 	// 按键输入
@@ -412,8 +455,7 @@ public:
 							// 添加文本
 							edit->Del(ite1, ite2->Index() - ite1->Index());
 							edit->AddString(buff, ite1);
-							m_iteSelect = ite1;
-							m_iteFlicker = ite1 += _tcslen(buff);
+							m_iteSelect = m_iteFlicker = ite1 += _tcslen(buff);
 							// 解锁句柄
 							::GlobalUnlock(clp_buf);
 						}
@@ -453,8 +495,7 @@ public:
 			}
 
 			// 刷新界面
-			m_bFlicker = true;
-			m_Ctrl->Refresh();
+			CheckFlicker();
 		}
 	}
 
@@ -499,8 +540,7 @@ public:
 		}
 
 		// 刷新界面
-		m_bFlicker = true;
-		m_Ctrl->Refresh();
+		CheckFlicker();
 	}
 
 	// 界面绘图
@@ -539,11 +579,26 @@ public:
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
 
+		// 拿到偏移量
+		CSize sz_off;
+		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
+		if (m_iteOffset->Index() > edit->Head()->Index())
+		{
+			CGraph tmp_grp;
+			tmp_grp.Create();
+
+			tmp_text.SetString(*edit);
+			tmp_text[m_iteOffset->Index()] = _T('\0');
+			tmp_text.GetSize(tmp_grp, sz_off);
+
+			tmp_grp.Delete();
+		}
+
 		// 定位选区
 		if (!m_iteSelect->InThis(edit)) m_iteSelect = m_iteFlicker;
 		CString::iterator_t ite1, ite2;
 		PosSelect(ite1, ite2);
-		CSize sz_off, sz_sel;
+		CSize sz_hed, sz_sel;
 		if (ite1 != ite2)
 		{
 			CGraph tmp_grp;
@@ -551,7 +606,7 @@ public:
 
 			tmp_text.SetString(*edit);
 			tmp_text[ite1->Index()] = _T('\0');
-			tmp_text.GetSize(tmp_grp, sz_off);
+			tmp_text.GetSize(tmp_grp, sz_hed);
 
 			tmp_text.SetString(*edit);
 			tmp_text[ite2->Index()] = _T('\0');
@@ -566,8 +621,8 @@ public:
 		CImage txt_img(tmp_text.GetImage());
 		if(!txt_img.IsNull())
 		{
-			CRect sel_rc(sz_off.cx, 0, sz_off.cx + sz_sel.cx, sz_sel.cy);
-			CPoint sel_pt(sz_off.cx, 0);
+			CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
+			CPoint sel_pt(sz_hed.cx, 0);
 			if (!sel_rc.IsEmpty())
 			{
 				CImgRenderer::Render
@@ -583,7 +638,7 @@ public:
 					&CFilterFillT<CFilterCopy>(ExRevColor(bkg_sel_color), 0xf, true, txt_sel_color)
 					);
 			}
-			CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint());
+			CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 		}
 
 		// 绘光标
@@ -605,7 +660,7 @@ public:
 			CImgDrawer::Line
 				(
 				mem_img->Get(), 
-				CLine(sz_txt.cx, 0, sz_txt.cx, sz_flk.cy), 
+				CLine(sz_txt.cx - sz_off.cx, 0, sz_txt.cx - sz_off.cx, sz_flk.cy), 
 				ExRGBA(0, 0, 0, EXP_CM)
 				);
 		}
@@ -646,7 +701,14 @@ public:
 			// 鼠标移动时定位光标
 			if (m_MouseDown)
 			{
-				CPoint point(ExLoWord(lParam), ExHiWord(lParam));
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+				CPoint point(pt_tmp);
+				m_Ctrl->GetBoard()->ScreenToClient(point);
+				CRect rc_tmp(point, point);
+				m_Ctrl->B2C(rc_tmp);
+				point = rc_tmp.pt1;
+			//	ExTrace(_T("(%d, %d)\n"), point.x, point.y);
 				PosFlicker(point);
 			}
 			break;

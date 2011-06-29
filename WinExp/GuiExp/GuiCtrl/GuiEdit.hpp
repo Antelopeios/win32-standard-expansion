@@ -65,7 +65,7 @@ public:
 	CGuiEdit()
 	{
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC()));
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC()));
 		pixel_t pix[5] = {0};
 		for(int i = 0; i < _countof(pix); ++i)
 			pix[i] = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);

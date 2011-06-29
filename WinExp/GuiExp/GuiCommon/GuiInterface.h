@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0010.1447
+// Date:	2011-06-29
+// Version:	1.0.0011.1530
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -51,6 +51,9 @@
 //	- 1.0.0008.1600(2011-05-25)	+ 添加IGuiEffect::IsFinished();SetTimer();KillTimer()接口
 //	- 1.0.0009.1411(2011-05-26)	+ 添加IGuiBase::GetPtCtrl()与IGuiBase::GetRealRect()接口
 //	- 1.0.0010.1447(2011-06-08)	^ 将IGuiBase移出并单独实现
+//	- 1.0.0011.1530(2011-06-29)	# 修正IGuiSender::Send()内部传递消息结果时可能出现的错误
+//								^ IGuiSender后添加的事件优先执行,优先执行自身的事件对象,再向子控件传递消息
+//								+ 相关组合接口添加Ins...()操作,用于在组合队列的头部添加子对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -132,6 +135,18 @@ public:
 			pComp->m_Pare->DelComp(pComp);
 		pComp->Init(this);
 		GetChildren().Add(pComp);
+	}
+	virtual void InsComp(IGuiComp* pComp)
+	{
+		if (!pComp) return ;
+		// 定位对象
+		list_t::iterator_t ite = Find(pComp);
+		if (ite != GetChildren().Tail()) return;
+		// 添加新对象
+		if( pComp->m_Pare )
+			pComp->m_Pare->DelComp(pComp);
+		pComp->Init(this);
+		GetChildren().Add(pComp, GetChildren().Head());
 	}
 	virtual void DelComp(IGuiComp* pComp)
 	{
@@ -227,6 +242,15 @@ public:
 		// 添加新对象
 		GetEvent().Add(pEvent);
 	}
+	virtual void InsEvent(IGuiEvent* pEvent)
+	{
+		if (!pEvent) return ;
+		// 定位对象
+		evt_list_t::iterator_t ite = Find(pEvent);
+		if (ite != GetEvent().Tail()) return;
+		// 添加新对象
+		GetEvent().Add(pEvent, GetEvent().Head());
+	}
 	virtual void DelEvent(IGuiEvent* pEvent)
 	{
 		if (!pEvent) return ;
@@ -259,11 +283,18 @@ public:
 	}
 	LRESULT GetResult(LRESULT lrDef = 0)
 	{
-		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
+		// 后添加的事件优先执行
+		evt_list_t::iterator_t ite = GetEvent().Last();
+		for(; ite != GetEvent().Head(); --ite)
 		{
 			if (!(*ite)) continue;
 			LRESULT r = (*ite)->GetResult();
-			if (r != 0 && lrDef != r) { lrDef = r; }
+			if (r != 0 && lrDef != r) lrDef = r;
+		}
+		if (*ite)
+		{
+			LRESULT r = (*ite)->GetResult();
+			if (r != 0 && lrDef != r) lrDef = r;
 		}
 		return lrDef;
 	}
@@ -273,12 +304,19 @@ public:
 		if (GetEvent().Empty()) return;
 		LRESULT ret = GetResult();
 		// 后添加的事件优先执行
-		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
+		evt_list_t::iterator_t ite = GetEvent().Last();
+		for(; ite != GetEvent().Head(); --ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
-			ret = (*ite)->GetResult();
+			LRESULT r = (*ite)->GetResult();
+			if (r != 0 && ret != r) ret = r;
+		}
+		if (*ite)
+		{
+			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
+			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 		}
 	}
 };

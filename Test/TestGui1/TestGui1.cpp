@@ -76,7 +76,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
-	wnd->Create(_T("Test"), CRect(0, 0, 500, 300)/*rect*/, SW_HIDE);
+	wnd->Create(_T("Test"), /*CRect(0, 0, 500, 300)*/rect, SW_HIDE);
 	wnd->CenterWindow();
 	wnd->SetLayered();
 	wnd->ShowWindow(SW_SHOW);

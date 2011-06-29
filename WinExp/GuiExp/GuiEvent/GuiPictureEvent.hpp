@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0002.1424
+// Date:	2011-06-29
+// Version:	1.0.0003.2006
 //
 // History:
 //	- 1.0.0001.1500(2011-05-24)	+ CGuiPictureEvent添加Color属性的处理
 //	- 1.0.0002.1424(2011-05-25)	+ CGuiPictureEvent添加Text属性的处理
 //								# 修正CGuiPictureEvent添对Text属性处理过程中的内存泄漏
+//	- 1.0.0003.2006(2011-06-29)	# 修正当不设置背景图片时,CGuiPictureEvent将跳过所有绘图的bug
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPictureEvent_hpp__
@@ -81,7 +82,7 @@ public:
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("image"), &gc);
 				if (!state) break;
 				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
-				if (!image || image->IsNull()) break;
+				if (!image) break;
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
@@ -99,7 +100,7 @@ public:
 				ctrl->GetClientRect(rect);
 
 				// 处理
-				if (m_rcOld != rect)
+				if (!image->IsNull() && m_rcOld != rect)
 				{
 					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), rect.Height()));
 					m_rcOld = rect;
@@ -107,7 +108,8 @@ public:
 
 				// 绘图
 				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
-				CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
+				if (!image->IsNull())
+					CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
 					CImgRenderer::Render

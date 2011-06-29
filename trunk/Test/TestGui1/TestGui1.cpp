@@ -51,8 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	txt_btn[0].SetString(_T("Dark C.at"));
 	txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_btn[0].SetColor(ExRGBA(0, 60, 116, 200));
-	for(int i = 1; i < _countof(txt_btn); ++i)
-		txt_btn[i] = txt_btn[0];
+	for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
 
 	// 创建效果对象并设置
 	IGuiEffect* eff1 = ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"), &gc));

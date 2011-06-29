@@ -34,11 +34,12 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-06-29
-// Version:	1.0.0001.1730
+// Version:	1.0.0001.1956
 //
 // History:
 //	- 1.0.0000.1055(2011-06-21)	@ 开始构建GuiEditEvent
-//	- 1.0.0001.1730(2011-06-29)	@ 基本完成GuiEditEvent
+//	- 1.0.0001.1956(2011-06-29)	@ 基本完成GuiEditEvent
+//								= 根据CGuiEdit基类的调整,修改GuiEditEvent
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEditEvent_h__
@@ -90,22 +91,12 @@ public:
 
 public:
 	// 获得属性
-	DWORD GetStatus(CGC* pGC)
-	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("status"), pGC);
-		if (!state) return 0;
-		DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
-		if (m_Ctrl->IsFocus() && status == 0) status = 3;
-		if (!m_Ctrl->IsEnabled()) status = 4;
-		return status;
-	}
 	CText* GetText(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
 		if (!state) return NULL;
-		CText* text = (CText*)(((void**)state->sta_arr)[GetStatus(pGC)]);
+		CText* text = (CText*)(((void**)state->sta_arr)[0]);
 		if (!text) return NULL;
 		return text;
 	}
@@ -551,15 +542,9 @@ public:
 		CGC gc;
 
 		// 获得属性
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("status"), &gc);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), &gc);
 		if (!state) return;
-		DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
-		if (m_Ctrl->IsFocus() && status == 0) status = 3;
-		if (!m_Ctrl->IsEnabled()) status = 4;
-
-		state = m_Ctrl->GetState(_T("text"), &gc);
-		if (!state) return;
-		CText* text = (CText*)(((void**)state->sta_arr)[status]);
+		CText* text = (CText*)(((void**)state->sta_arr)[0]);
 		if (!text) return;
 		CText tmp_text = (*text);
 
@@ -570,11 +555,11 @@ public:
 
 		state = m_Ctrl->GetState(_T("txt_sel_color"), &gc);
 		if (!state) return;
-		pixel_t txt_sel_color = *(pixel_t*)(((void**)state->sta_arr)[status]);
+		pixel_t txt_sel_color = *(pixel_t*)(((void**)state->sta_arr)[0]);
 
 		state = m_Ctrl->GetState(_T("bkg_sel_color"), &gc);
 		if (!state) return;
-		pixel_t bkg_sel_color = *(pixel_t*)(((void**)state->sta_arr)[status]);
+		pixel_t bkg_sel_color = *(pixel_t*)(((void**)state->sta_arr)[0]);
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);

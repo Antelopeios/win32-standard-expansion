@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "TestGui2.h"
 
-#pragma comment(lib, "Imm32.lib")
+//////////////////////////////////////////////////////////////////
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,
@@ -25,8 +25,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	CText txt_edt[5];
 	txt_edt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_edt[0].SetColor(ExRGBA(0, 60, 116, 200));
-	for(int i = 1; i < _countof(txt_edt); ++i)
-		txt_edt[i] = txt_edt[0];
+	for(int i = 1; i < _countof(txt_edt); ++i) txt_edt[i] = txt_edt[0];
 
 	// 创建控件
 	IGuiCtrl* edit = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc));
@@ -35,17 +34,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
-	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE);
+	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
-	wnd->SetLayered();
-	HIMC context = ::ImmCreateContext();
-	::ImmAssociateContext(wnd->GethWnd(), context);
+	//wnd->SetLayered();
 	wnd->ShowWindow(SW_SHOW);
+
+	// 创建事件对象并设置
+	CCustomEvent cus_evt;
+	CFillEvent	 fil_evt;
 
 	// 关联对象
 	wnd->AddComp(edit);
+	wnd->AddEvent(&cus_evt);
+	wnd->AddEvent(&fil_evt);
 
 	// 主消息循环:
 	MSG msg = {0};
@@ -54,8 +57,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
-	::ImmDestroyContext(context);
 
 	return (int) msg.wParam;
 }

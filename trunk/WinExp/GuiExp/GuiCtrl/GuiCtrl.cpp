@@ -194,5 +194,6 @@ EXP_END
 #include "GuiCtrl/GuiPicture.hpp"
 #include "GuiCtrl/GuiButton.hpp"
 #include "GuiCtrl/GuiEdit.hpp"
+#include "GuiCtrl/GuiListView.hpp"
 
 //////////////////////////////////////////////////////////////////

@@ -28,24 +28,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiPicture - 绘图板控件
+// GuiListView - 列表视图控件
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0003.2305
+// Date:	2011-06-30
+// Version:	1.0.0000.1543
 //
 // History:
-//	- 1.0.0001.2236(2011-05-23)	+ 添加CGuiPicture::IsUpdated()接口
-//	- 1.0.0002.1500(2011-05-24)	+ CGuiPicture添加Color属性
-//	- 1.0.0003.2305(2011-05-25)	+ CGuiPicture添加Text属性
-//								= CGuiPicture调整控件状态接口
-//								= CGuiPicture不再托管内部的图片资源
+//	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiPicture_hpp__
-#define __GuiPicture_hpp__
+#ifndef __GuiListView_hpp__
+#define __GuiListView_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -55,73 +51,29 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiPicture : public IGuiCtrlBase
+class CGuiListView : public CGuiPicture
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiListView, CGuiPicture)
 
 protected:
-	pixel_t m_Color;
-	CImage m_Image;
-	CText m_Text;
 
 public:
-	CGuiPicture()
-		: m_Color(0)
+	CGuiListView()
 	{
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), GetGC()));
-	}
-	~CGuiPicture()
-	{
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiListViewEvent"), GetGC()));
+		pixel_t pix = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
+		SetState(_T("color"), &pix);
 	}
 
-public:
-	// 获得控件状态
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
-	{
-		state_t* state = EXP_BASE::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("color"))
-				state->sta_arr.Add(&m_Color);
-			else
-			if (state->sta_typ == _T("image"))
-				state->sta_arr.Add(&m_Image);
-			else
-			if (state->sta_typ == _T("text"))
-				state->sta_arr.Add(&m_Text);
-		}
-		return state;
-	}
-	void SetState(const CString& sType, void* pState)
-	{
-		if (!pState) return;
-		if (sType == _T("color"))
-		{
-			m_Color = *(pixel_t*)pState;
-			EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("image"))
-		{
-			m_Image = *(CImage*)pState;
-			EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("text"))
-		{
-			m_Text = *(CText*)pState;
-			EXP_BASE::SetState(sType, pState);
-		}
-	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiListView, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiPicture_hpp__*/
+#endif/*__GuiListView_hpp__*/

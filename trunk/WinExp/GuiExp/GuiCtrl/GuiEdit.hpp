@@ -44,8 +44,8 @@
 //								+ 添加创建输入法上下文的相关代码
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiEdit_h__
-#define __GuiEdit_h__
+#ifndef __GuiEdit_hpp__
+#define __GuiEdit_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -144,10 +144,10 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiEdit, CGuiPicture);
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiEdit, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiEdit_h__*/
+#endif/*__GuiEdit_hpp__*/

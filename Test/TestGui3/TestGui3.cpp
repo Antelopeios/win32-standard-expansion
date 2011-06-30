@@ -1,8 +1,8 @@
-// TestGui2.cpp : 定义应用程序的入口点。
+// TestGui3.cpp : 定义应用程序的入口点。
 //
 
 #include "stdafx.h"
-#include "TestGui2.h"
+#include "TestGui3.h"
 
 //////////////////////////////////////////////////////////////////
 
@@ -21,11 +21,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	RECT rc_dsk = {0};
 	::GetClientRect(::GetDesktopWindow(), &rc_dsk);
 	CRect rc_wnd(0, 0, 500, 300);
-	HICON ic_wnd = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTGUI2));
-	CText txt_edt[5];
-	txt_edt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
-	txt_edt[0].SetColor(ExRGBA(0, 60, 116, 200));
-	for(int i = 1; i < _countof(txt_edt); ++i) txt_edt[i] = txt_edt[0];
+	HICON ic_wnd = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTGUI3));
+	CText txt_lst[5];
+	txt_lst[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
+	txt_lst[0].SetColor(ExRGBA(0, 60, 116, 200));
+	for(int i = 1; i < _countof(txt_lst); ++i) txt_lst[i] = txt_lst[0];
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
@@ -37,19 +37,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->ShowWindow(SW_SHOW);
 	wnd->GetClientRect(rc_wnd);
 
-	// 创建控件
-	IGuiCtrl* edit = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc));
-	edit->SetWindowRect(rc_wnd);
-	edit->SetState(_T("text"), txt_edt);
-
 	// 创建事件对象并设置
 	CCustomEvent cus_evt;
-	CFillEvent	 fil_evt;
 
 	// 关联对象
-	wnd->AddComp(edit);
 	wnd->AddEvent(&cus_evt);
-	wnd->AddEvent(&fil_evt);
 
 	// 主消息循环:
 	MSG msg = {0};

@@ -61,6 +61,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc));
 	btn->SetState(_T("image"), img_btn);
 	btn->SetState(_T("text"), txt_btn);
+	btn->SetState(_T("locate"), (void*)4);
+	btn->SetState(_T("loc_off"), (void*)10);
 	btn->SetWindowRect(CRect(70, 100, 180, 140));
 	btn->SetEffect(eff1);
 

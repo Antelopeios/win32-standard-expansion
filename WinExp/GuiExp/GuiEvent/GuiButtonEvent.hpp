@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-21
-// Version:	1.0.0004.1708
+// Date:	2011-07-01
+// Version:	1.0.0005.1430
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -46,6 +46,7 @@
 //	- 1.0.0002.1020(2011-05-27)	# 修正CGuiButtonEvent当WM_KEYUP之后无法响应焦点切换绘图
 //	- 1.0.0003.1426(2011-06-08)	# 修正CGuiButtonEvent不响应非工作区鼠标事件的问题
 //	- 1.0.0004.1708(2011-06-21)	# 修正当按钮控件没有加载图片时CGuiButtonEvent绘图出现的内存异常
+//	- 1.0.0005.1430(2011-07-01)	= 根据GuiButton的更新调整GuiButtonEvent
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -88,11 +89,11 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
 				if (status != 2)
 				{
 					status = 1;
-					ctrl->SetState(_T("status"), &status);
+					ctrl->SetState(_T("status"), (void*)status);
 				}
 			}
 			break;
@@ -102,7 +103,7 @@ public:
 		case WM_NCLBUTTONDOWN:
 			{
 				DWORD status = 2;
-				ctrl->SetState(_T("status"), &status);
+				ctrl->SetState(_T("status"), (void*)status);
 			}
 			break;
 		case WM_KEYUP:
@@ -122,7 +123,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
 				if (status == 2) // 当按下后抬起,视为一次Click
 					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_COMMAND, BN_CLICKED);
 
@@ -130,13 +131,13 @@ public:
 					status = 1;
 				else
 					status = 0;
-				ctrl->SetState(_T("status"), &status);
+				ctrl->SetState(_T("status"), (void*)status);
 			}
 			break;
 		case WM_MOUSELEAVE:
 			{
 				DWORD status = 0;
-				ctrl->SetState(_T("status"), &status);
+				ctrl->SetState(_T("status"), (void*)status);
 			}
 			break;
 		case WM_PAINT:
@@ -147,7 +148,7 @@ public:
 				// 获得属性
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = *(DWORD*)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
 				if (ctrl->IsFocus() && status == 0) status = 3;
 				if (!ctrl->IsEnabled()) status = 4;
 
@@ -360,18 +361,75 @@ public:
 				// 绘文字
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
-					CImgRenderer::Render
-						(
-						mem_img->Get(), txt_img, 
-						CRect
+				{
+					state = ctrl->GetState(_T("locate"), &gc);
+					if (!state) break;
+					DWORD locate = (DWORD)(((void**)state->sta_arr)[0]);
+					state = ctrl->GetState(_T("loc_off"), &gc);
+					if (!state) break;
+					LONG loc_off = (LONG)(((void**)state->sta_arr)[0]);
+
+					CRect txt_rct;
+					switch(locate)
+					{
+					case 0:	// center
+						txt_rct.Set
 							(
-							rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-							rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2, 
-							rect.Right(), 
-							rect.Bottom()
-							), 
-						CPoint()
-						);
+							CPoint
+								(
+								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 1:	// top
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+								rect.Top() + loc_off
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 2:	// bottom
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+								rect.Bottom() - txt_img.GetHeight() - loc_off
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 3:	// left
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + loc_off, 
+								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 4:	// right
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Right() - txt_img.GetWidth() - loc_off, 
+								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					}
+					CImgRenderer::Render(mem_img->Get(), txt_img, txt_rct, CPoint());
+				}
 			}
 			break;
 		}

@@ -247,10 +247,6 @@
 			Name="GuiEvent"
 			>
 			<File
-				RelativePath="..\..\BarClient\BarClient.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GuiEvent\GuiButtonEvent.hpp"
 				>
 			</File>
@@ -260,6 +256,10 @@
 			</File>
 			<File
 				RelativePath=".\GuiEvent\GuiEvent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiEvent\GuiLVEvent.hpp"
 				>
 			</File>
 			<File

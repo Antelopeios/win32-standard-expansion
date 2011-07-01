@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-28
-// Version:	1.0.0009.1630
+// Date:	2011-07-01
+// Version:	1.0.0010.1535
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -48,6 +48,8 @@
 //	- 1.0.0008.1654(2011-06-22)	# 修正GuiWndEvent没有向子控件通知焦点改变事件的问题
 //	- 1.0.0009.1630(2011-06-28)	# 修正GuiWndEvent无法向下发送WM_SHOWWINDOW消息的问题
 //								+ 添加事件捕获支持,允许控件设置所有消息的捕获
+//	- 1.0.0010.1535(2011-07-01)	+ WM_SIZE不能继续向下转发
+//								+ 处理控件消息时WM_SHOWWINDOW消息不应该向下转发
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -313,6 +315,7 @@ public:
 		IGuiBase* base = ExDynCast<IGuiBase>(pGui);
 		if (!base) return;
 		// 筛选消息
+		if (nMessage == WM_SIZE) return; /*WM_SIZE消息不应该向下转发*/
 		LRESULT ret = 0;
 		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
 		if (board)
@@ -357,6 +360,9 @@ public:
 				ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));
 			}
 		}
+		else
+		if (nMessage == WM_SHOWWINDOW)
+			return; /*处理控件消息时WM_SHOWWINDOW消息不应该向下转发*/
 		else
 			ret = BaseSend(base, nMessage, wParam, lParam);
 		SetResult(ret);

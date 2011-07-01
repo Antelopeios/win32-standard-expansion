@@ -51,25 +51,127 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiListView : public CGuiPicture
+class CGuiLVItem : public CGuiButton /*CGuiListView内部使用的列表项*/
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiListView, CGuiPicture)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiLVItem, CGuiButton)
 
 protected:
+	CImage m_Icon;
+	bool m_bGlow;
 
 public:
-	CGuiListView()
+	CGuiLVItem()
+		: m_bGlow(false)
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiListViewEvent"), GetGC()));
-		pixel_t pix = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
-		SetState(_T("color"), &pix);
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVItemEvent"), GetGC())); /*先让基类绘图*/
 	}
 
+public:
+	// 获得控件状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+		if (state)
+		{
+			if (state->sta_typ == _T("icon"))
+				state->sta_arr.Add(&m_Icon);
+			else
+			if (state->sta_typ == _T("glow"))
+				state->sta_arr.Add((void*)m_bGlow);
+			else
+				state = EXP_BASE::GetState(sType, pGC);
+		}
+		return state;
+	}
+	void SetState(const CString& sType, void* pState)
+	{
+		if (!pState) return;
+		if (sType == _T("icon"))
+		{
+			m_Icon = *((CImage*)pState);
+			IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("glow"))
+		{
+			m_bGlow = (bool)(LONG_PTR)pState;
+			IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+			EXP_BASE::SetState(sType, pState);
+	}
 };
 
 //////////////////////////////////////////////////////////////////
 
+class CGuiListView : public CGuiPicture
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiListView, CGuiPicture)
+
+public:
+	typedef CListT<IGuiCtrl*> items_t;
+
+protected:
+	items_t* m_ItemList;
+	LONG m_Space;	// 项间距
+
+public:
+	CGuiListView()
+		: m_ItemList(NULL)
+		, m_Space(0)
+	{
+		// 添加事件对象
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
+		pixel_t pix = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
+		SetState(_T("color"), &pix);
+	}
+
+public:
+	// 获得控件状态
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+		if (state)
+		{
+			if (state->sta_typ == _T("items"))
+				state->sta_arr.Add(m_ItemList);
+			else
+			if (state->sta_typ == _T("space"))
+				state->sta_arr.Add((void*)m_Space);
+			else
+				state = EXP_BASE::GetState(sType, pGC);
+		}
+		return state;
+	}
+	void SetState(const CString& sType, void* pState)
+	{
+		if (!pState) return;
+		if (sType == _T("items"))
+		{
+			items_t* old_sta = m_ItemList;
+			m_ItemList = (items_t*)pState;
+			if (old_sta != m_ItemList)
+			{
+				IGuiCtrlBase::SetState(sType, pState);
+			}
+		}
+		else
+		if (sType == _T("space"))
+		{
+			LONG old_sta = m_Space;
+			m_Space = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_LocOff)
+				IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+			EXP_BASE::SetState(sType, pState);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiLVItem, CGuiButton)
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiListView, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////

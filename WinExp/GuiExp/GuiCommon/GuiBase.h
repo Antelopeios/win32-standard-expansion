@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-28
-// Version:	1.0.0003.1544
+// Date:	2011-07-01
+// Version:	1.0.0004.1020
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
 //	- 1.0.0003.1544(2011-06-28)	+ 添加事件捕获接口,支持针对一个IGuiBase设置捕获所有的事件
+//	- 1.0.0004.1020(2011-07-01)	+ 重写IGuiBase::InsEvent()接口,当事件链表中有数据时,向第二个结点处插入新结点(为了保证第一个插入的结点始终最后执行)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -67,7 +68,7 @@ public:
 		: m_GC(ExMem::Alloc<CGC>())
 	{
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), GetGC()));
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), GetGC()));
 	}
 	virtual ~IGuiBase(void)
 	{
@@ -75,6 +76,19 @@ public:
 	}
 
 public:
+	void InsEvent(IGuiEvent* pEvent)
+	{
+		if (!pEvent) return ;
+		// 定位对象
+		evt_list_t::iterator_t ite = IGuiSender::Find(pEvent);
+		if (ite != GetEvent().Tail()) return;
+		// 添加新对象
+		if (GetEvent().Empty())
+			GetEvent().Add(pEvent, GetEvent().Head());
+		else
+			GetEvent().Add(pEvent, GetEvent().Head() + 1);
+	}
+
 	virtual CGC* GetGC() { return m_GC; }
 
 	virtual bool GetRealRect(CRect& rc) = 0;

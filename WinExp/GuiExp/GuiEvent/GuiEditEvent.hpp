@@ -42,8 +42,8 @@
 //								= 根据CGuiEdit基类的调整,修改GuiEditEvent
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiEditEvent_h__
-#define __GuiEditEvent_h__
+#ifndef __GuiEditEvent_hpp__
+#define __GuiEditEvent_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -96,18 +96,14 @@ public:
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
 		if (!state) return NULL;
-		CText* text = (CText*)(((void**)state->sta_arr)[0]);
-		if (!text) return NULL;
-		return text;
+		return (CText*)(((void**)state->sta_arr)[0]);
 	}
 	CString* GetEdit(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), pGC);
 		if (!state) return NULL;
-		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
-		if (!edit) return NULL;
-		return edit;
+		return (CString*)(((void**)state->sta_arr)[0]);
 	}
 
 	// 获得显示的文本内容,迭代器返回范围上限
@@ -744,4 +740,4 @@ CGuiEditEvent::map_t CGuiEditEvent::s_TimerToEvent;
 
 EXP_END
 
-#endif/*__GuiEditEvent_h__*/
+#endif/*__GuiEditEvent_hpp__*/

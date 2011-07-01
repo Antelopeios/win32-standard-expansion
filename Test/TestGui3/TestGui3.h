@@ -26,3 +26,31 @@ public:
 		}
 	}
 };
+
+//////////////////////////////////////////////////////////////////
+
+class CFillEvent : public IGuiEvent
+{
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
+		if (!board) return;
+
+		switch( nMessage )
+		{
+		case WM_SIZE:
+			{
+				CRect rect;
+				board->GetClientRect(rect);
+				for(IGuiBase::list_t::iterator_t ite = board->GetChildren().Head(); ite != board->GetChildren().Tail(); ++ite)
+				{
+					IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+					if (!ctrl) continue;
+					ctrl->SetRealRect(rect);
+				}
+			}
+			break;
+		}
+	}
+};

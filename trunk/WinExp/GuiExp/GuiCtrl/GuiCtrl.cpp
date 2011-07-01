@@ -33,11 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0001.1010
+// Date:	2011-07-01
+// Version:	1.0.0002.1528
 //
 // History:
 //	- 1.0.0001.1010(2011-06-17)	= 将IGuiCtrlBase接口定义移动到GuiCtrl.cpp中
+//	- 1.0.0002.1528(2011-07-01)	+ IGuiCtrlBase::SetWindowRect()将在改变控件大小时发送WM_SIZE消息
+//								+ IGuiCtrlBase::SetVisible()将在改变控件可视状态时发送WM_SHOWWINDOW消息
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -116,7 +118,10 @@ bool IGuiCtrlBase::C2B(CRect& rc)
 }
 bool IGuiCtrlBase::SetWindowRect(const CRect& rc)
 {
+	if (m_Rect == rc) return true;
 	m_Rect = rc;
+	Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
+		(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
 	Refresh(false);
 	return true;
 }
@@ -164,6 +169,7 @@ void IGuiCtrlBase::Refresh(bool bSelf/* = true*/)
 // 设置可用性
 bool IGuiCtrlBase::SetEnable(bool bEnable/* = true*/)
 {
+	if (m_bEnable == bEnable) return m_bEnable;
 	bool old = m_bEnable;
 	m_bEnable = bEnable;
 	UpdateState();
@@ -177,8 +183,10 @@ bool IGuiCtrlBase::IsEnabled() const
 // 设置可见性
 bool IGuiCtrlBase::SetVisible(bool bVisible/* = true*/)
 {
+	if (m_bVisible == bVisible) return m_bVisible;
 	bool old = m_bVisible;
 	m_bVisible = bVisible;
+	Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, m_bVisible);
 	UpdateState();
 	return old;
 }

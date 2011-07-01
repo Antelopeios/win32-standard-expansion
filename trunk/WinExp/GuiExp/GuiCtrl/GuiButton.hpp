@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0001.2305
+// Date:	2011-07-01
+// Version:	1.0.0002.1310
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
 //								= CGuiButton::m_Status初始化为nor
 //								= CGuiButton不再托管内部的图片资源
+//	- 1.0.0002.1310(2011-07-01)	+ CGuiButton添加locate属性,支持自定义文字显示位置
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -59,12 +60,18 @@ class CGuiButton : public IGuiCtrlBase
 
 public:
 	/*
-	正常; 浮动; 按下; 焦点; 禁止
+		正常; 浮动; 按下; 焦点; 禁止
 	*/
 	enum status_t {nor, ovr, hit};
+	/*
+		文字位置: 中; 上; 下; 左; 右
+	*/
+	enum locate_t {center, top, bottom, left, right};
 
 protected:
-	status_t m_Status;
+	status_t m_Status;	// 按钮状态
+	locate_t m_Locate;	// 文字位置
+	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
 	pixel_t m_Color[5];
 	CImage m_Image[9];	// 九宫格分割,每个小块保存5个状态
 	CText m_Text[5];
@@ -72,6 +79,8 @@ protected:
 public:
 	CGuiButton()
 		: m_Status(nor)
+		, m_Locate(center)
+		, m_LocOff(5)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
 		// 添加事件对象
@@ -88,7 +97,13 @@ public:
 		if (state)
 		{
 			if (state->sta_typ == _T("status"))
-				state->sta_arr.Add(&m_Status);
+				state->sta_arr.Add((void*)m_Status);
+			else
+			if (state->sta_typ == _T("locate"))
+				state->sta_arr.Add((void*)m_Locate);
+			else
+			if (state->sta_typ == _T("loc_off"))
+				state->sta_arr.Add((void*)m_LocOff);
 			else
 			if (state->sta_typ == _T("color"))
 				for(int i = 0; i < _countof(m_Color); ++i)
@@ -110,8 +125,24 @@ public:
 		if (sType == _T("status"))
 		{
 			status_t old_sta = m_Status;
-			m_Status = *(status_t*)pState;
+			m_Status = (status_t)(LONG_PTR)pState;
 			if (old_sta != m_Status)
+				EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("locate"))
+		{
+			locate_t old_sta = m_Locate;
+			m_Locate = (locate_t)(LONG_PTR)pState;
+			if (old_sta != m_Locate)
+				EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("loc_off"))
+		{
+			LONG old_sta = m_LocOff;
+			m_LocOff = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_LocOff)
 				EXP_BASE::SetState(sType, pState);
 		}
 		else

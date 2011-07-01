@@ -88,7 +88,7 @@ public:
 		: m_ImmContext(NULL)
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC()));
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC())); /*先让基类绘图*/
 		pixel_t pix = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
 		SetState(_T("color"), &pix);
 		pix = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);

@@ -65,12 +65,12 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-interface EXP_API IGuiCtrl : public IGuiBase
+EXP_INTERFACE IGuiCtrl : public IGuiBase
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
 
 public:
-	struct state_t : IPoolTypeT<state_t, EXP_MEMORY_ALLOC>
+	EXP_STRUCT state_t : IPoolTypeT<state_t, EXP_MEMORY_ALLOC>
 	{
 		CString			sta_typ;
 		CArrayT<void*>	sta_arr;
@@ -214,10 +214,8 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-#pragma warning(disable: 4251)
-
 // GUI 控件对象接口
-interface EXP_API IGuiCtrlBase : public IGuiCtrl
+EXP_INTERFACE IGuiCtrlBase : public IGuiCtrl
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
 

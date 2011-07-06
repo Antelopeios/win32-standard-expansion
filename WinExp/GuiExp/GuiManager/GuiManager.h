@@ -53,7 +53,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class EXP_API CGuiManager
+EXP_CLASS CGuiManager
 {
 public:
 	static bool Load(IFileObject* pFile);

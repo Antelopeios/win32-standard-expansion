@@ -68,7 +68,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 对象接口
-interface EXP_API IGuiObject : public IBaseObject
+EXP_INTERFACE IGuiObject : public IBaseObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiObject, IBaseObject)
 
@@ -83,7 +83,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 组合接口
-interface EXP_API IGuiComp : public IGuiObject
+EXP_INTERFACE IGuiComp : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiComp, IGuiObject)
 
@@ -174,7 +174,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 事件接口
-interface EXP_API IGuiEvent : public IGuiObject
+EXP_INTERFACE IGuiEvent : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiEvent, IGuiObject)
 
@@ -199,7 +199,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 事件转发器
-interface EXP_API IGuiSender : public IGuiObject
+EXP_INTERFACE IGuiSender : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiObject)
 
@@ -324,7 +324,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 效果对象基础
-interface EXP_API IGuiEffect : public IGuiObject
+EXP_INTERFACE IGuiEffect : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiEffect, IGuiObject)
 

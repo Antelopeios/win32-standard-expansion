@@ -146,11 +146,19 @@ public:
 				CGC gc;
 
 				// 获得属性
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("thr_sta"), &gc);
+				if (!state) break;
+				bool thr_sta = (bool)(((void**)state->sta_arr)[0]);
+				LONG sta_tim = thr_sta ? 3 : 5;
+
+				state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
 				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
-				if (ctrl->IsFocus() && status == 0) status = 3;
-				if (!ctrl->IsEnabled()) status = 4;
+				if (!thr_sta)
+				{
+					if (ctrl->IsFocus() && status == 0) status = 3;
+					if (!ctrl->IsEnabled()) status = 4;
+				}
 
 				state = ctrl->GetState(_T("image"), &gc);
 				if (!state) break;
@@ -176,7 +184,7 @@ public:
 				// 处理
 				if (m_rcOld != rect)
 				{
-					LONG r_h = rect.Height() * 5;
+					LONG r_h = rect.Height() * sta_tim;
 					// l-t
 					m_imgTmp[0].Set(image[0]->Get());
 					// m-t
@@ -250,9 +258,9 @@ public:
 						rect.Left(), 
 						rect.Top(), 
 						rect.Left() + m_imgTmp[0].GetWidth(), 
-						rect.Top() + m_imgTmp[0].GetHeight() / 5
+						rect.Top() + m_imgTmp[0].GetHeight() / sta_tim
 						), 
-					CPoint(0, m_imgTmp[0].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[0].GetHeight() * status / sta_tim)
 					);
 				// m-t
 				CImgRenderer::Render
@@ -263,9 +271,9 @@ public:
 						rect.Left() + m_imgTmp[0].GetWidth(), 
 						rect.Top(), 
 						rect.Right() - m_imgTmp[2].GetWidth(), 
-						rect.Top() + m_imgTmp[1].GetHeight() / 5
+						rect.Top() + m_imgTmp[1].GetHeight() / sta_tim
 						), 
-					CPoint(0, m_imgTmp[1].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[1].GetHeight() * status / sta_tim)
 					);
 				// r-t
 				CImgRenderer::Render
@@ -276,9 +284,9 @@ public:
 						rect.Right() - m_imgTmp[2].GetWidth(), 
 						rect.Top(), 
 						rect.Right(), 
-						rect.Top() + m_imgTmp[2].GetHeight() / 5
+						rect.Top() + m_imgTmp[2].GetHeight() / sta_tim
 						), 
-					CPoint(0, m_imgTmp[2].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[2].GetHeight() * status / sta_tim)
 					);
 				// l-m
 				CImgRenderer::Render
@@ -287,11 +295,11 @@ public:
 					CRect
 						(
 						rect.Left(), 
-						rect.Top() + m_imgTmp[0].GetHeight() / 5, 
+						rect.Top() + m_imgTmp[0].GetHeight() / sta_tim, 
 						rect.Left() + m_imgTmp[3].GetWidth(), 
-						rect.Bottom() - m_imgTmp[6].GetHeight() / 5
+						rect.Bottom() - m_imgTmp[6].GetHeight() / sta_tim
 						), 
-					CPoint(0, m_imgTmp[3].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[3].GetHeight() * status / sta_tim)
 					);
 				// m-m
 				CImgRenderer::Render
@@ -300,11 +308,11 @@ public:
 					CRect
 						(
 						rect.Left() + m_imgTmp[3].GetWidth(), 
-						rect.Top() + m_imgTmp[1].GetHeight() / 5, 
+						rect.Top() + m_imgTmp[1].GetHeight() / sta_tim, 
 						rect.Right() - m_imgTmp[5].GetWidth(), 
-						rect.Bottom() - m_imgTmp[7].GetHeight() / 5
+						rect.Bottom() - m_imgTmp[7].GetHeight() / sta_tim
 						), 
-					CPoint(0, m_imgTmp[4].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[4].GetHeight() * status / sta_tim)
 					);
 				// r-m
 				CImgRenderer::Render
@@ -313,11 +321,11 @@ public:
 					CRect
 						(
 						rect.Right() - m_imgTmp[5].GetWidth(), 
-						rect.Top() + m_imgTmp[2].GetHeight() / 5, 
+						rect.Top() + m_imgTmp[2].GetHeight() / sta_tim, 
 						rect.Right(), 
-						rect.Bottom() - m_imgTmp[8].GetHeight() / 5
+						rect.Bottom() - m_imgTmp[8].GetHeight() / sta_tim
 						), 
-					CPoint(0, m_imgTmp[5].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[5].GetHeight() * status / sta_tim)
 					);
 				// l-b
 				CImgRenderer::Render
@@ -326,11 +334,11 @@ public:
 					CRect
 						(
 						rect.Left(), 
-						rect.Bottom() - m_imgTmp[6].GetHeight() / 5, 
+						rect.Bottom() - m_imgTmp[6].GetHeight() / sta_tim, 
 						rect.Left() + m_imgTmp[6].GetWidth(), 
 						rect.Bottom()
 						), 
-					CPoint(0, m_imgTmp[6].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[6].GetHeight() * status / sta_tim)
 					);
 				// m-b
 				CImgRenderer::Render
@@ -339,11 +347,11 @@ public:
 					CRect
 						(
 						rect.Left() + m_imgTmp[6].GetWidth(), 
-						rect.Bottom() - m_imgTmp[7].GetHeight() / 5, 
+						rect.Bottom() - m_imgTmp[7].GetHeight() / sta_tim, 
 						rect.Right() - m_imgTmp[8].GetWidth(), 
 						rect.Bottom()
 						), 
-					CPoint(0, m_imgTmp[7].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[7].GetHeight() * status / sta_tim)
 					);
 				// r-b
 				CImgRenderer::Render
@@ -352,11 +360,11 @@ public:
 					CRect
 						(
 						rect.Right() - m_imgTmp[8].GetWidth(), 
-						rect.Bottom() - m_imgTmp[8].GetHeight() / 5, 
+						rect.Bottom() - m_imgTmp[8].GetHeight() / sta_tim, 
 						rect.Right(), 
 						rect.Bottom()
 						), 
-					CPoint(0, m_imgTmp[8].GetHeight() * status / 5)
+					CPoint(0, m_imgTmp[8].GetHeight() * status / sta_tim)
 					);
 				// 绘文字
 				CImage txt_img(text->GetImage());

@@ -402,7 +402,7 @@ EXP_INLINE bool ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
 }
 
 // 动态指针转换函数模板
-template <class TypeT>
+template <typename TypeT>
 EXP_INLINE TypeT* ExDynCast(void* ptr)
 {
 	if( ptr )

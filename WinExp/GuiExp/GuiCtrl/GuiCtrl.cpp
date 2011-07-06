@@ -74,7 +74,6 @@ IGuiCtrlBase::state_t* IGuiCtrlBase::GetState(const CString& sType, CGC* pGC/* =
 }
 void IGuiCtrlBase::SetState(const CString& sType, void* pState)
 {
-	if (!pState) return;
 	UpdateState();
 }
 void IGuiCtrlBase::UpdateState(bool bRefreshSelf/* = true*/)

@@ -95,7 +95,6 @@ public:
 	}
 	void SetState(const CString& sType, void* pState)
 	{
-		if (!pState) return;
 		if (sType == _T("color"))
 		{
 			m_Color = *(pixel_t*)pState;

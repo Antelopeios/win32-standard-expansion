@@ -28,69 +28,28 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiCommon - 界面拓展库公用定义
+// RTTI - 运行时类型识别
 //
 // Author:	木头云
-// Home:	dark-c.at
+// Home:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-07-07
-// Version:	1.0.0006.0120
+// Version:	1.0.0000.0058
 //
 // History:
-//	- 1.0.0001.1135(2011-05-04)	+ 添加wnd_t类型定义
-//	- 1.0.0002.1506(2011-05-11)	- 移除ATLThunk,采用GWL_USERDATA方式路由窗口过程
-//	- 1.0.0003.1553(2011-05-19)	^ 置换掉默认的单例,内存管理等动作统一在本模块内完成
-//	- 1.0.0004.1616(2011-06-08)	^ 将默认的Normal滤镜置换为CFilterOverlay,方便控件绘图
-//	- 1.0.0005.1438(2011-07-06)	^ 简化结构,统一EXP_API相关的类/结构/接口声明
-//	- 1.0.0006.0120(2011-07-07)	= 关闭由StdExp的RTTI改动引起的C4275警告
+//	- 1.0.0000.0058(2011-07-07)	# 由于在Dll中使用RTTI,会导致工程中的RTTI编译失败,因此将IBaseObjectT模板改为类
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiCommon_h__
-#define __GuiCommon_h__
+#include "Common/Common.h"
+#include "RTTI.h"
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-//////////////////////////////////////////////////////////////////
-
-// 关闭一些警告
-#pragma warning(disable: 4251)
-#pragma warning(disable: 4275)
-
-// Dll 导出宏定义
-#ifdef EXP_EXPORTS
-#define EXP_API __declspec(dllexport)
-#else
-#define EXP_API __declspec(dllimport)
-#endif
-
-//////////////////////////////////////////////////////////////////
-
-// 图像处理库
-#define EXP_IMG_FILTER CFilterOverlay	// 置换掉默认的Normal滤镜
-#include "ImgExp.h"
-
-//////////////////////////////////////////////////////////////////
-
-// 类型/功能定义
 EXP_BEG
-typedef HWND		wnd_t;
-#define ExGetX(lp)	((int)(short)LOWORD(lp))
-#define ExGetY(lp)	((int)(short)HIWORD(lp))
-EXP_END
-
-// 基本接口定义
-#include "GuiCommon/GuiInterface.h"
-
-// 通用对象创建接口
-EXP_BEG
-EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);
-EXP_END
-
-// Gui 基础接口定义
-#include "GuiCommon/GuiBase.h"
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__GuiCommon_h__*/
+EXP_IMPLEMENT_DYNCREATE_NULL(IBaseObject)
+int IBaseObject::TypeInfoOrder = 0;
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END

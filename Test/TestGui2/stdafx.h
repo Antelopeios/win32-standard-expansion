@@ -8,6 +8,12 @@
 #include "GuiExp.h"
 
 #ifdef _DEBUG
+#pragma comment(lib, "../../_Output/Debug/StdExp.lib")
+#else
+#pragma comment(lib, "../../_Output/Release/StdExp.lib")
+#endif
+
+#ifdef _DEBUG
 #pragma comment(lib, "../../_Output/Debug/ImgExp.lib")
 #else
 #pragma comment(lib, "../../_Output/Release/ImgExp.lib")

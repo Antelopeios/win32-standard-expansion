@@ -1,0 +1,64 @@
+#include "stdafx.h"
+#include "DemoGui1.h"
+
+//////////////////////////////////////////////////////////////////
+
+CImage CResManager::banner;
+
+CImage CResManager::corner_lb;
+CImage CResManager::corner_rb;
+CImage CResManager::corner_rt;
+CImage CResManager::corner_lt;
+
+CImage CResManager::line_bottom;
+CImage CResManager::line_left;
+CImage CResManager::line_right;
+CImage CResManager::line_top;
+
+CImage CResManager::tag_bg;
+CImage CResManager::toolbar_bg;
+
+//////////////////////////////////////////////////////////////////
+
+class CResLoader
+{
+public:
+	CResLoader()
+	{
+		// 垃圾回收器
+		CGC gc;
+
+		// 解码器
+		ICoderObject* coder = CImgAnalyzer::GetCoder(CImgAnalyzer::png, &gc);
+		if (!coder) return;
+		CIOFile file;
+		coder->SetFile(&file);
+
+		// 图片资源
+		file.Open(_T("ui/banner.png"));
+		CResManager::banner.Set(coder->Decode());
+
+		file.Open(_T("ui/corner_lb.png"));
+		CResManager::corner_lb.Set(coder->Decode());
+		file.Open(_T("ui/corner_rb.png"));
+		CResManager::corner_rb.Set(coder->Decode());
+		file.Open(_T("ui/corner_rt.png"));
+		CResManager::corner_rt.Set(coder->Decode());
+		file.Open(_T("ui/corner_lt.png"));
+		CResManager::corner_lt.Set(coder->Decode());
+
+		file.Open(_T("ui/line_bottom.png"));
+		CResManager::line_bottom.Set(coder->Decode());
+		file.Open(_T("ui/line_left.png"));
+		CResManager::line_left.Set(coder->Decode());
+		file.Open(_T("ui/line_right.png"));
+		CResManager::line_right.Set(coder->Decode());
+		file.Open(_T("ui/line_top.png"));
+		CResManager::line_top.Set(coder->Decode());
+
+		file.Open(_T("ui/tag_bg.png"));
+		CResManager::tag_bg.Set(coder->Decode());
+		file.Open(_T("ui/toolbar_bg.png"));
+		CResManager::toolbar_bg.Set(coder->Decode());
+	}
+} g_loader;

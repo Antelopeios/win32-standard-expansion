@@ -117,7 +117,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -177,6 +177,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiEvents.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ResManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -204,6 +212,10 @@
 			>
 			<File
 				RelativePath=".\DemoGui1.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ResManager.h"
 				>
 			</File>
 			<File

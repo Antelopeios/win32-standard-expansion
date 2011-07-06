@@ -107,7 +107,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -294,6 +294,10 @@
 			</File>
 			<File
 				RelativePath=".\Algorithm\NonCopyable.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Algorithm\RTTI.cpp"
 				>
 			</File>
 			<File

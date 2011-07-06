@@ -120,6 +120,16 @@ typedef __int64				int64_t;
 #define ExRandom(num)		((num) ? (rand() % (num)) : 0)
 #define ExRandomize()		srand((unsigned)time(NULL))
 
+// 导出定义
+
+#ifndef EXP_API
+#define EXP_API
+#endif
+
+#define EXP_CLASS class EXP_API
+#define EXP_STRUCT struct EXP_API
+#define EXP_INTERFACE interface EXP_API
+
 //////////////////////////////////////////////////////////////////
 
 EXP_END

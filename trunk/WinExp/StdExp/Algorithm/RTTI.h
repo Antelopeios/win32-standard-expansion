@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.1.0012.1400
+// Date:	2011-07-07
+// Version:	1.1.0013.0058
 //
 // History:
 //	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
@@ -42,6 +42,7 @@
 //	- 1.1.0010.1704(2011-05-13)	# 修正RTTI在多继承时的编译错误
 //	- 1.1.0011.1511(2011-05-16)	= 调整一些内部接口的名称定义
 //	- 1.1.0012.1400(2011-05-19)	^ ExDynCreate()支持默认传入空指针GC构造对象
+//	- 1.1.0013.0058(2011-07-07)	# 由于在Dll中使用RTTI,会导致工程中的RTTI编译失败,因此将IBaseObjectT模板改为类
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -61,10 +62,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // RTTI 起始类声明
-template <int IntT = 0>
-interface IBaseObjectT;
-
-typedef IBaseObjectT<> IBaseObject;
+interface IBaseObject;
 
 //////////////////////////////////////////////////////////////////
 
@@ -369,20 +367,14 @@ private:																					\
 //////////////////////////////////////////////////////////////////
 
 // RTTI 起始类
-template <int IntT/* = 0*/>
-interface IBaseObjectT
+interface IBaseObject
 {
-	EXP_DECLARE_DYNCREATE_NULL(IBaseObjectT)
+	EXP_DECLARE_DYNCREATE_NULL(IBaseObject)
 
 public:
 	// type_id 自增量
 	static int TypeInfoOrder;
 };
-
-EXP_IMPLEMENT_DYNCREATE_NULL(IBaseObjectT<IntT>, template <int IntT>)
-
-template <int IntT>
-int IBaseObjectT<IntT>::TypeInfoOrder = IntT;
 
 //////////////////////////////////////////////////////////////////
 

@@ -119,7 +119,6 @@ public:
 	}
 	void SetState(const CString& sType, void* pState)
 	{
-		if (!pState) return;
 		if (sType == _T("edit"))
 		{
 			m_Edit = *((CString*)pState);

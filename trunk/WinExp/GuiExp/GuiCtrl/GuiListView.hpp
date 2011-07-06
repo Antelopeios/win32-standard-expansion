@@ -86,7 +86,6 @@ public:
 	}
 	void SetState(const CString& sType, void* pState)
 	{
-		if (!pState) return;
 		if (sType == _T("icon"))
 		{
 			m_Icon = *((CImage*)pState);
@@ -146,22 +145,19 @@ public:
 	}
 	void SetState(const CString& sType, void* pState)
 	{
-		if (!pState) return;
 		if (sType == _T("items"))
 		{
 			items_t* old_sta = m_ItemList;
 			m_ItemList = (items_t*)pState;
 			if (old_sta != m_ItemList)
-			{
 				IGuiCtrlBase::SetState(sType, pState);
-			}
 		}
 		else
 		if (sType == _T("space"))
 		{
 			LONG old_sta = m_Space;
 			m_Space = (LONG)(LONG_PTR)pState;
-			if (old_sta != m_LocOff)
+			if (old_sta != m_Space)
 				IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

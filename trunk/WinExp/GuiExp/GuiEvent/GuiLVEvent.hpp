@@ -194,7 +194,7 @@ protected:
 	IGuiCtrl* m_Ctrl;
 
 public:
-	CGuiEditEvent()
+	CGuiLVEvent()
 		: m_Ctrl(NULL)
 	{}
 
@@ -207,6 +207,13 @@ public:
 		if (!state) return NULL;
 		return (CListT<IGuiCtrl*>*)(((void**)state->sta_arr)[0]);
 	}
+	LONG GetSpace(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("space"), pGC);
+		if (!state) return NULL;
+		return (LONG)(LONG_PTR)(((void**)state->sta_arr)[0]);
+	}
 
 	// 格式化列表项的位置
 	void FormatItems(CGC* pGC)
@@ -218,18 +225,28 @@ public:
 		// 获得属性
 		items_t* items = GetItems(pGC);
 		if (!items || items->Empty()) return;
+		LONG space = GetSpace(pGC);
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
 
 		// 遍历列表项
-		CRect itm_rc;
+		CRect itm_rc, old_rc(0, space, 0, space);
 		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 		{
 			IGuiCtrl* item = *ite;
 			if (!item) continue;
+			// 获取当前项的区域
+			item->GetWindowRect(itm_rc);
+			// 调整区域
+			itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
+			if (itm_rc.Right() + space > rect.Right())
+				itm_rc.MoveTo(CPoint(rect.Left() + space, old_rc.Bottom() + space));
+			// 设置当前项区域
+			item->SetWindowRect(itm_rc);
+			// 存储区域
+			old_rc = itm_rc;
 		}
-
 	}
 
 	// 消息响应
@@ -242,11 +259,7 @@ public:
 		switch( nMessage )
 		{
 		case WM_SHOWWINDOW:
-			{
-				CGC gc;
-				FormatItems(&gc);
-			}
-			break;
+			if (!wParam) break;
 		case WM_SIZE:
 			{
 				CGC gc;

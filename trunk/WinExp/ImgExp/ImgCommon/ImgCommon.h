@@ -53,7 +53,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "../StdExp/StdExp.h"
+#include "StdExp.h"
 
 EXP_BEG
 

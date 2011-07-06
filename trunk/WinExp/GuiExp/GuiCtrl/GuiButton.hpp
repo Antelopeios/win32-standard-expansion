@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-01
-// Version:	1.0.0002.1310
+// Date:	2011-07-06
+// Version:	1.0.0003.1648
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
 //								= CGuiButton::m_Status初始化为nor
 //								= CGuiButton不再托管内部的图片资源
 //	- 1.0.0002.1310(2011-07-01)	+ CGuiButton添加locate属性,支持自定义文字显示位置
+//	- 1.0.0003.1648(2011-07-06)	+ CGuiButton添加thr_sta属性,支持三态按钮
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -62,7 +63,7 @@ public:
 	/*
 		正常; 浮动; 按下; 焦点; 禁止
 	*/
-	enum status_t {nor, ovr, hit};
+	enum status_t {nor, ovr, hit/*, foc, dis*/};
 	/*
 		文字位置: 中; 上; 下; 左; 右
 	*/
@@ -72,6 +73,8 @@ protected:
 	status_t m_Status;	// 按钮状态
 	locate_t m_Locate;	// 文字位置
 	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
+
+	bool m_ThreeSta;	// 是否是三态按钮
 	pixel_t m_Color[5];
 	CImage m_Image[9];	// 九宫格分割,每个小块保存5个状态
 	CText m_Text[5];
@@ -81,6 +84,7 @@ public:
 		: m_Status(nor)
 		, m_Locate(center)
 		, m_LocOff(5)
+		, m_ThreeSta(false)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
 		// 添加事件对象
@@ -105,6 +109,9 @@ public:
 			if (state->sta_typ == _T("loc_off"))
 				state->sta_arr.Add((void*)m_LocOff);
 			else
+			if (state->sta_typ == _T("thr_sta"))
+				state->sta_arr.Add((void*)m_ThreeSta);
+			else
 			if (state->sta_typ == _T("color"))
 				for(int i = 0; i < _countof(m_Color); ++i)
 					state->sta_arr.Add(m_Color + i);
@@ -121,7 +128,6 @@ public:
 	}
 	void SetState(const CString& sType, void* pState)
 	{
-		if (!pState) return;
 		if (sType == _T("status"))
 		{
 			status_t old_sta = m_Status;
@@ -143,6 +149,14 @@ public:
 			LONG old_sta = m_LocOff;
 			m_LocOff = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_LocOff)
+				EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("thr_sta"))
+		{
+			bool old_sta = m_ThreeSta;
+			m_ThreeSta = (bool)(LONG_PTR)pState;
+			if (old_sta != m_ThreeSta)
 				EXP_BASE::SetState(sType, pState);
 		}
 		else

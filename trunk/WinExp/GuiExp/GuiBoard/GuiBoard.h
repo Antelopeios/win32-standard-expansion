@@ -62,7 +62,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 窗口对象接口
-interface EXP_API IGuiBoard : public IGuiBase
+EXP_INTERFACE IGuiBoard : public IGuiBase
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiBoard, IGuiBase)
 
@@ -145,14 +145,8 @@ struct _GuiBoardAlloc
 	}
 };
 
-// 导出的基础类定义
-template <typename TypeT, typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-class EXP_API CSmartPtrT;
-template <typename TypeT, typename TypeAllocT = _TypeAlloc>
-interface EXP_API ITypeObjectT;
-
 // GUI 窗口对象
-interface EXP_API IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
+EXP_INTERFACE IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
 

@@ -25,7 +25,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	CText txt_edt;
 	txt_edt.SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_edt.SetColor(ExRGBA(0, 60, 116, 200));
-|
+
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
 	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);

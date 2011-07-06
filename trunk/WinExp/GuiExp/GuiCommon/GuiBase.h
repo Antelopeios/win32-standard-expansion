@@ -54,7 +54,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 界面对象基础
-interface EXP_API IGuiBase : public IGuiComp, public IGuiSender
+EXP_INTERFACE IGuiBase : public IGuiComp, public IGuiSender
 {
 	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
 

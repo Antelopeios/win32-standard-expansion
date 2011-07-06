@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0004.1616
+// Date:	2011-07-06
+// Version:	1.0.0005.1438
 //
 // History:
 //	- 1.0.0001.1135(2011-05-04)	+ 添加wnd_t类型定义
 //	- 1.0.0002.1506(2011-05-11)	- 移除ATLThunk,采用GWL_USERDATA方式路由窗口过程
 //	- 1.0.0003.1553(2011-05-19)	^ 置换掉默认的单例,内存管理等动作统一在本模块内完成
 //	- 1.0.0004.1616(2011-06-08)	^ 将默认的Normal滤镜置换为CFilterOverlay,方便控件绘图
+//	- 1.0.0005.1438(2011-07-06)	^ 简化结构,统一EXP_API相关的类/结构/接口声明
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCommon_h__
@@ -52,6 +53,9 @@
 
 //////////////////////////////////////////////////////////////////
 
+// 关闭一些警告
+#pragma warning(disable: 4251)
+
 // Dll 导出宏定义
 #ifdef EXP_EXPORTS
 #define EXP_API __declspec(dllexport)
@@ -59,73 +63,32 @@
 #define EXP_API __declspec(dllimport)
 #endif
 
-//////////////////////////////////////////////////////////////////
-
-#include "../StdExp/Common/Common.h"
-#include "../StdExp/Thread/Lock.h"
-
-EXP_BEG
-
-// 模块内部单例定义
-template <typename TypeT>
-interface EXP_API IGuiSingletonT
-{
-public:
-	EXP_INLINE static TypeT& Instance()
-	{
-		static TypeT* instance = NULL;
-		if (instance == NULL)
-		{
-			ExLockThis();
-			if (instance == NULL)
-			{
-				static TypeT type;
-				instance = &type;
-			}
-		}
-		return (*instance);
-	}
-};
-
-EXP_END
+#define EXP_CLASS class EXP_API
+#define EXP_STRUCT struct EXP_API
+#define EXP_INTERFACE interface EXP_API
 
 //////////////////////////////////////////////////////////////////
 
 // 图像处理库
-#define EXP_SINGLETON IGuiSingletonT	// 置换掉默认的单例,内存管理等动作统一在本模块内完成
 #define EXP_IMG_FILTER CFilterOverlay	// 置换掉默认的Normal滤镜
-#include "../ImgExp/ImgExp.h"
+#include "ImgExp.h"
 
 //////////////////////////////////////////////////////////////////
 
+// 类型/功能定义
 EXP_BEG
-
-// 类型定义
-
 typedef HWND		wnd_t;
-
-// 功能定义
-
 #define ExGetX(lp)	((int)(short)LOWORD(lp))
 #define ExGetY(lp)	((int)(short)HIWORD(lp))
-
 EXP_END
-
-//////////////////////////////////////////////////////////////////
 
 // 基本接口定义
 #include "GuiCommon/GuiInterface.h"
 
-//////////////////////////////////////////////////////////////////
-
-EXP_BEG
-
 // 通用对象创建接口
+EXP_BEG
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);
-
 EXP_END
-
-//////////////////////////////////////////////////////////////////
 
 // Gui 基础接口定义
 #include "GuiCommon/GuiBase.h"

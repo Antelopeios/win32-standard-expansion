@@ -235,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiCtrl\GuiGroup.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiCtrl\GuiListView.hpp"
 				>
 			</File>

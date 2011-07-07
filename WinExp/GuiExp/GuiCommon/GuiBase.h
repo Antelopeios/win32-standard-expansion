@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-01
-// Version:	1.0.0004.1020
+// Date:	2011-07-07
+// Version:	1.0.0005.1550
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
 //	- 1.0.0003.1544(2011-06-28)	+ 添加事件捕获接口,支持针对一个IGuiBase设置捕获所有的事件
 //	- 1.0.0004.1020(2011-07-01)	+ 重写IGuiBase::InsEvent()接口,当事件链表中有数据时,向第二个结点处插入新结点(为了保证第一个插入的结点始终最后执行)
+//	- 1.0.0005.1550(2011-07-07)	# IGuiBase::GetPtCtrl()会返回不可见控件,导致可见控件被遮住而无法响应消息
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -80,7 +81,7 @@ public:
 	{
 		if (!pEvent) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = IGuiSender::Find(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(pEvent);
 		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
 		if (GetEvent().Empty())
@@ -93,8 +94,11 @@ public:
 
 	virtual bool GetRealRect(CRect& rc) = 0;
 
+	virtual bool IsVisible() const = 0;
+
 	IGuiBase* GetPtCtrl(const CPoint& pt)
 	{
+		if (!IsVisible()) return NULL;
 		CRect rc;
 		GetRealRect(rc);
 		if (rc.PtInRect(pt))

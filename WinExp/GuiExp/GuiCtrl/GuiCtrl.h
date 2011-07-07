@@ -153,7 +153,6 @@ public:
 
 	// 设置可见性
 	virtual bool SetVisible(bool bVisible = true) = 0;
-	virtual bool IsVisible() const = 0;
 
 	// 判断有效性
 	static bool IsEffect(IGuiCtrl* pCtrl)

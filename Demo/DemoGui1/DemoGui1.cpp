@@ -37,6 +37,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->CenterWindow();
 	wnd->SetLayered();
 	wnd->GetClientRect(rc_wnd);
+	wnd->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_wnd"), &gc)));
 
 	// 创建控件对象并设置
 
@@ -48,36 +49,67 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 //#define ExGuiLoadPic()
 
 	ExGuiLoadPic(banner);
-
 	ExGuiLoadPic(corner_lb);
 	ExGuiLoadPic(corner_rb);
 	ExGuiLoadPic(corner_rt);
 	ExGuiLoadPic(corner_lt);
-
 	ExGuiLoadPic(line_bottom);
 	ExGuiLoadPic(line_left);
 	ExGuiLoadPic(line_right);
 	ExGuiLoadPic(line_top);
-
 	ExGuiLoadPic(tag_bg);
 	ExGuiLoadPic(toolbar_bg);
 
+#define EXP_GUI_BTN(btn_name) btn_##btn_name
+#define ExGuiLoadBtn(btn_name, thr_sta) \
+		IGuiCtrl* EXP_GUI_BTN(btn_name) = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
+		EXP_GUI_BTN(btn_name)->SetState(_T("thr_sta"), (void*)thr_sta); \
+		{ \
+			CImage tmp[9]; \
+			tmp[4] = CResManager::##btn_name; \
+			EXP_GUI_BTN(btn_name)->SetState(_T("image"), tmp); \
+		} \
+		EXP_GUI_BTN(btn_name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#btn_name), &gc)))
+//#define ExGuiLoadBtn()
+
+	ExGuiLoadBtn(win_sysbtn_close, true);
+	ExGuiLoadBtn(win_sysbtn_max, true);
+	ExGuiLoadBtn(win_sysbtn_restore, true);
+	ExGuiLoadBtn(win_sysbtn_min, true);
+
+	//IGuiCtrl* grp_topbar_btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc));
+	//CArrayT<IGuiCtrl*> itm_topbar_btn;
+	//for(int i = 0; i < 8; ++i)
+	//{
+	//	IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc));
+	//	grp_topbar_btn->AddComp(btn);
+	//	itm_topbar_btn.Add(btn);
+	//}
+	//grp_topbar_btn->SetState(_T("items"), &itm_topbar_btn);
+	//grp_topbar_btn->SetState(_T("image"), &CResManager::topbar_btn);
+
 	// 将窗口与控件关联
 
+	// 内容打底
 	wnd->AddComp(EXP_GUI_PIC(banner));
+	wnd->AddComp(EXP_GUI_PIC(tag_bg));
+	wnd->AddComp(EXP_GUI_PIC(toolbar_bg));
 
-	wnd->AddComp(EXP_GUI_PIC(corner_lb));
-	wnd->AddComp(EXP_GUI_PIC(corner_rb));
-	wnd->AddComp(EXP_GUI_PIC(corner_rt));
-	wnd->AddComp(EXP_GUI_PIC(corner_lt));
+	// 三态按钮
+	wnd->AddComp(EXP_GUI_BTN(win_sysbtn_close));
+	wnd->AddComp(EXP_GUI_BTN(win_sysbtn_max));
+	wnd->AddComp(EXP_GUI_BTN(win_sysbtn_restore));
+	wnd->AddComp(EXP_GUI_BTN(win_sysbtn_min));
 
+	// 窗口边框
 	wnd->AddComp(EXP_GUI_PIC(line_bottom));
 	wnd->AddComp(EXP_GUI_PIC(line_left));
 	wnd->AddComp(EXP_GUI_PIC(line_right));
 	wnd->AddComp(EXP_GUI_PIC(line_top));
-	wnd->AddComp(EXP_GUI_PIC(tag_bg));
-
-	wnd->AddComp(EXP_GUI_PIC(toolbar_bg));
+	wnd->AddComp(EXP_GUI_PIC(corner_lb));
+	wnd->AddComp(EXP_GUI_PIC(corner_rb));
+	wnd->AddComp(EXP_GUI_PIC(corner_rt));
+	wnd->AddComp(EXP_GUI_PIC(corner_lt));
 
 	/////////////////////////////////
 

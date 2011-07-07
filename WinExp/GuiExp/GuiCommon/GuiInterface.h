@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-29
-// Version:	1.0.0011.1530
+// Date:	2011-07-07
+// Version:	1.0.0012.1523
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -54,6 +54,7 @@
 //	- 1.0.0011.1530(2011-06-29)	# 修正IGuiSender::Send()内部传递消息结果时可能出现的错误
 //								^ IGuiSender后添加的事件优先执行,优先执行自身的事件对象,再向子控件传递消息
 //								+ 相关组合接口添加Ins...()操作,用于在组合队列的头部添加子对象
+//	- 1.0.0012.1523(2011-07-07)	# 调整Comp与Event接口内Find()的命名,防止外部调用冲突
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -121,14 +122,14 @@ public:
 	list_t& GetChildren() { return *m_Cldr; }
 
 	// 查找
-	list_t::iterator_t& Find(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
+	list_t::iterator_t& FindComp(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
 
 	// 组合接口
 	virtual void AddComp(IGuiComp* pComp)
 	{
 		if (!pComp) return ;
 		// 定位对象
-		list_t::iterator_t ite = Find(pComp);
+		list_t::iterator_t ite = FindComp(pComp);
 		if (ite != GetChildren().Tail()) return;
 		// 添加新对象
 		if( pComp->m_Pare )
@@ -140,7 +141,7 @@ public:
 	{
 		if (!pComp) return ;
 		// 定位对象
-		list_t::iterator_t ite = Find(pComp);
+		list_t::iterator_t ite = FindComp(pComp);
 		if (ite != GetChildren().Tail()) return;
 		// 添加新对象
 		if( pComp->m_Pare )
@@ -152,7 +153,7 @@ public:
 	{
 		if (!pComp) return ;
 		// 定位对象
-		list_t::iterator_t ite = Find(pComp);
+		list_t::iterator_t ite = FindComp(pComp);
 		if (ite == GetChildren().Tail()) return;
 		// 删除对象
 		GetChildren().Del(ite);
@@ -230,14 +231,14 @@ public:
 	evt_list_t& GetEvent() { return *m_CldrEvt; }
 
 	// 查找
-	evt_list_t::iterator_t& Find(IGuiEvent* pEvent) { return evt_list_t::finder_t::Find(GetEvent(), pEvent); }
+	evt_list_t::iterator_t& FindEvent(IGuiEvent* pEvent) { return evt_list_t::finder_t::Find(GetEvent(), pEvent); }
 
 	// 组合接口
 	virtual void AddEvent(IGuiEvent* pEvent)
 	{
 		if (!pEvent) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = Find(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(pEvent);
 		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
 		GetEvent().Add(pEvent);
@@ -246,7 +247,7 @@ public:
 	{
 		if (!pEvent) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = Find(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(pEvent);
 		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
 		GetEvent().Add(pEvent, GetEvent().Head());
@@ -255,7 +256,7 @@ public:
 	{
 		if (!pEvent) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = Find(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(pEvent);
 		if (ite == GetEvent().Tail()) return;
 		// 删除对象
 		GetEvent().Del(ite);

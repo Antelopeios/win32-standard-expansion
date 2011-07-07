@@ -14,6 +14,7 @@ CImage CResManager::line_right;
 CImage CResManager::line_top;
 CImage CResManager::tag_bg;
 CImage CResManager::toolbar_bg;
+CImage CResManager::list;
 
 CImage CResManager::win_sysbtn_close;
 CImage CResManager::win_sysbtn_max;
@@ -62,6 +63,8 @@ public:
 		CResManager::tag_bg.Set(coder->Decode());
 		file.Open(_T("ui/toolbar_bg.png"));
 		CResManager::toolbar_bg.Set(coder->Decode());
+		file.Open(_T("ui/list.png"));
+		CResManager::list.Set(coder->Decode());
 
 		file.Open(_T("ui/win_sysbtn_close.png"));
 		CResManager::win_sysbtn_close.Set(coder->Decode());

@@ -90,22 +90,20 @@ public:
 		{
 			CImage* img = (CImage*)pState;
 			if (!img || img->IsNull()) return;
-			CRect rect;
-			GetWindowRect(rect);
-			rect.pt2.x = rect.pt1.x + img->GetWidth();
-			rect.pt2.y = rect.pt1.y + img->GetHeight();
-			SetWindowRect(rect);
 			if (!m_ItemList || m_ItemList->Empty()) return;
 			DWORD count = m_ItemList->GetCount();
 			LONG offset = img->GetWidth() / count;
 			CRect rc_img(0, 0, offset, img->GetHeight());
+			CRect rc_itm(0, 0, offset, img->GetHeight() / 3);
+			CPoint pt_off(offset, 0);
 			CImage tmp[9];
 			for(DWORD i = 0; i < count; ++i)
 			{
-				m_ItemList->GetAt(i)->SetWindowRect(rc_img);
+				m_ItemList->GetAt(i)->SetWindowRect(rc_itm);
 				tmp[4].Set(img->Clone(rc_img));
 				m_ItemList->GetAt(i)->SetState(_T("image"), tmp);
-				rc_img.Offset(CPoint(offset, 0));
+				rc_img.Offset(pt_off);
+				rc_itm.Offset(pt_off);
 			}
 			EXP_BASE::SetState(sType, pState);
 		}

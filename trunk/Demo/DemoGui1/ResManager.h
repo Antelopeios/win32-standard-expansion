@@ -16,6 +16,7 @@ public:
 	static CImage line_top;
 	static CImage tag_bg;
 	static CImage toolbar_bg;
+	static CImage list;
 
 	static CImage win_sysbtn_close;
 	static CImage win_sysbtn_max;

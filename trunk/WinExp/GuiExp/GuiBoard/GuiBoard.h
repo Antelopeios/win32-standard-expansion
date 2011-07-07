@@ -209,6 +209,7 @@ public:
 	void InvalidateRgn(HRGN hRgn);
 	bool ShowWindow(int nCmdShow);
 	bool UpdateWindow();
+	bool IsVisible() const;
 
 	// ´°¿ÚDC
 	graph_t GetDC();

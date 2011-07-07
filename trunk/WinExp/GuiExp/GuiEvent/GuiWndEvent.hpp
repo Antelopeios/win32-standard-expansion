@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-01
-// Version:	1.0.0010.1535
+// Date:	2011-07-07
+// Version:	1.0.0011.1330
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -50,6 +50,7 @@
 //								+ 添加事件捕获支持,允许控件设置所有消息的捕获
 //	- 1.0.0010.1535(2011-07-01)	+ WM_SIZE不能继续向下转发
 //								+ 处理控件消息时WM_SHOWWINDOW消息不应该向下转发
+//	- 1.0.0011.1330(2011-07-07)	# 修正WM_SHOWWINDOW消息会被第一层控件截断的问题(WM_SHOWWINDOW应该部分向下转发)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -144,10 +145,10 @@ protected:
 			case WM_NCRBUTTONDBLCLK:
 			case WM_NCMBUTTONDOWN:
 			case WM_NCMBUTTONDBLCLK:
-				if (ctrl) ctrl->SetFocus();
+				if (ctrl && ctrl->IsEnabled()) ctrl->SetFocus();
 				break;
 			}
-			if (!ctrl) goto EndWndSend;
+			if (!ctrl || !ctrl->IsEnabled()) goto EndWndSend;
 			// 初始化返回值
 			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
@@ -160,7 +161,7 @@ protected:
 			nMessage <= WM_KEYLAST)
 		{
 			IGuiCtrl* ctrl = IGuiCtrl::GetFocus();
-			if (!ctrl) goto EndWndSend;
+			if (!ctrl || !ctrl->IsEnabled()) goto EndWndSend;
 			// 初始化返回值
 			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
@@ -173,7 +174,7 @@ protected:
 				if (wParam == VK_TAB)
 				{
 					IGuiComp* comp = ctrl->GetParent();
-					IGuiComp::list_t::iterator_t ite = comp->Find(ExDynCast<IGuiComp>(ctrl));
+					IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
 					if (ite == comp->GetChildren().Tail()) goto EndWndSend;
 					if (m_ShiftDown)
 					{
@@ -281,12 +282,28 @@ protected:
 			}
 		}
 		else
+		if (nMessage == WM_SHOWWINDOW)
 		{
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
 				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if (!ctrl) continue;
+				if (!ctrl || !ctrl->IsVisible()) continue;
+				// 初始化返回值
+				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				// 转发消息
+				ctrl->Send(*ite, nMessage, wParam, lParam);
+				// 判断返回值
+				lrDef = ctrl->GetResult(lrDef);
+			}
+		}
+		else
+		{
+		//	ExTrace(_T("0x%04X\n"), nMessage);
+			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			{
+				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
+				if (!ctrl || !ctrl->IsEnabled()) continue;
 				// 初始化返回值
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
@@ -360,9 +377,6 @@ public:
 				ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));
 			}
 		}
-		else
-		if (nMessage == WM_SHOWWINDOW)
-			return; /*处理控件消息时WM_SHOWWINDOW消息不应该向下转发*/
 		else
 			ret = BaseSend(base, nMessage, wParam, lParam);
 		SetResult(ret);

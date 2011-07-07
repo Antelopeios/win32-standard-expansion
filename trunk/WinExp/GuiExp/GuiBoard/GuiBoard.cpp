@@ -372,6 +372,11 @@ bool IGuiBoardBase::UpdateWindow()
 	if (IsNull()) return false;
 	return (bool)::UpdateWindow(Get());
 }
+bool IGuiBoardBase::IsVisible() const
+{
+	if (IsNull()) return false;
+	return ::IsWindowVisible(Get());
+}
 
 // ´°¿ÚDC
 graph_t IGuiBoardBase::GetDC()

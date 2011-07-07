@@ -202,5 +202,6 @@ EXP_END
 #include "GuiCtrl/GuiButton.hpp"
 #include "GuiCtrl/GuiEdit.hpp"
 #include "GuiCtrl/GuiListView.hpp"
+#include "GuiCtrl/GuiGroup.hpp"
 
 //////////////////////////////////////////////////////////////////

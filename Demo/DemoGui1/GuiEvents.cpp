@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "DemoGui1.h"
 
+#define GUI_W_MIN 700
+#define GUI_H_MIN 500
+
 //////////////////////////////////////////////////////////////////
 
 class CEvent_wnd : public IGuiEvent
@@ -74,9 +77,9 @@ public:
 				ExAssert(wnd);
 				IGuiComp::list_t::iterator_t ite = wnd->FindComp(ctrl);
 				if (m_bZoomed)
-					ite += 5; // win_sysbtn_restore
+					ite += 6; // win_sysbtn_restore
 				else
-					ite += 4; // win_sysbtn_max
+					ite += 5; // win_sysbtn_max
 				ctrl = ExDynCast<IGuiCtrl>(*ite);
 				ctrl->Send(ExDynCast<IGuiObject>(*ite), WM_COMMAND, BN_CLICKED);
 			}
@@ -109,6 +112,14 @@ class CEvent_corner_lb : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_lb, IGuiEvent)
 
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_corner_lb()
+		: m_MouseDown(false)
+	{}
+
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
@@ -133,6 +144,38 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt1.x = pt_tmp.x;
+				rc_wnd.pt2.y = pt_tmp.y;
+				if (rc_wnd.Width() < GUI_W_MIN)
+					rc_wnd.pt1.x = rc_wnd.pt2.x - GUI_W_MIN;
+				if (rc_wnd.Height() < GUI_H_MIN)
+					rc_wnd.pt2.y = rc_wnd.pt1.y + GUI_H_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -144,6 +187,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_corner_lb, IGuiEvent)
 class CEvent_corner_rb : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_rb, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_corner_rb()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -169,6 +220,38 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt2.x = pt_tmp.x;
+				rc_wnd.pt2.y = pt_tmp.y;
+				if (rc_wnd.Width() < GUI_W_MIN)
+					rc_wnd.pt2.x = rc_wnd.pt1.x + GUI_W_MIN;
+				if (rc_wnd.Height() < GUI_H_MIN)
+					rc_wnd.pt2.y = rc_wnd.pt1.y + GUI_H_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -180,6 +263,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_corner_rb, IGuiEvent)
 class CEvent_corner_rt : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_rt, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_corner_rt()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -205,6 +296,38 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt2.x = pt_tmp.x;
+				rc_wnd.pt1.y = pt_tmp.y;
+				if (rc_wnd.Width() < GUI_W_MIN)
+					rc_wnd.pt2.x = rc_wnd.pt1.x + GUI_W_MIN;
+				if (rc_wnd.Height() < GUI_H_MIN)
+					rc_wnd.pt1.y = rc_wnd.pt2.y - GUI_H_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -216,6 +339,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_corner_rt, IGuiEvent)
 class CEvent_corner_lt : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_lt, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_corner_lt()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -241,6 +372,38 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt1.x = pt_tmp.x;
+				rc_wnd.pt1.y = pt_tmp.y;
+				if (rc_wnd.Width() < GUI_W_MIN)
+					rc_wnd.pt1.x = rc_wnd.pt2.x - GUI_W_MIN;
+				if (rc_wnd.Height() < GUI_H_MIN)
+					rc_wnd.pt1.y = rc_wnd.pt2.y - GUI_H_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -252,6 +415,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_corner_lt, IGuiEvent)
 class CEvent_line_bottom : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_bottom, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_line_bottom()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -277,6 +448,35 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt2.y = pt_tmp.y;
+				if (rc_wnd.Height() < GUI_H_MIN)
+					rc_wnd.pt2.y = rc_wnd.pt1.y + GUI_H_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -288,6 +488,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_line_bottom, IGuiEvent)
 class CEvent_line_left : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_left, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_line_left()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -313,6 +521,35 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt1.x = pt_tmp.x;
+				if (rc_wnd.Width() < GUI_W_MIN)
+					rc_wnd.pt1.x = rc_wnd.pt2.x - GUI_W_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -324,6 +561,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_line_left, IGuiEvent)
 class CEvent_line_right : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_right, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_line_right()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -349,6 +594,35 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt2.x = pt_tmp.x;
+				if (rc_wnd.Width() < GUI_W_MIN)
+					rc_wnd.pt2.x = rc_wnd.pt1.x + GUI_W_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
+			break;
 		}
 	}
 };
@@ -360,6 +634,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_line_right, IGuiEvent)
 class CEvent_line_top : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_top, IGuiEvent)
+
+protected:
+	bool m_MouseDown;
+
+public:
+	CEvent_line_top()
+		: m_MouseDown(false)
+	{}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -384,6 +666,35 @@ public:
 				b = t + CResManager::line_top.GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
+			break;
+		case WM_MOUSEMOVE:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+			// 鼠标移动时定位光标
+			if (m_MouseDown)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetWindowRect(rc_wnd);
+
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
+
+				rc_wnd.pt1.y = pt_tmp.y;
+				if (rc_wnd.Height() < GUI_H_MIN)
+					rc_wnd.pt1.y = rc_wnd.pt2.y - GUI_H_MIN;
+				wnd->MoveWindow(rc_wnd);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+			ctrl->SetCapture();
+			m_MouseDown = true;
+			break;
+		case WM_LBUTTONUP:
+			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
+			m_MouseDown = false;
+			ctrl->ReleaseCapture();
 			break;
 		}
 	}
@@ -462,6 +773,42 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_toolbar_bg, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_list : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_list, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+
+				LONG l, r, t, b;
+				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + CResManager::banner.GetHeight();
+				r = rc_wnd.Right() - CResManager::line_right.GetWidth();
+				b = rc_wnd.Bottom() - CResManager::line_bottom.GetHeight() - CResManager::toolbar_bg.GetHeight();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_list, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 
@@ -691,5 +1038,45 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_win_sysbtn_min, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_topbar_btn : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_topbar_btn, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+
+				LONG l, r, t, b;
+				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::banner.GetHeight() - 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::topbar_btn.GetHeight() / 3;
+				r = l + CResManager::topbar_btn.GetWidth();
+				b = t + CResManager::topbar_btn.GetHeight() / 3;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_topbar_btn, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////

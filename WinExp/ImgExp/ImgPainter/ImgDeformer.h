@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-25
-// Version:	1.0.0001.1630
+// Date:	2011-07-07
+// Version:	1.0.0002.2340
 //
 // History:
 //	- 1.0.0000.0810(2011-04-22)	= 调整差值函数接口命名
 //	- 1.0.0001.1630(2011-04-25)	+ 添加其他变换函数接口
+//	- 1.0.0002.2340(2011-07-07)	= 将默认的双线性差值调整为最邻近插值
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDeformer_h__
@@ -53,6 +54,10 @@
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
+
+#ifndef EXP_IMG_INTER
+#define EXP_IMG_INTER CImgDeformer::InterNeighbor
+#endif/*EXP_IMG_INTER*/
 
 class CImgDeformer
 {
@@ -138,7 +143,7 @@ protected:
 	}
 	// 图像矩阵变换
 	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const CPointT<double> (&ptVer)[2], 
-										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
+										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
 		exp_src.SetTrust(false);
@@ -177,7 +182,7 @@ protected:
 		exp_des.Create(w_des, h_des);
 		if (exp_des.IsNull()) return NULL;
 		// 映射坐标点
-		if (!interProc) interProc = InterBilinear;
+		if (!interProc) interProc = EXP_IMG_INTER;
 		CRectT<double> rc_src(0.0f, 0.0f, exp_src.GetWidth(), exp_src.GetHeight());
 		CPointT<double> crd_src, crd_des;
 		pixel_t* pix_src = exp_src.GetPixels();
@@ -200,7 +205,7 @@ protected:
 
 public:
 	// 矩阵变换
-	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = InterBilinear)
+	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
 		exp_src.SetTrust(false);
@@ -222,7 +227,7 @@ public:
 		return MtxDeform(imgSrc, ver_des, matrix, interProc);
 	}
 	// 平行四边形变换
-	EXP_INLINE static image_t PlgDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], inter_proc_t interProc = InterBilinear)
+	EXP_INLINE static image_t PlgDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
 		exp_src.SetTrust(false);
@@ -246,7 +251,7 @@ public:
 		return MtxDeform(imgSrc, ver_des, matrix, interProc);
 	}
 	// 旋转变换
-	EXP_INLINE static image_t WhlDeform(_IN_ image_t imgSrc, _IN_ int16_t nDegree, inter_proc_t interProc = InterBilinear)
+	EXP_INLINE static image_t WhlDeform(_IN_ image_t imgSrc, _IN_ int16_t nDegree, inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
 		exp_src.SetTrust(false);
@@ -266,7 +271,7 @@ public:
 		return MtxDeform(imgSrc, matrix, interProc);
 	}
 	// 缩放变换
-	EXP_INLINE static image_t ZomDeform(_IN_ image_t imgSrc, _IN_ LONG nW, _IN_ LONG nH, inter_proc_t interProc = InterBilinear)
+	EXP_INLINE static image_t ZomDeform(_IN_ image_t imgSrc, _IN_ LONG nW, _IN_ LONG nH, inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
 		exp_src.SetTrust(false);

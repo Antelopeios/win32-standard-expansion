@@ -22,6 +22,20 @@ CImage CResManager::win_sysbtn_min;
 CImage CResManager::win_sysbtn_restore;
 
 CImage CResManager::topbar_btn;
+CImage CResManager::gamesearch_charmap;
+CImage CResManager::toolbar_tools;
+
+CImage CResManager::tag_qb;
+CImage CResManager::tag_zx;
+CImage CResManager::tag_wl;
+CImage CResManager::tag_dz;
+CImage CResManager::tag_wy;
+CImage CResManager::tag_dj;
+
+CImage CResManager::search_bg;
+CImage CResManager::search_button;
+CImage CResManager::google_bg;
+CImage CResManager::google_button;
 
 //////////////////////////////////////////////////////////////////
 
@@ -77,5 +91,35 @@ public:
 
 		file.Open(_T("ui/topbar_btn.png"));
 		CResManager::topbar_btn.Set(coder->Decode());
+		file.Open(_T("ui/gamesearch_charmap.png"));
+		CResManager::gamesearch_charmap.Set(coder->Decode());
+		file.Open(_T("ui/toolbar_tools.png"));
+		CResManager::toolbar_tools.Set(coder->Decode());
+
+		file.Open(_T("ui/tag_qb.png"));
+		CResManager::tag_qb.Set(coder->Decode());
+		file.Open(_T("ui/tag_zx.png"));
+		CResManager::tag_zx.Set(coder->Decode());
+		file.Open(_T("ui/tag_wl.png"));
+		CResManager::tag_wl.Set(coder->Decode());
+		file.Open(_T("ui/tag_dz.png"));
+		CResManager::tag_dz.Set(coder->Decode());
+		file.Open(_T("ui/tag_wy.png"));
+		CResManager::tag_wy.Set(coder->Decode());
+		file.Open(_T("ui/tag_dj.png"));
+		CResManager::tag_dj.Set(coder->Decode());
+
+		file.Open(_T("ui/search_bg.png"));
+		CResManager::search_bg.Set(coder->Decode());
+		file.Open(_T("ui/search_button.png"));
+		CResManager::search_button.Set(coder->Decode());
+		file.Open(_T("ui/google_bg.png"));
+		CResManager::google_bg.Set(coder->Decode());
+		file.Open(_T("ui/google_button.png"));
+		CResManager::google_button.Set(coder->Decode());
 	}
 } g_loader;
+
+//////////////////////////////////////////////////////////////////
+
+CCtlManager::key_map_t CCtlManager::m_Ctrls(101);

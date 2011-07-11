@@ -107,8 +107,8 @@ class CTypeInfoFactory : INonCopyable, public EXP_SINGLETON<CTypeInfoFactory>
 	friend interface EXP_SINGLETON<CTypeInfoFactory>;
 
 private:
-	typedef CMapT<CString, _TypeInfo*> key_map;
-	key_map dc_funcs;
+	typedef CMapT<CString, _TypeInfo*> key_map_t;
+	key_map_t dc_funcs;
 
 private:
 	CTypeInfoFactory() : dc_funcs(1021) {}
@@ -132,7 +132,7 @@ public:
 	{
 		if (!c_key) return false;
 		CString key(c_key);
-		key_map::iterator_t ite = dc_funcs.Locate(key);
+		key_map_t::iterator_t ite = dc_funcs.Locate(key);
 		if (ite == dc_funcs.Tail())
 			return NULL;
 		else

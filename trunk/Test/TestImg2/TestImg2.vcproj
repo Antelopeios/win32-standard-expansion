@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="DemoGui1"
-	ProjectGUID="{8E811A26-99F7-403E-B965-AB5080DF7D72}"
-	RootNamespace="DemoGui1"
+	Name="TestImg2"
+	ProjectGUID="{B1537CD0-4485-4474-A325-7718F6325E77}"
+	RootNamespace="TestImg2"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -61,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(OutDir)\ImgExp.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -134,6 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(OutDir)\ImgExp.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -173,18 +175,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\DemoGui1.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiEvents.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -204,6 +194,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\TestImg2.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -211,19 +205,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\DemoGui1.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiManager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Resource.h"
 				>
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestImg2.h"
 				>
 			</File>
 		</Filter>
@@ -233,15 +223,15 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\DemoGui1.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\DemoGui1.rc"
-				>
-			</File>
-			<File
 				RelativePath=".\small.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\TestImg2.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\TestImg2.rc"
 				>
 			</File>
 		</Filter>

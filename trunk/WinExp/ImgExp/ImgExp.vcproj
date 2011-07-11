@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -649,15 +649,15 @@
 			Name="ImgPainter"
 			>
 			<File
-				RelativePath=".\ImgPainter\FilterObject.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImgPainter\ImgDeformer.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ImgPainter\ImgDrawer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImgPainter\ImgFilter.h"
 				>
 			</File>
 			<File

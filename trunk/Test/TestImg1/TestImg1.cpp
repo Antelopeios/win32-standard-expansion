@@ -175,10 +175,10 @@ BOOL SaveFile(DWORD nInx, CString& sPath)
 	return TRUE;
 }
 
-void Render(HWND hWnd, IFilterObject* pFilter = NULL)
+void Filter(HWND hWnd, IFilterObject* pFilter = NULL)
 {
 	if (imgShow.IsNull()) return;
-	CImgRenderer::Render(imgShow, imgShow, CRect(), CPoint(), pFilter);
+	CImgFilter::Filter(imgShow, CRect(), pFilter);
 	// 刷新窗口
 	Invalidate(hWnd);
 }
@@ -275,36 +275,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		// 渲染
 		case IDM_GRAY:
-			Render(hWnd, &CFilterGrayT<CFilterCopy>());
+			Filter(hWnd, &CFilterGray());
 			break;
 		case IDM_INVE:
-			Render(hWnd, &CFilterInverseT<CFilterCopy>());
+			Filter(hWnd, &CFilterInverse());
 			break;
 		case IDM_RELI:
-			Render(hWnd, &CFilterReliefT<CFilterCopy>());
+			Filter(hWnd, &CFilterRelief());
 			break;
 		case IDM_DIFF:
-			Render(hWnd, &CFilterDiffuseT<CFilterCopy>());
+			Filter(hWnd, &CFilterDiffuse());
 			break;
 		case IDM_GAUS:
-			Render(hWnd, &CFilterGaussT<CFilterCopy>());
+			Filter(hWnd, &CFilterGauss());
 			break;
 		case IDM_OUTG:
 			if (imgShow)
 			{
-				CFilterOuterGlowT<CFilterCopy> filter;
-				CPoint pt_flt(filter.GetRadius(), filter.GetRadius());
+				CFilterGauss filter;
+				CPoint pt_flt(filter.m_Radius << 1, filter.m_Radius << 1);
 				// 将图片扩大
 				CRect rc(0, 0, imgShow.GetWidth(), imgShow.GetHeight());
 				image_t tmp = imgShow.Clone(rc + pt_flt);
 				if (!tmp) break;
+				// 阴影化
+				CImgFilter::Filter(tmp, CRect(), &CFilterFill(ExRGB(255, 255, 190), 0xe));
+				CImgFilter::Filter(tmp, CRect(), &filter);
+				// 阴影叠加
+				rc.Offset(pt_flt);
+				CImgRenderer::Render(tmp, imgShow, rc, CPoint(), &CRenderOverlay());
 				imgShow = tmp;
-				// 渲染图片
-				Render(hWnd, &filter);
+				// 刷新窗口
+				Invalidate(hWnd);
 			}
 			break;
 		case IDM_GRAD:
-			Render(hWnd, &CFilterGradientT<CFilterCopy>(
+			Filter(hWnd, &CFilterGradient(
 				ExRGBA(255, 255, 255, 128), ExRGBA(0, 0, 0, 128), 0x9, false));
 			break;
 		// 关于

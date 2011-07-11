@@ -54,7 +54,7 @@
 #include "ImgTypes/Graph.h"
 #include "ImgTypes/Image.h"
 #include "ImgTypes/Font.h"
-#include "ImgPainter/ImgRenderer.h"
+#include "ImgPainter/ImgFilter.h"
 
 EXP_BEG
 
@@ -142,17 +142,16 @@ public:
 		if (img.IsNull()) return NULL;
 		tmp_grp.SetObject(img.Get());
 		// »æÖÆÎÄ×Ö
-		CImgRenderer::Render(img, img, CRect(), CPoint(), 
-			&CFilterFillT<CFilterCopy>(ExRGBA(0, 0, 0, EXP_CM), 0x1));
+		CRect rc(0, 0, sz.cx, sz.cy);
+		CImgFilter::Filter(img, rc, &CFilterFill(ExRGBA(0, 0, 0, EXP_CM), 0x1));
 		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), 
-			&(RECT)CRect(0, 0, sz.cx, sz.cy), DT_LEFT | DT_TOP);
-		CImgRenderer::Render(img, img, CRect(), CPoint(), 
-			&CFilterInverseT<CFilterCopy>(0x1));
+			&(RECT)rc, DT_LEFT | DT_TOP);
+		CImgFilter::Filter(img, rc, &CFilterInverse(0x1));
 		if (m_Color != ExRGBA(0, 0, 0, EXP_CM))
-			CImgRenderer::Render
+			CImgFilter::Filter
 				(
-				img, img, CRect(), CPoint(), 
-				&CFilterFillT<CFilterCopy>
+				img, rc, 
+				&CFilterFill
 					(
 					ExRGBA
 						(

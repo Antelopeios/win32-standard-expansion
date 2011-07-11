@@ -52,8 +52,8 @@
 //////////////////////////////////////////////////////////////////
 
 #include "ImgPainter/ImgDeformer.h"
-#include "ImgPainter/FilterObject.h"
 #include "ImgPainter/ImgRenderer.h"
+#include "ImgPainter/ImgFilter.h"
 #include "ImgPainter/ImgDrawer.h"
 
 //////////////////////////////////////////////////////////////////

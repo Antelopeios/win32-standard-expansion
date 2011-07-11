@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-10
-// Version:	1.0.0007.2200
+// Date:	2011-07-11
+// Version:	1.0.0008.2313
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -49,6 +49,7 @@
 //	- 1.0.0005.1330(2011-05-02)	= 将滤镜对象从ImgRenderer内部分离
 //	- 1.0.0006.1130(2011-05-26)	# 修正ImgRenderer::Render()在绘图时顶点坐标偏移的计算错误
 //	- 1.0.0007.2200(2011-07-10)	^ 将滤镜模块从ImgRenderer中分离,提高ImgRenderer的渲染效率
+//	- 1.0.0008.2313(2011-07-11)	^ 略微优化PreRender()的执行效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -80,12 +81,10 @@ interface IRenderObject : INonCopyable
 #pragma push_macro("PreRender")
 #undef PreRender
 #define PreRender() \
-	for(LONG y_s = pt_src.y; y_s < sz_src.cy; ++y_s) \
+	for(LONG y_s = pt_src.y; y_s < min(sz_src.cy, pt_src.y + rc_des.Height()); ++y_s) \
 	{ \
-		for(LONG x_s = pt_src.x; x_s < sz_src.cx; ++x_s) \
-		{ /*校验像素区域*/ \
-			if (x_s >= pt_src.x + rc_des.Width() ||  \
-				y_s >= pt_src.y + rc_des.Height()) continue; \
+		for(LONG x_s = pt_src.x; x_s < min(sz_src.cx, pt_src.x + rc_des.Width()); ++x_s) \
+		{	/*校验像素区域*/ \
 			LONG x_d = rc_des.Left() + x_s - pt_src.x; \
 			if (x_d < 0) continue; \
 			if (x_d >= sz_des.cx) break; \

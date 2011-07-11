@@ -183,21 +183,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
 			FillRect(mem_grp, &rect, brh);
 
+			mem_grp.Delete();
+
 			timeBeginPeriod(1);
 			DWORD t_s = timeGetTime();
-			CGraph img_grp;
-			img_grp.Create(hdc);
-			img_grp.SetObject(imgShow.Get());
 			for(int i = 0; i < 1000; ++i)
 			{
+				//CGraph mem_grp;
+				//mem_grp.Create();
+				//mem_grp.SetObject(mem_img.Get());
+				//CGraph img_grp;
+				//img_grp.Create();
+				//img_grp.SetObject(imgShow.Get());
+
 				//BLENDFUNCTION bl = {0};
-				//bl.AlphaFormat = AC_SRC_ALPHA;
+				//bl.AlphaFormat = AC_SRC_OVER;
+				//bl.SourceConstantAlpha = 255;
 				//AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
 				//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
-				//Render(mem_img, imgShow, CRect(), CPoint());
-				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay());
+
+				//img_grp.Delete();
+				//mem_grp.Delete();
+
+				Render(mem_img, imgShow, CRect(), CPoint());
+
+				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay());
 			}
-			img_grp.Delete();
 			DWORD t_e = timeGetTime();
 			timeEndPeriod(1);
 			t_e -= t_s;
@@ -205,8 +216,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			msg.Format(_T("%d ms"), t_e);
 			::MessageBox(NULL, (LPCTSTR)msg, NULL, 0);
 
+			mem_grp.Create(hdc);
+			mem_grp.SetObject(mem_img.Get());
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
-
 			mem_grp.Delete();
 		}
 		EndPaint(hWnd, &ps);

@@ -603,21 +603,13 @@ public:
 		if(!txt_img.IsNull())
 		{
 			CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
-			CPoint sel_pt(sz_hed.cx, 0);
 			if (!sel_rc.IsEmpty())
 			{
-				CImgRenderer::Render
-					(
-					txt_img, txt_img, 
-					sel_rc, sel_pt, 
-					&CFilterFillT<CFilterCopy>(ExRevColor(txt_sel_color), 0xf, true)
-					);
-				CImgRenderer::Render
-					(
-					txt_img, txt_img, 
-					sel_rc, sel_pt, 
-					&CFilterFillT<CFilterCopy>(ExRevColor(bkg_sel_color), 0xf, true, txt_sel_color)
-					);
+				CFilterFill filter(ExRevColor(txt_sel_color), 0xf, true);
+				CImgFilter::Filter(txt_img, sel_rc, &filter);
+				filter.m_Const = ExRevColor(bkg_sel_color);
+				filter.m_ClrMask = txt_sel_color;
+				CImgFilter::Filter(txt_img, sel_rc, &filter);
 			}
 			CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 		}

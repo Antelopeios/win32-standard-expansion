@@ -248,7 +248,7 @@ public:
 				}
 
 				// 绘图
-				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
+				CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
 				// l-t
 				CImgRenderer::Render
 					(
@@ -446,7 +446,232 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+class CGuiPushBtnEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiPushBtnEvent, IGuiEvent)
+
+protected:
+	CRect m_rcOld;
+	CImage m_imgTmp;
+
+public:
+	~CGuiPushBtnEvent()
+	{}
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_MOUSEMOVE:
+		case WM_NCMOUSEMOVE:
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				if (status != 2 && status != 3)
+				{
+					status = 1;
+					ctrl->SetState(_T("status"), (void*)status);
+				}
+			}
+			break;
+		case WM_KEYDOWN:
+			if (wParam != VK_RETURN) break; // Enter
+		case WM_LBUTTONDOWN:
+		case WM_NCLBUTTONDOWN:
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				if (status == 3) break;
+				status = 2;
+				ctrl->SetState(_T("status"), (void*)status);
+			}
+			break;
+		case WM_KEYUP:
+			if (wParam != VK_RETURN) break; // Enter
+		case WM_LBUTTONUP:
+		case WM_NCLBUTTONUP:
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				if (status == 3) break;
+
+				IGuiBoard* board = ctrl->GetBoard();
+				if (!board) break;
+				POINT pt_tmp = {0};
+				::GetCursorPos(&pt_tmp);
+				CPoint pt(pt_tmp);
+				board->ScreenToClient(pt);
+				CRect rc;
+				ctrl->GetRealRect(rc);
+
+				if (status == 2) // 当按下后抬起,视为一次Click
+					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_COMMAND, BN_CLICKED);
+
+				state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				status = (DWORD)(((void**)state->sta_arr)[0]);
+				if (status == 3) break;
+
+				if (rc.PtInRect(pt))
+					status = 1;
+				else
+					status = 0;
+				ctrl->SetState(_T("status"), (void*)status);
+			}
+			break;
+		case WM_MOUSELEAVE:
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				if (status == 3) break;
+				status = 0;
+				ctrl->SetState(_T("status"), (void*)status);
+			}
+			break;
+		case WM_PAINT:
+			if (lParam)
+			{
+				CGC gc;
+
+				// 获得属性
+				LONG sta_tim = 4;
+
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
+				if (!state) break;
+				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+
+				state = ctrl->GetState(_T("image"), &gc);
+				if (!state) break;
+				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
+
+				state = ctrl->GetState(_T("color"), &gc);
+				if (!state) break;
+				pixel_t* pixel = (pixel_t*)(((void**)state->sta_arr)[status]);
+				if (!pixel) break;
+
+				state = ctrl->GetState(_T("text"), &gc);
+				if (!state) break;
+				CText* text = (CText*)(((void**)state->sta_arr)[status]);
+				if (!text) break;
+
+				CImage* mem_img = (CImage*)lParam;
+				if (!mem_img || mem_img->IsNull()) break;
+				CRect rect;
+				ctrl->GetClientRect(rect);
+
+				// 处理
+				if (m_rcOld != rect)
+				{
+					LONG r_h = rect.Height() * sta_tim;
+					// m-m
+					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), r_h));
+					// Save
+					m_rcOld = rect;
+				}
+
+				// 绘图
+				CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
+				// m-m
+				CImgRenderer::Render
+					(
+					mem_img->Get(), m_imgTmp, rect, 
+					CPoint(0, m_imgTmp.GetHeight() * status / sta_tim)
+					);
+				// 绘文字
+				CImage txt_img(text->GetImage());
+				if (!txt_img.IsNull())
+				{
+					state = ctrl->GetState(_T("locate"), &gc);
+					if (!state) break;
+					DWORD locate = (DWORD)(((void**)state->sta_arr)[0]);
+					state = ctrl->GetState(_T("loc_off"), &gc);
+					if (!state) break;
+					LONG loc_off = (LONG)(((void**)state->sta_arr)[0]);
+
+					CRect txt_rct;
+					switch(locate)
+					{
+					case 0:	// center
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 1:	// top
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+								rect.Top() + loc_off
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 2:	// bottom
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
+								rect.Bottom() - txt_img.GetHeight() - loc_off
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 3:	// left
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Left() + loc_off, 
+								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					case 4:	// right
+						txt_rct.Set
+							(
+							CPoint
+								(
+								rect.Right() - txt_img.GetWidth() - loc_off, 
+								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
+								), 
+							CPoint(rect.Right(), rect.Bottom())
+							);
+						break;
+					}
+					CImgRenderer::Render(mem_img->Get(), txt_img, txt_rct, CPoint());
+				}
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiPushBtnEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 

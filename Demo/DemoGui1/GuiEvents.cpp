@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "DemoGui1.h"
 
-#define GUI_W_MIN 700
-#define GUI_H_MIN 500
+#define GUI_W_MIN 1000
+#define GUI_H_MIN 750
 
 //////////////////////////////////////////////////////////////////
 
@@ -75,12 +75,8 @@ public:
 			{
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
-				IGuiComp::list_t::iterator_t ite = wnd->FindComp(ctrl);
-				if (m_bZoomed)
-					ite += 6; // win_sysbtn_restore
-				else
-					ite += 5; // win_sysbtn_max
-				ctrl = ExDynCast<IGuiCtrl>(*ite);
+				IGuiComp::list_t::iterator_t ite = wnd->GetChildren().Last();
+				ctrl = m_bZoomed ? GUI_CTRL(win_sysbtn_restore) : GUI_CTRL(win_sysbtn_max);
 				ctrl->Send(ExDynCast<IGuiObject>(*ite), WM_COMMAND, BN_CLICKED);
 			}
 			break;
@@ -91,6 +87,7 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
@@ -723,6 +720,7 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
@@ -759,10 +757,13 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
-				t = rc_wnd.Bottom() - CResManager::line_bottom.GetHeight() - CResManager::toolbar_bg.GetHeight();
+				t = rc_wnd.Bottom() - 
+					CResManager::line_bottom.GetHeight() - 
+					CResManager::toolbar_bg.GetHeight();
 				r = rc_wnd.Right() - CResManager::line_right.GetWidth();
 				b = t + CResManager::toolbar_bg.GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
@@ -795,6 +796,7 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
@@ -831,10 +833,13 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Right() - CResManager::line_right.GetWidth() - CResManager::win_sysbtn_close.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight();
+				l = rc_wnd.Right() - 
+					CResManager::line_right.GetWidth() - 
+					CResManager::win_sysbtn_close.GetWidth() - 4;
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
 				r = l + CResManager::win_sysbtn_close.GetWidth();
 				b = t + CResManager::win_sysbtn_close.GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
@@ -879,13 +884,14 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
 					CResManager::line_right.GetWidth() - 
 					CResManager::win_sysbtn_close.GetWidth() - 
-					CResManager::win_sysbtn_max.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight();
+					CResManager::win_sysbtn_max.GetWidth() - 4;
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
 				r = l + CResManager::win_sysbtn_max.GetWidth();
 				b = t + CResManager::win_sysbtn_max.GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
@@ -945,13 +951,14 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
 					CResManager::line_right.GetWidth() - 
 					CResManager::win_sysbtn_close.GetWidth() - 
-					CResManager::win_sysbtn_restore.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight();
+					CResManager::win_sysbtn_restore.GetWidth() - 4;
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
 				r = l + CResManager::win_sysbtn_restore.GetWidth();
 				b = t + CResManager::win_sysbtn_restore.GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
@@ -1003,6 +1010,7 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG w_dec = 
 					::IsZoomed(wnd->GethWnd()) ? 
@@ -1013,8 +1021,8 @@ public:
 				l = rc_wnd.Right() - 
 					CResManager::line_right.GetWidth() - 
 					CResManager::win_sysbtn_close.GetWidth() - w_dec - 
-					CResManager::win_sysbtn_min.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight();
+					CResManager::win_sysbtn_min.GetWidth() - 4;
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
 				r = l + CResManager::win_sysbtn_min.GetWidth();
 				b = t + CResManager::win_sysbtn_min.GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
@@ -1060,6 +1068,7 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
@@ -1067,9 +1076,9 @@ public:
 					CResManager::line_top.GetHeight() + 
 					CResManager::banner.GetHeight() - 
 					CResManager::tag_bg.GetHeight() - 
-					CResManager::topbar_btn.GetHeight() / 3;
+					CResManager::topbar_btn.GetHeight() / 4 - 8;
 				r = l + CResManager::topbar_btn.GetWidth();
-				b = t + CResManager::topbar_btn.GetHeight() / 3;
+				b = t + CResManager::topbar_btn.GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1078,5 +1087,593 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_topbar_btn, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_items_topbar_btn : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_items_topbar_btn, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+					IGuiComp* pare = ctrl->GetParent();
+					for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
+					{
+						IGuiCtrl* c = ExDynCast<IGuiCtrl>(*ite);
+						c->SetState(_T("status"), (void*)0);
+					}
+					ctrl->SetState(_T("status"), (void*)3);
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_items_topbar_btn, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_gamesearch_charmap : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_gamesearch_charmap, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Left() + 
+					CResManager::line_left.GetWidth() + 
+					CResManager::search_bg.GetWidth() + 20 + 
+					CResManager::search_button.GetWidth();
+				t = rc_wnd.Bottom() - 
+					CResManager::line_bottom.GetHeight() - 
+					CResManager::gamesearch_charmap.GetHeight() / 3 - 2;
+				r = l + CResManager::gamesearch_charmap.GetWidth();
+				b = t + CResManager::gamesearch_charmap.GetHeight() / 3;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_gamesearch_charmap, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_toolbar_tools : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_toolbar_tools, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Right() - 
+					CResManager::line_right.GetWidth() - 
+					CResManager::toolbar_tools.GetWidth() - 20;
+				t = rc_wnd.Bottom() - 
+					CResManager::line_bottom.GetHeight() - 
+					CResManager::toolbar_tools.GetHeight() / 3;
+				r = l + CResManager::toolbar_tools.GetWidth();
+				b = t + CResManager::toolbar_tools.GetHeight() / 3;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_toolbar_tools, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_search_bg : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_search_bg, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Left() + 
+					CResManager::line_left.GetWidth() + 15;
+				t = rc_wnd.Bottom() - 
+					CResManager::line_bottom.GetHeight() - 
+					CResManager::search_bg.GetHeight() - 3;
+				r = l + CResManager::search_bg.GetWidth();
+				b = t + CResManager::search_bg.GetHeight();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_search_bg, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_search_button : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_search_button, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Left() + 
+					CResManager::line_left.GetWidth() + 15 + 
+					CResManager::search_bg.GetWidth();
+				t = rc_wnd.Bottom() - 
+					CResManager::line_bottom.GetHeight() - 
+					CResManager::search_button.GetHeight() - 3;
+				r = l + CResManager::search_button.GetWidth();
+				b = t + CResManager::search_button.GetHeight();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_search_button, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_google_bg : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_google_bg, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Right() - 
+					CResManager::line_right.GetWidth() - 
+					CResManager::google_button.GetWidth() - 
+					CResManager::google_bg.GetWidth() - 5;
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + 120;
+				r = l + CResManager::google_bg.GetWidth();
+				b = t + CResManager::google_bg.GetHeight();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_google_bg, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_google_button : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_google_button, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Right() - 
+					CResManager::line_right.GetWidth() - 
+					CResManager::google_button.GetWidth() - 5;
+				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + 120;
+				r = l + CResManager::google_button.GetWidth();
+				b = t + CResManager::google_button.GetHeight();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_google_button, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_tag_qb : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_tag_qb, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Left() + CResManager::line_left.GetWidth() + 5;
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::tag_qb.GetHeight() / 4 + 115;
+				r = l + CResManager::tag_qb.GetWidth();
+				b = t + CResManager::tag_qb.GetHeight() / 4;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_tag_qb, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_tag_zx : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_tag_zx, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				CRect rc_ctl;
+				GUI_CTRL(tag_qb)->GetWindowRect(rc_ctl);
+
+				LONG l, r, t, b;
+				l = rc_ctl.Right() + 5;
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::tag_qb.GetHeight() / 4 + 115;
+				r = l + CResManager::tag_qb.GetWidth();
+				b = t + CResManager::tag_qb.GetHeight() / 4;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_tag_zx, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_tag_wl : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_tag_wl, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				CRect rc_ctl;
+				GUI_CTRL(tag_zx)->GetWindowRect(rc_ctl);
+
+				LONG l, r, t, b;
+				l = rc_ctl.Right() + 5;
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::tag_qb.GetHeight() / 4 + 115;
+				r = l + CResManager::tag_qb.GetWidth();
+				b = t + CResManager::tag_qb.GetHeight() / 4;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_tag_wl, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_tag_dz : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_tag_dz, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				CRect rc_ctl;
+				GUI_CTRL(tag_wl)->GetWindowRect(rc_ctl);
+
+				LONG l, r, t, b;
+				l = rc_ctl.Right() + 5;
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::tag_qb.GetHeight() / 4 + 115;
+				r = l + CResManager::tag_qb.GetWidth();
+				b = t + CResManager::tag_qb.GetHeight() / 4;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_tag_dz, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_tag_wy : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_tag_wy, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				CRect rc_ctl;
+				GUI_CTRL(tag_dz)->GetWindowRect(rc_ctl);
+
+				LONG l, r, t, b;
+				l = rc_ctl.Right() + 5;
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::tag_qb.GetHeight() / 4 + 115;
+				r = l + CResManager::tag_qb.GetWidth();
+				b = t + CResManager::tag_qb.GetHeight() / 4;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_tag_wy, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_tag_dj : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_tag_dj, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				CRect rc_ctl;
+				GUI_CTRL(tag_wy)->GetWindowRect(rc_ctl);
+
+				LONG l, r, t, b;
+				l = rc_ctl.Right() + 5;
+				t = rc_wnd.Top() + 
+					CResManager::line_top.GetHeight() + 
+					CResManager::tag_bg.GetHeight() - 
+					CResManager::tag_qb.GetHeight() / 4 + 115;
+				r = l + CResManager::tag_qb.GetWidth();
+				b = t + CResManager::tag_qb.GetHeight() / 4;
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			switch (wParam)
+			{
+			case BN_CLICKED:
+				{
+				}
+				break;
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_tag_dj, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////

@@ -73,8 +73,8 @@ protected:
 		//ExTrace(_T("0x%08X fade alpha: %d\n"), pCtrl, m_Alpha);
 
 		CImage tmp_old(tOld.Clone());
-		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CFilterCopy(m_Alpha));
-		CImgRenderer::Render(tNew, tmp_old, CRect(), CPoint(), &CFilterCopy());
+		CImgRenderer::Render(tmp_old, tNew, CRect(), CPoint(), &CRenderCopy(m_Alpha));
+		CImgRenderer::Render(tNew, tmp_old, CRect(), CPoint(), &CRenderCopy());
 
 		m_Alpha += 25;
 		return (m_Alpha < EXP_CM);

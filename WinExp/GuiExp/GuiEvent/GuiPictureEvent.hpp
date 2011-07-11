@@ -107,7 +107,7 @@ public:
 				}
 
 				// »æÍ¼
-				CImgRenderer::Render(mem_img->Get(), mem_img->Get(), rect, CPoint(), &CFilterFill(*pixel));
+				CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
 				if (!image->IsNull())
 					CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
 				CImage txt_img(text->GetImage());

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-07
-// Version:	1.0.0000.0940
+// Date:	2011-07-11
+// Version:	1.0.0001.1752
 //
 // History:
 //	- 1.0.0000.0940(2011-07-07)	@ 开始构建GuiGroup
+//	- 1.0.0001.1752(2011-07-11)	^ 优化GuiGroup的外部调用属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiGroup_hpp__
@@ -58,10 +59,14 @@ public:
 
 protected:
 	items_t* m_ItemList;
+	DWORD m_StatusCount;
+	bool m_StyleBox;
 
 public:
 	CGuiGroup()
 		: m_ItemList(NULL)
+		, m_StatusCount(3)
+		, m_StyleBox(true)
 	{}
 
 public:
@@ -86,6 +91,12 @@ public:
 				EXP_BASE::SetState(sType, pState);
 		}
 		else
+		if (sType == _T("sta_cnt"))
+			m_StatusCount = (DWORD)(LONG_PTR)pState;
+		else
+		if (sType == _T("sty_box"))
+			m_StyleBox = (bool)(LONG_PTR)pState;
+		else
 		if (sType == _T("image"))
 		{
 			CImage* img = (CImage*)pState;
@@ -94,16 +105,31 @@ public:
 			DWORD count = m_ItemList->GetCount();
 			LONG offset = img->GetWidth() / count;
 			CRect rc_img(0, 0, offset, img->GetHeight());
-			CRect rc_itm(0, 0, offset, img->GetHeight() / 3);
+			CRect rc_itm(0, 0, offset, img->GetHeight() / m_StatusCount);
 			CPoint pt_off(offset, 0);
-			CImage tmp[9];
-			for(DWORD i = 0; i < count; ++i)
+			if (m_StyleBox)
 			{
-				m_ItemList->GetAt(i)->SetWindowRect(rc_itm);
-				tmp[4].Set(img->Clone(rc_img));
-				m_ItemList->GetAt(i)->SetState(_T("image"), tmp);
-				rc_img.Offset(pt_off);
-				rc_itm.Offset(pt_off);
+				CImage tmp[9];
+				for(DWORD i = 0; i < count; ++i)
+				{
+					m_ItemList->GetAt(i)->SetWindowRect(rc_itm);
+					tmp[4].Set(img->Clone(rc_img));
+					m_ItemList->GetAt(i)->SetState(_T("image"), tmp);
+					rc_img.Offset(pt_off);
+					rc_itm.Offset(pt_off);
+				}
+			}
+			else
+			{
+				CImage tmp;
+				for(DWORD i = 0; i < count; ++i)
+				{
+					m_ItemList->GetAt(i)->SetWindowRect(rc_itm);
+					tmp.Set(img->Clone(rc_img));
+					m_ItemList->GetAt(i)->SetState(_T("image"), &tmp);
+					rc_img.Offset(pt_off);
+					rc_itm.Offset(pt_off);
+				}
 			}
 			EXP_BASE::SetState(sType, pState);
 		}

@@ -261,8 +261,7 @@ protected:
 					IGuiEffect* eff = ctrl->GetEffect();
 					if (eff)
 					{
-						if(!eff->IsInit())
-							eff->Init(ctl_img);
+						if (!eff->IsInit()) eff->Init(ctl_img);
 						ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
 						eff->Show(*ite, ctl_img);
 					}
@@ -359,7 +358,7 @@ public:
 					CImage pnt_img;
 					pnt_img.Create(rect.Width(), rect.Height());
 					ret = WndSend(board, nMessage, wParam, (LPARAM)&pnt_img);
-					CImgRenderer::Render(mem_img, pnt_img, CRect(), CPoint(), &CFilterNormal());
+					CImgRenderer::Render(mem_img, pnt_img, CRect(), CPoint(), &CRenderNormal());
 					// ¸²¸Ç»º´æ»æÍ¼
 					CGraph mem_grp;
 					mem_grp.Create();

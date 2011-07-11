@@ -348,14 +348,7 @@ void IGuiBoardBase::Invalidate()
 void IGuiBoardBase::InvalidateRect(CRect& rcInv)
 {
 	if (IsNull()) return ;
-	RECT rect = 
-	{
-		rcInv.Left(), 
-		rcInv.Top(), 
-		rcInv.Right(), 
-		rcInv.Bottom()
-	};
-	::InvalidateRect(Get(), &rect, TRUE);
+	::InvalidateRect(Get(), &(RECT)rcInv, TRUE);
 }
 void IGuiBoardBase::InvalidateRgn(HRGN hRgn)
 {

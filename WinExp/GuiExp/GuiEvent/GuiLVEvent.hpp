@@ -98,12 +98,17 @@ public:
 				{
 					if (m_IconOld != icon)
 					{
-						CFilterOuterGlowT<CFilterCopy> filter;
-						CPoint pt_flt(filter.GetRadius(), filter.GetRadius());
+						CFilterGauss filter;
+						CPoint pt_flt(filter.m_Radius << 1, filter.m_Radius << 1);
 						// 将图片扩大
 						CRect rc(0, 0, icon->GetWidth(), icon->GetHeight());
 						m_IconTmp = icon->Clone(rc + pt_flt);
-						CImgRenderer::Render(m_IconTmp, icon->Get(), CRect(), CPoint(), &filter);
+						// 阴影化
+						CImgFilter::Filter(m_IconTmp, CRect(), &CFilterFill(0, 0xe));
+						CImgFilter::Filter(m_IconTmp, CRect(), &filter);
+						// 阴影叠加
+						rc.Offset(pt_flt);
+						CImgRenderer::Render(m_IconTmp, icon->Get(), rc, CPoint(), &CRenderOverlay());
 						// 保存指针
 						m_IconOld = icon;
 					}

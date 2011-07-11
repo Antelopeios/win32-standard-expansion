@@ -41,11 +41,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建控件对象并设置
 
-#define GUI_PIC(name) pic_##name
 #define GuiLoadPic(name) \
-		IGuiCtrl* GUI_PIC(name) = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)); \
-		GUI_PIC(name)->SetState(_T("image"), &CResManager::##name); \
-		GUI_PIC(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc))); \
+	GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
 //#define GuiLoadPic()
 
 	GuiLoadPic(banner);
@@ -61,16 +60,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	GuiLoadPic(toolbar_bg);
 	GuiLoadPic(list);
 
-#define GUI_BTN(name) btn_##name
 #define GuiLoadBtn(name, thr_sta) \
-		IGuiCtrl* GUI_BTN(name) = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
-		GUI_BTN(name)->SetState(_T("thr_sta"), (void*)thr_sta); \
-		{ \
-			CImage tmp[9]; \
-			tmp[4] = CResManager::##name; \
-			GUI_BTN(name)->SetState(_T("image"), tmp); \
-		} \
-		GUI_BTN(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
+	GUI_CTRL(name)->SetState(_T("thr_sta"), (void*)thr_sta); \
+	{ \
+		CImage tmp[9]; \
+		tmp[4] = CResManager::##name; \
+		GUI_CTRL(name)->SetState(_T("image"), tmp); \
+	} \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
 //#define GuiLoadBtn()
 
 	GuiLoadBtn(win_sysbtn_close, true);
@@ -78,51 +76,101 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	GuiLoadBtn(win_sysbtn_restore, true);
 	GuiLoadBtn(win_sysbtn_min, true);
 
-#define GUI_GRP(name) grp_##name
-#define GUI_ITM(name) itm_##name
 #define GuiLoadGrp(name, count, thr_sta) \
-		IGuiCtrl* GUI_GRP(name) = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc)); \
-		CArrayT<IGuiCtrl*> GUI_ITM(name); \
-		for(int i = 0; i < count; ++i) \
-		{ \
-			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
-			itm->SetState(_T("thr_sta"), (void*)thr_sta); \
-			GUI_GRP(name)->AddComp(itm); \
-			GUI_ITM(name).Add(itm); \
-		} \
-		GUI_GRP(name)->SetState(_T("items"), &GUI_ITM(name)); \
-		GUI_GRP(name)->SetState(_T("image"), &CResManager::##name); \
-		GUI_GRP(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc))); \
+	CArrayT<IGuiCtrl*> items_##name; \
+	for(int i = 0; i < count; ++i) \
+	{ \
+		IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
+		itm->SetState(_T("thr_sta"), (void*)thr_sta); \
+		GUI_CTRL(name)->AddComp(itm); \
+		items_##name.Add(itm); \
+	} \
+	GUI_CTRL(name)->SetState(_T("items"), &items_##name); \
+	GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
 //#define GuiLoadGrp()
 
-	GuiLoadGrp(topbar_btn, 8, true);
+	GuiLoadGrp(gamesearch_charmap, 26, true);
+	GuiLoadGrp(toolbar_tools, 8, true);
+
+	REG_CTRL(topbar_btn, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc)));
+	CArrayT<IGuiCtrl*> items_topbar_btn;
+	IGuiEvent* items_topbar_btn_evt = ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_items_topbar_btn"), &gc));
+	for(int i = 0; i < 8; ++i)
+	{
+		IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc));
+		itm->AddEvent(items_topbar_btn_evt);
+		GUI_CTRL(topbar_btn)->AddComp(itm);
+		items_topbar_btn.Add(itm);
+	}
+	((IGuiCtrl**)items_topbar_btn)[0]->SetState(_T("status"), (void*)3);
+	GUI_CTRL(topbar_btn)->SetState(_T("items"), &items_topbar_btn);
+	GUI_CTRL(topbar_btn)->SetState(_T("sta_cnt"), (void*)4);
+	GUI_CTRL(topbar_btn)->SetState(_T("sty_box"), (void*)false);
+	GUI_CTRL(topbar_btn)->SetState(_T("image"), &CResManager::topbar_btn);
+	GUI_CTRL(topbar_btn)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_topbar_btn"), &gc)));
+
+#define GuiLoadPsh(name) \
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc))); \
+	GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+//#define GuiLoadGrp()
+
+	GuiLoadPsh(tag_qb);
+	GuiLoadPsh(tag_zx);
+	GuiLoadPsh(tag_wl);
+	GuiLoadPsh(tag_dz);
+	GuiLoadPsh(tag_wy);
+	GuiLoadPsh(tag_dj);
+
+	GuiLoadPic(search_bg);
+	GuiLoadPic(search_button);
+	GuiLoadPic(google_bg);
+	GuiLoadPic(google_button);
 
 	// 将窗口与控件关联
 
 	// 内容打底
-	wnd->AddComp(GUI_PIC(banner));
-	wnd->AddComp(GUI_PIC(tag_bg));
-	wnd->AddComp(GUI_PIC(toolbar_bg));
-	wnd->AddComp(GUI_PIC(list));
-
-	// 三态按钮
-	wnd->AddComp(GUI_BTN(win_sysbtn_close));
-	wnd->AddComp(GUI_BTN(win_sysbtn_max));
-	wnd->AddComp(GUI_BTN(win_sysbtn_restore));
-	wnd->AddComp(GUI_BTN(win_sysbtn_min));
+	wnd->AddComp(GUI_CTRL(banner));
+	wnd->AddComp(GUI_CTRL(tag_bg));
+	wnd->AddComp(GUI_CTRL(toolbar_bg));
+	wnd->AddComp(GUI_CTRL(list));
 
 	// 功能按钮
-	wnd->AddComp(GUI_GRP(topbar_btn));
+	wnd->AddComp(GUI_CTRL(topbar_btn));
+	wnd->AddComp(GUI_CTRL(gamesearch_charmap));
+	wnd->AddComp(GUI_CTRL(toolbar_tools));
+
+	// 标签栏
+	wnd->AddComp(GUI_CTRL(tag_qb));
+	wnd->AddComp(GUI_CTRL(tag_zx));
+	wnd->AddComp(GUI_CTRL(tag_wl));
+	wnd->AddComp(GUI_CTRL(tag_dz));
+	wnd->AddComp(GUI_CTRL(tag_wy));
+	wnd->AddComp(GUI_CTRL(tag_dj));
+
+	// 编辑框
+	wnd->AddComp(GUI_CTRL(search_bg));
+	wnd->AddComp(GUI_CTRL(search_button));
+	wnd->AddComp(GUI_CTRL(google_bg));
+	wnd->AddComp(GUI_CTRL(google_button));
 
 	// 窗口边框
-	wnd->AddComp(GUI_PIC(line_bottom));
-	wnd->AddComp(GUI_PIC(line_left));
-	wnd->AddComp(GUI_PIC(line_right));
-	wnd->AddComp(GUI_PIC(line_top));
-	wnd->AddComp(GUI_PIC(corner_lb));
-	wnd->AddComp(GUI_PIC(corner_rb));
-	wnd->AddComp(GUI_PIC(corner_rt));
-	wnd->AddComp(GUI_PIC(corner_lt));
+	wnd->AddComp(GUI_CTRL(line_bottom));
+	wnd->AddComp(GUI_CTRL(line_left));
+	wnd->AddComp(GUI_CTRL(line_right));
+	wnd->AddComp(GUI_CTRL(line_top));
+	wnd->AddComp(GUI_CTRL(corner_lb));
+	wnd->AddComp(GUI_CTRL(corner_rb));
+	wnd->AddComp(GUI_CTRL(corner_rt));
+	wnd->AddComp(GUI_CTRL(corner_lt));
+
+	// 三态按钮
+	wnd->AddComp(GUI_CTRL(win_sysbtn_close));
+	wnd->AddComp(GUI_CTRL(win_sysbtn_max));
+	wnd->AddComp(GUI_CTRL(win_sysbtn_restore));
+	wnd->AddComp(GUI_CTRL(win_sysbtn_min));
 
 	/////////////////////////////////
 

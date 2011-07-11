@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-27
-// Version:	1.0.0018.1520
+// Date:	2011-07-11
+// Version:	1.0.0019.2025
 //
 // History:
 //	- 1.0.0015.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -43,6 +43,7 @@
 //	- 1.0.0017.0035(2011-05-12)	= 调整bool operator==()与bool operator!=()的内部实现,支持对整个CArrayT做比较
 //								- 移除CArrayT中直接与指针做比较的接口
 //	- 1.0.0018.1520(2011-06-27)	# 修正当CArrayT的迭代器走到上/下限时可以继续移动的问题
+//	- 1.0.0019.2025(2011-07-11)	# 修正CArrayT::operator[]()无法顺利通过编译的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Array_h__
@@ -162,9 +163,9 @@ public:
 			m_nCont = m_nSize = 0;
 	}
 
-	type_t& operator[](DWORD nIndex)
+	type_t& operator[](INT_PTR nIndex)
 	{ return GetAt(nIndex); }
-	const type_t& operator[](DWORD nIndex) const
+	const type_t& operator[](INT_PTR nIndex) const
 	{ return GetAt(nIndex); }
 
 	type_t& GetAt(DWORD nIndex)

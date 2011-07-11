@@ -1111,6 +1111,7 @@ public:
 					for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
 					{
 						IGuiCtrl* c = ExDynCast<IGuiCtrl>(*ite);
+						if (c == ctrl) continue;
 						c->SetState(_T("status"), (void*)0);
 					}
 					ctrl->SetState(_T("status"), (void*)3);
@@ -1406,6 +1407,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
+					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)3);
+					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1458,6 +1465,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
+					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)3);
+					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1510,6 +1523,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
+					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)3);
+					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1562,6 +1581,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
+					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)3);
+					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1614,6 +1639,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
+					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)3);
+					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1666,6 +1697,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
+					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)3);
 				}
 				break;
 			}

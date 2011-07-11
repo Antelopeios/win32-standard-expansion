@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-02
-// Version:	1.0.0011.1742
+// Date:	2011-07-11
+// Version:	1.0.0012.2025
 //
 // History:
 //	- 1.0.0010.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //	- 1.0.0011.1742(2011-06-02)	# 修正CListT::Del()当传入的迭代器为Tail时会导致意外的结果
 //								# 修正CListT::AddList()里的迭代器赋值错误
+//	- 1.0.0012.2025(2011-07-11)	# 修正CListT::operator[]()无法顺利通过编译的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __List_h__
@@ -126,9 +127,9 @@ public:
 		m_nCont = 0;
 	}
 
-	type_t& operator[](DWORD nIndex)
+	type_t& operator[](INT_PTR nIndex)
 	{ return GetAt(nIndex); }
-	const type_t& operator[](DWORD nIndex) const
+	const type_t& operator[](INT_PTR nIndex) const
 	{ return GetAt(nIndex); }
 
 	type_t& GetAt(DWORD nIndex)

@@ -96,14 +96,14 @@ public:
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
 		if (!state) return NULL;
-		return (CText*)(((void**)state->sta_arr)[0]);
+		return (CText*)(state->sta_arr[0]);
 	}
 	CString* GetEdit(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), pGC);
 		if (!state) return NULL;
-		return (CString*)(((void**)state->sta_arr)[0]);
+		return (CString*)(state->sta_arr[0]);
 	}
 
 	// 获得显示的文本内容,迭代器返回范围上限
@@ -540,22 +540,22 @@ public:
 		// 获得属性
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), &gc);
 		if (!state) return;
-		CText* text = (CText*)(((void**)state->sta_arr)[0]);
+		CText* text = (CText*)(state->sta_arr[0]);
 		if (!text) return;
 		CText tmp_text = (*text);
 
 		state = m_Ctrl->GetState(_T("edit"), &gc);
 		if (!state) return;
-		CString* edit = (CString*)(((void**)state->sta_arr)[0]);
+		CString* edit = (CString*)(state->sta_arr[0]);
 		if (!edit) return;
 
 		state = m_Ctrl->GetState(_T("txt_sel_color"), &gc);
 		if (!state) return;
-		pixel_t txt_sel_color = *(pixel_t*)(((void**)state->sta_arr)[0]);
+		pixel_t txt_sel_color = *(pixel_t*)(state->sta_arr[0]);
 
 		state = m_Ctrl->GetState(_T("bkg_sel_color"), &gc);
 		if (!state) return;
-		pixel_t bkg_sel_color = *(pixel_t*)(((void**)state->sta_arr)[0]);
+		pixel_t bkg_sel_color = *(pixel_t*)(state->sta_arr[0]);
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);

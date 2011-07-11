@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-07-11
-// Version:	1.0.0008.2313
+// Version:	1.0.0008.2350
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -49,7 +49,8 @@
 //	- 1.0.0005.1330(2011-05-02)	= 将滤镜对象从ImgRenderer内部分离
 //	- 1.0.0006.1130(2011-05-26)	# 修正ImgRenderer::Render()在绘图时顶点坐标偏移的计算错误
 //	- 1.0.0007.2200(2011-07-10)	^ 将滤镜模块从ImgRenderer中分离,提高ImgRenderer的渲染效率
-//	- 1.0.0008.2313(2011-07-11)	^ 略微优化PreRender()的执行效率
+//	- 1.0.0008.2350(2011-07-11)	^ 略微优化PreRender()的执行效率
+//								^ 优化渲染器算法,提高执行效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -134,10 +135,22 @@ public:
 		}
 		else
 		{
-			int r_dif = ((int)ExGetR(pix_src[i_s]) - (int)ExGetR(pix_des[i_d])) * m_Alpha / EXP_CM;
-			int g_dif = ((int)ExGetG(pix_src[i_s]) - (int)ExGetG(pix_des[i_d])) * m_Alpha / EXP_CM;
-			int b_dif = ((int)ExGetB(pix_src[i_s]) - (int)ExGetB(pix_des[i_d])) * m_Alpha / EXP_CM;
-			int a_dif = ((int)ExGetA(pix_src[i_s]) - (int)ExGetA(pix_des[i_d])) * m_Alpha / EXP_CM;
+			int r_dif = 
+				(m_Alpha == EXP_CM ? 
+				((int)ExGetR(pix_src[i_s]) - (int)ExGetR(pix_des[i_d])) : 
+				((int)ExGetR(pix_src[i_s]) - (int)ExGetR(pix_des[i_d])) * m_Alpha >> 8);
+			int g_dif = 
+				(m_Alpha == EXP_CM ? 
+				((int)ExGetG(pix_src[i_s]) - (int)ExGetG(pix_des[i_d])) : 
+				((int)ExGetG(pix_src[i_s]) - (int)ExGetG(pix_des[i_d])) * m_Alpha >> 8);
+			int b_dif = 
+				(m_Alpha == EXP_CM ? 
+				((int)ExGetB(pix_src[i_s]) - (int)ExGetB(pix_des[i_d])) : 
+				((int)ExGetB(pix_src[i_s]) - (int)ExGetB(pix_des[i_d])) * m_Alpha >> 8);
+			int a_dif = 
+				(m_Alpha == EXP_CM ? 
+				((int)ExGetA(pix_src[i_s]) - (int)ExGetA(pix_des[i_d])) : 
+				((int)ExGetA(pix_src[i_s]) - (int)ExGetA(pix_des[i_d])) * m_Alpha >> 8);
 			pix_des[i_d] = ExRGBA
 				(
 				ExGetR(pix_des[i_d]) + r_dif, 
@@ -173,7 +186,8 @@ public:
 	{
 		PreRender();
 
-		BYTE a_s = (ExGetA(pix_src[i_s]) * m_Alpha) / EXP_CM;
+		BYTE a_s = 
+			(m_Alpha == EXP_CM ? ExGetA(pix_src[i_s]) : (ExGetA(pix_src[i_s]) * m_Alpha) >> 8);
 		if (a_s == 0)
 			continue;
 		else
@@ -192,10 +206,10 @@ public:
 		BYTE a_i = EXP_CM - a_s;
 		pix_des[i_d] = ExRGBA
 			(
-			(r_s * a_s + r_d * a_i) / EXP_CM, 
-			(g_s * a_s + g_d * a_i) / EXP_CM, 
-			(b_s * a_s + b_d * a_i) / EXP_CM, 
-			(a_d + a_s) - a_d * a_s / EXP_CM
+			(r_s * a_s + r_d * a_i) >> 8, 
+			(g_s * a_s + g_d * a_i) >> 8, 
+			(b_s * a_s + b_d * a_i) >> 8, 
+			(a_d + a_s) - (a_d * a_s >> 8)
 			);
 
 		EndRender();
@@ -205,7 +219,6 @@ public:
 #ifndef EXP_IMG_RENDER
 #define EXP_IMG_RENDER CRenderNormal
 #endif/*EXP_IMG_RENDER*/
-
 
 //////////////////////////////////////////////////////////////////
 
@@ -229,7 +242,8 @@ public:
 	{
 		PreRender();
 
-		BYTE a_s = (ExGetA(pix_src[i_s]) * m_Alpha) / EXP_CM;
+		BYTE a_s = 
+			(m_Alpha == EXP_CM ? ExGetA(pix_src[i_s]) : (ExGetA(pix_src[i_s]) * m_Alpha) >> 8);
 		if (a_s == 0)
 			continue;
 		else
@@ -245,13 +259,14 @@ public:
 		BYTE r_d = ExGetR(pix_des[i_d]);
 		BYTE g_d = ExGetG(pix_des[i_d]);
 		BYTE b_d = ExGetB(pix_des[i_d]);
-		BYTE a_i = EXP_CM - a_s;
-		BYTE a_r = (a_d + a_s) - a_d * a_s / EXP_CM;
+		LONG a_i = (EXP_CM - a_s) * a_d >> 8;
+		BYTE a_r = (a_d + a_s) - (a_d * a_s >> 8);
+		if (a_r == 0) a_r = EXP_CM;
 		pix_des[i_d] = ExRGBA
 			(
-			(r_d * a_d * a_i + EXP_CM * r_s * a_s) / (EXP_CM * a_r), 
-			(g_d * a_d * a_i + EXP_CM * g_s * a_s) / (EXP_CM * a_r), 
-			(b_d * a_d * a_i + EXP_CM * b_s * a_s) / (EXP_CM * a_r), 
+			(r_d * a_i + r_s * a_s) / a_r, 
+			(g_d * a_i + g_s * a_s) / a_r, 
+			(b_d * a_i + b_s * a_s) / a_r, 
 			a_r
 			);
 

@@ -205,9 +205,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//img_grp.Delete();
 				//mem_grp.Delete();
 
-				Render(mem_img, imgShow, CRect(), CPoint());
+				//Render(mem_img, imgShow, CRect(), CPoint());
 
-				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay());
+				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay());
 			}
 			DWORD t_e = timeGetTime();
 			timeEndPeriod(1);

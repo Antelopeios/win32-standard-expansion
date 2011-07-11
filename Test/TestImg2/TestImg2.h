@@ -58,7 +58,7 @@ bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc)
 			DWORD* p_des = pix_des + i_d;
 			DWORD p_src = pix_src[i_s];
 			BYTE a_s = ExGetA(pix_src[i_s]);
-			__asm
+			//__asm
 			{
 				pxor		mm2,	mm2
 				mov			edx,	p_des
@@ -108,10 +108,10 @@ bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc)
 			BYTE a_i = EXP_CM - a_s;
 			pix_des[i_d] = ExRGBA
 				(
-				(r_s * a_s + r_d * a_i) / EXP_CM, 
-				(g_s * a_s + g_d * a_i) / EXP_CM, 
-				(b_s * a_s + b_d * a_i) / EXP_CM, 
-				(a_d + a_s) - a_d * a_s / EXP_CM
+				(r_s * a_s + r_d * a_i) >> 8, 
+				(g_s * a_s + g_d * a_i) >> 8, 
+				(b_s * a_s + b_d * a_i) >> 8, 
+				(a_d + a_s) - (a_d * a_s >> 8)
 				);
 		}
 	}

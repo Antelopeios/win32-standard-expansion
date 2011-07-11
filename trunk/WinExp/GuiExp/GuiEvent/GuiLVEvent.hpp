@@ -81,12 +81,12 @@ public:
 				// 获得属性
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("icon"), &gc);
 				if (!state) break;
-				CImage* icon = (CImage*)(((void**)state->sta_arr)[0]);
+				CImage* icon = (CImage*)(state->sta_arr[0]);
 				if (!icon || icon->IsNull()) break;
 
 				state = ctrl->GetState(_T("glow"), &gc);
 				if (!state) break;
-				bool glow = (bool)(LONG_PTR)(((void**)state->sta_arr)[0]);
+				bool glow = (bool)(LONG_PTR)(state->sta_arr[0]);
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
@@ -118,10 +118,10 @@ public:
 				// 绘图
 				state = ctrl->GetState(_T("locate"), &gc);
 				if (!state) break;
-				DWORD locate = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD locate = (DWORD)(state->sta_arr[0]);
 				state = ctrl->GetState(_T("loc_off"), &gc);
 				if (!state) break;
-				LONG loc_off = (LONG)(((void**)state->sta_arr)[0]);
+				LONG loc_off = (LONG)(state->sta_arr[0]);
 
 				CRect icon_rct;
 				switch(locate)
@@ -210,14 +210,14 @@ public:
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("items"), pGC);
 		if (!state) return NULL;
-		return (CListT<IGuiCtrl*>*)(((void**)state->sta_arr)[0]);
+		return (CListT<IGuiCtrl*>*)(state->sta_arr[0]);
 	}
 	LONG GetSpace(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("space"), pGC);
 		if (!state) return NULL;
-		return (LONG)(LONG_PTR)(((void**)state->sta_arr)[0]);
+		return (LONG)(LONG_PTR)(state->sta_arr[0]);
 	}
 
 	// 格式化列表项的位置

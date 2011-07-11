@@ -81,17 +81,17 @@ public:
 				// »ñµÃÊôÐÔ
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("image"), &gc);
 				if (!state) break;
-				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
+				CImage* image = (CImage*)(state->sta_arr[0]);
 				if (!image) break;
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
-				pixel_t* pixel = (pixel_t*)(((void**)state->sta_arr)[0]);
+				pixel_t* pixel = (pixel_t*)(state->sta_arr[0]);
 				if (!pixel) break;
 
 				state = ctrl->GetState(_T("text"), &gc);
 				if (!state) break;
-				CText* text = (CText*)(((void**)state->sta_arr)[0]);
+				CText* text = (CText*)(state->sta_arr[0]);
 				if (!text) break;
 
 				CImage* mem_img = (CImage*)lParam;

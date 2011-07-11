@@ -89,7 +89,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)state->sta_arr[0];
 				if (status != 2)
 				{
 					status = 1;
@@ -123,7 +123,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (status == 2) // 当按下后抬起,视为一次Click
 					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_COMMAND, BN_CLICKED);
 
@@ -148,12 +148,12 @@ public:
 				// 获得属性
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("thr_sta"), &gc);
 				if (!state) break;
-				bool thr_sta = (bool)(((void**)state->sta_arr)[0]);
+				bool thr_sta = (bool)(state->sta_arr[0]);
 				LONG sta_tim = thr_sta ? 3 : 5;
 
 				state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (!thr_sta)
 				{
 					if (ctrl->IsFocus() && status == 0) status = 3;
@@ -164,16 +164,16 @@ public:
 				if (!state) break;
 				CImage* (image[9]);
 				for(int i = 0; i < _countof(image); ++i)
-					image[i] = (CImage*)(((void**)state->sta_arr)[i]);
+					image[i] = (CImage*)(state->sta_arr[i]);
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
-				pixel_t* pixel = (pixel_t*)(((void**)state->sta_arr)[status]);
+				pixel_t* pixel = (pixel_t*)(state->sta_arr[status]);
 				if (!pixel) break;
 
 				state = ctrl->GetState(_T("text"), &gc);
 				if (!state) break;
-				CText* text = (CText*)(((void**)state->sta_arr)[status]);
+				CText* text = (CText*)(state->sta_arr[status]);
 				if (!text) break;
 
 				CImage* mem_img = (CImage*)lParam;
@@ -372,10 +372,10 @@ public:
 				{
 					state = ctrl->GetState(_T("locate"), &gc);
 					if (!state) break;
-					DWORD locate = (DWORD)(((void**)state->sta_arr)[0]);
+					DWORD locate = (DWORD)(state->sta_arr[0]);
 					state = ctrl->GetState(_T("loc_off"), &gc);
 					if (!state) break;
-					LONG loc_off = (LONG)(((void**)state->sta_arr)[0]);
+					LONG loc_off = (LONG)(state->sta_arr[0]);
 
 					CRect txt_rct;
 					switch(locate)
@@ -473,7 +473,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (status != 2 && status != 3)
 				{
 					status = 1;
@@ -489,7 +489,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (status == 3) break;
 				status = 2;
 				ctrl->SetState(_T("status"), (void*)status);
@@ -503,7 +503,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (status == 3) break;
 
 				IGuiBoard* board = ctrl->GetBoard();
@@ -520,7 +520,7 @@ public:
 
 				state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				status = (DWORD)(((void**)state->sta_arr)[0]);
+				status = (DWORD)(state->sta_arr[0]);
 				if (status == 3) break;
 
 				if (rc.PtInRect(pt))
@@ -535,7 +535,7 @@ public:
 				CGC gc;
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (status == 3) break;
 				status = 0;
 				ctrl->SetState(_T("status"), (void*)status);
@@ -551,20 +551,20 @@ public:
 
 				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;
-				DWORD status = (DWORD)(((void**)state->sta_arr)[0]);
+				DWORD status = (DWORD)(state->sta_arr[0]);
 
 				state = ctrl->GetState(_T("image"), &gc);
 				if (!state) break;
-				CImage* image = (CImage*)(((void**)state->sta_arr)[0]);
+				CImage* image = (CImage*)(state->sta_arr[0]);
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
-				pixel_t* pixel = (pixel_t*)(((void**)state->sta_arr)[status]);
+				pixel_t* pixel = (pixel_t*)(state->sta_arr[status]);
 				if (!pixel) break;
 
 				state = ctrl->GetState(_T("text"), &gc);
 				if (!state) break;
-				CText* text = (CText*)(((void**)state->sta_arr)[status]);
+				CText* text = (CText*)(state->sta_arr[status]);
 				if (!text) break;
 
 				CImage* mem_img = (CImage*)lParam;
@@ -596,10 +596,10 @@ public:
 				{
 					state = ctrl->GetState(_T("locate"), &gc);
 					if (!state) break;
-					DWORD locate = (DWORD)(((void**)state->sta_arr)[0]);
+					DWORD locate = (DWORD)(state->sta_arr[0]);
 					state = ctrl->GetState(_T("loc_off"), &gc);
 					if (!state) break;
-					LONG loc_off = (LONG)(((void**)state->sta_arr)[0]);
+					LONG loc_off = (LONG)(state->sta_arr[0]);
 
 					CRect txt_rct;
 					switch(locate)

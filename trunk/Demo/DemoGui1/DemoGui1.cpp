@@ -104,7 +104,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		GUI_CTRL(topbar_btn)->AddComp(itm);
 		items_topbar_btn.Add(itm);
 	}
-	((IGuiCtrl**)items_topbar_btn)[0]->SetState(_T("status"), (void*)3);
+	items_topbar_btn[0]->SetState(_T("status"), (void*)3);
 	GUI_CTRL(topbar_btn)->SetState(_T("items"), &items_topbar_btn);
 	GUI_CTRL(topbar_btn)->SetState(_T("sta_cnt"), (void*)4);
 	GUI_CTRL(topbar_btn)->SetState(_T("sty_box"), (void*)false);
@@ -118,6 +118,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 //#define GuiLoadGrp()
 
 	GuiLoadPsh(tag_qb);
+	GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)3);
 	GuiLoadPsh(tag_zx);
 	GuiLoadPsh(tag_wl);
 	GuiLoadPsh(tag_dz);

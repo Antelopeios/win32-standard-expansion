@@ -127,113 +127,53 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	imgOrig = coder->Decode();
 	imgShow = imgOrig.Clone();
 
-	__m128 m_1, m_2, m_r;
+	//__m128i m_1, m_2, m_r;
 
-	timeBeginPeriod(1);
-	DWORD t_s = timeGetTime();
+	//timeBeginPeriod(1);
+	//DWORD t_s = timeGetTime();
 
-	for(int i = 0; i < 10000000; ++i)
-	{
-		ExSetSSE(m_1, 123, 321, 231, 312);
-		ExSetSSE(m_2, 312, 213, 231, 123);
-		{
-			uint32_t* sr = (uint32_t*)(&m_r);
-			uint32_t* s1 = (uint32_t*)(&m_1);
-			uint32_t* s2 = (uint32_t*)(&m_2);
-			__asm
-			{
-				mov eax, [s1]
-				mov esi, [s2]
-				mov ecx, [sr]
-				movups xmm0, [eax]
-				movups xmm1, [esi]
-				addps xmm0, xmm1
-				movups [ecx], xmm0
-			}
-		}
-		{
-			uint32_t* sr = (uint32_t*)(&m_r);
-			uint32_t* s1 = (uint32_t*)(&m_1);
-			uint32_t* s2 = (uint32_t*)(&m_2);
-			__asm
-			{
-				mov eax, [s1]
-				mov esi, [s2]
-				mov ecx, [sr]
-				movups xmm0, [eax]
-				movups xmm1, [esi]
-				subps xmm0, xmm1
-				movups [ecx], xmm0
-			}
-		}
-		{
-			uint32_t* sr = (uint32_t*)(&m_r);
-			uint32_t* s1 = (uint32_t*)(&m_1);
-			uint32_t* s2 = (uint32_t*)(&m_2);
-			__asm
-			{
-				mov eax, [s1]
-				mov esi, [s2]
-				mov ecx, [sr]
-				movups xmm0, [eax]
-				movups xmm1, [esi]
-				mulps xmm0, xmm1
-				movups [ecx], xmm0
-			}
-		}
-		{
-			uint32_t* sr = (uint32_t*)(&m_r);
-			uint32_t* s1 = (uint32_t*)(&m_1);
-			uint32_t* s2 = (uint32_t*)(&m_2);
-			__asm
-			{
-				mov eax, [s1]
-				mov esi, [s2]
-				mov ecx, [sr]
-				movups xmm0, [eax]
-				movups xmm1, [esi]
-				divps xmm0, xmm1
-				movups [ecx], xmm0
-			}
-		}
-		//ExAddSSE(&m_r, &m_1, &m_2);
-		//ExSubSSE(&m_r, &m_1, &m_2);
-		//ExMulSSE(&m_r, &m_1, &m_2);
-		//ExDivSSE(&m_r, &m_1, &m_2);
-	}
 	//for(int i = 0; i < 10000000; ++i)
 	//{
-	//	CSSE::SetNor(m_1, (float)123, (float)321, (float)231, (float)312);
-	//	CSSE::SetNor(m_2, (float)312, (float)213, (float)231, (float)123);
-
-	//	m_r.m128_f32[0] = (m_1.m128_f32[0] + m_2.m128_f32[0]);
-	//	m_r.m128_f32[1] = (m_1.m128_f32[1] + m_2.m128_f32[1]);
-	//	m_r.m128_f32[2] = (m_1.m128_f32[2] + m_2.m128_f32[2]);
-	//	m_r.m128_f32[3] = (m_1.m128_f32[3] + m_2.m128_f32[3]);
-
-	//	m_r.m128_f32[0] = (m_1.m128_f32[0] - m_2.m128_f32[0]);
-	//	m_r.m128_f32[1] = (m_1.m128_f32[1] - m_2.m128_f32[1]);
-	//	m_r.m128_f32[2] = (m_1.m128_f32[2] - m_2.m128_f32[2]);
-	//	m_r.m128_f32[3] = (m_1.m128_f32[3] - m_2.m128_f32[3]);
-
-	//	m_r.m128_f32[0] = (m_1.m128_f32[0] * m_2.m128_f32[0]);
-	//	m_r.m128_f32[1] = (m_1.m128_f32[1] * m_2.m128_f32[1]);
-	//	m_r.m128_f32[2] = (m_1.m128_f32[2] * m_2.m128_f32[2]);
-	//	m_r.m128_f32[3] = (m_1.m128_f32[3] * m_2.m128_f32[3]);
-
-	//	m_r.m128_f32[0] = (m_1.m128_f32[0] / m_2.m128_f32[0]);
-	//	m_r.m128_f32[1] = (m_1.m128_f32[1] / m_2.m128_f32[1]);
-	//	m_r.m128_f32[2] = (m_1.m128_f32[2] / m_2.m128_f32[2]);
-	//	m_r.m128_f32[3] = (m_1.m128_f32[3] / m_2.m128_f32[3]);
+	//	m_1 = _mm_set_epi32(123, 321, 231, 312);
+	//	m_2 = _mm_set_epi32(312, 213, 231, 123);
+	//	m_r = _mm_add_epi32(m_1, m_2);
+	//	m_r = _mm_sub_epi32(m_1, m_2);
+	//	m_r = _mm_mullo_epi16(m_1, m_2);
+	//	//m_r = _mm_div_epi32(m_1, m_2);
 	//}
+	////for(int i = 0; i < 10000000; ++i)
+	////{
+	////	m_1 = _mm_set_ps((float)123, (float)321, (float)231, (float)312);
+	////	m_2 = _mm_set_ps((float)312, (float)213, (float)231, (float)123);
 
-	DWORD t_e = timeGetTime();
-	timeEndPeriod(1);
-	t_e -= t_s;
-	CString msg;
-	msg.Format(_T("%d ms (%f, %f, %f, %f)"), t_e, 
-		m_r.m128_f32[0], m_r.m128_f32[1], m_r.m128_f32[2], m_r.m128_f32[3]);
-	::MessageBox(NULL, (LPCTSTR)msg, NULL, 0);
+	////	m_r.m128_f32[0] = (m_1.m128_f32[0] + m_2.m128_f32[0]);
+	////	m_r.m128_f32[1] = (m_1.m128_f32[1] + m_2.m128_f32[1]);
+	////	m_r.m128_f32[2] = (m_1.m128_f32[2] + m_2.m128_f32[2]);
+	////	m_r.m128_f32[3] = (m_1.m128_f32[3] + m_2.m128_f32[3]);
+
+	////	m_r.m128_f32[0] = (m_1.m128_f32[0] - m_2.m128_f32[0]);
+	////	m_r.m128_f32[1] = (m_1.m128_f32[1] - m_2.m128_f32[1]);
+	////	m_r.m128_f32[2] = (m_1.m128_f32[2] - m_2.m128_f32[2]);
+	////	m_r.m128_f32[3] = (m_1.m128_f32[3] - m_2.m128_f32[3]);
+
+	////	m_r.m128_f32[0] = (m_1.m128_f32[0] * m_2.m128_f32[0]);
+	////	m_r.m128_f32[1] = (m_1.m128_f32[1] * m_2.m128_f32[1]);
+	////	m_r.m128_f32[2] = (m_1.m128_f32[2] * m_2.m128_f32[2]);
+	////	m_r.m128_f32[3] = (m_1.m128_f32[3] * m_2.m128_f32[3]);
+
+	////	m_r.m128_f32[0] = (m_1.m128_f32[0] / m_2.m128_f32[0]);
+	////	m_r.m128_f32[1] = (m_1.m128_f32[1] / m_2.m128_f32[1]);
+	////	m_r.m128_f32[2] = (m_1.m128_f32[2] / m_2.m128_f32[2]);
+	////	m_r.m128_f32[3] = (m_1.m128_f32[3] / m_2.m128_f32[3]);
+	////}
+
+	//DWORD t_e = timeGetTime();
+	//timeEndPeriod(1);
+	//t_e -= t_s;
+	//CString msg;
+	//msg.Format(_T("%d ms (%d, %d, %d, %d)"), t_e, 
+	//	m_r.m128i_i32[0], m_r.m128i_i32[1], m_r.m128i_i32[2], m_r.m128i_i32[3]);
+	//::MessageBox(NULL, (LPCTSTR)msg, NULL, 0);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -313,9 +253,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//img_grp.Delete();
 				//mem_grp.Delete();
 
-				Render(mem_img, imgShow, CRect(), CPoint());
+				//Render(mem_img, imgShow, CRect(), CPoint());
 
-				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint()/*, &CRenderOverlay()*/);
+				//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint(), &CRenderCopy());
+
+				//CGraph mem_grp;
+				//mem_grp.Create();
+				//mem_grp.SetObject(mem_img.Get());
+				//CGraph img_grp;
+				//img_grp.Create();
+				//img_grp.SetObject(imgShow.Get());
+
+				//StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
+				//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
+
+				//img_grp.Delete();
+				//mem_grp.Delete();
+
+				CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
+				CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint()/*, &CRenderCopy()*/);
 			}
 			DWORD t_e = timeGetTime();
 			timeEndPeriod(1);

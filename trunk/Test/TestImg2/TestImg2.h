@@ -2,7 +2,10 @@
 
 #include "resource.h"
 
-bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc)
+#include <xmmintrin.h>
+#include <emmintrin.h>
+
+bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
 {
 	CImage exp_des;
 	exp_des.SetTrust(false);
@@ -15,26 +18,27 @@ bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc)
 
 	CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 	CSize sz_src(exp_src.GetWidth(), exp_src.GetHeight());
-	if (rcDes.IsEmpty())
-		rcDes.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
+	if (rc_des.IsEmpty())
+		rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
 
 	// ±éÀúÏñËØ»æÍ¼
 	pixel_t* pix_des = exp_des.GetPixels();
 	pixel_t* pix_src = exp_src.GetPixels();
-	LONG w = min(sz_src.cx, ptSrc.x + rcDes.Width());
-	LONG h = min(sz_src.cy, ptSrc.y + rcDes.Height());
-	for(LONG y_s = ptSrc.y; y_s < h; ++y_s)
+	LONG w = min(sz_src.cx, pt_src.x + rc_des.Width());
+	LONG h = min(sz_src.cy, pt_src.y + rc_des.Height());
+	LONG y_s = pt_src.y;
+	LONG y_d = rc_des.Top() + y_s - pt_src.y;
+	for(; y_s < h && y_d < sz_des.cy; ++y_s, ++y_d)
 	{
-		LONG y_d = rcDes.Top() + y_s - ptSrc.y;
-		if (y_d < 0 || y_d >= sz_des.cy) continue;
+		if (y_d < 0) continue;
 
-		for(LONG x_s = ptSrc.x; x_s < w; ++x_s)
+		LONG x_s = pt_src.x;
+		LONG x_d = rc_des.Left() + x_s - pt_src.x;
+		LONG i_s = (sz_src.cy - y_s - 1) * sz_src.cx + x_s;
+		LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d;
+		for(; x_s < w && x_d < sz_des.cx; ++x_s, ++x_d, ++i_s, ++i_d)
 		{
-			LONG x_d = rcDes.Left() + x_s - ptSrc.x;
-			if (x_d < 0 || x_d >= sz_des.cx) continue;
-
-			LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d;
-			LONG i_s = (sz_src.cy - y_s - 1) * sz_src.cx + x_s;
+			if (x_d < 0) continue;
 
 			BYTE a_s = ExGetA(pix_src[i_s]);
 			if (a_s == 0)

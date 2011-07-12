@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-10
-// Version:	1.0.0000.2200
+// Date:	2011-07-12
+// Version:	1.0.0001.1004
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
+//	- 1.0.0001.1004(2011-07-12)	^ 优化PreFilter()的执行效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -109,9 +110,11 @@ protected:
 #pragma push_macro("PreFilter")
 #undef PreFilter
 #define PreFilter() \
-	for(LONG y_d = rc_des.Top(); y_d < min(sz_des.cy, rc_des.Bottom()); ++y_d) \
+	LONG w = min(sz_des.cx, rc_des.Right()); \
+	LONG h = min(sz_des.cy, rc_des.Bottom()); \
+	for(LONG y_d = rc_des.Top(); y_d < h; ++y_d) \
 	{ \
-		for(LONG x_d = rc_des.Left(); x_d < min(sz_des.cx, rc_des.Right()); ++x_d) \
+		for(LONG x_d = rc_des.Left(); x_d < w; ++x_d) \
 		{ \
 			LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d
 //#define PreRender

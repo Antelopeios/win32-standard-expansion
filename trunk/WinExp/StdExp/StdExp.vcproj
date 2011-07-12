@@ -305,6 +305,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Algorithm\SSE.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Algorithm\SSE.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Algorithm\Swap.h"
 				>
 			</File>

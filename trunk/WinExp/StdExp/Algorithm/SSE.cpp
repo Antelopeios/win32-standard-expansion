@@ -28,33 +28,27 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Algorithm - 算法
+// SSE - SSE指令优化算法
 //
 // Author:	木头云
-// Home:	dark-c.at
+// Home:	http://hi.baidu.com/markl22222
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-01-26
-// Version:	1.0.0003.1730
+// Date:	2011-07-12
+// Version:	1.0.0000.1033
+//
+// History:
+//	- 1.0.0000.1033(2011-07-12)	@ 开始构建CSSE
 //////////////////////////////////////////////////////////////////
-
-#ifndef __Algorithm_h__
-#define __Algorithm_h__
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 #include "Common/Common.h"
+#include "SSE.h"
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "Algorithm/Finder.h"
-#include "Algorithm/Swap.h"
-#include "Algorithm/Hash.h"
-#include "Algorithm/NonCopyable.h"
-#include "Algorithm/RTTI.h"
-#include "Algorithm/SSE.h"
+int CSSE::m_nSupport = -1;
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Algorithm_h__*/
+EXP_END

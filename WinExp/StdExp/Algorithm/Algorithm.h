@@ -53,7 +53,6 @@
 #include "Algorithm/Hash.h"
 #include "Algorithm/NonCopyable.h"
 #include "Algorithm/RTTI.h"
-#include "Algorithm/SSE.h"
 
 //////////////////////////////////////////////////////////////////
 

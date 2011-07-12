@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-07-12
-// Version:	1.0.0009.1004
+// Version:	1.0.0009.2328
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -51,7 +51,7 @@
 //	- 1.0.0007.2200(2011-07-10)	^ 将滤镜模块从ImgRenderer中分离,提高ImgRenderer的渲染效率
 //	- 1.0.0008.2350(2011-07-11)	^ 略微优化PreRender()的执行效率
 //								^ 优化渲染器算法,提高执行效率(+25%)
-//	- 1.0.0009.1004(2011-07-12)	^ 优化PreRender()的执行效率(+20%)
+//	- 1.0.0009.2328(2011-07-12)	^ 优化PreRender()的执行效率(+40-60%)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -85,16 +85,18 @@ interface IRenderObject : INonCopyable
 #define PreRender() \
 	LONG w = min(sz_src.cx, pt_src.x + rc_des.Width()); \
 	LONG h = min(sz_src.cy, pt_src.y + rc_des.Height()); \
-	for(LONG y_s = pt_src.y; y_s < h; ++y_s) \
+	LONG y_s = pt_src.y; \
+	LONG y_d = rc_des.Top() + y_s - pt_src.y; \
+	for(; y_s < h && y_d < sz_des.cy; ++y_s, ++y_d) \
 	{ \
-		LONG y_d = rc_des.Top() + y_s - pt_src.y; \
-		if (y_d < 0 || y_d >= sz_des.cy) continue; \
-		for(LONG x_s = pt_src.x; x_s < w; ++x_s) \
+		if (y_d < 0) continue; \
+		LONG x_s = pt_src.x; \
+		LONG x_d = rc_des.Left() + x_s - pt_src.x; \
+		LONG i_s = (sz_src.cy - y_s - 1) * sz_src.cx + x_s; \
+		LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d; \
+		for(; x_s < w && x_d < sz_des.cx; ++x_s, ++x_d, ++i_s, ++i_d) \
 		{ \
-			LONG x_d = rc_des.Left() + x_s - pt_src.x; \
-			if (x_d < 0 || x_d >= sz_des.cx) continue; \
-			LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d; \
-			LONG i_s = (sz_src.cy - y_s - 1) * sz_src.cx + x_s
+			if (x_d < 0) continue
 //#define PreRender
 
 #pragma push_macro("EndRender")
@@ -124,18 +126,18 @@ public:
 		CRect& rc_des, CPoint& pt_src
 		)
 	{
-		PreRender();
-
 		if (m_Alpha == 0)
-			continue;
+			return;
 		else
 		if (m_Alpha == EXP_CM)
 		{
+			PreRender();
 			pix_des[i_d] = pix_src[i_s];
-			continue;
+			EndRender();
 		}
 		else
 		{
+			PreRender();
 			int r_dif = 
 				(m_Alpha == EXP_CM ? 
 				((int)ExGetR(pix_src[i_s]) - (int)ExGetR(pix_des[i_d])) : 
@@ -159,9 +161,8 @@ public:
 				ExGetB(pix_des[i_d]) + b_dif, 
 				ExGetA(pix_des[i_d]) + a_dif
 				);
+			EndRender();
 		}
-
-		EndRender();
 	}
 };
 

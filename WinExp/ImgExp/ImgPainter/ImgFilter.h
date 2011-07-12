@@ -34,11 +34,11 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-07-12
-// Version:	1.0.0001.1004
+// Version:	1.0.0001.2328
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
-//	- 1.0.0001.1004(2011-07-12)	^ 优化PreFilter()的执行效率
+//	- 1.0.0001.2328(2011-07-12)	^ 优化PreFilter()的执行效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -112,11 +112,13 @@ protected:
 #define PreFilter() \
 	LONG w = min(sz_des.cx, rc_des.Right()); \
 	LONG h = min(sz_des.cy, rc_des.Bottom()); \
-	for(LONG y_d = rc_des.Top(); y_d < h; ++y_d) \
+	LONG y_d = rc_des.Top(); \
+	for(; y_d < h; ++y_d) \
 	{ \
-		for(LONG x_d = rc_des.Left(); x_d < w; ++x_d) \
-		{ \
-			LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d
+		LONG x_d = rc_des.Left(); \
+		LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d; \
+		for(; x_d < w; ++x_d, ++i_d) \
+		{
 //#define PreRender
 
 #pragma push_macro("EndFilter")

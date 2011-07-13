@@ -255,7 +255,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				//Render(mem_img, imgShow, CRect(), CPoint());
 
-				//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint(), &CRenderCopy());
+				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint()/*, &CRenderCopy()*/);
 
 				//CGraph mem_grp;
 				//mem_grp.Create();
@@ -271,7 +271,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//mem_grp.Delete();
 
 				CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
-				CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint()/*, &CRenderCopy()*/);
+				CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
 			}
 			DWORD t_e = timeGetTime();
 			timeEndPeriod(1);

@@ -67,8 +67,7 @@ public:
 	// 最邻近插值
 	static pixel_t InterNeighbor(pixel_t* pixSrc, CPointT<double>& ptSrc, CRectT<double>& rcSrc)
 	{
-		if (!pixSrc) return 0;
-		if (!rcSrc.PtInRect(ptSrc)) return 0;
+		if (!pixSrc || !rcSrc.PtInRect(ptSrc)) return 0;
 		return pixSrc[((LONG)ptSrc.x + (LONG)ptSrc.y * (LONG)rcSrc.Width())];
 	}
 	// 双线性插值
@@ -135,6 +134,7 @@ protected:
 		mtxDes[2] = -(mtxSrc[2] / inv_div);
 		mtxDes[3] = (mtxSrc[0] / inv_div);
 	}
+
 	// 坐标矩阵变换
 	EXP_INLINE static void Transform(_IN_ CPointT<double>& ptSrc, _OT_ CPointT<double>& ptDes, _IN_ const double (&mtxTans)[4])
 	{
@@ -153,9 +153,9 @@ protected:
 		CPointT<double> ver_src[4] = 
 		{
 			CPointT<double>(0.0f, 0.0f), 
-			CPointT<double>(exp_src.GetWidth(), 0.0f), 
-			CPointT<double>(exp_src.GetWidth(), exp_src.GetHeight()), 
-			CPointT<double>(0.0f, exp_src.GetHeight())
+			CPointT<double>((double)exp_src.GetWidth(), 0.0f), 
+			CPointT<double>((double)exp_src.GetWidth(), exp_src.GetHeight()), 
+			CPointT<double>(0.0f, (double)exp_src.GetHeight())
 		};
 		CPointT<double> ver_des[4] = 
 		{
@@ -187,12 +187,16 @@ protected:
 		CPointT<double> crd_src, crd_des;
 		pixel_t* pix_src = exp_src.GetPixels();
 		pixel_t* pix_des = exp_des.GetPixels();
-		for(LONG y = 0; y < h_des; ++y)
+		LONG y = 0;
+		LONG crd_y = h_des - y + min_y;
+		for(; y < h_des; ++y, --crd_y)
 		{
-			for(LONG x = 0; x < w_des; ++x)
+			LONG x = 0;
+			LONG crd_x = x + min_x;
+			for(; x < w_des; ++x, ++crd_x)
 			{
 				// 存储目标坐标
-				crd_des.Set(x + min_x, h_des - y + min_y);
+				crd_des.Set((double)crd_x, (double)crd_y);
 				// 反向映射坐标
 				Transform(crd_des, crd_src, matrix);
 				// 改写目标像素
@@ -260,7 +264,7 @@ public:
 		// 角度换算弧度
 		nDegree = nDegree % 360;
 		if (nDegree == 0) return NULL;
-		double radian = EXP_PI * ((double)nDegree / 180);
+		double radian = (double)EXP_PI * (nDegree / 180);
 		// 计算形变矩阵
 		double matrix[4] = 
 		{

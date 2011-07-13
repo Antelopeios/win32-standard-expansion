@@ -6,6 +6,7 @@
 
 #include "mmsystem.h"
 #pragma comment(lib, "winmm.lib")
+
 #pragma comment(lib, "msimg32.lib")
 
 #define MAX_LOADSTRING 100
@@ -255,7 +256,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				//Render(mem_img, imgShow, CRect(), CPoint());
 
-				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint()/*, &CRenderCopy()*/);
+				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint()/*, &CRenderCopy()*//*, &CRenderOverlay()*/);
 
 				//CGraph mem_grp;
 				//mem_grp.Create();
@@ -270,8 +271,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//img_grp.Delete();
 				//mem_grp.Delete();
 
-				CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
-				CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
+				//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
+				//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
 			}
 			DWORD t_e = timeGetTime();
 			timeEndPeriod(1);

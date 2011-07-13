@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "TestImg1.h"
 
+#include "mmsystem.h"
+#pragma comment(lib, "winmm.lib")
+
 #pragma comment(lib, "msimg32.lib")
 
 #define MAX_LOADSTRING 100
@@ -281,13 +284,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Filter(hWnd, &CFilterInverse());
 			break;
 		case IDM_RELI:
-			Filter(hWnd, &CFilterRelief());
+			{
+				timeBeginPeriod(1);
+				DWORD t_s = timeGetTime();
+				Filter(hWnd, &CFilterRelief());
+				DWORD t_e = timeGetTime();
+				timeEndPeriod(1);
+				t_e -= t_s;
+				CString msg;
+				msg.Format(_T("%d ms"), t_e);
+				::MessageBox(NULL, (LPCTSTR)msg, NULL, 0);
+			}
 			break;
 		case IDM_DIFF:
 			Filter(hWnd, &CFilterDiffuse());
 			break;
 		case IDM_GAUS:
-			Filter(hWnd, &CFilterGauss());
+			{
+				timeBeginPeriod(1);
+				DWORD t_s = timeGetTime();
+				Filter(hWnd, &CFilterGauss());
+				DWORD t_e = timeGetTime();
+				timeEndPeriod(1);
+				t_e -= t_s;
+				CString msg;
+				msg.Format(_T("%d ms"), t_e);
+				::MessageBox(NULL, (LPCTSTR)msg, NULL, 0);
+			}
 			break;
 		case IDM_OUTG:
 			if (imgShow)

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-12
-// Version:	1.0.0009.2328
+// Date:	2011-07-13
+// Version:	1.0.0010.2345
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -52,6 +52,8 @@
 //	- 1.0.0008.2350(2011-07-11)	^ 略微优化PreRender()的执行效率
 //								^ 优化渲染器算法,提高执行效率(+25%)
 //	- 1.0.0009.2328(2011-07-12)	^ 优化PreRender()的执行效率(+40-60%)
+//	- 1.0.0010.2345(2011-07-13)	^ 优化CImgRenderer::Render()与PreRender()的执行效率
+//								# 修正CImgRenderer::Render()区域校验中的错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -74,7 +76,7 @@ interface IRenderObject : INonCopyable
 		(
 		pixel_t* pix_des, pixel_t* pix_src, 
 		CSize& sz_des, CSize& sz_src, 
-		CRect& rc_des, CPoint& pt_src
+		LONG w, LONG h, LONG inx_des, LONG inx_src
 		) = 0;
 };
 
@@ -83,20 +85,10 @@ interface IRenderObject : INonCopyable
 #pragma push_macro("PreRender")
 #undef PreRender
 #define PreRender() \
-	LONG w = min(sz_src.cx, pt_src.x + rc_des.Width()); \
-	LONG h = min(sz_src.cy, pt_src.y + rc_des.Height()); \
-	LONG y_s = pt_src.y; \
-	LONG y_d = rc_des.Top() + y_s - pt_src.y; \
-	for(; y_s < h && y_d < sz_des.cy; ++y_s, ++y_d) \
+	for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx) \
 	{ \
-		if (y_d < 0) continue; \
-		LONG x_s = pt_src.x; \
-		LONG x_d = rc_des.Left() + x_s - pt_src.x; \
-		LONG i_s = (sz_src.cy - y_s - 1) * sz_src.cx + x_s; \
-		LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d; \
-		for(; x_s < w && x_d < sz_des.cx; ++x_s, ++x_d, ++i_s, ++i_d) \
+		for(LONG x = 0, i_d = inx_des, i_s = inx_src; x < w; ++x, ++i_d, ++i_s) \
 		{ \
-			if (x_d < 0) continue
 //#define PreRender
 
 #pragma push_macro("EndRender")
@@ -123,7 +115,7 @@ public:
 		(
 		pixel_t* pix_des, pixel_t* pix_src, 
 		CSize& sz_des, CSize& sz_src, 
-		CRect& rc_des, CPoint& pt_src
+		LONG w, LONG h, LONG inx_des, LONG inx_src
 		)
 	{
 		if (m_Alpha == 0)
@@ -183,7 +175,7 @@ public:
 		(
 		pixel_t* pix_des, pixel_t* pix_src, 
 		CSize& sz_des, CSize& sz_src, 
-		CRect& rc_des, CPoint& pt_src
+		LONG w, LONG h, LONG inx_des, LONG inx_src
 		)
 	{
 		PreRender();
@@ -239,7 +231,7 @@ public:
 		(
 		pixel_t* pix_des, pixel_t* pix_src, 
 		CSize& sz_des, CSize& sz_src, 
-		CRect& rc_des, CPoint& pt_src
+		LONG w, LONG h, LONG inx_des, LONG inx_src
 		)
 	{
 		PreRender();
@@ -286,7 +278,7 @@ public:
 class CImgRenderer
 {
 public:
-	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rcDes, CPoint& ptSrc, 
+	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src, 
 								  IRenderObject* pRender = NULL)
 	{
 		CImage exp_des;
@@ -297,15 +289,56 @@ public:
 		exp_src.SetTrust(false);
 		exp_src = imgSrc;
 		if (exp_src.IsNull()) return false;
+
+		// 格式化区域
+
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		CSize sz_src(exp_src.GetWidth(), exp_src.GetHeight());
-		if (rcDes.IsEmpty())
-			rcDes.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
+		if (rc_des.IsEmpty())
+			rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
+		CRect rc_src(pt_src.x, pt_src.y, sz_src.cx, sz_src.cy);
+		// 校验rc_des.pt1
+		if (rc_des.pt1.x < 0)
+		{
+			rc_src.pt1.x -= rc_des.pt1.x;
+			rc_des.pt1.x = 0;
+		}
+		if (rc_des.pt1.y < 0)
+		{
+			rc_src.pt1.y -= rc_des.pt1.y;
+			rc_des.pt1.y = 0;
+		}
+		// 校验rc_des.pt2
+		if (rc_des.pt2.x > sz_des.cx)
+			rc_des.pt2.x = sz_des.cx;
+		if (rc_des.pt2.y > sz_des.cy)
+			rc_des.pt2.y = sz_des.cy;
+		// 校验rc_src.pt1
+		if (rc_src.pt1.x < 0)
+		{
+			rc_des.pt1.x -= rc_src.pt1.x;
+			rc_src.pt1.x = 0;
+		}
+		if (rc_src.pt1.y < 0)
+		{
+			rc_des.pt1.y -= rc_src.pt1.y;
+			rc_src.pt1.y = 0;
+		}
+		// rc_src.pt2不需要校验
+
+		// 获得合适的宽与高
+		LONG w = min(rc_des.Width(), rc_src.Width());
+		LONG h = min(rc_des.Height(), rc_src.Height());
+		if (w <= 0 || h <= 0) return true;
+		// 计算坐标起点
+		LONG inx_des = (sz_des.cy - rc_des.Top() - 1) * sz_des.cx + rc_des.Left();
+		LONG inx_src = (sz_src.cy - rc_src.Top() - 1) * sz_src.cx + rc_src.Left();
+
 		// 遍历像素绘图
 		pixel_t* pix_des = exp_des.GetPixels();
 		pixel_t* pix_src = exp_src.GetPixels();
 		if (!pRender) pRender = &EXP_IMG_RENDER();
-		pRender->Render(pix_des, pix_src, sz_des, sz_src, rcDes, ptSrc);
+		pRender->Render(pix_des, pix_src, sz_des, sz_src, w, h, inx_des, inx_src);
 		return true;
 	}
 };

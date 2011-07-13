@@ -33,12 +33,17 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-12
-// Version:	1.0.0001.2328
+// Date:	2011-07-13
+// Version:	1.0.0002.2345
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
 //	- 1.0.0001.2328(2011-07-12)	^ 优化PreFilter()的执行效率
+//	- 1.0.0002.2345(2011-07-13)	^ 优化CImgFilter::Filter()与PreFilter()的执行效率
+//								^ 大幅优化滤镜基类接口中像素块抓取函数的执行效率
+//								^ 优化高斯模糊算法的执行效率
+//								# 修正CImgFilter::Filter()区域校验中的错误
+//								# 修正高斯模糊算法中的内存泄漏
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -59,7 +64,8 @@ interface IFilterObject : INonCopyable
 {
 	LONG m_Radius;	// 滤镜半径
 	IFilterObject() : m_Radius(0) {}
-	virtual void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des) = 0;
+	virtual void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+						LONG w, LONG h, LONG inx_des) = 0;
 
 protected:
 	EXP_INLINE LONG DesToBlc(CSize& sz_des, LONG x_d, LONG y_d, LONG x_b, LONG y_b)
@@ -84,24 +90,24 @@ protected:
 		}
 		return (sz_des.cy - y_d - 1) * sz_des.cx + x_d;
 	}
-	EXP_INLINE pixel_t* Block(pixel_t* pix_des, CSize& sz_des, LONG i_d, LONG x_d, LONG y_d)
+	EXP_INLINE void Block(pixel_t* pix_blc, LONG diamet, 
+						  pixel_t* pix_des, CSize& sz_des, LONG i_d, LONG x_d, LONG y_d)
 	{
-		pixel_t* pix_blc = NULL;
-		if (m_Radius == 0)
-		{
-			pix_blc = ExMem::Alloc<pixel_t>();
-			pix_blc[0] = pix_des[i_d];
-		}
-		else
-		{
-			LONG diamet = (m_Radius << 1) + 1;
-			pix_blc = ExMem::Alloc<pixel_t>(diamet * diamet);
-			for(LONG y_b = 0; y_b < diamet; ++y_b)
-				for(LONG x_b = 0; x_b < diamet; ++x_b)
-					pix_blc[(diamet - y_b - 1) * diamet + x_b] = 
-					pix_des[DesToBlc(sz_des, x_d, y_d, x_b, y_b)];
-		}
-		return pix_blc;
+		ExAssert(pix_blc);
+		ExAssert(diamet > 1);
+		for(LONG y_b = 0; y_b < diamet; ++y_b)
+			for(LONG x_b = 0; x_b < diamet; ++x_b)
+				pix_blc[(diamet - y_b - 1) * diamet + x_b] = 
+				pix_des[DesToBlc(sz_des, x_d, y_d, x_b, y_b)];
+	}
+	EXP_INLINE pixel_t* Alloc(LONG diamet2)
+	{
+		ExAssert(diamet2 > 1);
+		return ExMem::Alloc<pixel_t>(diamet2);
+	}
+	EXP_INLINE void Free(pixel_t* pix_blc)
+	{
+		ExMem::Free(pix_blc);
 	}
 };
 
@@ -110,14 +116,11 @@ protected:
 #pragma push_macro("PreFilter")
 #undef PreFilter
 #define PreFilter() \
-	LONG w = min(sz_des.cx, rc_des.Right()); \
-	LONG h = min(sz_des.cy, rc_des.Bottom()); \
 	LONG y_d = rc_des.Top(); \
-	for(; y_d < h; ++y_d) \
+	for(LONG y = 0; y < h; ++y, ++y_d, inx_des -= sz_des.cx) \
 	{ \
 		LONG x_d = rc_des.Left(); \
-		LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d; \
-		for(; x_d < w; ++x_d, ++i_d) \
+		for(LONG x = 0, i_d = inx_des; x < w; ++x, ++x_d, ++i_d) \
 		{
 //#define PreRender
 
@@ -127,6 +130,21 @@ protected:
 		} \
 	}
 //#define EndRender
+
+#pragma push_macro("PreBlockFilter")
+#undef PreBlockFilter
+#define PreBlockFilter() \
+	pixel_t* pix_blc = Alloc(diamet2); \
+	PreFilter(); \
+	Block(pix_blc, diamet, pix_des, sz_des, i_d, x_d, y_d)
+//#define PreBlockFilter
+
+#pragma push_macro("EndBlockFilter")
+#undef EndBlockFilter
+#define EndBlockFilter() \
+	EndFilter(); \
+	Free(pix_blc)
+//#define EndBlockFilter
 
 //////////////////////////////////////////////////////////////////
 
@@ -147,18 +165,13 @@ public:
 		, m_ClrMask(cMask)
 	{}
 
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
-		//PreFilter();
-for(LONG y_d = rc_des.Top(); y_d < min(sz_des.cy, rc_des.Bottom()); ++y_d)
-{
-	for(LONG x_d = rc_des.Left(); x_d < min(sz_des.cx, rc_des.Right()); ++x_d)
-	{
-		LONG i_d = (sz_des.cy - y_d - 1) * sz_des.cx + x_d;
+		if (m_Mask == 0) return;
 
-		if (m_Mask == 0)
-			continue;
-		else
+		PreFilter();
+
 		if (m_bClrMask && pix_des[i_d] == m_ClrMask)
 			continue;
 		pix_des[i_d] = ExRGBA
@@ -168,9 +181,8 @@ for(LONG y_d = rc_des.Top(); y_d < min(sz_des.cy, rc_des.Bottom()); ++y_d)
 			(m_Mask & 0x02) ? ExGetB(m_Const) : ExGetB(pix_des[i_d]), 
 			(m_Mask & 0x01) ? ExGetA(m_Const) : ExGetA(pix_des[i_d])
 			);
-	}
-}
-		//EndFilter();
+
+		EndFilter();
 	}
 };
 
@@ -180,7 +192,8 @@ for(LONG y_d = rc_des.Top(); y_d < min(sz_des.cy, rc_des.Bottom()); ++y_d)
 class CFilterGray : public IFilterObject
 {
 public:
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
 		PreFilter();
 
@@ -205,7 +218,8 @@ public:
 		: m_Mask(bMask)
 	{}
 
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
 		PreFilter();
 
@@ -234,16 +248,17 @@ public:
 		: m_Const(cConst)
 	{ m_Radius = 1; }
 
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
 		if (m_Radius < 1) return;
 		LONG diamet = (m_Radius << 1) + 1;
-		LONG key1 = (diamet * diamet) >> 1;
-		LONG key2 = (diamet * diamet) - 1;
+		LONG diamet2 = diamet * diamet;
+		LONG key1 = diamet2 >> 1;
+		LONG key2 = diamet2 - 1;
 
-		PreFilter();
+		PreBlockFilter();
 
-		pixel_t* pix_blc = Block(pix_des, sz_des, i_d, x_d, y_d);
 		pix_des[i_d] = ExRGBA
 			(
 			abs(ExGetR(pix_blc[key1]) - ExGetR(pix_blc[key2]) + ExGetB(m_Const)), 
@@ -251,9 +266,8 @@ public:
 			abs(ExGetB(pix_blc[key1]) - ExGetB(pix_blc[key2]) + ExGetR(m_Const)), 
 			abs(ExGetA(pix_blc[key1]) - ExGetA(pix_blc[key2]) + ExGetA(m_Const))
 			);
-		ExMem::Free(pix_blc);
 
-		EndFilter();
+		EndBlockFilter();
 	}
 };
 
@@ -266,21 +280,20 @@ public:
 	CFilterDiffuse(LONG nRadius = 1)
 	{ m_Radius = nRadius; }
 
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
 		if (m_Radius < 1) return;
 		LONG diamet = (m_Radius << 1) + 1;
-		LONG flt_siz = diamet * diamet;
+		LONG diamet2 = diamet * diamet;
 
 		ExRandomize();
 
-		PreFilter();
+		PreBlockFilter();
 
-		pixel_t* pix_blc = Block(pix_des, sz_des, i_d, x_d, y_d);
-		pix_des[i_d] = pix_blc[ExRandom(flt_siz)];
-		ExMem::Free(pix_blc);
+		pix_des[i_d] = pix_blc[ExRandom(diamet2)];
 
-		EndFilter();
+		EndBlockFilter();
 	}
 };
 
@@ -293,41 +306,40 @@ public:
 	CFilterGauss(LONG nRadius = 5)
 	{ m_Radius = nRadius; }
 
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
 		if (m_Radius < 1) return;
 		LONG diamet = (m_Radius << 1) + 1;
-		LONG flt_siz = diamet * diamet;
+		LONG diamet2 = diamet * diamet;
 
-		double s = (double)m_Radius / 3.0;						// 正态分布的标准偏差σ
-		double sigma2 = 2.0 * s * s;							// 2倍的σ平方,参考N维空间正态分布方程
-		double nuclear = 0.0;									// 高斯卷积核
-		double* matrix = ExMem::Alloc<double>(diamet * diamet);	// 高斯矩阵定义
+		double s = (double)m_Radius / 3.0;				// 正态分布的标准偏差σ
+		double sigma2 = 2.0 * s * s;					// 2倍的σ平方,参考N维空间正态分布方程
+		double nuclear = 0.0;							// 高斯卷积核
+		double* matrix = ExMem::Alloc<double>(diamet2);	// 高斯矩阵定义
 
 		// 计算高斯矩阵
 		int i = 0;
 		for(long y = -m_Radius; y <= m_Radius; ++y)
-			for(long x = -m_Radius; x <= m_Radius; ++x)
+			for(long x = -m_Radius; x <= m_Radius; ++x, ++i)
 			{
-				matrix[i] = 
-					exp(-(double)(x * x + y * y) / sigma2);
+				matrix[i] = exp(-(double)(x * x + y * y) / sigma2);
 				nuclear += matrix[i];
-				++i;
 			}
+		for(i = 0; i < diamet2; ++i)
+			matrix[i] /= nuclear;
 
 		// 遍历并处理像素
 
-		PreFilter();
+		PreBlockFilter();
 
-		pixel_t* pix_blc = Block(pix_des, sz_des, i_d, x_d, y_d);
 		double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
-		for(int i = 0; i < flt_siz; ++i)
+		for(i = 0; i < diamet2; ++i)
 		{
-			double weight = matrix[i] / nuclear;
-			r += weight * ExGetR(pix_blc[i]);
-			g += weight * ExGetG(pix_blc[i]);
-			b += weight * ExGetB(pix_blc[i]);
-			a += weight * ExGetA(pix_blc[i]);
+			r += matrix[i] * ExGetR(pix_blc[i]);
+			g += matrix[i] * ExGetG(pix_blc[i]);
+			b += matrix[i] * ExGetB(pix_blc[i]);
+			a += matrix[i] * ExGetA(pix_blc[i]);
 		}
 		pix_des[i_d] = ExRGBA
 			(
@@ -336,9 +348,10 @@ public:
 			(BYTE)(b > (BYTE)~0 ? (BYTE)~0 : b), 
 			(BYTE)(a > (BYTE)~0 ? (BYTE)~0 : a)
 			);
-		ExMem::Free(pix_blc);
 
-		EndFilter();
+		EndBlockFilter();
+
+		ExMem::Free(matrix);
 	}
 };
 
@@ -365,7 +378,8 @@ public:
 		m_Mode = eMode;
 	}
 
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des)
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
 	{
 		if (m_Mask == 0) return;
 
@@ -441,19 +455,35 @@ public:
 class CImgFilter
 {
 public:
-	EXP_INLINE static bool Filter(image_t imgDes, CRect& rcDes, IFilterObject* pFilter)
+	EXP_INLINE static bool Filter(image_t imgDes, CRect& rc_des, IFilterObject* pFilter)
 	{
 		if (!pFilter) return false;
 		CImage exp_des;
 		exp_des.SetTrust(false);
 		exp_des = imgDes;
 		if (exp_des.IsNull()) return false;
+
+		// 格式化区域
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
-		if (rcDes.IsEmpty())
-			rcDes.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
+		if (rc_des.IsEmpty())
+			rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
+		else
+		{
+			if (rc_des.pt1.x < 0) rc_des.pt1.x = 0;
+			if (rc_des.pt1.y < 0) rc_des.pt1.y = 0;
+			if (rc_des.pt2.x > sz_des.cx) rc_des.pt2.x = sz_des.cx;
+			if (rc_des.pt2.y > sz_des.cy) rc_des.pt2.y = sz_des.cy;
+		}
+
+		// 获得合适的宽与高
+		LONG w = rc_des.Width(), h = rc_des.Height();
+		if (w <= 0 || h <= 0) return true;
+		// 计算坐标起点
+		LONG inx_des = (sz_des.cy - rc_des.Top() - 1) * sz_des.cx + rc_des.Left();
+
 		// 遍历像素绘图
 		pixel_t* pix_des = exp_des.GetPixels();
-		pFilter->Filter(pix_des, sz_des, rcDes);
+		pFilter->Filter(pix_des, sz_des, rc_des, w, h, inx_des);
 		return true;
 	}
 };

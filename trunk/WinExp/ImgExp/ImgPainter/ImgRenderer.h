@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-13
-// Version:	1.0.0010.2345
+// Date:	2011-07-14
+// Version:	1.0.0011.2350
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -54,6 +54,7 @@
 //	- 1.0.0009.2328(2011-07-12)	^ 优化PreRender()的执行效率(+40-60%)
 //	- 1.0.0010.2345(2011-07-13)	^ 优化CImgRenderer::Render()与PreRender()的执行效率
 //								# 修正CImgRenderer::Render()区域校验中的错误
+//	- 1.0.0011.2350(2011-07-14)	^ 使用sse优化CRenderCopy的执行效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -98,41 +99,6 @@ interface IRenderObject : INonCopyable
 	}
 //#define EndRender
 
-#pragma push_macro("PreSSERender")
-#undef PreSSERender
-#define PreSSERender() \
-	{ \
-		__asm push ecx \
-		__asm push edx \
-		__asm push eax \
-	} \
-	for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx) \
-	{ \
-		int s_l = w >> 2; \
-		pixel_t* p_s = pix_src + inx_src; \
-		pixel_t* p_d = pix_des + inx_des
-//#define PreSSERender
-
-#pragma push_macro("OvrSSERender")
-#undef OvrSSERender
-#define OvrSSERender() \
-	s_l <<= 2; \
-	int n_l = w - s_l; \
-	if (n_l == 0) continue
-//#define OvrSSERender
-
-#pragma push_macro("EndSSERender")
-#undef EndSSERender
-#define EndSSERender() \
-	} \
-	{ \
-		__asm pop eax \
-		__asm pop edx \
-		__asm pop ecx \
-		__asm emms \
-	}
-//#define EndSSERender
-
 //////////////////////////////////////////////////////////////////
 
 // 像素拷贝
@@ -157,7 +123,7 @@ public:
 			return;
 		else
 		if (m_Alpha == EXP_CM)
-		{
+		{	// 拷贝像素
 			__asm
 			{
 				push ecx
@@ -243,13 +209,13 @@ public:
 					// 混色计算
 					psubw xmm0, xmm1
 					pmullw xmm0, xmm7
-					movups [esi], xmm0
-					psrlw xmm0, 8
-					movups [esi], xmm0
+					psraw xmm0, 8
+					paddw xmm0, xmm1
 					// 恢复像素
 					packuswb xmm0, xmm0
+					// 保存结果
 					movlpd [edx], xmm0
-
+					// 循环扫描
 					add eax, 08h
 					add edx, 08h
 					dec ecx
@@ -306,6 +272,8 @@ public:
 		LONG w, LONG h, LONG inx_des, LONG inx_src
 		)
 	{
+		if (m_Alpha == 0) return;
+
 		PreRender();
 
 		BYTE a_s = 
@@ -362,13 +330,10 @@ public:
 		LONG w, LONG h, LONG inx_des, LONG inx_src
 		)
 	{
+		if (m_Alpha == 0) return;
+
 		PreRender();
 
-		if (pix_des[i_d] == 0)
-		{
-			pix_des[i_d] = pix_src[i_s];
-			continue;
-		}
 		BYTE a_s = 
 			(m_Alpha == EXP_CM ? ExGetA(pix_src[i_s]) : (ExGetA(pix_src[i_s]) * m_Alpha) >> 8);
 		if (a_s == 0)
@@ -405,9 +370,6 @@ public:
 
 #pragma pop_macro("EndRender")
 #pragma pop_macro("PreRender")
-#pragma pop_macro("EndSSERender")
-#pragma pop_macro("OvrSSERender")
-#pragma pop_macro("PreSSERender")
 
 //////////////////////////////////////////////////////////////////
 

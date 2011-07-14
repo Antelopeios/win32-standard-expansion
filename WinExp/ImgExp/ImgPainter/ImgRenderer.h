@@ -98,6 +98,41 @@ interface IRenderObject : INonCopyable
 	}
 //#define EndRender
 
+#pragma push_macro("PreSSERender")
+#undef PreSSERender
+#define PreSSERender() \
+	{ \
+		__asm push ecx \
+		__asm push edx \
+		__asm push eax \
+	} \
+	for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx) \
+	{ \
+		int s_l = w >> 2; \
+		pixel_t* p_s = pix_src + inx_src; \
+		pixel_t* p_d = pix_des + inx_des
+//#define PreSSERender
+
+#pragma push_macro("OvrSSERender")
+#undef OvrSSERender
+#define OvrSSERender() \
+	s_l <<= 2; \
+	int n_l = w - s_l; \
+	if (n_l == 0) continue
+//#define OvrSSERender
+
+#pragma push_macro("EndSSERender")
+#undef EndSSERender
+#define EndSSERender() \
+	} \
+	{ \
+		__asm pop eax \
+		__asm pop edx \
+		__asm pop ecx \
+		__asm emms \
+	}
+//#define EndSSERender
+
 //////////////////////////////////////////////////////////////////
 
 // œÒÀÿøΩ±¥
@@ -123,37 +158,130 @@ public:
 		else
 		if (m_Alpha == EXP_CM)
 		{
-			PreRender();
-			pix_des[i_d] = pix_src[i_s];
-			EndRender();
+			__asm
+			{
+				push ecx
+				push edx
+				push eax
+			}
+			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
+			{
+				int sse_len = w >> 2;
+				pixel_t* ps = pix_src + inx_src;
+				pixel_t* pd = pix_des + inx_des;
+				__asm
+				{
+					mov	eax, [ps]
+					mov edx, [pd]
+					mov ecx, [sse_len]
+				sse_loop_1:
+					movups xmm0, [eax]
+					movups [edx], xmm0
+					add eax, 10h
+					add edx, 10h
+					dec ecx
+					jnz sse_loop_1
+				}
+				sse_len <<= 2;
+				int nor_len = w - sse_len;
+				if (nor_len)
+					memcpy(pd + sse_len, ps + sse_len, (nor_len << 2));
+			}
+			__asm
+			{
+				pop eax
+				pop edx
+				pop ecx
+				emms
+			}
 		}
 		else
 		{
-			PreRender();
-			int r_dif = 
-				(m_Alpha == EXP_CM ? 
-				((int)ExGetR(pix_src[i_s]) - (int)ExGetR(pix_des[i_d])) : 
-				((int)ExGetR(pix_src[i_s]) - (int)ExGetR(pix_des[i_d])) * m_Alpha >> 8);
-			int g_dif = 
-				(m_Alpha == EXP_CM ? 
-				((int)ExGetG(pix_src[i_s]) - (int)ExGetG(pix_des[i_d])) : 
-				((int)ExGetG(pix_src[i_s]) - (int)ExGetG(pix_des[i_d])) * m_Alpha >> 8);
-			int b_dif = 
-				(m_Alpha == EXP_CM ? 
-				((int)ExGetB(pix_src[i_s]) - (int)ExGetB(pix_des[i_d])) : 
-				((int)ExGetB(pix_src[i_s]) - (int)ExGetB(pix_des[i_d])) * m_Alpha >> 8);
-			int a_dif = 
-				(m_Alpha == EXP_CM ? 
-				((int)ExGetA(pix_src[i_s]) - (int)ExGetA(pix_des[i_d])) : 
-				((int)ExGetA(pix_src[i_s]) - (int)ExGetA(pix_des[i_d])) * m_Alpha >> 8);
-			pix_des[i_d] = ExRGBA
-				(
-				ExGetR(pix_des[i_d]) + r_dif, 
-				ExGetG(pix_des[i_d]) + g_dif, 
-				ExGetB(pix_des[i_d]) + b_dif, 
-				ExGetA(pix_des[i_d]) + a_dif
-				);
-			EndRender();
+			WORD p_m[8] = 
+			{
+				0x00ff, 0x00ff, 0x00ff, 0x00ff, 
+				0x00ff, 0x00ff, 0x00ff, 0x00ff
+			};
+			WORD p_a[8] = 
+			{
+				m_Alpha, m_Alpha, m_Alpha, m_Alpha, 
+				m_Alpha, m_Alpha, m_Alpha, m_Alpha
+			};
+			pixel_t* pm = (pixel_t*)p_m;
+			pixel_t* pa = (pixel_t*)p_a;
+			__asm
+			{
+				push ecx
+				push edx
+				push eax
+				push esi
+				push edi
+				mov edi, [pm]
+				mov esi, [pa]
+				movups xmm6, [edi]
+				movups xmm7, [esi]
+			}
+			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
+			{
+				int sse_len = w >> 1;
+				pixel_t* ps = pix_src + inx_src;
+				pixel_t* pd = pix_des + inx_des;
+				__asm
+				{
+					mov	eax, [ps]
+					mov edx, [pd]
+					mov ecx, [sse_len]
+				sse_loop_2:
+					// Õÿ’πps
+					movups xmm0, [eax]
+					punpcklbw xmm0, xmm0
+					pand xmm0, xmm6
+					// Õÿ’πpd
+					movups xmm1, [edx]
+					punpcklbw xmm1, xmm1
+					pand xmm1, xmm6
+					// ªÏ…´º∆À„
+					psubw xmm0, xmm1
+					pmullw xmm0, xmm7
+					movups [esi], xmm0
+					psrlw xmm0, 8
+					movups [esi], xmm0
+					// ª÷∏¥œÒÀÿ
+					packuswb xmm0, xmm0
+					movlpd [edx], xmm0
+
+					add eax, 08h
+					add edx, 08h
+					dec ecx
+					jnz sse_loop_2
+				}
+				sse_len <<= 1;
+				for(LONG x = sse_len; x < w; ++x)
+				{
+					LONG i_d = inx_des + sse_len, i_s = inx_src + sse_len;
+					BYTE r_dif = (ExGetR(pix_src[i_s]) - ExGetR(pix_des[i_d])) * m_Alpha >> 8;
+					BYTE g_dif = (ExGetG(pix_src[i_s]) - ExGetG(pix_des[i_d])) * m_Alpha >> 8;
+					BYTE b_dif = (ExGetB(pix_src[i_s]) - ExGetB(pix_des[i_d])) * m_Alpha >> 8;
+					BYTE a_dif = (ExGetA(pix_src[i_s]) - ExGetA(pix_des[i_d])) * m_Alpha >> 8;
+					pix_des[i_d] = ExRGBA
+						(
+						ExGetR(pix_des[i_d]) + r_dif, 
+						ExGetG(pix_des[i_d]) + g_dif, 
+						ExGetB(pix_des[i_d]) + b_dif, 
+						ExGetA(pix_des[i_d]) + a_dif
+						);
+					++i_d, ++i_s;
+				}
+			}
+			__asm
+			{
+				pop edi
+				pop esi
+				pop eax
+				pop edx
+				pop ecx
+				emms
+			}
 		}
 	}
 };
@@ -236,6 +364,11 @@ public:
 	{
 		PreRender();
 
+		if (pix_des[i_d] == 0)
+		{
+			pix_des[i_d] = pix_src[i_s];
+			continue;
+		}
 		BYTE a_s = 
 			(m_Alpha == EXP_CM ? ExGetA(pix_src[i_s]) : (ExGetA(pix_src[i_s]) * m_Alpha) >> 8);
 		if (a_s == 0)
@@ -272,6 +405,9 @@ public:
 
 #pragma pop_macro("EndRender")
 #pragma pop_macro("PreRender")
+#pragma pop_macro("EndSSERender")
+#pragma pop_macro("OvrSSERender")
+#pragma pop_macro("PreSSERender")
 
 //////////////////////////////////////////////////////////////////
 

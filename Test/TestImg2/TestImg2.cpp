@@ -246,30 +246,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//img_grp.SetObject(imgShow.Get());
 
 				//BLENDFUNCTION bl = {0};
-				//bl.AlphaFormat = AC_SRC_OVER;
+				//bl.AlphaFormat = AC_SRC_ALPHA;
 				//bl.SourceConstantAlpha = 255;
 				//AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
 				//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
 
-				//img_grp.Delete();
-				//mem_grp.Delete();
-
-				//Render(mem_img, imgShow, CRect(), CPoint());
-
-				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint()/*, &CRenderCopy()*//*, &CRenderOverlay()*/);
-
-				//CGraph mem_grp;
-				//mem_grp.Create();
-				//mem_grp.SetObject(mem_img.Get());
-				//CGraph img_grp;
-				//img_grp.Create();
-				//img_grp.SetObject(imgShow.Get());
+				//BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
 
 				//StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
 				//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
 
 				//img_grp.Delete();
 				//mem_grp.Delete();
+
+				//Render(mem_img, imgShow, CRect(), CPoint());
+
+				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderCopy(200)/*, &CRenderOverlay()*/);
 
 				//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
 				//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-13
-// Version:	1.0.0002.2345
+// Date:	2011-07-14
+// Version:	1.0.0003.1800
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
@@ -44,6 +44,7 @@
 //								^ 优化高斯模糊算法的执行效率
 //								# 修正CImgFilter::Filter()区域校验中的错误
 //								# 修正高斯模糊算法中的内存泄漏
+//	- 1.0.0003.1800(2011-07-14)	# 修正浮雕滤镜的算法错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -255,7 +256,7 @@ public:
 		LONG diamet = (m_Radius << 1) + 1;
 		LONG diamet2 = diamet * diamet;
 		LONG key1 = diamet2 >> 1;
-		LONG key2 = diamet2 - 1;
+		LONG key2 = key1 + 1;
 
 		PreBlockFilter();
 
@@ -449,6 +450,8 @@ public:
 
 #pragma pop_macro("EndFilter")
 #pragma pop_macro("PreFilter")
+#pragma pop_macro("EndBlockFilter")
+#pragma pop_macro("PreBlockFilter")
 
 //////////////////////////////////////////////////////////////////
 

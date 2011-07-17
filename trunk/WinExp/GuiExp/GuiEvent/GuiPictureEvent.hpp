@@ -96,14 +96,15 @@ public:
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect;
-				ctrl->GetClientRect(rect);
+				CRect rect, clt_rct;
+				ctrl->GetClipRect(rect);
+				ctrl->GetClientRect(clt_rct);
 
 				// ´¦Àí
-				if (!image->IsNull() && m_rcOld != rect)
+				if (!image->IsNull() && m_rcOld != clt_rct)
 				{
-					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), rect.Height()));
-					m_rcOld = rect;
+					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), clt_rct.Width(), clt_rct.Height()));
+					m_rcOld = clt_rct;
 				}
 
 				// »æÍ¼

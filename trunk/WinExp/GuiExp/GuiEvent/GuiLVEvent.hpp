@@ -91,7 +91,7 @@ public:
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect;
-				ctrl->GetClientRect(rect);
+				ctrl->GetClipRect(rect);
 
 				// ¥¶¿Ì
 				if (glow)

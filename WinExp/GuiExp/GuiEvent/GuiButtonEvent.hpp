@@ -178,13 +178,14 @@ public:
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect;
-				ctrl->GetClientRect(rect);
+				CRect rect, clt_rct;
+				ctrl->GetClipRect(rect);
+				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (m_rcOld != rect)
+				if (m_rcOld != clt_rct)
 				{
-					LONG r_h = rect.Height() * sta_tim;
+					LONG r_h = clt_rct.Height() * sta_tim;
 					// l-t
 					m_imgTmp[0].Set(image[0]->Get());
 					// m-t
@@ -193,7 +194,7 @@ public:
 						CImgDeformer::ZomDeform
 							(
 							image[1]->Get(), 
-							rect.Width() - image[0]->GetWidth() - image[2]->GetWidth(), 
+							clt_rct.Width() - image[0]->GetWidth() - image[2]->GetWidth(), 
 							image[1]->GetHeight()
 							)
 						);
@@ -215,7 +216,7 @@ public:
 						CImgDeformer::ZomDeform
 							(
 							image[4]->Get(), 
-							rect.Width() - image[3]->GetWidth() - image[5]->GetWidth(), 
+							clt_rct.Width() - image[3]->GetWidth() - image[5]->GetWidth(), 
 							r_h - image[1]->GetHeight() - image[7]->GetHeight()
 							)
 						);
@@ -237,14 +238,14 @@ public:
 						CImgDeformer::ZomDeform
 							(
 							image[7]->Get(), 
-							rect.Width() - image[6]->GetWidth() - image[8]->GetWidth(), 
+							clt_rct.Width() - image[6]->GetWidth() - image[8]->GetWidth(), 
 							image[7]->GetHeight()
 							)
 						);
 					// r-b
 					m_imgTmp[8].Set(image[8]->Get());
 					// Save
-					m_rcOld = rect;
+					m_rcOld = clt_rct;
 				}
 
 				// 绘图
@@ -569,17 +570,18 @@ public:
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect;
-				ctrl->GetClientRect(rect);
+				CRect rect, clt_rct;
+				ctrl->GetClipRect(rect);
+				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (m_rcOld != rect)
+				if (m_rcOld != clt_rct)
 				{
-					LONG r_h = rect.Height() * sta_tim;
+					LONG r_h = clt_rct.Height() * sta_tim;
 					// m-m
-					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), rect.Width(), r_h));
+					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), clt_rct.Width(), r_h));
 					// Save
-					m_rcOld = rect;
+					m_rcOld = clt_rct;
 				}
 
 				// 绘图

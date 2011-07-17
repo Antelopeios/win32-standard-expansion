@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-24
-// Version:	1.0.0008.1253
+// Date:	2011-07-16
+// Version:	1.0.0009.2008
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -46,6 +46,7 @@
 //	- 1.0.0006.1411(2011-05-26)	+ 添加IGuiBoard::GetRealRect()接口实现
 //	- 1.0.0007.0942(2011-06-17)	= 将IGuiBoardBase接口移动到GuiBoard.h中,使外部可以使用此接口
 //	- 1.0.0008.1253(2011-06-24)	+ 将IGuiBoard支持通过Create接口控制WNDCLASSEX的style
+//	- 1.0.0009.2008(2011-07-16)	= 调整SetLayered()接口,支持在非半透明图层化模式下设置透明色
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -128,8 +129,10 @@ public:
 	virtual bool IsFocus() = 0;
 
 	// 窗口图层化
-	virtual void SetLayered(bool bLayered = true) = 0;
+	virtual void SetLayered(bool bLayered = true, bool bColorKey = true, pixel_t crKey = ExRGB(255, 0, 255)) = 0;
 	virtual bool IsLayered() = 0;
+	virtual bool IsColorKey() = 0;
+	virtual pixel_t GetColorKey() = 0;
 	virtual void LayeredWindow(HDC hDC, HDC tGrp) = 0;
 };
 
@@ -157,6 +160,8 @@ protected:
 	HINSTANCE m_hIns;
 
 	bool m_bLayered;
+	bool m_bColorKey;
+	pixel_t m_crKey;
 
 public:
 	IGuiBoardBase(void);
@@ -227,8 +232,10 @@ public:
 	bool IsFocus();
 
 	// 窗口图层化
-	void SetLayered(bool bLayered = true);
+	void SetLayered(bool bLayered = true, bool bColorKey = true, pixel_t crKey = ExRGB(255, 0, 255));
 	bool IsLayered();
+	bool IsColorKey();
+	pixel_t GetColorKey();
 	void LayeredWindow(HDC hDC, HDC tGrp);
 };
 

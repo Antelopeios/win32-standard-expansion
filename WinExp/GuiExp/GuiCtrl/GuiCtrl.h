@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-24
-// Version:	1.0.0007.1732
+// Date:	2011-07-16
+// Version:	1.0.0008.2000
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -48,6 +48,7 @@
 //								+ 在IGuiCtrl::SetFocus()接口实现中添加更新状态逻辑
 //	- 1.0.0006.1010(2011-06-17)	= 将IGuiCtrlBase接口移动到GuiCtrl.h中,使外部可以使用此接口
 //	- 1.0.0007.1732(2011-06-24)	+ 添加静态IGuiCtrl::SetFocus()接口
+//	- 1.0.0008.2000(2011-07-16)	+ 添加IGuiCtrl::GetClipRect()接口,用于绘图时动态获取当前剪切区下的绘图区域
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -143,6 +144,14 @@ public:
 	virtual bool SetRealRect(const CRect& rc) = 0;
 	virtual bool GetRealRect(CRect& rc) = 0;
 	virtual bool GetClientRect(CRect& rc) = 0;
+	bool GetClipRect(CRect& rc)
+	{
+		CRect rc_clp;
+		GetClipBox(rc_clp);
+		if (!GetClientRect(rc)) return false;
+		rc.Offset(-rc_clp.pt1);
+		return true;
+	}
 
 	// 刷新绘图
 	virtual void Refresh(bool bSelf = true) = 0;

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-07
-// Version:	1.0.0011.1330
+// Date:	2011-07-16
+// Version:	1.0.0013.1958
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -51,6 +51,8 @@
 //	- 1.0.0010.1535(2011-07-01)	+ WM_SIZE不能继续向下转发
 //								+ 处理控件消息时WM_SHOWWINDOW消息不应该向下转发
 //	- 1.0.0011.1330(2011-07-07)	# 修正WM_SHOWWINDOW消息会被第一层控件截断的问题(WM_SHOWWINDOW应该部分向下转发)
+//	- 1.0.0012.1702(2011-07-15)	^ 优化WM_PAINT时位图覆盖的内存消耗及时间效率
+//	- 1.0.0013.1958(2011-07-16)	^ 采用剪切区方式优化WM_PAINT时所有内存缓冲位图的效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -252,23 +254,39 @@ protected:
 				// 转发消息
 				if (ctrl->IsVisible())
 				{
-					// 创建控件图片
+					// 获取控件区域
 					CRect ctl_rct;
 					ctrl->GetWindowRect(ctl_rct);
-					CImage ctl_img;
-					ctl_img.Create(ctl_rct.Width(), ctl_rct.Height());
-					// 控件绘图
-					IGuiEffect* eff = ctrl->GetEffect();
-					if (eff)
+					CRect rect(ctl_rct), clp_rct;
+					pGui->GetClipBox(clp_rct);
+					rect.Inter(clp_rct);
+					if (rect.Width() > 0 && rect.Height() > 0)
 					{
-						if (!eff->IsInit()) eff->Init(ctl_img);
-						ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-						eff->Show(*ite, ctl_img);
+						// 设置剪切区
+						rect.Offset(-ctl_rct.pt1);
+						ctrl->SetClipBox(rect);
+						// 创建控件图片
+						CImage ctl_img;
+						ctl_img.Create(rect.Width(), rect.Height());
+						// 控件绘图
+						IGuiEffect* eff = ctrl->GetEffect();
+						if (eff)
+						{
+							if (!eff->IsInit()) eff->Init(ctl_img);
+							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+							eff->Show(*ite, ctl_img);
+						}
+						else
+							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+						// 覆盖全局绘图
+						ctl_rct.Inter(clp_rct);
+						ctl_rct.Offset(-clp_rct.pt1);
+						IRenderObject* render = NULL;
+						if (ExDynCast<IGuiBoard>(pGui))
+							render = ExMem::Alloc<CRenderNormal>();
+						CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint(), render);
+						ExMem::Free(render);
 					}
-					else
-						ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-					// 覆盖全局绘图
-					CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint());
 				}
 				else
 				{
@@ -349,20 +367,33 @@ public:
 				{
 					PAINTSTRUCT ps = {0};
 					HDC hdc = ::BeginPaint(board->GethWnd(), &ps);
-					// 构建绘图缓存
+					// 获取缓存区域
 					CRect rect;
-					board->GetClientRect(rect);
+					::GetClipBox(hdc, (LPRECT)&rect);
+				//	ExTrace(_T("%d, %d, %d, %d\n"), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
+					if (rect.IsNull())
+						board->GetClientRect(rect);
+				//	else /*此段仅在调试时做断点使用*/
+				//	if (rect.pt1 != CPoint())
+				//		rect = rect;
+					board->SetClipBox(rect);
+					// 构建绘图缓存
 					CImage mem_img;
 					mem_img.Create(rect.Width(), rect.Height());
-					// 覆盖控件绘图
-					CImage pnt_img;
-					pnt_img.Create(rect.Width(), rect.Height());
-					ret = WndSend(board, nMessage, wParam, (LPARAM)&pnt_img);
-					CImgRenderer::Render(mem_img, pnt_img, CRect(), CPoint(), &CRenderNormal());
-					// 覆盖缓存绘图
 					CGraph mem_grp;
 					mem_grp.Create();
 					mem_grp.SetObject(mem_img.Get());
+					if (board->IsColorKey())
+					{
+						LOGBRUSH br = {BS_SOLID, board->GetColorKey(), NULL};
+						HBRUSH brh = ::CreateBrushIndirect(&br);
+						board->GetClientRect(rect);
+						::FillRect(mem_grp, &(RECT)rect, brh);
+						::DeleteObject(brh);
+					}
+					// 覆盖控件绘图
+					ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
+					// 覆盖缓存绘图
 					board->LayeredWindow(hdc, mem_grp);
 					// 结束绘图
 					mem_grp.Delete();

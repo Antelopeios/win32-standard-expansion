@@ -558,7 +558,7 @@ public:
 		pixel_t bkg_sel_color = *(pixel_t*)(state->sta_arr[0]);
 
 		CRect rect;
-		m_Ctrl->GetClientRect(rect);
+		m_Ctrl->GetClipRect(rect);
 
 		// дц╣╫ф╚рфа©
 		CSize sz_off;

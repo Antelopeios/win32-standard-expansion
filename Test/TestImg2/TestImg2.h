@@ -86,12 +86,14 @@ bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
 				BYTE g_d = ExGetG(pix_des[i_d]);
 				BYTE b_d = ExGetB(pix_des[i_d]);
 				BYTE a_i = EXP_CM - a_s;
+				BYTE a_r = (a_d + a_s) - (a_d * a_s >> 8);
+				if (a_r == 0) a_r = EXP_CM;
 				pix_des[i_d] = ExRGBA
 					(
 					(r_s * a_s + r_d * a_i) >> 8, 
 					(g_s * a_s + g_d * a_i) >> 8, 
 					(b_s * a_s + b_d * a_i) >> 8, 
-					(a_d + a_s) - (a_d * a_s >> 8)
+					a_r
 					);
 			}
 		}

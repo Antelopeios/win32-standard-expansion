@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-14
-// Version:	1.0.0003.1800
+// Date:	2011-07-16
+// Version:	1.0.0004.1947
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
@@ -45,6 +45,7 @@
 //								# 修正CImgFilter::Filter()区域校验中的错误
 //								# 修正高斯模糊算法中的内存泄漏
 //	- 1.0.0003.1800(2011-07-14)	# 修正浮雕滤镜的算法错误
+//	- 1.0.0004.1947(2011-07-16)	# 修正CImgFilter::Filter()在执行后有可能修改传入区域的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -458,7 +459,7 @@ public:
 class CImgFilter
 {
 public:
-	EXP_INLINE static bool Filter(image_t imgDes, CRect& rc_des, IFilterObject* pFilter)
+	EXP_INLINE static bool Filter(image_t imgDes, const CRect& rcDes, IFilterObject* pFilter)
 	{
 		if (!pFilter) return false;
 		CImage exp_des;
@@ -468,6 +469,7 @@ public:
 
 		// 格式化区域
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
+		CRect rc_des(rcDes);
 		if (rc_des.IsEmpty())
 			rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
 		else

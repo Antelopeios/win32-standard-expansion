@@ -35,7 +35,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
-	wnd->SetLayered();
+	wnd->SetLayered(false);
 	wnd->GetClientRect(rc_wnd);
 	wnd->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_wnd"), &gc)));
 

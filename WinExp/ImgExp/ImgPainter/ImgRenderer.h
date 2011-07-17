@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-14
-// Version:	1.0.0011.2350
+// Date:	2011-07-16
+// Version:	1.0.0013.1947
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -55,6 +55,8 @@
 //	- 1.0.0010.2345(2011-07-13)	^ 优化CImgRenderer::Render()与PreRender()的执行效率
 //								# 修正CImgRenderer::Render()区域校验中的错误
 //	- 1.0.0011.2350(2011-07-14)	^ 使用sse优化CRenderCopy的执行效率
+//	- 1.0.0012.1640(2011-07-15)	# 修正CRenderNormal对alpha通道处理时出现的数据溢出误差
+//	- 1.0.0013.1947(2011-07-16)	# 修正CImgRenderer::Render()在执行后有可能修改传入区域的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -294,12 +296,14 @@ public:
 		BYTE g_d = ExGetG(pix_des[i_d]);
 		BYTE b_d = ExGetB(pix_des[i_d]);
 		BYTE a_i = EXP_CM - a_s;
+		BYTE a_r = (a_d + a_s) - (a_d * a_s >> 8);
+		if (a_r == 0) a_r = EXP_CM;
 		pix_des[i_d] = ExRGBA
 			(
 			(r_s * a_s + r_d * a_i) >> 8, 
 			(g_s * a_s + g_d * a_i) >> 8, 
 			(b_s * a_s + b_d * a_i) >> 8, 
-			(a_d + a_s) - (a_d * a_s >> 8)
+			a_r
 			);
 
 		EndRender();
@@ -376,7 +380,7 @@ public:
 class CImgRenderer
 {
 public:
-	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src, 
+	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, const CRect& rcDes, const CPoint& ptSrc, 
 								  IRenderObject* pRender = NULL)
 	{
 		CImage exp_des;
@@ -392,9 +396,10 @@ public:
 
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		CSize sz_src(exp_src.GetWidth(), exp_src.GetHeight());
+		CRect rc_des(rcDes);
 		if (rc_des.IsEmpty())
 			rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
-		CRect rc_src(pt_src.x, pt_src.y, sz_src.cx, sz_src.cy);
+		CRect rc_src(ptSrc.x, ptSrc.y, sz_src.cx, sz_src.cy);
 		// 校验rc_des.pt1
 		if (rc_des.pt1.x < 0)
 		{

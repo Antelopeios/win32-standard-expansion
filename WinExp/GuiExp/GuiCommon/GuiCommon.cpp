@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-01
-// Version:	1.0.0004.1130
+// Date:	2011-07-20
+// Version:	1.0.0005.1540
 //
 // History:
 //	- 1.0.0003.1354(2011-05-19)	= 调整ExGui()的内部实现,始终在模块内构造对象
 //	- 1.0.0004.1130(2011-06-01)	= 将DllMain()入口点放入GuiCommon.cpp内
+//	- 1.0.0005.1540(2011-07-20)	+ 添加ExGC()接口实现
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon.h"
@@ -59,11 +60,21 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+// 模块内部GC接口
+EXP_API CGC& ExGC()
+{
+	return ExSingleton<CGC>();
+}
+
 // 通用对象创建接口
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
 {
 	return ExDynCast<IGuiObject>(ExDynCreate(sGuiType, pGC));
 }
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
 
 //////////////////////////////////////////////////////////////////
 
@@ -84,5 +95,3 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 }
 
 //////////////////////////////////////////////////////////////////
-
-EXP_END

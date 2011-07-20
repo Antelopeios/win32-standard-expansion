@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-07
-// Version:	1.0.0006.0120
+// Date:	2011-07-20
+// Version:	1.0.0007.1540
 //
 // History:
 //	- 1.0.0001.1135(2011-05-04)	+ 添加wnd_t类型定义
@@ -43,6 +43,7 @@
 //	- 1.0.0004.1616(2011-06-08)	^ 将默认的Normal滤镜置换为CFilterOverlay,方便控件绘图
 //	- 1.0.0005.1438(2011-07-06)	^ 简化结构,统一EXP_API相关的类/结构/接口声明
 //	- 1.0.0006.0120(2011-07-07)	= 关闭由StdExp的RTTI改动引起的C4275警告
+//	- 1.0.0007.1540(2011-07-20)	+ 添加ExGC()接口,供外部获取全局GC,防止由于DLL内外全局GC生存周期不一致导致的析构异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCommon_h__
@@ -67,8 +68,36 @@
 
 //////////////////////////////////////////////////////////////////
 
+// 置换掉默认的全局单例
+#include "Common/Common.h"
+#include "Thread/Lock.h"
+EXP_BEG
+template <typename TypeT>
+EXP_INTERFACE IGuiSingletonT
+{
+public:
+	EXP_INLINE static TypeT& Instance()
+	{
+		static TypeT* instance = NULL;
+		if (instance == NULL)
+		{
+			ExLockThis();
+			if (instance == NULL)
+			{
+				static TypeT type;
+				instance = &type;
+			}
+		}
+		return (*instance);
+	}
+};
+EXP_END
+#define EXP_SINGLETON IGuiSingletonT
+
+// 置换掉默认的Normal渲染器
+#define EXP_IMG_RENDER CRenderOverlay
+
 // 图像处理库
-#define EXP_IMG_RENDER CRenderOverlay	// 置换掉默认的Normal渲染器
 #include "ImgExp.h"
 
 //////////////////////////////////////////////////////////////////
@@ -83,9 +112,14 @@ EXP_END
 // 基本接口定义
 #include "GuiCommon/GuiInterface.h"
 
-// 通用对象创建接口
 EXP_BEG
+
+// 模块内部GC接口
+EXP_API CGC& ExGC();
+
+// 通用对象创建接口
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);
+
 EXP_END
 
 // Gui 基础接口定义

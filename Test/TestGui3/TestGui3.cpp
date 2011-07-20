@@ -15,7 +15,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// 垃圾回收器
-	CGC gc;
+	CGC& gc = ExGC();
 
 	// 相关资源定义
 	RECT rc_dsk = {0};
@@ -63,7 +63,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
-	//wnd->SetLayered();
+	//wnd->SetLayered(true);
 	wnd->ShowWindow(SW_SHOW);
 	wnd->GetClientRect(rc_wnd);
 
@@ -74,12 +74,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	{
 		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
 		btn->SetState(_T("icon"), &img_pic);
-		//btn->SetState(_T("glow"), (void*)1);
+		btn->SetState(_T("glow"), (void*)1);
 		btn->SetState(_T("image"), img_btn);
 		btn->SetState(_T("text"), txt_btn);
 		btn->SetState(_T("locate"), (void*)2);
-		//btn->SetState(_T("loc_off"), (void*)10);
-		btn->SetWindowRect(CRect(0, 0, 70, 70));
+		btn->SetState(_T("loc_off"), (void*)4);
+		btn->SetWindowRect(CRect(0, 0, 80, 80));
 		list->AddComp(btn);
 		items.Add(btn);
 	}

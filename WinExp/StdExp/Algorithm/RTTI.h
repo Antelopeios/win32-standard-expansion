@@ -182,15 +182,14 @@ public:																						\
 //////////////////////////////////////////////////////////////////
 
 // 类的 RTTI 宏定义
-
 #define EXP_DECLARE_TYPEINFO(cls_name)														\
 public:																						\
-	virtual int GetTypeID()				{ return EXP_TYPEINFO_MEMBER.type_id; }				\
-	virtual LPCTSTR GetTypeName()		{ return EXP_TYPEINFO_MEMBER.className; }			\
+	virtual int GetTypeID()					{ return EXP_TYPEINFO_MEMBER.type_id; }			\
+	virtual LPCTSTR GetTypeName()			{ return EXP_TYPEINFO_MEMBER.className; }		\
 	virtual _TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }					\
 	static _TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }					\
 private:																					\
-	static _TypeInfo EXP_TYPEINFO_MEMBER;													\
+	static _TypeInfo EXP_TYPEINFO_MEMBER;
 
 #define EXP_DECLARE_TYPEINFO_CLS(cls_name, base_name)										\
 	EXP_DEF_MULTTYPE(cls_name)																\

@@ -15,7 +15,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// 垃圾回收器
-	CGC gc;
+	CGC& gc = ExGC();
 
 	// 相关资源定义
 	RECT rc_dsk = {0};

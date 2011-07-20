@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-23
-// Version:	1.0.0001.1124
+// Date:	2011-07-20
+// Version:	1.0.0002.1540
+//
+// History:
+//	- 1.0.0002.1540(2011-07-20)	= 将CThreadAdapterT的单例独立到外部,定义EXP_SINGLETON_TRDCREATOR,可由外部按需要自行替换
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadCreator_h__
@@ -48,9 +51,13 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+#ifndef EXP_SINGLETON_TRDCREATOR
+#define EXP_SINGLETON_TRDCREATOR EXP_SINGLETON<CreatorT>
+#endif/*EXP_SINGLETON_TRDCREATOR*/
+
 // 将普通线程分配转换为静态线程分配的适配器
 template <typename CreatorT = _ThreadHeap>
-class CThreadAdapterT : public EXP_SINGLETON<CreatorT>
+class CThreadAdapterT : public EXP_SINGLETON_TRDCREATOR
 {
 public:
 	typedef CreatorT creator_t;
@@ -81,8 +88,6 @@ public:
 #ifndef EXP_THREAD_CREATOR
 #define EXP_THREAD_CREATOR CThreadAdapterT<>
 #endif/*EXP_THREAD_CREATOR*/
-
-typedef EXP_THREAD_CREATOR ExThread;
 
 //////////////////////////////////////////////////////////////////
 

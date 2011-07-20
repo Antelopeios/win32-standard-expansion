@@ -1,4 +1,4 @@
-// Copyright 2010, 木头云
+// Copyright 2010-2011, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-04
-// Version:	1.0.0001.2202
+// Date:	2011-07-20
+// Version:	1.0.0002.1540
+//
+// History:
+//	- 1.0.0002.1540(2011-07-20)	= 将ExThread放入Thread公共头文件中实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Thread_h__
@@ -57,6 +60,12 @@
 #include "Thread/ThreadHeap.h"
 #include "Thread/ThreadPool.h"
 #include "Thread/ThreadCreator.h"
+
+//////////////////////////////////////////////////////////////////
+
+EXP_BEG
+typedef EXP_THREAD_CREATOR ExThread;
+EXP_END
 
 //////////////////////////////////////////////////////////////////
 

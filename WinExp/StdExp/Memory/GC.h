@@ -96,12 +96,12 @@ public:
 	EXP_INLINE static TypeT* CheckAlloc(DWORD nCount = 1)
 	{
 		TypeT* ptr = alloc_t::Alloc<TypeT>(nCount);
-		CPtrManager::Instance().Add<alloc_t, model_t>(ptr);
+		EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr);
 		return ptr;
 	}
 	EXP_INLINE static void CheckFree(void* pPtr)
 	{
-		CPtrManager::Instance().Del(pPtr);
+		EXP_PTR_MANAGER.Del(pPtr);
 	}
 
 public:

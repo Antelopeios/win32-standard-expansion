@@ -142,20 +142,20 @@ public:
 	// 操作
 public:
 	long GetRefCount()
-	{ return CPtrManager::Instance().Get(m_Ptr); }
+	{ return EXP_PTR_MANAGER.Get(m_Ptr); }
 
 	// 是否做托管
 	void SetTrust(bool bTru = true) { m_bTru = bTru; }
 	bool IsTrust() { return m_bTru; }
 
 	void Inc()
-	{ if (m_bTru) CPtrManager::Instance().Add<alloc_t, model_t>(m_Ptr); }
+	{ if (m_bTru) EXP_PTR_MANAGER.Add<alloc_t, model_t>(m_Ptr); }
 	void Dec()
-	{ if (m_bTru) CPtrManager::Instance().Del(m_Ptr); }
+	{ if (m_bTru) EXP_PTR_MANAGER.Del(m_Ptr); }
 
 	void Release()
 	{
-		CPtrManager::Instance().Del(m_Ptr, true);
+		EXP_PTR_MANAGER.Del(m_Ptr, true);
 		m_Ptr = NULL;
 	}
 

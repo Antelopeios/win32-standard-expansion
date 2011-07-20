@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-24
-// Version:	1.0.0005.2230
+// Date:	2011-07-20
+// Version:	1.0.0006.1540
 //
 // History:
 //	- 1.0.0005.2230(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //								+ 添加CMapT::Del(iterator_t&)接口,支持由迭代器定位并删除结点
 //								+ 添加CMapT::Null()接口,支持彻底清空CMapT
+//	- 1.0.0006.1540(2011-07-20)	= 将CMapT::_Assoc与IPoolTypeT解耦,避免DLL中置换单例导致IPoolTypeT中的单例模板无法导出
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Map_h__
@@ -74,7 +75,7 @@ public:
 		type_t	Val;
 	} pair_t;
 
-	typedef struct _Assoc : public pair_t, public IPoolTypeT<_Assoc, alloc_t>
+	typedef struct _Assoc : public pair_t
 	{
 		DWORD	nHash;
 		bool	bSet;
@@ -83,6 +84,11 @@ public:
 			: nHash(0)
 			, bSet(s)
 		{}
+
+		static _Assoc* Alloc()
+		{ return alloc_t::Alloc<_Assoc>(); }
+		void Free()
+		{ alloc_t::Free(this); }
 	} assoc_t;
 
 	typedef CListT<assoc_t*, _ListPolicyT<alloc_t> > alist_t;

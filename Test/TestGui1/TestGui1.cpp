@@ -18,7 +18,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	CGuiManager::Load(&f_xml);
 
 	// 垃圾回收器
-	CGC gc;
+	CGC& gc = ExGC();
 
 	// 加载资源
 	CIOFile file(_T("../TestImg1/ground.png"));

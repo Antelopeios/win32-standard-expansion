@@ -43,183 +43,179 @@ CCtlManager::key_map_t CCtlManager::m_Ctrls(101);
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiLoader
+void CGuiLoader::LoadRes()
 {
-private:
-	CGC gc;
+	// 解码器
+	ICoderObject* coder = CImgAnalyzer::GetCoder(CImgAnalyzer::png, &gc);
+	if (!coder) return;
+	CIOFile file;
+	coder->SetFile(&file);
 
-public:
-	CGuiLoader()
-	{
-		LoadRes();
-		LoadCtl();
-	}
+	// 图片资源
 
-	void LoadRes()
-	{
-		// 解码器
-		ICoderObject* coder = CImgAnalyzer::GetCoder(CImgAnalyzer::png, &gc);
-		if (!coder) return;
-		CIOFile file;
-		coder->SetFile(&file);
+	file.Open(_T("ui/banner.png"));
+	CResManager::banner.Set(coder->Decode());
+	file.Open(_T("ui/corner_lb.png"));
+	CResManager::corner_lb.Set(coder->Decode());
+	file.Open(_T("ui/corner_rb.png"));
+	CResManager::corner_rb.Set(coder->Decode());
+	file.Open(_T("ui/corner_rt.png"));
+	CResManager::corner_rt.Set(coder->Decode());
+	file.Open(_T("ui/corner_lt.png"));
+	CResManager::corner_lt.Set(coder->Decode());
+	file.Open(_T("ui/line_bottom.png"));
+	CResManager::line_bottom.Set(coder->Decode());
+	file.Open(_T("ui/line_left.png"));
+	CResManager::line_left.Set(coder->Decode());
+	file.Open(_T("ui/line_right.png"));
+	CResManager::line_right.Set(coder->Decode());
+	file.Open(_T("ui/line_top.png"));
+	CResManager::line_top.Set(coder->Decode());
+	file.Open(_T("ui/tag_bg.png"));
+	CResManager::tag_bg.Set(coder->Decode());
+	file.Open(_T("ui/toolbar_bg.png"));
+	CResManager::toolbar_bg.Set(coder->Decode());
+	file.Open(_T("ui/list.png"));
+	CResManager::list.Set(coder->Decode());
 
-		// 图片资源
+	file.Open(_T("ui/win_sysbtn_close.png"));
+	CResManager::win_sysbtn_close.Set(coder->Decode());
+	file.Open(_T("ui/win_sysbtn_max.png"));
+	CResManager::win_sysbtn_max.Set(coder->Decode());
+	file.Open(_T("ui/win_sysbtn_min.png"));
+	CResManager::win_sysbtn_min.Set(coder->Decode());
+	file.Open(_T("ui/win_sysbtn_restore.png"));
+	CResManager::win_sysbtn_restore.Set(coder->Decode());
 
-		file.Open(_T("ui/banner.png"));
-		CResManager::banner.Set(coder->Decode());
-		file.Open(_T("ui/corner_lb.png"));
-		CResManager::corner_lb.Set(coder->Decode());
-		file.Open(_T("ui/corner_rb.png"));
-		CResManager::corner_rb.Set(coder->Decode());
-		file.Open(_T("ui/corner_rt.png"));
-		CResManager::corner_rt.Set(coder->Decode());
-		file.Open(_T("ui/corner_lt.png"));
-		CResManager::corner_lt.Set(coder->Decode());
-		file.Open(_T("ui/line_bottom.png"));
-		CResManager::line_bottom.Set(coder->Decode());
-		file.Open(_T("ui/line_left.png"));
-		CResManager::line_left.Set(coder->Decode());
-		file.Open(_T("ui/line_right.png"));
-		CResManager::line_right.Set(coder->Decode());
-		file.Open(_T("ui/line_top.png"));
-		CResManager::line_top.Set(coder->Decode());
-		file.Open(_T("ui/tag_bg.png"));
-		CResManager::tag_bg.Set(coder->Decode());
-		file.Open(_T("ui/toolbar_bg.png"));
-		CResManager::toolbar_bg.Set(coder->Decode());
-		file.Open(_T("ui/list.png"));
-		CResManager::list.Set(coder->Decode());
+	file.Open(_T("ui/topbar_btn.png"));
+	CResManager::topbar_btn.Set(coder->Decode());
+	file.Open(_T("ui/gamesearch_charmap.png"));
+	CResManager::gamesearch_charmap.Set(coder->Decode());
+	file.Open(_T("ui/toolbar_tools.png"));
+	CResManager::toolbar_tools.Set(coder->Decode());
 
-		file.Open(_T("ui/win_sysbtn_close.png"));
-		CResManager::win_sysbtn_close.Set(coder->Decode());
-		file.Open(_T("ui/win_sysbtn_max.png"));
-		CResManager::win_sysbtn_max.Set(coder->Decode());
-		file.Open(_T("ui/win_sysbtn_min.png"));
-		CResManager::win_sysbtn_min.Set(coder->Decode());
-		file.Open(_T("ui/win_sysbtn_restore.png"));
-		CResManager::win_sysbtn_restore.Set(coder->Decode());
+	file.Open(_T("ui/tag_qb.png"));
+	CResManager::tag_qb.Set(coder->Decode());
+	file.Open(_T("ui/tag_zx.png"));
+	CResManager::tag_zx.Set(coder->Decode());
+	file.Open(_T("ui/tag_wl.png"));
+	CResManager::tag_wl.Set(coder->Decode());
+	file.Open(_T("ui/tag_dz.png"));
+	CResManager::tag_dz.Set(coder->Decode());
+	file.Open(_T("ui/tag_wy.png"));
+	CResManager::tag_wy.Set(coder->Decode());
+	file.Open(_T("ui/tag_dj.png"));
+	CResManager::tag_dj.Set(coder->Decode());
 
-		file.Open(_T("ui/topbar_btn.png"));
-		CResManager::topbar_btn.Set(coder->Decode());
-		file.Open(_T("ui/gamesearch_charmap.png"));
-		CResManager::gamesearch_charmap.Set(coder->Decode());
-		file.Open(_T("ui/toolbar_tools.png"));
-		CResManager::toolbar_tools.Set(coder->Decode());
+	file.Open(_T("ui/search_bg.png"));
+	CResManager::search_bg.Set(coder->Decode());
+	file.Open(_T("ui/search_button.png"));
+	CResManager::search_button.Set(coder->Decode());
+	file.Open(_T("ui/google_bg.png"));
+	CResManager::google_bg.Set(coder->Decode());
+	file.Open(_T("ui/google_button.png"));
+	CResManager::google_button.Set(coder->Decode());
+}
 
-		file.Open(_T("ui/tag_qb.png"));
-		CResManager::tag_qb.Set(coder->Decode());
-		file.Open(_T("ui/tag_zx.png"));
-		CResManager::tag_zx.Set(coder->Decode());
-		file.Open(_T("ui/tag_wl.png"));
-		CResManager::tag_wl.Set(coder->Decode());
-		file.Open(_T("ui/tag_dz.png"));
-		CResManager::tag_dz.Set(coder->Decode());
-		file.Open(_T("ui/tag_wy.png"));
-		CResManager::tag_wy.Set(coder->Decode());
-		file.Open(_T("ui/tag_dj.png"));
-		CResManager::tag_dj.Set(coder->Decode());
-
-		file.Open(_T("ui/search_bg.png"));
-		CResManager::search_bg.Set(coder->Decode());
-		file.Open(_T("ui/search_button.png"));
-		CResManager::search_button.Set(coder->Decode());
-		file.Open(_T("ui/google_bg.png"));
-		CResManager::google_bg.Set(coder->Decode());
-		file.Open(_T("ui/google_button.png"));
-		CResManager::google_button.Set(coder->Decode());
-	}
-
-	void LoadCtl()
-	{
-		// 创建控件对象并设置
+void CGuiLoader::LoadCtl()
+{
+	// 创建控件对象并设置
 
 #define GuiLoadPic(name) \
-		REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc))); \
-		GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
-		GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc))); \
+	GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
 //#define GuiLoadPic()
 
-		GuiLoadPic(banner);
-		GuiLoadPic(corner_lb);
-		GuiLoadPic(corner_rb);
-		GuiLoadPic(corner_rt);
-		GuiLoadPic(corner_lt);
-		GuiLoadPic(line_bottom);
-		GuiLoadPic(line_left);
-		GuiLoadPic(line_right);
-		GuiLoadPic(line_top);
-		GuiLoadPic(tag_bg);
-		GuiLoadPic(toolbar_bg);
-		GuiLoadPic(list);
+	GuiLoadPic(banner);
+	GuiLoadPic(corner_lb);
+	GuiLoadPic(corner_rb);
+	GuiLoadPic(corner_rt);
+	GuiLoadPic(corner_lt);
+	GuiLoadPic(line_bottom);
+	GuiLoadPic(line_left);
+	GuiLoadPic(line_right);
+	GuiLoadPic(line_top);
+	GuiLoadPic(tag_bg);
+	GuiLoadPic(toolbar_bg);
+	GuiLoadPic(list);
 
 #define GuiLoadBtn(name, thr_sta) \
-		REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
-		GUI_CTRL(name)->SetState(_T("thr_sta"), (void*)thr_sta); \
-		{ \
-			CImage tmp[9]; \
-			tmp[4] = CResManager::##name; \
-			GUI_CTRL(name)->SetState(_T("image"), tmp); \
-		} \
-		GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
+	GUI_CTRL(name)->SetState(_T("thr_sta"), (void*)thr_sta); \
+	{ \
+		CImage tmp[9]; \
+		tmp[4] = CResManager::##name; \
+		GUI_CTRL(name)->SetState(_T("image"), tmp); \
+	} \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
 //#define GuiLoadBtn()
 
-		GuiLoadBtn(win_sysbtn_close, true);
-		GuiLoadBtn(win_sysbtn_max, true);
-		GuiLoadBtn(win_sysbtn_restore, true);
-		GuiLoadBtn(win_sysbtn_min, true);
+	GuiLoadBtn(win_sysbtn_close, true);
+	GuiLoadBtn(win_sysbtn_max, true);
+	GuiLoadBtn(win_sysbtn_restore, true);
+	GuiLoadBtn(win_sysbtn_min, true);
 
 #define GuiLoadGrp(name, count, thr_sta) \
-		REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc))); \
-		CArrayT<IGuiCtrl*> items_##name; \
-		for(int i = 0; i < count; ++i) \
-		{ \
-			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
-			itm->SetState(_T("thr_sta"), (void*)thr_sta); \
-			GUI_CTRL(name)->AddComp(itm); \
-			items_##name.Add(itm); \
-		} \
-		GUI_CTRL(name)->SetState(_T("items"), &items_##name); \
-		GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
-		GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
-	//#define GuiLoadGrp()
-
-		GuiLoadGrp(gamesearch_charmap, 26, true);
-		GuiLoadGrp(toolbar_tools, 8, true);
-
-		REG_CTRL(topbar_btn, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc)));
-		CArrayT<IGuiCtrl*> items_topbar_btn;
-		IGuiEvent* items_topbar_btn_evt = ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_items_topbar_btn"), &gc));
-		for(int i = 0; i < 8; ++i)
-		{
-			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc));
-			itm->AddEvent(items_topbar_btn_evt);
-			GUI_CTRL(topbar_btn)->AddComp(itm);
-			items_topbar_btn.Add(itm);
-		}
-		items_topbar_btn[0]->SetState(_T("status"), (void*)3);
-		GUI_CTRL(topbar_btn)->SetState(_T("items"), &items_topbar_btn);
-		GUI_CTRL(topbar_btn)->SetState(_T("sta_cnt"), (void*)4);
-		GUI_CTRL(topbar_btn)->SetState(_T("sty_box"), (void*)false);
-		GUI_CTRL(topbar_btn)->SetState(_T("image"), &CResManager::topbar_btn);
-		GUI_CTRL(topbar_btn)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_topbar_btn"), &gc)));
-
-#define GuiLoadPsh(name) \
-		REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc))); \
-		GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
-		GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(CString(_T("CEvent_")) + _T(#name), &gc)))
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc))); \
+	CArrayT<IGuiCtrl*> items_##name; \
+	for(int i = 0; i < count; ++i) \
+	{ \
+		IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
+		itm->SetState(_T("thr_sta"), (void*)thr_sta); \
+		GUI_CTRL(name)->AddComp(itm); \
+		items_##name.Add(itm); \
+	} \
+	GUI_CTRL(name)->SetState(_T("items"), &items_##name); \
+	GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
 //#define GuiLoadGrp()
 
-		GuiLoadPsh(tag_qb);
-		GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)3);
-		GuiLoadPsh(tag_zx);
-		GuiLoadPsh(tag_wl);
-		GuiLoadPsh(tag_dz);
-		GuiLoadPsh(tag_wy);
-		GuiLoadPsh(tag_dj);
+	GuiLoadGrp(gamesearch_charmap, 26, true);
+	GuiLoadGrp(toolbar_tools, 8, true);
 
-		GuiLoadPic(search_bg);
-		GuiLoadPic(search_button);
-		GuiLoadPic(google_bg);
-		GuiLoadPic(google_button);
+	REG_CTRL(topbar_btn, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc)));
+	CArrayT<IGuiCtrl*> items_topbar_btn;
+	IGuiEvent* items_topbar_btn_evt = ExDynCast<IGuiEvent>(ExGui(_T("CEvent_items_topbar_btn"), &gc));
+	for(int i = 0; i < 8; ++i)
+	{
+		IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc));
+		itm->AddEvent(items_topbar_btn_evt);
+		GUI_CTRL(topbar_btn)->AddComp(itm);
+		items_topbar_btn.Add(itm);
 	}
-} g_loader;
+	items_topbar_btn[0]->SetState(_T("status"), (void*)3);
+	GUI_CTRL(topbar_btn)->SetState(_T("items"), &items_topbar_btn);
+	GUI_CTRL(topbar_btn)->SetState(_T("sta_cnt"), (void*)4);
+	GUI_CTRL(topbar_btn)->SetState(_T("sty_box"), (void*)false);
+	GUI_CTRL(topbar_btn)->SetState(_T("image"), &CResManager::topbar_btn);
+	GUI_CTRL(topbar_btn)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_topbar_btn"), &gc)));
+
+#define GuiLoadPsh(name) \
+	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc))); \
+	GUI_CTRL(name)->SetState(_T("image"), &CResManager::##name); \
+	GUI_CTRL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
+//#define GuiLoadGrp()
+
+	GuiLoadPsh(tag_qb);
+	GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)3);
+	GuiLoadPsh(tag_zx);
+	GuiLoadPsh(tag_wl);
+	GuiLoadPsh(tag_dz);
+	GuiLoadPsh(tag_wy);
+	GuiLoadPsh(tag_dj);
+
+	GuiLoadPic(search_bg);
+	GuiLoadPic(search_button);
+	GuiLoadPic(google_bg);
+	GuiLoadPic(google_button);
+}
+
+CGuiLoader::CGuiLoader()
+	: gc(ExGC())
+{
+	LoadRes();
+	LoadCtl();
+}
+
+CGuiLoader g_GuiLoader;

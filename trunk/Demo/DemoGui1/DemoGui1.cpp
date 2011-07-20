@@ -17,7 +17,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	/////////////////////////////////
 
 	// 垃圾回收器
-	CGC gc;
+	CGC& gc = ExGC();
 
 	/////////////////////////////////
 
@@ -31,13 +31,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建窗口对象并设置
 	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
-	wnd->Create(_T("DemoGui1"), rc_wnd, SW_HIDE);
+	wnd->Create(_T("DemoGui1"), rc_wnd, SW_HIDE, 
+		WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
 	wnd->SetLayered(false);
 	wnd->GetClientRect(rc_wnd);
-	wnd->AddEvent(ExDynCast<IGuiEvent>(ExDynCreate(_T("CEvent_wnd"), &gc)));
+	wnd->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
 
 	// 将窗口与控件关联
 

@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-11
-// Version:	1.0.0012.2025
+// Date:	2011-07-20
+// Version:	1.0.0013.1540
 //
 // History:
 //	- 1.0.0010.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //	- 1.0.0011.1742(2011-06-02)	# 修正CListT::Del()当传入的迭代器为Tail时会导致意外的结果
 //								# 修正CListT::AddList()里的迭代器赋值错误
 //	- 1.0.0012.2025(2011-07-11)	# 修正CListT::operator[]()无法顺利通过编译的问题
+//	- 1.0.0013.1540(2011-07-20)	= 将CListT::_Block与IPoolTypeT解耦,避免DLL中置换单例导致IPoolTypeT中的单例模板无法导出
 //////////////////////////////////////////////////////////////////
 
 #ifndef __List_h__
@@ -64,7 +65,7 @@ template <typename TypeT, typename PolicyT = _ListPolicyT<> >
 class CListT : public IContainerObjectT<TypeT, PolicyT, CListT<TypeT, PolicyT> >
 {
 public:
-	typedef struct _Block : public IPoolTypeT<_Block, alloc_t>
+	typedef struct _Block
 	{
 		type_t	Buff;	// 数据块
 		_Block*	pPrev;	// 上一个结点
@@ -73,6 +74,11 @@ public:
 			: pPrev(NULL)
 			, pNext(NULL)
 		{}
+
+		static _Block* Alloc()
+		{ return alloc_t::Alloc<_Block>(); }
+		void Free()
+		{ alloc_t::Free(this); }
 	} block_t;
 
 protected:

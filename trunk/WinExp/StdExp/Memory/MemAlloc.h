@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-05
-// Version:	1.0.0016.2133
+// Date:	2011-07-20
+// Version:	1.0.0017.1540
 //
 // History:
 //	- 1.0.0016.2133(2011-04-05)	- 移除ExMem的通用内存分配接口定义,此定义在GC.h中实现
+//	- 1.0.0017.1540(2011-07-20)	= 将CMemAdapterT的单例独立到外部,定义EXP_SINGLETON_MEMALLOC,可由外部按需要自行替换
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemAlloc_h__
@@ -53,9 +54,13 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+#ifndef EXP_SINGLETON_MEMALLOC
+#define EXP_SINGLETON_MEMALLOC EXP_SINGLETON<AllocT>
+#endif/*EXP_SINGLETON_MEMALLOC*/
+
 // 将普通内存分配转换为静态内存分配的适配器
 template <typename AllocT = _MemPool>
-class CMemAdapterT : public EXP_SINGLETON<AllocT>
+class CMemAdapterT : public EXP_SINGLETON_MEMALLOC
 {
 public:
 	typedef AllocT alloc_t;

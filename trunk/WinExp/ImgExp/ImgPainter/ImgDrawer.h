@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0001.1942
+// Date:	2011-07-20
+// Version:	1.0.0002.1747
 //
 // History:
 //	- 1.0.0000.1627(2011-06-20)	@ 重新构建ImgDrawer,作为ImgPainter的子模块,用于绘制基本图形
 //	- 1.0.0001.1942(2011-07-16)	# 修正当CImgDrawer::Fill()传入的CRect参数超出image_t界限时导致的访问异常
+//	- 1.0.0002.1747(2011-07-20)	# 修正CImgDrawer::Fill()像素循环遍历中的一个低级错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDrawer_h__
@@ -101,12 +102,9 @@ public:
 
 		// 遍历像素绘图
 		pixel_t* pix_des = exp_des.GetPixels();
-		for(LONG y = 0; y < h; ++y);
-		{
+		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
 			for(LONG x = 0, i_d = inx_des; x < w; ++x, ++i_d)
 				pix_des[i_d] = pixSrc;
-			inx_des -= sz_des.cx;
-		}
 		return true;
 	}
 

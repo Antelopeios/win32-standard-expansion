@@ -75,3 +75,18 @@ public:
 
 #define REG_CTRL(name, inf) CCtlManager::RegCtrl(_T(#name), inf)
 #define GUI_CTRL(name) CCtlManager::GetCtrl(_T(#name))
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiLoader
+{
+protected:
+	CGC& gc;
+
+protected:
+	void LoadRes();
+	void LoadCtl();
+
+public:
+	CGuiLoader();
+};

@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-31
-// Version:	1.3.0029.1116
+// Date:	2011-07-20
+// Version:	1.3.0030.1540
 //
 // History:
 //	- 1.3.0028.1020(2011-05-30)	= 将CPtrManagerT独立作为一个单独的模块维护
 //	- 1.3.0029.1116(2011-05-31)	# 添加一个bool标记,防止CPtrManagerT在析构后继续被调用导致Crash
+//	- 1.3.0030.1540(2011-07-20)	= 将CPtrManager的单例独立到CPtrManager外部,定义EXP_PTR_MANAGER,可由外部按需要自行替换
 //////////////////////////////////////////////////////////////////
 
 #ifndef __PtrManager_h__
@@ -55,7 +56,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-class CPtrManagerT : INonCopyable, public EXP_SINGLETON<CPtrManagerT<AllocT, ModelT> >
+class CPtrManagerT : INonCopyable
 {
 protected:
 	// 计数指针接口
@@ -231,6 +232,10 @@ public:
 };
 
 typedef CPtrManagerT<> CPtrManager;
+
+#ifndef EXP_PTR_MANAGER
+#define EXP_PTR_MANAGER ExSingleton<CPtrManager>()
+#endif/*EXP_PTR_MANAGER*/
 
 //////////////////////////////////////////////////////////////////
 

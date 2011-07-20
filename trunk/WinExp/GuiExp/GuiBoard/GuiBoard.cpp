@@ -66,14 +66,14 @@ const LPCTSTR IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
 IGuiBoardBase::IGuiBoardBase(void)
 	: m_hIns(::GetModuleHandle(NULL))
 	, m_bLayered(false)
-	, m_bColorKey(true)
+	, m_bColorKey(false)
 	, m_crKey(ExRGB(255, 0, 255))
 {}
 IGuiBoardBase::IGuiBoardBase(wnd_t hWnd)
 	: m_hIns(::GetModuleHandle(NULL))
 	, type_base_t(hWnd)
 	, m_bLayered(false)
-	, m_bColorKey(true)
+	, m_bColorKey(false)
 	, m_crKey(ExRGB(255, 0, 255))
 {}
 IGuiBoardBase::~IGuiBoardBase(void)

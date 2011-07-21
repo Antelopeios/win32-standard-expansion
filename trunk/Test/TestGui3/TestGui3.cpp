@@ -78,13 +78,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		btn->SetState(_T("image"), img_btn);
 		btn->SetState(_T("text"), txt_btn);
 		btn->SetState(_T("locate"), (void*)2);
-		btn->SetState(_T("loc_off"), (void*)4);
+		btn->SetState(_T("loc_off"), (void*)5);
 		btn->SetWindowRect(CRect(0, 0, 80, 80));
-		list->AddComp(btn);
 		items.Add(btn);
 	}
 	list->SetState(_T("items"), &items);
-	list->SetState(_T("space"), (void*)10);
+	list->SetState(_T("space"), (void*)5);
 	list->SetWindowRect(rc_wnd);
 
 	// 创建事件对象并设置

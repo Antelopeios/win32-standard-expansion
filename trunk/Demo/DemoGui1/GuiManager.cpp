@@ -14,7 +14,9 @@ CImage CResManager::line_right;
 CImage CResManager::line_top;
 CImage CResManager::tag_bg;
 CImage CResManager::toolbar_bg;
+
 CImage CResManager::list;
+CImage CResManager::list_item;
 
 CImage CResManager::win_sysbtn_close;
 CImage CResManager::win_sysbtn_max;
@@ -75,8 +77,11 @@ void CGuiLoader::LoadRes()
 	CResManager::tag_bg.Set(coder->Decode());
 	file.Open(_T("ui/toolbar_bg.png"));
 	CResManager::toolbar_bg.Set(coder->Decode());
+
 	file.Open(_T("ui/list.png"));
 	CResManager::list.Set(coder->Decode());
+	file.Open(_T("ui/list_item.png"));
+	CResManager::list_item.Set(coder->Decode());
 
 	file.Open(_T("ui/win_sysbtn_close.png"));
 	CResManager::win_sysbtn_close.Set(coder->Decode());
@@ -138,7 +143,26 @@ void CGuiLoader::LoadCtl()
 	GuiLoadPic(line_top);
 	GuiLoadPic(tag_bg);
 	GuiLoadPic(toolbar_bg);
-	GuiLoadPic(list);
+
+	REG_CTRL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
+	GUI_CTRL(list)->SetState(_T("image"), &CResManager::list);
+	CListT<IGuiCtrl*> items_list;
+	for(int i = 0; i < 200; ++i)
+	{
+		CImage img_btn[9];
+		img_btn[4] = CResManager::list_item;
+		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
+		btn->SetState(_T("image"), img_btn);
+		//btn->SetState(_T("icon"), &img_pic);
+		//btn->SetState(_T("text"), txt_btn);
+		//btn->SetState(_T("locate"), (void*)2);
+		//btn->SetState(_T("loc_off"), (void*)5);
+		btn->SetWindowRect(CRect(0, 0, 70, 70));
+		items_list.Add(btn);
+	}
+	GUI_CTRL(list)->SetState(_T("items"), &items_list);
+	GUI_CTRL(list)->SetState(_T("space"), (void*)5);
+	GUI_CTRL(list)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
 
 #define GuiLoadBtn(name, thr_sta) \
 	REG_CTRL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
@@ -163,7 +187,6 @@ void CGuiLoader::LoadCtl()
 	{ \
 		IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
 		itm->SetState(_T("thr_sta"), (void*)thr_sta); \
-		GUI_CTRL(name)->AddComp(itm); \
 		items_##name.Add(itm); \
 	} \
 	GUI_CTRL(name)->SetState(_T("items"), &items_##name); \

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-30
-// Version:	1.0.0000.1543
+// Date:	2011-07-21
+// Version:	1.0.0001.1532
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
+//	- 1.0.0001.1532(2011-07-21)	= 将CGuiListView内部items_t结构由指针改为对象,减轻调用复杂度
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -112,7 +113,7 @@ public:
 	typedef CListT<IGuiCtrl*> items_t;
 
 protected:
-	items_t* m_ItemList;
+	items_t m_ItemList;
 	LONG m_Space;	// 项间距
 
 public:
@@ -134,7 +135,7 @@ public:
 		if (state)
 		{
 			if (state->sta_typ == _T("items"))
-				state->sta_arr.Add(m_ItemList);
+				state->sta_arr.Add(&m_ItemList);
 			else
 			if (state->sta_typ == _T("space"))
 				state->sta_arr.Add((void*)m_Space);
@@ -147,10 +148,23 @@ public:
 	{
 		if (sType == _T("items"))
 		{
-			items_t* old_sta = m_ItemList;
-			m_ItemList = (items_t*)pState;
-			if (old_sta != m_ItemList)
-				IGuiCtrlBase::SetState(sType, pState);
+			items_t* new_sta = (items_t*)pState;
+			if (new_sta == NULL) return;
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtrl* item = *ite;
+				if (!item) continue;
+				items_t::iterator_t it = items_t::finder_t::Find(*new_sta, item);
+				if (it == new_sta->Tail()) DelComp(item);
+			}
+			m_ItemList = *(items_t*)pState;
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtrl* item = *ite;
+				if (!item) continue;
+				AddComp(item);
+			}
+			IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("space"))

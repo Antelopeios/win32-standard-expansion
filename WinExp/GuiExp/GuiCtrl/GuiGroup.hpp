@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-11
-// Version:	1.0.0001.1752
+// Date:	2011-07-21
+// Version:	1.0.0002.1532
 //
 // History:
 //	- 1.0.0000.0940(2011-07-07)	@ 开始构建GuiGroup
 //	- 1.0.0001.1752(2011-07-11)	^ 优化GuiGroup的外部调用属性
+//	- 1.0.0002.1532(2011-07-21)	= 将CGuiGroup内部items_t结构由指针改为对象,减轻调用复杂度
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiGroup_hpp__
@@ -58,7 +59,7 @@ public:
 	typedef CArrayT<IGuiCtrl*> items_t;
 
 protected:
-	items_t* m_ItemList;
+	items_t m_ItemList;
 	DWORD m_StatusCount;
 	bool m_StyleBox;
 
@@ -77,7 +78,7 @@ public:
 		if (state)
 		{
 			if (state->sta_typ == _T("items"))
-				state->sta_arr.Add(m_ItemList);
+				state->sta_arr.Add(&m_ItemList);
 		}
 		return state;
 	}
@@ -85,10 +86,23 @@ public:
 	{
 		if (sType == _T("items"))
 		{
-			items_t* old_sta = m_ItemList;
-			m_ItemList = (items_t*)pState;
-			if (old_sta != m_ItemList)
-				EXP_BASE::SetState(sType, pState);
+			items_t* new_sta = (items_t*)pState;
+			if (new_sta == NULL) return;
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtrl* item = *ite;
+				if (!item) continue;
+				items_t::iterator_t it = items_t::finder_t::Find(*new_sta, item);
+				if (it == new_sta->Tail()) DelComp(item);
+			}
+			m_ItemList = *(items_t*)pState;
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtrl* item = *ite;
+				if (!item) continue;
+				AddComp(item);
+			}
+			IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("sta_cnt"))
@@ -101,8 +115,8 @@ public:
 		{
 			CImage* img = (CImage*)pState;
 			if (!img || img->IsNull()) return;
-			if (!m_ItemList || m_ItemList->Empty()) return;
-			DWORD count = m_ItemList->GetCount();
+			if (!m_ItemList || m_ItemList.Empty()) return;
+			DWORD count = m_ItemList.GetCount();
 			LONG offset = img->GetWidth() / count;
 			CRect rc_img(0, 0, offset, img->GetHeight());
 			CRect rc_itm(0, 0, offset, img->GetHeight() / m_StatusCount);
@@ -112,9 +126,9 @@ public:
 				CImage tmp[9];
 				for(DWORD i = 0; i < count; ++i)
 				{
-					m_ItemList->GetAt(i)->SetWindowRect(rc_itm);
+					m_ItemList[i]->SetWindowRect(rc_itm);
 					tmp[4].Set(img->Clone(rc_img));
-					m_ItemList->GetAt(i)->SetState(_T("image"), tmp);
+					m_ItemList[i]->SetState(_T("image"), tmp);
 					rc_img.Offset(pt_off);
 					rc_itm.Offset(pt_off);
 				}
@@ -124,9 +138,9 @@ public:
 				CImage tmp;
 				for(DWORD i = 0; i < count; ++i)
 				{
-					m_ItemList->GetAt(i)->SetWindowRect(rc_itm);
+					m_ItemList[i]->SetWindowRect(rc_itm);
 					tmp.Set(img->Clone(rc_img));
-					m_ItemList->GetAt(i)->SetState(_T("image"), &tmp);
+					m_ItemList[i]->SetState(_T("image"), &tmp);
 					rc_img.Offset(pt_off);
 					rc_itm.Offset(pt_off);
 				}

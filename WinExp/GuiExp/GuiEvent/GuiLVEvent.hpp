@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-01
-// Version:	1.0.0000.1125
+// Date:	2011-07-21
+// Version:	1.0.0001.1532
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
+//	- 1.0.0001.1532(2011-07-21)	= 调整CGuiLVItemEvent的绘图算法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -94,12 +95,14 @@ public:
 				ctrl->GetClipRect(rect);
 
 				// 处理
+				LONG radius = 0;
 				if (glow)
 				{
+					CFilterGauss filter;
+					radius = filter.m_Radius;
 					if (m_IconOld != icon)
 					{
-						CFilterGauss filter;
-						CPoint pt_flt(filter.m_Radius << 1, filter.m_Radius << 1);
+						CPoint pt_flt(radius << 1, radius << 1);
 						// 将图片扩大
 						CRect rc(0, 0, icon->GetWidth(), icon->GetHeight());
 						m_IconTmp = icon->Clone(rc + pt_flt);
@@ -121,7 +124,7 @@ public:
 				DWORD locate = (DWORD)(state->sta_arr[0]);
 				state = ctrl->GetState(_T("loc_off"), &gc);
 				if (!state) break;
-				LONG loc_off = (LONG)(state->sta_arr[0]);
+				LONG loc_off = (LONG)(state->sta_arr[0]) - radius;
 
 				CRect icon_rct;
 				switch(locate)

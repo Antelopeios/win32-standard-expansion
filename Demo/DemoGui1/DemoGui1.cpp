@@ -46,6 +46,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->AddComp(GUI_CTRL(banner));
 	wnd->AddComp(GUI_CTRL(tag_bg));
 	wnd->AddComp(GUI_CTRL(toolbar_bg));
+
+	// 列表
 	wnd->AddComp(GUI_CTRL(list));
 
 	// 功能按钮

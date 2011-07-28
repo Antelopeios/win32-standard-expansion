@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-20
-// Version:	1.0.0002.1612
+// Date:	2011-07-28
+// Version:	1.0.0003.1411
 //
 // History:
 //	- 1.0.0002.1612(2011-06-20)	^ 简化CFinderT的查找接口
 //								+ CFinderT添加在容器中查找子容器的算法
+//	- 1.0.0003.1411(2011-07-28)	^ 改进查找接口在使用上的一些不方便
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Finder_h__
@@ -61,14 +62,14 @@ public:
 
 public:
 	// 正向搜索
-	static iterator_t& Find(iterator_t& Head, iterator_t& Tail, type_t& Item)
+	static iterator_t& Find(iterator_t& Head, iterator_t& Tail, const type_t& Item)
 	{
 		static iterator_t iter;
 		for(iter = Head; iter != Tail; ++iter)
 			if (iter->Val() == Item) break;
 		return iter;
 	}
-	static iterator_t& Find(iterator_t& Head, iterator_t& Tail, ContainerT& cnt2)
+	static iterator_t& Find(iterator_t& Head, iterator_t& Tail, const ContainerT& cnt2)
 	{
 		static iterator_t iter;
 		for(iter = Head; iter != Tail; ++iter)
@@ -80,17 +81,17 @@ public:
 		}
 		return iter;
 	}
-	static iterator_t& Find(ContainerT& cnt1, type_t& Item)
+	static iterator_t& Find(const ContainerT& cnt1, const type_t& Item)
 	{
 		return Find(cnt1.Head(), cnt1.Tail(), Item);
 	}
-	static iterator_t& Find(ContainerT& cnt1, ContainerT& cnt2)
+	static iterator_t& Find(const ContainerT& cnt1, const ContainerT& cnt2)
 	{
 		return Find(cnt1.Head(), cnt1.Tail(), cnt2);
 	}
 
 	// 反向搜索
-	static iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, type_t& Item)
+	static iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, const type_t& Item)
 	{
 		static iterator_t iter;
 		iter = Tail;
@@ -100,7 +101,7 @@ public:
 			iter = Tail;
 		return iter;
 	}
-	static iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, ContainerT& cnt2)
+	static iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, const ContainerT& cnt2)
 	{
 		static iterator_t iter;
 		iter = Tail;
@@ -117,11 +118,11 @@ public:
 		if (ite2 == cnt2.Head() && ite1->Val() == ite2->Val()) return (iter = ite1);
 		return Tail;
 	}
-	static iterator_t& RevFind(ContainerT& cnt1, type_t& Item)
+	static iterator_t& RevFind(const ContainerT& cnt1, const type_t& Item)
 	{
 		return RevFind(cnt1.Head(), cnt1.Tail(), Item);
 	}
-	static iterator_t& RevFind(ContainerT& cnt1, ContainerT& cnt2)
+	static iterator_t& RevFind(const ContainerT& cnt1, const ContainerT& cnt2)
 	{
 		return RevFind(cnt1.Head(), cnt1.Tail(), cnt2);
 	}

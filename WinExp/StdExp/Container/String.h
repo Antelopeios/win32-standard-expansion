@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-28
-// Version:	1.0.0021.1755
+// Date:	2011-07-28
+// Version:	1.0.0022.1650
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -48,6 +48,8 @@
 //								+ 支持CStringT::operator[]()支持由迭代器获取值
 //	- 1.0.0020.1817(2011-06-24)	# 修正CStringT::AddString()无法向字符串末尾添加字符的问题
 //	- 1.0.0021.1755(2011-06-28)	# 修正CStringT::AddString()在针对字符串添加时包含了待添加字符串的结尾'\0'符,导致结果被意外截断的问题
+//	- 1.0.0022.1650(2011-07-28)	# 修正CStringT::operator[]()无法顺利通过编译的问题
+//								# 修正CStringT::LastItem()定位错误的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -175,9 +177,9 @@ public:
 	const type_t& GetAt(iterator_t& nIndex) const
 	{ return nIndex->Val(); }
 
-	type_t& operator[](DWORD nIndex)
+	type_t& operator[](INT_PTR nIndex)
 	{ return GetAt(nIndex); }
-	const type_t& operator[](DWORD nIndex) const
+	const type_t& operator[](INT_PTR nIndex) const
 	{ return GetAt(nIndex); }
 	type_t& operator[](iterator_t& nIndex)
 	{ return GetAt(nIndex); }
@@ -330,7 +332,7 @@ public:
 	type_t& HeadItem() const
 	{ return m_Array[0]; }
 	type_t& LastItem() const
-	{ return m_Array[GetLength()]; }
+	{ return m_Array[GetLength() - 1]; }
 
 	bool AddString(const type_t* pString, DWORD nSize, iterator_t& Iter)
 	{

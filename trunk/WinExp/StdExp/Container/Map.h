@@ -194,7 +194,7 @@ public:
 			return Tail();
 	}
 
-	iterator_t& Head()
+	iterator_t& Head() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
@@ -203,14 +203,14 @@ public:
 			++ iter;
 		return iter;
 	}
-	iterator_t& Tail()
+	iterator_t& Tail() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = m_Assoc.Tail();
 		return iter;
 	}
-	iterator_t& Last()
+	iterator_t& Last() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
@@ -219,9 +219,9 @@ public:
 			-- iter;
 		return iter;
 	}
-	type_t& HeadItem()
+	type_t& HeadItem() const
 	{ return Head()->Val()->Val; }
-	type_t& LastItem()
+	type_t& LastItem() const
 	{ return Last()->Val()->Val; }
 
 	bool Add(const key_t& Key, const type_t& Val)
@@ -275,6 +275,9 @@ struct _MapPolicyT
 
 		node_t(container_t* p = NULL)
 			: pCont(p)
+		{}
+		node_t(const container_t* p)
+			: pCont((container_t*)p)
 		{}
 
 		key_t& Key() { return nIndx->Val()->Key; }

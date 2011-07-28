@@ -230,30 +230,30 @@ public:
 	operator const type_t*() const
 	{ return m_Array; }
 
-	iterator_t& Head()
+	iterator_t& Head() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = 0;
 		return iter;
 	}
-	iterator_t& Tail()
+	iterator_t& Tail() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = m_nCont;
 		return iter;
 	}
-	iterator_t& Last()
+	iterator_t& Last() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = m_nCont - 1;
 		return iter;
 	}
-	type_t& HeadItem()
+	type_t& HeadItem() const
 	{ return GetAt(0); }
-	type_t& LastItem()
+	type_t& LastItem() const
 	{ return GetAt(m_nCont - 1); }
 
 	bool AddArray(const type_t* pArray, DWORD nSize, iterator_t& Iter)
@@ -340,6 +340,10 @@ struct _ArrayPolicyT
 
 		node_t(container_t* p = NULL)
 			: pCont(p)
+			, nIndx(0)
+		{}
+		node_t(const container_t* p)
+			: pCont((container_t*)p)
 			, nIndx(0)
 		{}
 

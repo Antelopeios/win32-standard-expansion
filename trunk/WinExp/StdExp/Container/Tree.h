@@ -233,30 +233,30 @@ public:
 	CTreeT& operator=(const CTreeT& tTree)
 	{ return SetTree(tTree); }
 
-	iterator_t& Head()
+	iterator_t& Head() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = m_pTree;
 		return iter;
 	}
-	iterator_t& Tail()
+	iterator_t& Tail() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = NULL;
 		return iter;
 	}
-	iterator_t& Last()
+	iterator_t& Last() const
 	{
 		static iterator_t iter;
 		iter = node_t(this);
 		iter->nIndx = m_pTree->GetChdrLast();
 		return iter;
 	}
-	type_t& HeadItem()
+	type_t& HeadItem() const
 	{ return m_pTree->Val; }
-	type_t& LastItem()
+	type_t& LastItem() const
 	{ return Last()->Val(); }
 
 	/*
@@ -389,6 +389,10 @@ struct _TreePolicyT
 
 		node_t(container_t* p = NULL)
 			: pCont(p)
+			, nIndx(NULL)
+		{}
+		node_t(const container_t* p)
+			: pCont((container_t*)p)
 			, nIndx(NULL)
 		{}
 

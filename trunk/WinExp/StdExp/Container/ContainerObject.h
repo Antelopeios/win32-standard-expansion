@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-12
-// Version:	1.0.0010.0142
+// Date:	2011-07-28
+// Version:	1.0.0011.1458
 //
 // History:
 //	- 1.0.0009.1617(2011-06-02)	+ 添加默认的IContainerObjectT::Del()接口,支持直接定位元素删除
 //	- 1.0.0010.0142(2011-06-12)	# 修正默认的IContainerObjectT::Del()接口与容器子类的Del()的重载冲突
+//	- 1.0.0011.1458(2011-07-28)	= 将容器的迭代器接口调整为const类型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ContainerObject_h__
@@ -88,15 +89,15 @@ public:
 	void Clear()
 	{ return This()->container_t::Clear(); }
 
-	iterator_t& Head()
+	iterator_t& Head() const
 	{ return This()->container_t::Head(); }
-	iterator_t& Tail()
+	iterator_t& Tail() const
 	{ return This()->container_t::Tail(); }
-	iterator_t& Last()
+	iterator_t& Last() const
 	{ return This()->container_t::Last(); }
-	type_t& HeadItem()
+	type_t& HeadItem() const
 	{ return This()->container_t::HeadItem(); }
-	type_t& LastItem()
+	type_t& LastItem() const
 	{ return This()->container_t::LastItem(); }
 
 	bool Replace(type_t& Type)

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-28
-// Version:	1.0.0022.1650
+// Date:	2011-07-29
+// Version:	1.0.0023.1555
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -50,6 +50,8 @@
 //	- 1.0.0021.1755(2011-06-28)	# 修正CStringT::AddString()在针对字符串添加时包含了待添加字符串的结尾'\0'符,导致结果被意外截断的问题
 //	- 1.0.0022.1650(2011-07-28)	# 修正CStringT::operator[]()无法顺利通过编译的问题
 //								# 修正CStringT::LastItem()定位错误的问题
+//	- 1.0.0023.1555(2011-07-29)	+ CStringT::Compare()支持替换默认的比较函数接口进行字符串比较
+//								+ 为CStringT增加一些方便的功能接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -230,15 +232,105 @@ public:
 	CStringT& operator=(const type_t* pString)
 	{ return SetString(pString); }
 
-	int Compare(const type_t* pString) const
+	CStringT& Mid(int nStart, int nCount = -1) const
+	{
+		if (nStart < 0) nStart = 0;
+		if (nStart >= (int)GetLength()) nStart = (int)GetLength() - 1;
+		int max_cnt = (int)GetLength() - nStart;
+		if (nCount < 0 || nCount > max_cnt)
+			nCount = max_cnt;
+		static CStringT str;
+		str = _T("");
+		if (nCount > 0)
+		{
+			memcpy(str.GetCStr(nCount), (m_Array + nStart), (nCount * sizeof(type_t)));
+			str[nCount] = 0;
+		}
+		return str;
+	}
+	CStringT& Left(int nCount) const
+	{
+		return Mid(0, nCount);
+	}
+	CStringT& Right(int nCount) const
+	{
+		return Mid((int)GetLength() - nCount, -1);
+	}
+
+	void Upper()
+	{
+		if (Empty()) return;
+		type_t* s = m_Array, *str = m_Array;
+		if (sizeof(type_t) == 1)
+			while(*s) *str++ = toupper(*s++);
+		else
+			while(*s) *str++ = towupper(*s++);
+	}
+	void Lower()
+	{
+		if (Empty()) return;
+		type_t* s = m_Array, *str = m_Array;
+		if (sizeof(type_t) == 1)
+			while(*s) *str++ = tolower(*s++);
+		else
+			while(*s) *str++ = towlower(*s++);
+	}
+
+	void TrimLeft(const type_t cTar)
+	{
+		if (Empty()) return;
+		int cnt = 0;
+		type_t* str = m_Array;
+		while(*str)
+		{
+			if (*str++ != cTar) break;
+			++cnt;
+		}
+		Del(Head(), cnt);
+	}
+	void TrimLeft(const type_t* sTar)
+	{
+		if (!sTar) return;
+		type_t* str = (type_t*)sTar;
+		while(*str) TrimLeft(*str++);
+	}
+	void TrimRight(const type_t cTar)
+	{
+		if (Empty()) return;
+		int cnt = 0, len = GetLength();
+		type_t* str = m_Array + len - 1;
+		while(cnt < len)
+		{
+			if (*str-- != cTar) break;
+			++cnt;
+		}
+		Del(Tail() - cnt, cnt);
+	}
+	void TrimRight(const type_t* sTar)
+	{
+		if (!sTar) return;
+		int cnt = 0, len = (sizeof(type_t) == 1 ? strlen((char*)sTar) : wcslen((wchar_t*)sTar));
+		type_t* str = (type_t*)sTar + len - 1;
+		while(cnt < len)
+		{
+			TrimRight(*str--);
+			++cnt;
+		}
+	}
+
+	typedef int (__cdecl *a_comp_t)(const char*, const char*);
+	typedef int (__cdecl *w_comp_t)(const wchar_t*, const wchar_t*);
+	int Compare(const type_t* pString, a_comp_t a_comp = NULL, w_comp_t w_comp = NULL) const
 	{
 		if (m_Array == pString) return true;
 		if (m_Array == NULL || 
 			pString == NULL) return false;
+		if (a_comp == NULL) a_comp = strcmp;
+		if (w_comp == NULL) w_comp = wcscmp;
 		if (sizeof(type_t) == 1)
-			return strcmp((char*)m_Array, (char*)pString);
+			return a_comp((char*)m_Array, (char*)pString);
 		else
-			return wcscmp((wchar_t*)m_Array, (wchar_t*)pString);
+			return w_comp((wchar_t*)m_Array, (wchar_t*)pString);
 	}
 
 	friend bool operator==(const CStringT& str1, const CStringT& str2)

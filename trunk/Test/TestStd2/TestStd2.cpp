@@ -5,6 +5,15 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	CString s(_T("我在马abcd路边捡EFGH到一分钱")), t;
+	t = s.Left(4);
+	s.Upper();
+	s.Lower();
+	s.TrimLeft(_T('我'));
+	s.TrimLeft(_T("我在马a"));
+	s.TrimRight(_T('钱'));
+	s.TrimRight(_T("h到一分钱"));
+
 	CArrayT<TCHAR> str(_T("1234")), str2(_T("123"));
 	TCHAR* a = NULL, b[MAX_PATH] = {0};
 	if (str/* == *//*a*//*b*//*str2*//*_T("123")*/)

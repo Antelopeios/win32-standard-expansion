@@ -34,11 +34,11 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-08-01
-// Version:	1.0.0001.0440
+// Version:	1.0.0001.0527
 //
 // History:
 //	- 1.0.0000.1622(2011-06-13)	@ 开始构建GuiManager接口
-//	- 1.0.0001.0440(2011-08-01)	= 将GuiManager改为模板形式,提供泛型化的界面元素管理
+//	- 1.0.0001.0527(2011-08-01)	= 将GuiManager改为模板形式,提供泛型化的界面元素管理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiManager_h__
@@ -75,18 +75,18 @@ private:
 	}
 
 public:
-	static bool Reg(LPCTSTR c_key, TypeT* inf)
+	static TypeT* Reg(LPCTSTR c_key, TypeT* inf)
 	{
-		if (!c_key) return false;
+		if (!c_key) return NULL;
 		key_map_t& types = Instance();
 		CString key(c_key);
 		if (types.Locate(key) == types.Tail())
 		{
 			types.Add(key, inf);
-			return true;
+			return inf;
 		}
 		else
-			return false;
+			return NULL;
 	}
 	static TypeT* Get(LPCTSTR c_key)
 	{

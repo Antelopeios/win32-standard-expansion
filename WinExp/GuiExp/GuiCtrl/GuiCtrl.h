@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0008.2000
+// Date:	2011-07-31
+// Version:	1.0.0009.2111
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -49,6 +49,7 @@
 //	- 1.0.0006.1010(2011-06-17)	= 将IGuiCtrlBase接口移动到GuiCtrl.h中,使外部可以使用此接口
 //	- 1.0.0007.1732(2011-06-24)	+ 添加静态IGuiCtrl::SetFocus()接口
 //	- 1.0.0008.2000(2011-07-16)	+ 添加IGuiCtrl::GetClipRect()接口,用于绘图时动态获取当前剪切区下的绘图区域
+//	- 1.0.0009.2111(2011-07-31)	= IGuiCtrl::Init()将判断控件是否可见,并发送WM_SHOWWINDOW消息
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -90,7 +91,13 @@ protected:
 	void Init(IGuiComp* pComp)
 	{
 		EXP_BASE::Init(pComp);
-		SetFocus();
+		if (IsVisible())
+		{
+			Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, 1);
+			SetFocus();
+		}
+		else
+			Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, 0);
 	}
 	void Fina()
 	{
@@ -162,6 +169,7 @@ public:
 
 	// 设置可见性
 	virtual bool SetVisible(bool bVisible = true) = 0;
+	virtual bool IsVisible() const = 0;
 
 	// 判断有效性
 	static bool IsEffect(IGuiCtrl* pCtrl)

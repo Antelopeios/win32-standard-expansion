@@ -33,13 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-29
-// Version:	1.0.0001.1956
+// Date:	2011-07-31
+// Version:	1.0.0002.2018
 //
 // History:
 //	- 1.0.0000.1055(2011-06-21)	@ 开始构建GuiEditEvent
 //	- 1.0.0001.1956(2011-06-29)	@ 基本完成GuiEditEvent
 //								= 根据CGuiEdit基类的调整,修改GuiEditEvent
+//	- 1.0.0002.2018(2011-07-31)	+ 当Edit内容变化时会向控件自身发送EN_CHANGE的命令消息
+//								# 修正光标显示判断不够准确的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEditEvent_hpp__
@@ -401,6 +403,7 @@ public:
 				else
 					edit->Del(ite1, ite2->Index() - ite1->Index());
 				m_iteSelect = m_iteFlicker = ite1;
+				m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, EN_CHANGE);
 			}
 			else
 			if (m_CtrlDown)
@@ -511,6 +514,7 @@ public:
 			else
 				edit->Del(ite1, ite2->Index() - ite1->Index());
 			m_iteSelect = m_iteFlicker = ite1;
+			m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, EN_CHANGE);
 		}
 		else
 		if (cInput >= VK_SPACE)
@@ -524,6 +528,7 @@ public:
 			edit->Add(cInput, ite1);
 			++ite1; /*此处若在上面使用ite1++,当输入第一个字符之前edit为空,则++运算将被忽略*/
 			m_iteSelect = m_iteFlicker = ite1;
+			m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, EN_CHANGE);
 		}
 
 		// 刷新界面
@@ -615,7 +620,7 @@ public:
 		}
 
 		// 绘光标
-		if (m_bFlicker)
+		if (m_bFlicker && m_uFlicker)
 		{
 			// 获得光标高度
 			tmp_text.SetString(_T("lq"));
@@ -704,19 +709,20 @@ public:
 			// 字符输入
 			OnChar((TCHAR)wParam);
 			break;
-		case WM_SETFOCUS:
-			// 获得焦点时显示光标
-			ShowFlicker(true);
-			break;
+		//case WM_SETFOCUS:
+		//	// 获得焦点时显示光标
+		//	ShowFlicker(true);
+		//	break;
 		case WM_KILLFOCUS:
 			m_ShiftDown = false;
 			m_CtrlDown = false;
 			m_MouseDown = false;
 			m_Ctrl->ReleaseCapture();
-			// 失去焦点时隐藏光标
-			ShowFlicker(false);
+		//	// 失去焦点时隐藏光标
+		//	ShowFlicker(false);
 			break;
 		case WM_PAINT:
+			ShowFlicker(m_Ctrl->IsFocus());
 			OnPaint((CImage*)lParam);
 			break;
 		}

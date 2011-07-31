@@ -43,47 +43,47 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 将窗口与控件关联
 
 	// 内容打底
-	wnd->AddComp(GUI_CTRL(banner));
-	wnd->AddComp(GUI_CTRL(tag_bg));
-	wnd->AddComp(GUI_CTRL(toolbar_bg));
+	wnd->AddComp(GUI_CTL(banner));
+	wnd->AddComp(GUI_CTL(tag_bg));
+	wnd->AddComp(GUI_CTL(toolbar_bg));
 
 	// 列表
-	wnd->AddComp(GUI_CTRL(list));
+	wnd->AddComp(GUI_CTL(list));
 
 	// 功能按钮
-	wnd->AddComp(GUI_CTRL(topbar_btn));
-	wnd->AddComp(GUI_CTRL(gamesearch_charmap));
-	wnd->AddComp(GUI_CTRL(toolbar_tools));
+	wnd->AddComp(GUI_CTL(topbar_btn));
+	wnd->AddComp(GUI_CTL(gamesearch_charmap));
+	wnd->AddComp(GUI_CTL(toolbar_tools));
 
 	// 标签栏
-	wnd->AddComp(GUI_CTRL(tag_qb));
-	wnd->AddComp(GUI_CTRL(tag_zx));
-	wnd->AddComp(GUI_CTRL(tag_wl));
-	wnd->AddComp(GUI_CTRL(tag_dz));
-	wnd->AddComp(GUI_CTRL(tag_wy));
-	wnd->AddComp(GUI_CTRL(tag_dj));
+	wnd->AddComp(GUI_CTL(tag_qb));
+	wnd->AddComp(GUI_CTL(tag_zx));
+	wnd->AddComp(GUI_CTL(tag_wl));
+	wnd->AddComp(GUI_CTL(tag_dz));
+	wnd->AddComp(GUI_CTL(tag_wy));
+	wnd->AddComp(GUI_CTL(tag_dj));
 
 	// 编辑框
-	wnd->AddComp(GUI_CTRL(search_bg));
-	wnd->AddComp(GUI_CTRL(search_button));
-	wnd->AddComp(GUI_CTRL(google_bg));
-	wnd->AddComp(GUI_CTRL(google_button));
+	wnd->AddComp(GUI_CTL(search_bg));
+	wnd->AddComp(GUI_CTL(search_button));
+	wnd->AddComp(GUI_CTL(google_bg));
+	wnd->AddComp(GUI_CTL(google_button));
 
 	// 窗口边框
-	wnd->AddComp(GUI_CTRL(line_bottom));
-	wnd->AddComp(GUI_CTRL(line_left));
-	wnd->AddComp(GUI_CTRL(line_right));
-	wnd->AddComp(GUI_CTRL(line_top));
-	wnd->AddComp(GUI_CTRL(corner_lb));
-	wnd->AddComp(GUI_CTRL(corner_rb));
-	wnd->AddComp(GUI_CTRL(corner_rt));
-	wnd->AddComp(GUI_CTRL(corner_lt));
+	wnd->AddComp(GUI_CTL(line_bottom));
+	wnd->AddComp(GUI_CTL(line_left));
+	wnd->AddComp(GUI_CTL(line_right));
+	wnd->AddComp(GUI_CTL(line_top));
+	wnd->AddComp(GUI_CTL(corner_lb));
+	wnd->AddComp(GUI_CTL(corner_rb));
+	wnd->AddComp(GUI_CTL(corner_rt));
+	wnd->AddComp(GUI_CTL(corner_lt));
 
 	// 三态按钮
-	wnd->AddComp(GUI_CTRL(win_sysbtn_close));
-	wnd->AddComp(GUI_CTRL(win_sysbtn_max));
-	wnd->AddComp(GUI_CTRL(win_sysbtn_restore));
-	wnd->AddComp(GUI_CTRL(win_sysbtn_min));
+	wnd->AddComp(GUI_CTL(win_sysbtn_close));
+	wnd->AddComp(GUI_CTL(win_sysbtn_max));
+	wnd->AddComp(GUI_CTL(win_sysbtn_restore));
+	wnd->AddComp(GUI_CTL(win_sysbtn_min));
 
 	/////////////////////////////////
 

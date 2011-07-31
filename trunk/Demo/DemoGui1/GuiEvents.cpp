@@ -75,7 +75,7 @@ public:
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
 				IGuiComp::list_t::iterator_t ite = wnd->GetChildren().Last();
-				ctrl = m_bZoomed ? GUI_CTRL(win_sysbtn_restore) : GUI_CTRL(win_sysbtn_max);
+				ctrl = m_bZoomed ? GUI_CTL(win_sysbtn_restore) : GUI_CTL(win_sysbtn_max);
 				ctrl->Send(ExDynCast<IGuiObject>(*ite), WM_COMMAND, BN_CLICKED);
 			}
 			break;
@@ -89,10 +89,10 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight();
-				r = rc_wnd.Right() - CResManager::line_right.GetWidth();
-				b = t + CResManager::banner.GetHeight();
+				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight();
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				b = t + GUI_IMG(banner)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -134,9 +134,9 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left();
-				t = rc_wnd.Bottom() - CResManager::corner_lb.GetHeight();
-				r = l + CResManager::corner_lb.GetWidth();
-				b = t + CResManager::corner_lb.GetHeight();
+				t = rc_wnd.Bottom() - GUI_IMG(corner_lb)->GetHeight();
+				r = l + GUI_IMG(corner_lb)->GetWidth();
+				b = t + GUI_IMG(corner_lb)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -209,10 +209,10 @@ public:
 				wnd->GetClientRect(rc_wnd);
 
 				LONG l, r, t, b;
-				l = rc_wnd.Right() - CResManager::corner_rb.GetWidth();
-				t = rc_wnd.Bottom() - CResManager::corner_rb.GetHeight();
-				r = l + CResManager::corner_rb.GetWidth();
-				b = t + CResManager::corner_rb.GetHeight();
+				l = rc_wnd.Right() - GUI_IMG(corner_rb)->GetWidth();
+				t = rc_wnd.Bottom() - GUI_IMG(corner_rb)->GetHeight();
+				r = l + GUI_IMG(corner_rb)->GetWidth();
+				b = t + GUI_IMG(corner_rb)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -285,10 +285,10 @@ public:
 				wnd->GetClientRect(rc_wnd);
 
 				LONG l, r, t, b;
-				l = rc_wnd.Right() - CResManager::corner_rt.GetWidth();
+				l = rc_wnd.Right() - GUI_IMG(corner_rt)->GetWidth();
 				t = rc_wnd.Top();
-				r = l + CResManager::corner_rt.GetWidth();
-				b = t + CResManager::corner_rt.GetHeight();
+				r = l + GUI_IMG(corner_rt)->GetWidth();
+				b = t + GUI_IMG(corner_rt)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -363,8 +363,8 @@ public:
 				LONG l, r, t, b;
 				l = rc_wnd.Left();
 				t = rc_wnd.Top();
-				r = l + CResManager::corner_lt.GetWidth();
-				b = t + CResManager::corner_lt.GetHeight();
+				r = l + GUI_IMG(corner_lt)->GetWidth();
+				b = t + GUI_IMG(corner_lt)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -437,10 +437,10 @@ public:
 				wnd->GetClientRect(rc_wnd);
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::corner_lb.GetWidth();
-				t = rc_wnd.Bottom() - CResManager::line_bottom.GetHeight();
-				r = rc_wnd.Right() - CResManager::corner_rb.GetWidth();
-				b = t + CResManager::line_bottom.GetHeight();
+				l = rc_wnd.Left() + GUI_IMG(corner_lb)->GetWidth();
+				t = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight();
+				r = rc_wnd.Right() - GUI_IMG(corner_rb)->GetWidth();
+				b = t + GUI_IMG(line_bottom)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -511,9 +511,9 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left();
-				t = rc_wnd.Top() + CResManager::corner_lt.GetHeight();
-				r = l + CResManager::line_left.GetWidth();
-				b = rc_wnd.Bottom() - CResManager::corner_lb.GetHeight();
+				t = rc_wnd.Top() + GUI_IMG(corner_lt)->GetHeight();
+				r = l + GUI_IMG(line_left)->GetWidth();
+				b = rc_wnd.Bottom() - GUI_IMG(corner_lb)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -583,10 +583,10 @@ public:
 				wnd->GetClientRect(rc_wnd);
 
 				LONG l, r, t, b;
-				l = rc_wnd.Right() - CResManager::line_right.GetWidth();
-				t = rc_wnd.Top() + CResManager::corner_rt.GetHeight();
-				r = l + CResManager::line_right.GetWidth();
-				b = rc_wnd.Bottom() - CResManager::corner_rb.GetHeight();
+				l = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				t = rc_wnd.Top() + GUI_IMG(corner_rt)->GetHeight();
+				r = l + GUI_IMG(line_right)->GetWidth();
+				b = rc_wnd.Bottom() - GUI_IMG(corner_rb)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -656,10 +656,10 @@ public:
 				wnd->GetClientRect(rc_wnd);
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::corner_lt.GetWidth();
+				l = rc_wnd.Left() + GUI_IMG(corner_lt)->GetWidth();
 				t = rc_wnd.Top();
-				r = rc_wnd.Right() - CResManager::corner_rt.GetWidth();
-				b = t + CResManager::line_top.GetHeight();
+				r = rc_wnd.Right() - GUI_IMG(corner_rt)->GetWidth();
+				b = t + GUI_IMG(line_top)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -722,10 +722,10 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + 115;
-				r = rc_wnd.Right() - CResManager::line_right.GetWidth();
-				b = t + CResManager::tag_bg.GetHeight();
+				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + 115;
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				b = t + GUI_IMG(tag_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -759,12 +759,12 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
+				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
 				t = rc_wnd.Bottom() - 
-					CResManager::line_bottom.GetHeight() - 
-					CResManager::toolbar_bg.GetHeight();
-				r = rc_wnd.Right() - CResManager::line_right.GetWidth();
-				b = t + CResManager::toolbar_bg.GetHeight();
+					GUI_IMG(line_bottom)->GetHeight() - 
+					GUI_IMG(toolbar_bg)->GetHeight();
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				b = t + GUI_IMG(toolbar_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -798,10 +798,10 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + CResManager::banner.GetHeight();
-				r = rc_wnd.Right() - CResManager::line_right.GetWidth();
-				b = rc_wnd.Bottom() - CResManager::line_bottom.GetHeight() - CResManager::toolbar_bg.GetHeight();
+				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -836,11 +836,11 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::win_sysbtn_close.GetWidth() - 4;
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
-				r = l + CResManager::win_sysbtn_close.GetWidth();
-				b = t + CResManager::win_sysbtn_close.GetHeight() / 3;
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(win_sysbtn_close)->GetWidth() - 4;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
+				r = l + GUI_IMG(win_sysbtn_close)->GetWidth();
+				b = t + GUI_IMG(win_sysbtn_close)->GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -887,12 +887,12 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::win_sysbtn_close.GetWidth() - 
-					CResManager::win_sysbtn_max.GetWidth() - 4;
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
-				r = l + CResManager::win_sysbtn_max.GetWidth();
-				b = t + CResManager::win_sysbtn_max.GetHeight() / 3;
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(win_sysbtn_close)->GetWidth() - 
+					GUI_IMG(win_sysbtn_max)->GetWidth() - 4;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
+				r = l + GUI_IMG(win_sysbtn_max)->GetWidth();
+				b = t + GUI_IMG(win_sysbtn_max)->GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			// ÅÐ¶Ï´°¿Ú
@@ -954,12 +954,12 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::win_sysbtn_close.GetWidth() - 
-					CResManager::win_sysbtn_restore.GetWidth() - 4;
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
-				r = l + CResManager::win_sysbtn_restore.GetWidth();
-				b = t + CResManager::win_sysbtn_restore.GetHeight() / 3;
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(win_sysbtn_close)->GetWidth() - 
+					GUI_IMG(win_sysbtn_restore)->GetWidth() - 4;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
+				r = l + GUI_IMG(win_sysbtn_restore)->GetWidth();
+				b = t + GUI_IMG(win_sysbtn_restore)->GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			// ÅÐ¶Ï´°¿Ú
@@ -1013,17 +1013,17 @@ public:
 
 				LONG w_dec = 
 					::IsZoomed(wnd->GethWnd()) ? 
-					CResManager::win_sysbtn_restore.GetWidth() : 
-					CResManager::win_sysbtn_max.GetWidth();
+					GUI_IMG(win_sysbtn_restore)->GetWidth() : 
+					GUI_IMG(win_sysbtn_max)->GetWidth();
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::win_sysbtn_close.GetWidth() - w_dec - 
-					CResManager::win_sysbtn_min.GetWidth() - 4;
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() - 1;
-				r = l + CResManager::win_sysbtn_min.GetWidth();
-				b = t + CResManager::win_sysbtn_min.GetHeight() / 3;
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(win_sysbtn_close)->GetWidth() - w_dec - 
+					GUI_IMG(win_sysbtn_min)->GetWidth() - 4;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
+				r = l + GUI_IMG(win_sysbtn_min)->GetWidth();
+				b = t + GUI_IMG(win_sysbtn_min)->GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1070,14 +1070,14 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::line_left.GetWidth();
+				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::banner.GetHeight() - 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::topbar_btn.GetHeight() / 4 - 8;
-				r = l + CResManager::topbar_btn.GetWidth();
-				b = t + CResManager::topbar_btn.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(banner)->GetHeight() - 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(topbar_btn)->GetHeight() / 4 - 8;
+				r = l + GUI_IMG(topbar_btn)->GetWidth();
+				b = t + GUI_IMG(topbar_btn)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1149,14 +1149,14 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + 
-					CResManager::line_left.GetWidth() + 
-					CResManager::search_bg.GetWidth() + 20 + 
-					CResManager::search_button.GetWidth();
+					GUI_IMG(line_left)->GetWidth() + 
+					GUI_IMG(search_bg)->GetWidth() + 20 + 
+					GUI_IMG(search_button)->GetWidth();
 				t = rc_wnd.Bottom() - 
-					CResManager::line_bottom.GetHeight() - 
-					CResManager::gamesearch_charmap.GetHeight() / 3 - 2;
-				r = l + CResManager::gamesearch_charmap.GetWidth();
-				b = t + CResManager::gamesearch_charmap.GetHeight() / 3;
+					GUI_IMG(line_bottom)->GetHeight() - 
+					GUI_IMG(gamesearch_charmap)->GetHeight() / 3 - 2;
+				r = l + GUI_IMG(gamesearch_charmap)->GetWidth();
+				b = t + GUI_IMG(gamesearch_charmap)->GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1191,13 +1191,13 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::toolbar_tools.GetWidth() - 20;
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(toolbar_tools)->GetWidth() - 20;
 				t = rc_wnd.Bottom() - 
-					CResManager::line_bottom.GetHeight() - 
-					CResManager::toolbar_tools.GetHeight() / 3;
-				r = l + CResManager::toolbar_tools.GetWidth();
-				b = t + CResManager::toolbar_tools.GetHeight() / 3;
+					GUI_IMG(line_bottom)->GetHeight() - 
+					GUI_IMG(toolbar_tools)->GetHeight() / 3;
+				r = l + GUI_IMG(toolbar_tools)->GetWidth();
+				b = t + GUI_IMG(toolbar_tools)->GetHeight() / 3;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1232,12 +1232,12 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + 
-					CResManager::line_left.GetWidth() + 15;
+					GUI_IMG(line_left)->GetWidth() + 15;
 				t = rc_wnd.Bottom() - 
-					CResManager::line_bottom.GetHeight() - 
-					CResManager::search_bg.GetHeight() - 3;
-				r = l + CResManager::search_bg.GetWidth();
-				b = t + CResManager::search_bg.GetHeight();
+					GUI_IMG(line_bottom)->GetHeight() - 
+					GUI_IMG(search_bg)->GetHeight() - 3;
+				r = l + GUI_IMG(search_bg)->GetWidth();
+				b = t + GUI_IMG(search_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1272,13 +1272,13 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + 
-					CResManager::line_left.GetWidth() + 15 + 
-					CResManager::search_bg.GetWidth();
+					GUI_IMG(line_left)->GetWidth() + 15 + 
+					GUI_IMG(search_bg)->GetWidth();
 				t = rc_wnd.Bottom() - 
-					CResManager::line_bottom.GetHeight() - 
-					CResManager::search_button.GetHeight() - 3;
-				r = l + CResManager::search_button.GetWidth();
-				b = t + CResManager::search_button.GetHeight();
+					GUI_IMG(line_bottom)->GetHeight() - 
+					GUI_IMG(search_button)->GetHeight() - 3;
+				r = l + GUI_IMG(search_button)->GetWidth();
+				b = t + GUI_IMG(search_button)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1313,12 +1313,12 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::google_button.GetWidth() - 
-					CResManager::google_bg.GetWidth() - 5;
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + 120;
-				r = l + CResManager::google_bg.GetWidth();
-				b = t + CResManager::google_bg.GetHeight();
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(google_button)->GetWidth() - 
+					GUI_IMG(google_bg)->GetWidth() - 5;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + 120;
+				r = l + GUI_IMG(google_bg)->GetWidth();
+				b = t + GUI_IMG(google_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1353,11 +1353,11 @@ public:
 
 				LONG l, r, t, b;
 				l = rc_wnd.Right() - 
-					CResManager::line_right.GetWidth() - 
-					CResManager::google_button.GetWidth() - 5;
-				t = rc_wnd.Top() + CResManager::line_top.GetHeight() + 120;
-				r = l + CResManager::google_button.GetWidth();
-				b = t + CResManager::google_button.GetHeight();
+					GUI_IMG(line_right)->GetWidth() - 
+					GUI_IMG(google_button)->GetWidth() - 5;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + 120;
+				r = l + GUI_IMG(google_button)->GetWidth();
+				b = t + GUI_IMG(google_button)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1391,13 +1391,13 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Left() + CResManager::line_left.GetWidth() + 5;
+				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth() + 5;
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::tag_qb.GetHeight() / 4 + 115;
-				r = l + CResManager::tag_qb.GetWidth();
-				b = t + CResManager::tag_qb.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
+				r = l + GUI_IMG(tag_qb)->GetWidth();
+				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1406,12 +1406,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
-					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)3);
-					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)3);
+					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1446,16 +1446,16 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				CRect rc_ctl;
-				GUI_CTRL(tag_qb)->GetWindowRect(rc_ctl);
+				GUI_CTL(tag_qb)->GetWindowRect(rc_ctl);
 
 				LONG l, r, t, b;
 				l = rc_ctl.Right() + 5;
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::tag_qb.GetHeight() / 4 + 115;
-				r = l + CResManager::tag_qb.GetWidth();
-				b = t + CResManager::tag_qb.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
+				r = l + GUI_IMG(tag_qb)->GetWidth();
+				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1464,12 +1464,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
-					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)3);
-					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)3);
+					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1504,16 +1504,16 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				CRect rc_ctl;
-				GUI_CTRL(tag_zx)->GetWindowRect(rc_ctl);
+				GUI_CTL(tag_zx)->GetWindowRect(rc_ctl);
 
 				LONG l, r, t, b;
 				l = rc_ctl.Right() + 5;
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::tag_qb.GetHeight() / 4 + 115;
-				r = l + CResManager::tag_qb.GetWidth();
-				b = t + CResManager::tag_qb.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
+				r = l + GUI_IMG(tag_qb)->GetWidth();
+				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1522,12 +1522,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
-					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)3);
-					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)3);
+					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1562,16 +1562,16 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				CRect rc_ctl;
-				GUI_CTRL(tag_wl)->GetWindowRect(rc_ctl);
+				GUI_CTL(tag_wl)->GetWindowRect(rc_ctl);
 
 				LONG l, r, t, b;
 				l = rc_ctl.Right() + 5;
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::tag_qb.GetHeight() / 4 + 115;
-				r = l + CResManager::tag_qb.GetWidth();
-				b = t + CResManager::tag_qb.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
+				r = l + GUI_IMG(tag_qb)->GetWidth();
+				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1580,12 +1580,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
-					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)3);
-					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)3);
+					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1620,16 +1620,16 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				CRect rc_ctl;
-				GUI_CTRL(tag_dz)->GetWindowRect(rc_ctl);
+				GUI_CTL(tag_dz)->GetWindowRect(rc_ctl);
 
 				LONG l, r, t, b;
 				l = rc_ctl.Right() + 5;
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::tag_qb.GetHeight() / 4 + 115;
-				r = l + CResManager::tag_qb.GetWidth();
-				b = t + CResManager::tag_qb.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
+				r = l + GUI_IMG(tag_qb)->GetWidth();
+				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1638,12 +1638,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
-					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)3);
-					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)3);
+					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 				}
 				break;
 			}
@@ -1678,16 +1678,16 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				CRect rc_ctl;
-				GUI_CTRL(tag_wy)->GetWindowRect(rc_ctl);
+				GUI_CTL(tag_wy)->GetWindowRect(rc_ctl);
 
 				LONG l, r, t, b;
 				l = rc_ctl.Right() + 5;
 				t = rc_wnd.Top() + 
-					CResManager::line_top.GetHeight() + 
-					CResManager::tag_bg.GetHeight() - 
-					CResManager::tag_qb.GetHeight() / 4 + 115;
-				r = l + CResManager::tag_qb.GetWidth();
-				b = t + CResManager::tag_qb.GetHeight() / 4;
+					GUI_IMG(line_top)->GetHeight() + 
+					GUI_IMG(tag_bg)->GetHeight() - 
+					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
+				r = l + GUI_IMG(tag_qb)->GetWidth();
+				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
@@ -1696,12 +1696,12 @@ public:
 			{
 			case BN_CLICKED:
 				{
-					GUI_CTRL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTRL(tag_dj)->SetState(_T("status"), (void*)3);
+					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)3);
 				}
 				break;
 			}

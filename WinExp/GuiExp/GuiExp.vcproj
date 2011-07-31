@@ -299,10 +299,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GuiManager\GuiManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GuiManager\GuiManager.h"
 				>
 			</File>

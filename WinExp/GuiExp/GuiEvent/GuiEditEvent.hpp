@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-31
-// Version:	1.0.0002.2018
+// Date:	2011-08-01
+// Version:	1.0.0003.0505
 //
 // History:
 //	- 1.0.0000.1055(2011-06-21)	@ 开始构建GuiEditEvent
@@ -42,6 +42,7 @@
 //								= 根据CGuiEdit基类的调整,修改GuiEditEvent
 //	- 1.0.0002.2018(2011-07-31)	+ 当Edit内容变化时会向控件自身发送EN_CHANGE的命令消息
 //								# 修正光标显示判断不够准确的问题
+//	- 1.0.0002.2018(2011-07-31)	+ 添加Edit无焦点时选中的文字背景与颜色的变化
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEditEvent_hpp__
@@ -543,6 +544,8 @@ public:
 		CGC gc;
 
 		// 获得属性
+		int no_foc = m_Ctrl->IsFocus() ? 0 : 1;
+
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), &gc);
 		if (!state) return;
 		CText* text = (CText*)(state->sta_arr[0]);
@@ -556,11 +559,11 @@ public:
 
 		state = m_Ctrl->GetState(_T("txt_sel_color"), &gc);
 		if (!state) return;
-		pixel_t txt_sel_color = *(pixel_t*)(state->sta_arr[0]);
+		pixel_t txt_sel_color = *(pixel_t*)(state->sta_arr[no_foc]);
 
 		state = m_Ctrl->GetState(_T("bkg_sel_color"), &gc);
 		if (!state) return;
-		pixel_t bkg_sel_color = *(pixel_t*)(state->sta_arr[0]);
+		pixel_t bkg_sel_color = *(pixel_t*)(state->sta_arr[no_foc]);
 
 		CRect rect;
 		m_Ctrl->GetClipRect(rect);

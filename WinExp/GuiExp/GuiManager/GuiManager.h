@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-13
-// Version:	1.0.0000.1622
+// Date:	2011-08-01
+// Version:	1.0.0001.0440
 //
 // History:
 //	- 1.0.0000.1622(2011-06-13)	@ 开始构建GuiManager接口
+//	- 1.0.0001.0440(2011-08-01)	= 将GuiManager改为模板形式,提供泛型化的界面元素管理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiManager_h__
@@ -53,10 +54,51 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_CLASS CGuiManager
+template <typename TypeT, const DWORD SizeT = 101>
+class CGuiManagerT
 {
+private:
+	typedef CMapT<CString, TypeT*> key_map_t;
+	EXP_INLINE static key_map_t& Instance()
+	{
+		static key_map_t* instance = NULL;
+		if (instance == NULL)
+		{
+			ExLockThis();
+			if (instance == NULL)
+			{
+				static key_map_t type(SizeT);
+				instance = &type;
+			}
+		}
+		return (*instance);
+	}
+
 public:
-	static bool Load(IFileObject* pFile);
+	static bool Reg(LPCTSTR c_key, TypeT* inf)
+	{
+		if (!c_key) return false;
+		key_map_t& types = Instance();
+		CString key(c_key);
+		if (types.Locate(key) == types.Tail())
+		{
+			types.Add(key, inf);
+			return true;
+		}
+		else
+			return false;
+	}
+	static TypeT* Get(LPCTSTR c_key)
+	{
+		if (!c_key) return false;
+		key_map_t& types = Instance();
+		CString key(c_key);
+		key_map_t::iterator_t ite = types.Locate(key);
+		if (ite == types.Tail())
+			return NULL;
+		else
+			return ite->Val();
+	}
 };
 
 //////////////////////////////////////////////////////////////////

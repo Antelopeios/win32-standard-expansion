@@ -23,8 +23,7 @@ public:
 			{
 				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 				if (!ctrl) continue;
-				ctrl->SetVisible(false);
-				ctrl->SetVisible(true);
+				ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
 			}
 			break;
 		case WM_DESTROY:

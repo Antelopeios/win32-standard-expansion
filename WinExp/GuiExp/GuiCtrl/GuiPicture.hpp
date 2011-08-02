@@ -93,25 +93,26 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("color"))
 		{
 			m_Color = *(pixel_t*)pState;
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
 			m_Image = *(CImage*)pState;
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
 			m_Text = *(CText*)pState;
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
+		return false;
 	}
 };
 

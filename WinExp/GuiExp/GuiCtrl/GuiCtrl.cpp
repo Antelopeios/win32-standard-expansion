@@ -72,9 +72,10 @@ IGuiCtrlBase::state_t* IGuiCtrlBase::GetState(const CString& sType, CGC* pGC/* =
 	if (state) state->sta_typ = sType;
 	return state;
 }
-void IGuiCtrlBase::SetState(const CString& sType, void* pState)
+bool IGuiCtrlBase::SetState(const CString& sType, void* pState)
 {
 	UpdateState();
+	return true;
 }
 void IGuiCtrlBase::UpdateState(bool bRefreshSelf/* = true*/)
 {
@@ -203,5 +204,6 @@ EXP_END
 #include "GuiCtrl/GuiEdit.hpp"
 #include "GuiCtrl/GuiListView.hpp"
 #include "GuiCtrl/GuiGroup.hpp"
+#include "GuiCtrl/GuiScroll.hpp"
 
 //////////////////////////////////////////////////////////////////

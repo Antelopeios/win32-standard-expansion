@@ -108,7 +108,7 @@ protected:
 public:
 	// 获得控件状态
 	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
-	virtual void SetState(const CString& sType, void* pState) = 0;
+	virtual bool SetState(const CString& sType, void* pState) = 0;
 	virtual void UpdateState(bool bRefreshSelf = true) = 0;
 	virtual bool IsUpdated() = 0;
 
@@ -249,7 +249,7 @@ public:
 public:
 	// 更新状态
 	state_t* GetState(const CString& sType, CGC* pGC = NULL);
-	void SetState(const CString& sType, void* pState);
+	bool SetState(const CString& sType, void* pState);
 	void UpdateState(bool bRefreshSelf = true);
 	bool IsUpdated();
 

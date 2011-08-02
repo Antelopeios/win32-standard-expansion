@@ -85,21 +85,21 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("icon"))
 		{
 			m_Icon = *((CImage*)pState);
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("glow"))
 		{
 			m_bGlow = (bool)(LONG_PTR)pState;
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 	}
 };
 
@@ -144,12 +144,12 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("items"))
 		{
 			items_t* new_sta = (items_t*)pState;
-			if (new_sta == NULL) return;
+			if (new_sta == NULL) return false;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
 				IGuiCtrl* item = *ite;
@@ -164,7 +164,7 @@ public:
 				if (!item) continue;
 				AddComp(item);
 			}
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("space"))
@@ -172,10 +172,12 @@ public:
 			LONG old_sta = m_Space;
 			m_Space = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_Space)
-				IGuiCtrlBase::SetState(sType, pState);
+				return IGuiCtrlBase::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 	}
 };
 

@@ -82,12 +82,12 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("items"))
 		{
 			items_t* new_sta = (items_t*)pState;
-			if (new_sta == NULL) return;
+			if (new_sta == NULL) return false;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
 				IGuiCtrl* item = *ite;
@@ -102,20 +102,26 @@ public:
 				if (!item) continue;
 				AddComp(item);
 			}
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("sta_cnt"))
+		{
 			m_StatusCount = (DWORD)(LONG_PTR)pState;
+			return true;
+		}
 		else
 		if (sType == _T("sty_box"))
+		{
 			m_StyleBox = (bool)(LONG_PTR)pState;
+			return true;
+		}
 		else
 		if (sType == _T("image"))
 		{
 			CImage* img = (CImage*)pState;
-			if (!img || img->IsNull()) return;
-			if (!m_ItemList || m_ItemList.Empty()) return;
+			if (!img || img->IsNull()) return false;
+			if (m_ItemList.Empty()) return false;
 			DWORD count = m_ItemList.GetCount();
 			LONG offset = img->GetWidth() / count;
 			CRect rc_img(0, 0, offset, img->GetHeight());
@@ -145,8 +151,9 @@ public:
 					rc_itm.Offset(pt_off);
 				}
 			}
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
+		return false;
 	}
 };
 

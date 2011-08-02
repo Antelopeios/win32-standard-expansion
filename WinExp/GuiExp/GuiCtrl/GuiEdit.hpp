@@ -124,29 +124,29 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("edit"))
 		{
 			m_Edit = *((CString*)pState);
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("txt_sel_color"))
 		{
 			for(int i = 0; i < _countof(m_ColorSelTxt); ++i)
 				m_ColorSelTxt[i] = *((pixel_t*)pState + i);
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("bkg_sel_color"))
 		{
 			for(int i = 0; i < _countof(m_ColorSelBkg); ++i)
 				m_ColorSelBkg[i] = *((pixel_t*)pState + i);
-			IGuiCtrlBase::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 	}
 };
 

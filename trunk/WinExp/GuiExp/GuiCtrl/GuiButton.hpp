@@ -127,14 +127,16 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("status"))
 		{
 			status_t old_sta = m_Status;
 			m_Status = (status_t)(LONG_PTR)pState;
 			if (old_sta != m_Status)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("locate"))
@@ -142,7 +144,9 @@ public:
 			locate_t old_sta = m_Locate;
 			m_Locate = (locate_t)(LONG_PTR)pState;
 			if (old_sta != m_Locate)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("loc_off"))
@@ -150,7 +154,9 @@ public:
 			LONG old_sta = m_LocOff;
 			m_LocOff = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_LocOff)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("thr_sta"))
@@ -158,29 +164,32 @@ public:
 			bool old_sta = m_ThreeSta;
 			m_ThreeSta = (bool)(LONG_PTR)pState;
 			if (old_sta != m_ThreeSta)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("color"))
 		{
 			for(int i = 0; i < _countof(m_Color); ++i)
 				m_Color[i] = *((pixel_t*)pState + i);
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
 			for(int i = 0; i < _countof(m_Image); ++i)
 				m_Image[i] = *((CImage*)pState + i);
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
 			for(int i = 0; i < _countof(m_Text); ++i)
 				m_Text[i] = *((CText*)pState + i);
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
+		return false;
 	}
 };
 
@@ -251,14 +260,16 @@ public:
 		}
 		return state;
 	}
-	void SetState(const CString& sType, void* pState)
+	bool SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("status"))
 		{
 			status_t old_sta = m_Status;
 			m_Status = (status_t)(LONG_PTR)pState;
 			if (old_sta != m_Status)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("locate"))
@@ -266,7 +277,9 @@ public:
 			locate_t old_sta = m_Locate;
 			m_Locate = (locate_t)(LONG_PTR)pState;
 			if (old_sta != m_Locate)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("loc_off"))
@@ -274,28 +287,31 @@ public:
 			LONG old_sta = m_LocOff;
 			m_LocOff = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_LocOff)
-				EXP_BASE::SetState(sType, pState);
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("color"))
 		{
 			for(int i = 0; i < _countof(m_Color); ++i)
 				m_Color[i] = *((pixel_t*)pState + i);
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
 			m_Image = *((CImage*)pState);
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
 			for(int i = 0; i < _countof(m_Text); ++i)
 				m_Text[i] = *((CText*)pState + i);
-			EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 		}
+		return false;
 	}
 };
 

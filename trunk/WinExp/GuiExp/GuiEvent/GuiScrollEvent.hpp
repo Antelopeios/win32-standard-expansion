@@ -179,14 +179,14 @@ public:
 		m_Ctrl->GetClientRect(rect);
 		if (ori)
 		{
-			LONG sli_pos = rect.Height() * pos / all;
-			LONG sli_fra = sli_pos + rect.Height() * fra / all;
+			LONG sli_pos = (LONG)((double)rect.Height() * (double)pos / (double)all + 0.5);
+			LONG sli_fra = sli_pos + (LONG)((double)rect.Height() * (double)fra / (double)all + 0.5);
 			sli->SetWindowRect(CRect(0, sli_pos, rect.Right(), sli_fra));
 		}
 		else
 		{
-			LONG sli_pos = rect.Width() * pos / all;
-			LONG sli_fra = sli_pos + rect.Width() * fra / all;
+			LONG sli_pos = (LONG)((double)rect.Width() * (double)pos / (double)all + 0.5);
+			LONG sli_fra = sli_pos + (LONG)((double)rect.Width() * (double)fra / (double)all + 0.5);
 			sli->SetWindowRect(CRect(sli_pos, 0, sli_fra, rect.Bottom()));
 		}
 	}
@@ -216,27 +216,23 @@ public:
 			{
 				CPoint* pt = (CPoint*)lParam;
 				if (!pt) break;
+				CRect rect;
+				m_Ctrl->GetClientRect(rect);
 				CGC gc;
 				bool ori = GetOri(&gc);
 				if (ori)
 				{
 					if (pt->y == 0) break;
 					LONG all = GetAll(&gc);
-					CRect rect;
-					m_Ctrl->GetClientRect(rect);
 					LONG off = pt->y * all / rect.Height();
-					LONG pos = s_pos + off;
-					m_Ctrl->SetState(_T("pos"), (void*)pos);
+					m_Ctrl->SetState(_T("pos"), (void*)(s_pos + off));
 				}
 				else
 				{
 					if (pt->x == 0) break;
 					LONG all = GetAll(&gc);
-					CRect rect;
-					m_Ctrl->GetClientRect(rect);
 					LONG off = pt->x * all / rect.Width();
-					LONG pos = s_pos + off;
-					m_Ctrl->SetState(_T("pos"), (void*)pos);
+					m_Ctrl->SetState(_T("pos"), (void*)(s_pos + off));
 				}
 			}
 			else
@@ -249,11 +245,151 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
-			ctrl->SetCapture();
+			{
+				CGC gc;
+				IGuiCtrl* sli = GetSlider(&gc);
+				if (!sli) break;
+				CRect rect, rc_pt;
+				sli->GetWindowRect(rect);
+				::GetCursorPos((LPPOINT)&(rc_pt.pt1));
+				m_Ctrl->GetBoard()->ScreenToClient(rc_pt.pt1);
+				m_Ctrl->B2C(rc_pt);
+				rc_pt.pt1 -= CPoint((rect.Left() + rect.Right()) >> 1, (rect.Top() + rect.Bottom()) >> 1);
+				m_Ctrl->GetClientRect(rect);
+				LONG all = GetAll(&gc);
+				bool ori = GetOri(&gc);
+				if (ori)
+				{
+					LONG off = rc_pt.pt1.y * all / rect.Height();
+					m_Ctrl->SetState(_T("pos"), (void*)(GetPos(&gc) + off));
+				}
+				else
+				{
+					LONG off = rc_pt.pt1.x * all / rect.Width();
+					m_Ctrl->SetState(_T("pos"), (void*)(GetPos(&gc) + off));
+				}
+			}
 			break;
-		case WM_LBUTTONUP:
-		case WM_NCLBUTTONUP:
-			ctrl->ReleaseCapture();
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiScrollEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiScrollEvent, IGuiEvent)
+
+protected:
+	IGuiCtrl* m_Ctrl;
+
+public:
+	CGuiScrollEvent()
+		: m_Ctrl(NULL)
+	{}
+
+public:
+	// 获得属性
+	IGuiCtrl* GetSlider(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("slider"), pGC);
+		if (!state) return NULL;
+		return (IGuiCtrl*)(state->sta_arr[0]);
+	}
+	IGuiCtrl* GetUp(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("up"), pGC);
+		if (!state) return NULL;
+		return (IGuiCtrl*)(state->sta_arr[0]);
+	}
+	IGuiCtrl* GetDn(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("down"), pGC);
+		if (!state) return NULL;
+		return (IGuiCtrl*)(state->sta_arr[0]);
+	}
+	bool GetOri(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("sli_ori"), pGC);
+		if (!state) return NULL;
+		return (bool)(LONG_PTR)(state->sta_arr[0]);
+	}
+	LONG GetPos(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("sli_pos"), pGC);
+		if (!state) return NULL;
+		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+	}
+
+	// 格式化位置
+	void Format(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl* sli = GetSlider(pGC);
+		if (!sli) return;
+		IGuiCtrl* up = GetUp(pGC);
+		if (!sli) return;
+		IGuiCtrl* dn = GetDn(pGC);
+		if (!sli) return;
+		bool ori = GetOri(pGC);
+
+		CRect rc_scr, rc_sli, rc_up, rc_dn;
+		m_Ctrl->GetClientRect(rc_scr);
+		sli->GetClientRect(rc_sli);
+		up->GetClientRect(rc_up);
+		dn->GetClientRect(rc_dn);
+		if (ori)
+		{
+			rc_dn.pt2.x = rc_up.pt2.x = rc_sli.pt2.x = rc_scr.Right();
+			rc_dn.MoveTo(CPoint(0, rc_scr.Bottom() - rc_dn.Height()));
+			rc_sli.pt1.y = rc_up.pt2.y;
+			rc_sli.pt2.y = rc_dn.pt1.y;
+		}
+		else
+		{
+			rc_dn.pt2.y = rc_up.pt2.y = rc_sli.pt2.y = rc_scr.Height();
+			rc_dn.MoveTo(CPoint(rc_scr.Right() - rc_dn.Width(), 0));
+			rc_sli.pt1.x = rc_up.pt2.x;
+			rc_sli.pt2.x = rc_dn.pt1.x;
+		}
+		up->SetWindowRect(rc_up);
+		sli->SetWindowRect(rc_sli);
+		dn->SetWindowRect(rc_dn);
+	}
+
+	// 消息响应
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		m_Ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!m_Ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (!wParam) break;
+		case WM_SIZE:
+		case WM_PAINT:
+			{
+				CGC gc;
+				Format(&gc);
+			}
+			break;
+		case WM_COMMAND:
+			if (wParam == BN_CLICKED)
+			{
+				CGC gc;
+				IGuiCtrl* btn = (IGuiCtrl*)lParam;
+				if (btn == GetUp(&gc))
+					m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) - 10));
+				else
+					m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) + 10));
+			}
 			break;
 		}
 	}
@@ -263,6 +399,7 @@ public:
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiSliBlkEvent, IGuiEvent)
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiSliderEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiScrollEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 

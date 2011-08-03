@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-01
-// Version:	1.0.0002.1528
+// Date:	2011-08-03
+// Version:	1.0.0003.1752
 //
 // History:
 //	- 1.0.0001.1010(2011-06-17)	= 将IGuiCtrlBase接口定义移动到GuiCtrl.cpp中
 //	- 1.0.0002.1528(2011-07-01)	+ IGuiCtrlBase::SetWindowRect()将在改变控件大小时发送WM_SIZE消息
 //								+ IGuiCtrlBase::SetVisible()将在改变控件可视状态时发送WM_SHOWWINDOW消息
+//	- 1.0.0003.1752(2011-08-03)	= 当没有父窗口时,IGuiCtrlBase::SetWindowRect()不应当向自身发送消息
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -120,9 +121,12 @@ bool IGuiCtrlBase::SetWindowRect(const CRect& rc)
 {
 	if (m_Rect == rc) return true;
 	m_Rect = rc;
-	Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
-		(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
-	Refresh(false);
+	if (GetParent())
+	{
+		Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
+			(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
+		Refresh(false);
+	}
 	return true;
 }
 bool IGuiCtrlBase::GetWindowRect(CRect& rc)

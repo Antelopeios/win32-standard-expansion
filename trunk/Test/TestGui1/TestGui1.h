@@ -67,27 +67,22 @@ public:
 
 		switch( nMessage )
 		{
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					IGuiBoard* board = ctrl->GetBoard();
-					if (!board) return;
-					IGuiCtrl* pic = ExDynCast<IGuiCtrl>(board->GetChildren().HeadItem());
-					if (!pic) return;
-					CGC gc;
-					IGuiCtrl::state_t* s = pic->GetState(_T("color"), &gc);
-					if (!s) break;
-					pixel_t* pix = (pixel_t*)(((void**)s->sta_arr)[0]);
-					if (!pix) break;
-					if (*pix)
-						*pix = 0;
-					else
-						*pix = ExRGBA(128, 128, 128, 128);
-					pic->SetState(_T("color"), pix);
-				}
-				break;
+				IGuiBoard* board = ctrl->GetBoard();
+				if (!board) return;
+				IGuiCtrl* pic = ExDynCast<IGuiCtrl>(board->GetChildren().HeadItem());
+				if (!pic) return;
+				CGC gc;
+				IGuiCtrl::state_t* s = pic->GetState(_T("color"), &gc);
+				if (!s) break;
+				pixel_t* pix = (pixel_t*)(((void**)s->sta_arr)[0]);
+				if (!pix) break;
+				if (*pix)
+					*pix = 0;
+				else
+					*pix = ExRGBA(128, 128, 128, 128);
+				pic->SetState(_T("color"), pix);
 			}
 			break;
 		}

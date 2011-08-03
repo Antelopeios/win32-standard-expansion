@@ -844,16 +844,11 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					IGuiBoard* board = ctrl->GetBoard();
-					if (!board) return;
-					board->PostMessage(WM_CLOSE);
-				}
-				break;
+				IGuiBoard* board = ctrl->GetBoard();
+				if (!board) return;
+				board->PostMessage(WM_CLOSE);
 			}
 			break;
 		}
@@ -902,25 +897,20 @@ public:
 				ctrl->SetVisible(!::IsZoomed(board->GethWnd()));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					IGuiBoard* board = ctrl->GetBoard();
-					if (!board) return;
-					// 先最大化窗口
-					board->ShowWindow(SW_SHOWMAXIMIZED);
-					// 重新设置窗口大小
-					RECT rect;
-					::GetWindowRect(board->GethWnd(), &rect);
-					HMONITOR monitor = ::MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
-					MONITORINFO mi = {0};
-					mi.cbSize = sizeof(mi);
-					::GetMonitorInfo(monitor, &mi);
-					board->MoveWindow(CRect(mi.rcWork));
-				}
-				break;
+				IGuiBoard* board = ctrl->GetBoard();
+				if (!board) return;
+				// 先最大化窗口
+				board->ShowWindow(SW_SHOWMAXIMIZED);
+				// 重新设置窗口大小
+				RECT rect;
+				::GetWindowRect(board->GethWnd(), &rect);
+				HMONITOR monitor = ::MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
+				MONITORINFO mi = {0};
+				mi.cbSize = sizeof(mi);
+				::GetMonitorInfo(monitor, &mi);
+				board->MoveWindow(CRect(mi.rcWork));
 			}
 			break;
 		}
@@ -969,17 +959,12 @@ public:
 				ctrl->SetVisible(::IsZoomed(board->GethWnd()));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					IGuiBoard* board = ctrl->GetBoard();
-					if (!board) return;
-					// 还原窗口
-					board->ShowWindow(SW_SHOWNORMAL);
-				}
-				break;
+				IGuiBoard* board = ctrl->GetBoard();
+				if (!board) return;
+				// 还原窗口
+				board->ShowWindow(SW_SHOWNORMAL);
 			}
 			break;
 		}
@@ -1027,17 +1012,12 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					IGuiBoard* board = ctrl->GetBoard();
-					if (!board) return;
-					// 最小化窗口
-					board->ShowWindow(SW_SHOWMINIMIZED);
-				}
-				break;
+				IGuiBoard* board = ctrl->GetBoard();
+				if (!board) return;
+				// 最小化窗口
+				board->ShowWindow(SW_SHOWMINIMIZED);
 			}
 			break;
 		}
@@ -1101,21 +1081,16 @@ public:
 
 		switch( nMessage )
 		{
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
+				IGuiComp* pare = ctrl->GetParent();
+				for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
 				{
-					IGuiComp* pare = ctrl->GetParent();
-					for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
-					{
-						IGuiCtrl* c = ExDynCast<IGuiCtrl>(*ite);
-						if (c == ctrl) continue;
-						c->SetState(_T("status"), (void*)0);
-					}
-					ctrl->SetState(_T("status"), (void*)3);
+					IGuiCtrl* c = ExDynCast<IGuiCtrl>(*ite);
+					if (c == ctrl) continue;
+					c->SetState(_T("status"), (void*)0);
 				}
-				break;
+				ctrl->SetState(_T("status"), (void*)3);
 			}
 			break;
 		}
@@ -1401,19 +1376,14 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)3);
-					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
-				}
-				break;
+				GUI_CTL(tag_qb)->SetState(_T("status"), (void*)3);
+				GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 			}
 			break;
 		}
@@ -1459,19 +1429,14 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)3);
-					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
-				}
-				break;
+				GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_zx)->SetState(_T("status"), (void*)3);
+				GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 			}
 			break;
 		}
@@ -1517,19 +1482,14 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)3);
-					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
-				}
-				break;
+				GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wl)->SetState(_T("status"), (void*)3);
+				GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 			}
 			break;
 		}
@@ -1575,19 +1535,14 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)3);
-					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
-				}
-				break;
+				GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dz)->SetState(_T("status"), (void*)3);
+				GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 			}
 			break;
 		}
@@ -1633,19 +1588,14 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)3);
-					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
-				}
-				break;
+				GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wy)->SetState(_T("status"), (void*)3);
+				GUI_CTL(tag_dj)->SetState(_T("status"), (void*)0);
 			}
 			break;
 		}
@@ -1691,19 +1641,14 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			switch (wParam)
+		case BM_CLICK:
 			{
-			case BN_CLICKED:
-				{
-					GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
-					GUI_CTL(tag_dj)->SetState(_T("status"), (void*)3);
-				}
-				break;
+				GUI_CTL(tag_qb)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_zx)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wl)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dz)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_wy)->SetState(_T("status"), (void*)0);
+				GUI_CTL(tag_dj)->SetState(_T("status"), (void*)3);
 			}
 			break;
 		}

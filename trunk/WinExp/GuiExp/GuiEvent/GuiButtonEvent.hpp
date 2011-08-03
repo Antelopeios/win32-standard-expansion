@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-01
-// Version:	1.0.0005.1430
+// Date:	2011-08-03
+// Version:	1.0.0006.1616
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -47,6 +47,7 @@
 //	- 1.0.0003.1426(2011-06-08)	# 修正CGuiButtonEvent不响应非工作区鼠标事件的问题
 //	- 1.0.0004.1708(2011-06-21)	# 修正当按钮控件没有加载图片时CGuiButtonEvent绘图出现的内存异常
 //	- 1.0.0005.1430(2011-07-01)	= 根据GuiButton的更新调整GuiButtonEvent
+//	- 1.0.0006.1616(2011-08-03)	= 调整按钮控件的事件发送,向自身发送BM_CLICK消息,并向父窗口发送BN_CLICKED的WM_COMMAND消息
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -125,7 +126,12 @@ public:
 				if (!state) break;
 				DWORD status = (DWORD)(state->sta_arr[0]);
 				if (status == 2) // 当按下后抬起,视为一次Click
-					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_COMMAND, BN_CLICKED);
+				{
+					ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+					IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+					if (pare)
+						pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_CLICKED, (LPARAM)ctrl);
+				}
 
 				if (rc.PtInRect(pt))
 					status = 1;
@@ -517,7 +523,12 @@ public:
 				ctrl->GetRealRect(rc);
 
 				if (status == 2) // 当按下后抬起,视为一次Click
-					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_COMMAND, BN_CLICKED);
+				{
+					ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+					IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+					if (pare)
+						pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_CLICKED, (LPARAM)ctrl);
+				}
 
 				state = ctrl->GetState(_T("status"), &gc);
 				if (!state) break;

@@ -117,21 +117,14 @@ public:
 			return state;
 		}
 		else
-		if (sType == _T("sli_image"))
-			return m_Slider.GetState(_T("image"), pGC);
-		else
-		if (sType == _T("sli_color"))
-			return m_Slider.GetState(_T("color"), pGC);
-		else
+		if (sType.Left(4) == _T("sli_"))
 		{
-			state_t* state = CGuiPicture::GetState(sType, pGC);
-			if (!state || state->sta_arr.Empty())
-			{
-				if (!pGC) ExMem::Free(state);
-				state = m_Slider.GetState(sType, pGC);
-			}
-			return state;
+			CString type(sType);
+			type.TrimLeft(_T("sli_"));
+			return m_Slider.GetState(type, pGC);
 		}
+		else
+			return CGuiPicture::GetState(sType, pGC);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{
@@ -162,24 +155,112 @@ public:
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
-		if (sType == _T("sli_image"))
-			return m_Slider.SetState(_T("image"), pState);
-		else
-		if (sType == _T("sli_color"))
-			return m_Slider.SetState(_T("color"), pState);
-		else
+		if (sType.Left(4) == _T("sli_"))
 		{
-			if (!CGuiPicture::SetState(sType, pState))
-				return m_Slider.SetState(sType, pState);
-			else
-				return true;
+			CString type(sType);
+			type.TrimLeft(_T("sli_"));
+			return m_Slider.SetState(type, pState);
 		}
+		else
+			return CGuiPicture::SetState(sType, pState);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiScroll : public IGuiCtrlBase
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiScroll, IGuiCtrlBase)
+
+protected:
+	CGuiSlider m_Slider;
+	CGuiButton m_Up, m_Down;
+
+public:
+	CGuiScroll()
+	{
+		// 添加事件对象
+		InsEvent((IGuiEvent*)ExGui(_T("CGuiScrollEvent"), GetGC())); /*先让基类绘图*/
+		// 添加控件对象
+		InsComp(&m_Slider);
+		m_Up.SetWindowRect(CRect(0, 0, 20, 20));
+		InsComp(&m_Up);
+		m_Down.SetWindowRect(CRect(0, 0, 20, 20));
+		InsComp(&m_Down);
+	}
+
+public:
+	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	{
+		CString type(sType);
+		if (type == _T("slider"))
+		{
+			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+			if (state) state->sta_arr.Add(&m_Slider);
+			return state;
+		}
+		else
+		if (type == _T("up"))
+		{
+			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+			if (state) state->sta_arr.Add(&m_Up);
+			return state;
+		}
+		else
+		if (type == _T("down"))
+		{
+			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+			if (state) state->sta_arr.Add(&m_Down);
+			return state;
+		}
+		else
+		if (type.Left(4) == _T("sli_"))
+		{
+			type.TrimLeft(_T("sli_"));
+			return m_Slider.GetState(type, pGC);
+		}
+		else
+		if (type.Left(3) == _T("up_"))
+		{
+			type.TrimLeft(_T("up_"));
+			return m_Up.GetState(type, pGC);
+		}
+		else
+		if (type.Left(3) == _T("dn_"))
+		{
+			type.TrimLeft(_T("dn_"));
+			return m_Down.GetState(type, pGC);
+		}
+		return NULL;
+	}
+	bool SetState(const CString& sType, void* pState)
+	{
+		CString type(sType);
+		if (type.Left(4) == _T("sli_"))
+		{
+			type.TrimLeft(_T("sli_"));
+			return m_Slider.SetState(type, pState);
+		}
+		else
+		if (type.Left(3) == _T("up_"))
+		{
+			type.TrimLeft(_T("up_"));
+			return m_Up.SetState(type, pState);
+		}
+		else
+		if (type.Left(3) == _T("dn_"))
+		{
+			type.TrimLeft(_T("dn_"));
+			return m_Down.SetState(type, pState);
+		}
+		return false;
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiScroll, IGuiCtrlBase)
 
 //////////////////////////////////////////////////////////////////
 

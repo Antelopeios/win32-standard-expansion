@@ -237,9 +237,11 @@ public:
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
+		CSize scr_sz;
+		m_Ctrl->GetScrollSize(scr_sz);
 
 		// 遍历列表项
-		CRect itm_rc, old_rc(0, space, 0, space);
+		CRect itm_rc, old_rc(scr_sz.cx, space, scr_sz.cy, space);
 		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 		{
 			IGuiCtrl* item = *ite;
@@ -269,6 +271,7 @@ public:
 		case WM_SHOWWINDOW:
 			if (!wParam) break;
 		case WM_SIZE:
+		case WM_PAINT:
 			{
 				CGC gc;
 				FormatItems(&gc);

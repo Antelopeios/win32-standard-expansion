@@ -33,23 +33,41 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->GetClientRect(rc_wnd);
 
 	// 创建控件
-	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiSlider"), &gc));
-	ctrl->SetWindowRect(CRect(10, 10, 475, 30));
+
+	IGuiCtrl* scroll1 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc));
+	scroll1->SetWindowRect(CRect(10, 230, 475, 250));
 	pixel_t pix[5] = {0};
-	pix[0] = ExRGBA(240, 240, 240, 255);
-	ctrl->SetState(_T("color"), pix);
+	pix[0] = ExRGBA(220, 220, 220, 255);
+	scroll1->SetState(_T("sli_color"), pix);
 	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
-	ctrl->SetState(_T("sli_color"), pix);
-	ctrl->SetState(_T("all"), (void*)100);
-	ctrl->SetState(_T("fra"), (void*)20);
-	//ctrl->SetState(_T("ori"), (void*)true);
+	scroll1->SetState(_T("sli_sli_color"), pix);
+	scroll1->SetState(_T("sli_all"), (void*)100);
+	scroll1->SetState(_T("sli_fra"), (void*)10);
+	//scroll1->SetState(_T("sli_ori"), (void*)true);
+	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+	scroll1->SetState(_T("up_color"), (void*)pix);
+	scroll1->SetState(_T("dn_color"), (void*)pix);
+
+	IGuiCtrl* scroll2 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc));
+	scroll2->SetWindowRect(CRect(455, 10, 475, 225));
+	pix[0] = ExRGBA(220, 220, 220, 255);
+	scroll2->SetState(_T("sli_color"), pix);
+	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
+	scroll2->SetState(_T("sli_sli_color"), pix);
+	scroll2->SetState(_T("sli_all"), (void*)100);
+	scroll2->SetState(_T("sli_fra"), (void*)20);
+	scroll2->SetState(_T("sli_ori"), (void*)true);
+	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+	scroll2->SetState(_T("up_color"), (void*)pix);
+	scroll2->SetState(_T("dn_color"), (void*)pix);
 
 	// 创建事件对象并设置
 	CCustomEvent cus_evt;
 	CFillEvent	 fil_evt;
 
 	// 关联对象
-	wnd->AddComp(ctrl);
+	wnd->AddComp(scroll1);
+	wnd->AddComp(scroll2);
 	wnd->AddEvent(&cus_evt);
 	//wnd->AddEvent(&fil_evt);
 

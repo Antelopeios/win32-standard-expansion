@@ -47,6 +47,8 @@ protected:
 		REG_IMG(list, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(_T("ui/list_item.png"));
 		REG_IMG(list_item, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(_T("ui/list_icon.png"));
+		REG_IMG(list_icon, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 
 		file.Open(_T("ui/win_sysbtn_close.png"));
 		REG_IMG(win_sysbtn_close, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
@@ -119,7 +121,7 @@ protected:
 			img_btn[4] = GUI_IMG(list_item)->Get();
 			IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
 			btn->SetState(_T("image"), img_btn);
-			//btn->SetState(_T("icon"), &img_pic);
+			btn->SetState(_T("icon"), GUI_IMG(list_icon));
 			//btn->SetState(_T("text"), txt_btn);
 			//btn->SetState(_T("locate"), (void*)2);
 			//btn->SetState(_T("loc_off"), (void*)5);
@@ -203,11 +205,72 @@ protected:
 	// 加载窗口
 	void LoadWnd()
 	{
+		// 相关资源定义
+		RECT rc_dsk = {0};
+		::GetClientRect(::GetDesktopWindow(), &rc_dsk);
+		CRect rc_wnd(0, 0, 1000, 750);
+		HICON ic_wnd = ::LoadIcon(::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_DEMOGUI1));
+
+		// 创建窗口对象并设置
+		REG_WND(main, ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc)));
+		GUI_WND(main)->Create(_T("DemoGui1"), rc_wnd, SW_HIDE, 
+			WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
+		GUI_WND(main)->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
+		GUI_WND(main)->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
+		GUI_WND(main)->CenterWindow();
+		GUI_WND(main)->SetLayered(false);
+		GUI_WND(main)->GetClientRect(rc_wnd);
+		GUI_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
 	}
 
 	// 关联对象
 	void LinkGui()
 	{
+		// 内容打底
+		GUI_WND(main)->AddComp(GUI_CTL(banner));
+		GUI_WND(main)->AddComp(GUI_CTL(tag_bg));
+		GUI_WND(main)->AddComp(GUI_CTL(toolbar_bg));
+
+		// 列表
+		GUI_WND(main)->AddComp(GUI_CTL(list));
+
+		// 功能按钮
+		GUI_WND(main)->AddComp(GUI_CTL(topbar_btn));
+		GUI_WND(main)->AddComp(GUI_CTL(gamesearch_charmap));
+		GUI_WND(main)->AddComp(GUI_CTL(toolbar_tools));
+
+		// 标签栏
+		GUI_WND(main)->AddComp(GUI_CTL(tag_qb));
+		GUI_WND(main)->AddComp(GUI_CTL(tag_zx));
+		GUI_WND(main)->AddComp(GUI_CTL(tag_wl));
+		GUI_WND(main)->AddComp(GUI_CTL(tag_dz));
+		GUI_WND(main)->AddComp(GUI_CTL(tag_wy));
+		GUI_WND(main)->AddComp(GUI_CTL(tag_dj));
+
+		// 编辑框
+		GUI_WND(main)->AddComp(GUI_CTL(search_bg));
+		GUI_WND(main)->AddComp(GUI_CTL(search_button));
+		GUI_WND(main)->AddComp(GUI_CTL(google_bg));
+		GUI_WND(main)->AddComp(GUI_CTL(google_button));
+
+		// 窗口边框
+		GUI_WND(main)->AddComp(GUI_CTL(line_bottom));
+		GUI_WND(main)->AddComp(GUI_CTL(line_left));
+		GUI_WND(main)->AddComp(GUI_CTL(line_right));
+		GUI_WND(main)->AddComp(GUI_CTL(line_top));
+		GUI_WND(main)->AddComp(GUI_CTL(corner_lb));
+		GUI_WND(main)->AddComp(GUI_CTL(corner_rb));
+		GUI_WND(main)->AddComp(GUI_CTL(corner_rt));
+		GUI_WND(main)->AddComp(GUI_CTL(corner_lt));
+
+		// 三态按钮
+		GUI_WND(main)->AddComp(GUI_CTL(win_sysbtn_close));
+		GUI_WND(main)->AddComp(GUI_CTL(win_sysbtn_max));
+		GUI_WND(main)->AddComp(GUI_CTL(win_sysbtn_restore));
+		GUI_WND(main)->AddComp(GUI_CTL(win_sysbtn_min));
+
+		// 显示主窗口
+		GUI_WND(main)->ShowWindow(SW_SHOW);
 	}
 
 public:

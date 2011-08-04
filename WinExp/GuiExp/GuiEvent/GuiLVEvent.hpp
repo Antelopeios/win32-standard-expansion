@@ -241,7 +241,8 @@ public:
 		m_Ctrl->GetScrollSize(scr_sz);
 
 		// 遍历列表项
-		CRect itm_rc, old_rc(scr_sz.cx, space, scr_sz.cy, space);
+		LONG all_line = 0;
+		CRect itm_rc, old_rc(scr_sz.cx, space - scr_sz.cy, scr_sz.cx, space - scr_sz.cy);
 		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 		{
 			IGuiCtrl* item = *ite;
@@ -250,13 +251,18 @@ public:
 			item->GetWindowRect(itm_rc);
 			// 调整区域
 			itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
-			if (itm_rc.Right() + space > rect.Right())
+			if (itm_rc.Right() > rect.Right())
 				itm_rc.MoveTo(CPoint(rect.Left() + space, old_rc.Bottom() + space));
 			// 设置当前项区域
 			item->SetWindowRect(itm_rc);
 			// 存储区域
 			old_rc = itm_rc;
 		}
+
+		// 设置滚动区域
+		itm_rc.pt2.y += scr_sz.cy;
+		m_Ctrl->SetState(_T("fra_line"), (void*)rect.Height());
+		m_Ctrl->SetState(_T("all_line"), (void*)itm_rc.Bottom());
 	}
 
 	// 消息响应

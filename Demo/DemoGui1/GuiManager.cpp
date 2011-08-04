@@ -130,7 +130,23 @@ protected:
 		}
 		GUI_CTL(list)->SetState(_T("items"), &items_list);
 		GUI_CTL(list)->SetState(_T("space"), (void*)5);
-		GUI_CTL(list)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
+		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
+
+		pixel_t pix[5] = {0};
+
+		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
+		pix[0] = ExRGBA(220, 220, 220, 255);
+		GUI_CTL(scr_h)->SetState(_T("sli_color"), pix);
+		pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
+		GUI_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
+		//GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)100);
+		//GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)10);
+		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
+		pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+		GUI_CTL(scr_h)->SetState(_T("up_color"), (void*)pix);
+		GUI_CTL(scr_h)->SetState(_T("dn_color"), (void*)pix);
+		//GUI_CTL(scr_h)->SetVisible(false);
+		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
 
 	#define GuiLoadBtn(name, thr_sta) \
 		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
@@ -233,6 +249,7 @@ protected:
 
 		// 列表
 		GUI_WND(main)->AddComp(GUI_CTL(list));
+		GUI_WND(main)->AddComp(GUI_CTL(scr_h));
 
 		// 功能按钮
 		GUI_WND(main)->AddComp(GUI_CTL(topbar_btn));

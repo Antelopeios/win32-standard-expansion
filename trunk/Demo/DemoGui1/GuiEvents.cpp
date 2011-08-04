@@ -800,9 +800,48 @@ public:
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
-				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth() - 
+					(GUI_CTL(scr_h)->IsVisible() ? 20 : 0);
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_SIZE:
+			{
+				CGC gc;
+
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("all_line"), &gc);
+				if (!state) break;
+				LONG all_line = (LONG)(LONG_PTR)(state->sta_arr[0]);
+
+				state = ctrl->GetState(_T("fra_line"), &gc);
+				if (!state) break;
+				LONG fra_line = (LONG)(LONG_PTR)(state->sta_arr[0]);
+
+				if (all_line > fra_line)
+				{
+					GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)all_line);
+					GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)fra_line);
+					if (!GUI_CTL(scr_h)->IsVisible())
+					{
+						GUI_CTL(scr_h)->SetVisible(true);
+						CRect rc;
+						ctrl->GetWindowRect(rc);
+						rc.pt2.x -= 20;
+						ctrl->SetWindowRect(rc);
+					}
+				}
+				else
+				{
+					if (GUI_CTL(scr_h)->IsVisible())
+					{
+						GUI_CTL(scr_h)->SetVisible(false);
+						CRect rc;
+						ctrl->GetWindowRect(rc);
+						rc.pt2.x += 20;
+						ctrl->SetWindowRect(rc);
+					}
+				}
 			}
 			break;
 		}
@@ -810,6 +849,56 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_list, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_scr_h : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_scr_h, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth() - 20;
+				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
+				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		case WM_COMMAND:
+			if (wParam == SB_THUMBPOSITION)
+			{
+				CGC gc;
+				IGuiCtrl::state_t* state = ctrl->GetState(_T("sli_pos"), &gc);
+				if (!state) break;
+				LONG pos = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				CSize scr_sz;
+				GUI_CTL(list)->GetScrollSize(scr_sz);
+				scr_sz.cy = pos;
+				GUI_CTL(list)->SetScrollSize(scr_sz);
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_scr_h, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 

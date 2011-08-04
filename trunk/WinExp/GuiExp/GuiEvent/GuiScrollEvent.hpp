@@ -234,14 +234,22 @@ public:
 					LONG off = pt->x * all / rect.Width();
 					m_Ctrl->SetState(_T("pos"), (void*)(s_pos + off));
 				}
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
 			}
 			else
 			if (wParam == SB_THUMBTRACK)
+			{
 				s_pos = GetPos(&CGC());
-			//else
-			//if (wParam == SB_ENDSCROLL)
-			//{
-			//}
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
+			}
+			else
+			if (wParam == SB_ENDSCROLL)
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
+			}
 			break;
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
@@ -268,6 +276,8 @@ public:
 					LONG off = rc_pt.pt1.x * all / rect.Width();
 					m_Ctrl->SetState(_T("pos"), (void*)(GetPos(&gc) + off));
 				}
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
 			}
 			break;
 		}
@@ -389,6 +399,7 @@ public:
 					m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) - 10));
 				else
 					m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) + 10));
+				m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, SB_THUMBPOSITION);
 			}
 			break;
 		}

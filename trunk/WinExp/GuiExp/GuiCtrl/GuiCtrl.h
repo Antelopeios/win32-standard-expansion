@@ -169,6 +169,7 @@ public:
 	bool SetScrollSize(const CSize& sz)
 	{
 		m_szScroll = sz;
+		Refresh();
 		return true;
 	}
 

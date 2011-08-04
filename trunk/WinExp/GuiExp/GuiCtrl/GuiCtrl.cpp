@@ -190,8 +190,11 @@ bool IGuiCtrlBase::SetVisible(bool bVisible/* = true*/)
 	if (m_bVisible == bVisible) return m_bVisible;
 	bool old = m_bVisible;
 	m_bVisible = bVisible;
-	Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, m_bVisible);
-	UpdateState();
+	if (GetParent())
+	{
+		Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, m_bVisible);
+		UpdateState();
+	}
 	return old;
 }
 bool IGuiCtrlBase::IsVisible() const

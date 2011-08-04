@@ -115,11 +115,14 @@ public:
 protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
+	LONG m_AllLine, m_FraLine;
 
 public:
 	CGuiListView()
 		: m_ItemList(NULL)
 		, m_Space(0)
+		, m_AllLine(0)
+		, m_FraLine(0)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
@@ -139,6 +142,12 @@ public:
 			else
 			if (state->sta_typ == _T("space"))
 				state->sta_arr.Add((void*)m_Space);
+			else
+			if (state->sta_typ == _T("all_line"))
+				state->sta_arr.Add((void*)m_AllLine);
+			else
+			if (state->sta_typ == _T("fra_line"))
+				state->sta_arr.Add((void*)m_FraLine);
 			else
 				state = EXP_BASE::GetState(sType, pGC);
 		}
@@ -175,6 +184,18 @@ public:
 				return IGuiCtrlBase::SetState(sType, pState);
 			else
 				return true;
+		}
+		else
+		if (sType == _T("all_line"))
+		{
+			m_AllLine = (LONG)(LONG_PTR)pState;
+			return true;
+		}
+		else
+		if (sType == _T("fra_line"))
+		{
+			m_FraLine = (LONG)(LONG_PTR)pState;
+			return true;
 		}
 		else
 			return EXP_BASE::SetState(sType, pState);

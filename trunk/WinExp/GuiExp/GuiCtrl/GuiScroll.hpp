@@ -56,7 +56,7 @@ class CGuiSlider : public CGuiPicture /*滚动条滑槽*/
 	EXP_DECLARE_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
 
 protected:
-	CGuiButton m_Slider;
+	CGuiLVItem m_Slider;
 	LONG m_All/*全部内容长度*/, m_Fra/*片段长度*/, m_Pos/*位置*/;
 	bool m_Ori; // 方向
 
@@ -117,10 +117,10 @@ public:
 			return state;
 		}
 		else
-		if (sType.Left(4) == _T("sli_"))
+		if (sType.Left(4) == _T("blk_"))
 		{
 			CString type(sType);
-			type.TrimLeft(_T("sli_"));
+			type.TrimLeft(_T("blk_"));
 			return m_Slider.GetState(type, pGC);
 		}
 		else
@@ -155,10 +155,10 @@ public:
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
-		if (sType.Left(4) == _T("sli_"))
+		if (sType.Left(4) == _T("blk_"))
 		{
 			CString type(sType);
-			type.TrimLeft(_T("sli_"));
+			type.TrimLeft(_T("blk_"));
 			return m_Slider.SetState(type, pState);
 		}
 		else

@@ -104,6 +104,12 @@ public:
 			m_MDown = false;
 			ctrl->ReleaseCapture();
 			break;
+		case WM_MOUSEWHEEL:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), nMessage, wParam, lParam);
+			}
+			break;
 		}
 	}
 };
@@ -280,6 +286,128 @@ public:
 				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
 			}
 			break;
+		case WM_MOUSEWHEEL:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), nMessage, wParam, lParam);
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiScrUpEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiScrUpEvent, IGuiEvent)
+
+protected:
+	UINT m_TimerId;
+
+public:
+	CGuiScrUpEvent()
+		: m_TimerId(0)
+	{}
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_LBUTTONDOWN:
+		case WM_NCLBUTTONDOWN:
+			{
+				ctrl->SetCapture();
+				ExRandomize();
+				m_TimerId = 10001 + ExRandom(89999);
+				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				::SetTimer(wnd->GethWnd(), m_TimerId, 40, NULL);
+			}
+			break;
+		case WM_LBUTTONUP:
+		case WM_NCLBUTTONUP:
+			if (m_TimerId)
+			{
+				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				::KillTimer(wnd->GethWnd(), m_TimerId);
+				m_TimerId = 0;
+				ctrl->ReleaseCapture();
+			}
+			break;
+		case WM_TIMER:
+			if (m_TimerId == wParam)
+			{
+				CGC gc;
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				IGuiCtrl::state_t* state = pare->GetState(_T("sli_pos"), &gc);
+				if (!state) break;
+				LONG pos = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				pare->SetState(_T("sli_pos"), (void*)(pos - WHEEL_DELTA));
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiScrDnEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiScrDnEvent, IGuiEvent)
+
+protected:
+	UINT m_TimerId;
+
+public:
+	CGuiScrDnEvent()
+		: m_TimerId(0)
+	{}
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_LBUTTONDOWN:
+		case WM_NCLBUTTONDOWN:
+			{
+				ctrl->SetCapture();
+				ExRandomize();
+				m_TimerId = 10001 + ExRandom(89999);
+				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				::SetTimer(wnd->GethWnd(), m_TimerId, 40, NULL);
+			}
+			break;
+		case WM_LBUTTONUP:
+		case WM_NCLBUTTONUP:
+			if (m_TimerId)
+			{
+				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				::KillTimer(wnd->GethWnd(), m_TimerId);
+				m_TimerId = 0;
+				ctrl->ReleaseCapture();
+			}
+			break;
+		case WM_TIMER:
+			if (m_TimerId == wParam)
+			{
+				CGC gc;
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				IGuiCtrl::state_t* state = pare->GetState(_T("sli_pos"), &gc);
+				if (!state) break;
+				LONG pos = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				pare->SetState(_T("sli_pos"), (void*)(pos + WHEEL_DELTA));
+			}
+			break;
 		}
 	}
 };
@@ -390,16 +518,11 @@ public:
 				Format(&gc);
 			}
 			break;
-		case WM_COMMAND:
-			if (wParam == BN_CLICKED)
+		case WM_MOUSEWHEEL:
 			{
+				short scr_cnt = (short)ExHiWord(wParam);
 				CGC gc;
-				IGuiCtrl* btn = (IGuiCtrl*)lParam;
-				if (btn == GetUp(&gc))
-					m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) - 10));
-				else
-					m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) + 10));
-				m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, SB_THUMBPOSITION);
+				m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) - scr_cnt));
 			}
 			break;
 		}
@@ -410,6 +533,8 @@ public:
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiSliBlkEvent, IGuiEvent)
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiSliderEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiScrUpEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiScrDnEvent, IGuiEvent)
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiScrollEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////

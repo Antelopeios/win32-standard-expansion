@@ -8,7 +8,47 @@ class CGuiLoader
 protected:
 	CGC& gc;
 
+	CListT<CImage*> list_icon;
+
 protected:
+	void LoadDirImage(CListT<CImage*>& lstImage, LPCTSTR sPath, ICoderObject* pCoder, CGC* pGC)
+	{
+		if (!sPath || !pCoder || !pGC) return;
+		CString path(sPath); path += _T("\\");
+		CString path_find(path); path_find += _T("*");
+
+		CIOFile file;
+		IFileObject* old_file = pCoder->GetFile();
+		pCoder->SetFile(&file);
+
+		WIN32_FIND_DATA fd = {0};
+		HANDLE find = ::FindFirstFile(path_find, &fd);
+		if (find != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				if (0 == wcscmp(fd.cFileName, L".") || 
+					0 == wcscmp(fd.cFileName, L"..")) continue;
+				if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+					LoadDirImage(lstImage, path + fd.cFileName, pCoder, pGC);
+				else
+				{
+					file.Open(path + fd.cFileName);
+					image_t img = pCoder->Decode();
+					if (img)
+					{
+						CImage* image = ExMem::Alloc<CImage>(pGC);
+						image->Set(img);
+						lstImage.Add(image);
+					}
+				}
+			} while (::FindNextFile(find, &fd));
+			::FindClose(find);
+		}
+
+		pCoder->SetFile(old_file);
+	}
+
 	// 加载资源
 	void LoadRes()
 	{
@@ -20,72 +60,77 @@ protected:
 
 		// 图片资源
 
-		file.Open(_T("ui/banner.png"));
+		CString path;
+		::GetCurrentDirectory(MAX_PATH, path.GetCStr(MAX_PATH));
+		path += _T("\\ui");
+
+		file.Open(path + _T("\\banner.png"));
 		REG_IMG(banner, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/corner_lb.png"));
+		file.Open(path + _T("\\corner_lb.png"));
 		REG_IMG(corner_lb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/corner_rb.png"));
+		file.Open(path + _T("\\corner_rb.png"));
 		REG_IMG(corner_rb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/corner_rt.png"));
+		file.Open(path + _T("\\corner_rt.png"));
 		REG_IMG(corner_rt, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/corner_lt.png"));
+		file.Open(path + _T("\\corner_lt.png"));
 		REG_IMG(corner_lt, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/line_bottom.png"));
+		file.Open(path + _T("\\line_bottom.png"));
 		REG_IMG(line_bottom, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/line_left.png"));
+		file.Open(path + _T("\\line_left.png"));
 		REG_IMG(line_left, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/line_right.png"));
+		file.Open(path + _T("\\line_right.png"));
 		REG_IMG(line_right, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/line_top.png"));
+		file.Open(path + _T("\\line_top.png"));
 		REG_IMG(line_top, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/tag_bg.png"));
+		file.Open(path + _T("\\tag_bg.png"));
 		REG_IMG(tag_bg, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/toolbar_bg.png"));
+		file.Open(path + _T("\\toolbar_bg.png"));
 		REG_IMG(toolbar_bg, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 
-		file.Open(_T("ui/list.png"));
+		file.Open(path + _T("\\list.png"));
 		REG_IMG(list, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/list_item.png"));
+		file.Open(path + _T("\\list_item.png"));
 		REG_IMG(list_item, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/list_icon.png"));
-		REG_IMG(list_icon, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc.png"));
+		REG_IMG(list_foc, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		LoadDirImage(list_icon, path + _T("\\icon"), coder, &gc);
 
-		file.Open(_T("ui/win_sysbtn_close.png"));
+		file.Open(path + _T("\\win_sysbtn_close.png"));
 		REG_IMG(win_sysbtn_close, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/win_sysbtn_max.png"));
+		file.Open(path + _T("\\win_sysbtn_max.png"));
 		REG_IMG(win_sysbtn_max, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/win_sysbtn_min.png"));
+		file.Open(path + _T("\\win_sysbtn_min.png"));
 		REG_IMG(win_sysbtn_min, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/win_sysbtn_restore.png"));
+		file.Open(path + _T("\\win_sysbtn_restore.png"));
 		REG_IMG(win_sysbtn_restore, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 
-		file.Open(_T("ui/topbar_btn.png"));
+		file.Open(path + _T("\\topbar_btn.png"));
 		REG_IMG(topbar_btn, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/gamesearch_charmap.png"));
+		file.Open(path + _T("\\gamesearch_charmap.png"));
 		REG_IMG(gamesearch_charmap, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/toolbar_tools.png"));
+		file.Open(path + _T("\\toolbar_tools.png"));
 		REG_IMG(toolbar_tools, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 
-		file.Open(_T("ui/tag_qb.png"));
+		file.Open(path + _T("\\tag_qb.png"));
 		REG_IMG(tag_qb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/tag_zx.png"));
+		file.Open(path + _T("\\tag_zx.png"));
 		REG_IMG(tag_zx, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/tag_wl.png"));
+		file.Open(path + _T("\\tag_wl.png"));
 		REG_IMG(tag_wl, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/tag_dz.png"));
+		file.Open(path + _T("\\tag_dz.png"));
 		REG_IMG(tag_dz, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/tag_wy.png"));
+		file.Open(path + _T("\\tag_wy.png"));
 		REG_IMG(tag_wy, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/tag_dj.png"));
+		file.Open(path + _T("\\tag_dj.png"));
 		REG_IMG(tag_dj, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 
-		file.Open(_T("ui/search_bg.png"));
+		file.Open(path + _T("\\search_bg.png"));
 		REG_IMG(search_bg, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/search_button.png"));
+		file.Open(path + _T("\\search_button.png"));
 		REG_IMG(search_button, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/google_bg.png"));
+		file.Open(path + _T("\\google_bg.png"));
 		REG_IMG(google_bg, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		file.Open(_T("ui/google_button.png"));
+		file.Open(path + _T("\\google_button.png"));
 		REG_IMG(google_button, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 	}
 
@@ -115,13 +160,13 @@ protected:
 		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
 		GUI_CTL(list)->SetState(_T("image"), GUI_IMG(list));
 		CListT<IGuiCtrl*> items_list;
-		for(int i = 0; i < 200; ++i)
+		for(CListT<CImage*>::iterator_t ite = list_icon.Head(); ite != list_icon.Tail(); ++ite)
 		{
 			CImage img_btn[9];
 			img_btn[4] = GUI_IMG(list_item)->Get();
 			IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
 			btn->SetState(_T("image"), img_btn);
-			btn->SetState(_T("icon"), GUI_IMG(list_icon));
+			btn->SetState(_T("icon"), *ite);
 			//btn->SetState(_T("text"), txt_btn);
 			//btn->SetState(_T("locate"), (void*)2);
 			//btn->SetState(_T("loc_off"), (void*)5);
@@ -129,6 +174,7 @@ protected:
 			items_list.Add(btn);
 		}
 		GUI_CTL(list)->SetState(_T("items"), &items_list);
+		GUI_CTL(list)->SetState(_T("foc_image"), GUI_IMG(list_foc));
 		GUI_CTL(list)->SetState(_T("space"), (void*)5);
 		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
 

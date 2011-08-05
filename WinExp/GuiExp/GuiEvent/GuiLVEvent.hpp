@@ -188,6 +188,12 @@ public:
 				CImgRenderer::Render(mem_img->Get(), icon->Get(), icon_rct, CPoint());
 			}
 			break;
+		case WM_MOUSEWHEEL:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				pare->Send(ExDynCast<IGuiObject>(pare), nMessage, wParam, lParam);
+			}
+			break;
 		}
 	}
 };
@@ -200,10 +206,12 @@ class CGuiLVEvent : public IGuiEvent
 
 protected:
 	IGuiCtrl* m_Ctrl;
+	IGuiCtrl* m_FocItm;
 
 public:
 	CGuiLVEvent()
 		: m_Ctrl(NULL)
+		, m_FocItm(NULL)
 	{}
 
 public:
@@ -221,6 +229,13 @@ public:
 		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("space"), pGC);
 		if (!state) return NULL;
 		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+	}
+	CImage* GetFocImage(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("foc_image"), pGC);
+		if (!state) return NULL;
+		return (CImage*)(state->sta_arr[0]);
 	}
 
 	// 格式化列表项的位置
@@ -281,6 +296,29 @@ public:
 			{
 				CGC gc;
 				FormatItems(&gc);
+
+				if (WM_PAINT == nMessage && 
+					m_Ctrl->IsFocus())
+				{
+					if(!m_FocItm)
+						m_FocItm = GetItems(&gc)->HeadItem();
+					if(!m_FocItm) break;
+					CImage* foc_img = GetFocImage(&gc);
+					if(!foc_img || foc_img->IsNull()) break;
+					CImage* mem_img = (CImage*)lParam;
+					if(!mem_img || mem_img->IsNull()) break;
+
+					CRect foc_rct;
+					m_FocItm->GetWindowRect(foc_rct);
+					CImgRenderer::Render(mem_img->Get(), foc_img->Get(), foc_rct, CPoint());
+				}
+			}
+			break;
+		case WM_COMMAND:
+			if (BN_SETFOCUS == wParam)
+			{
+				IGuiCtrl* itm = (IGuiCtrl*)lParam;
+				m_FocItm = itm;
 			}
 			break;
 		}

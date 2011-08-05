@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-03
-// Version:	1.0.0006.1616
+// Date:	2011-08-05
+// Version:	1.0.0007.1708
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -48,6 +48,7 @@
 //	- 1.0.0004.1708(2011-06-21)	# 修正当按钮控件没有加载图片时CGuiButtonEvent绘图出现的内存异常
 //	- 1.0.0005.1430(2011-07-01)	= 根据GuiButton的更新调整GuiButtonEvent
 //	- 1.0.0006.1616(2011-08-03)	= 调整按钮控件的事件发送,向自身发送BM_CLICK消息,并向父窗口发送BN_CLICKED的WM_COMMAND消息
+//	- 1.0.0007.1708(2011-08-05)	+ GuiButtonEvent向父窗口发送BN_SETFOCUS与BN_KILLFOCUS的WM_COMMAND消息
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -144,6 +145,20 @@ public:
 			{
 				DWORD status = 0;
 				ctrl->SetState(_T("status"), (void*)status);
+			}
+			break;
+		case WM_SETFOCUS:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				if (pare)
+					pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_SETFOCUS, (LPARAM)ctrl);
+			}
+			break;
+		case WM_KILLFOCUS:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				if (pare)
+					pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_KILLFOCUS, (LPARAM)ctrl);
 			}
 			break;
 		case WM_PAINT:
@@ -551,6 +566,20 @@ public:
 				if (status == 3) break;
 				status = 0;
 				ctrl->SetState(_T("status"), (void*)status);
+			}
+			break;
+		case WM_SETFOCUS:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				if (pare)
+					pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_SETFOCUS, (LPARAM)ctrl);
+			}
+			break;
+		case WM_KILLFOCUS:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				if (pare)
+					pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_KILLFOCUS, (LPARAM)ctrl);
 			}
 			break;
 		case WM_PAINT:

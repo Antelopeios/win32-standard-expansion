@@ -69,7 +69,7 @@ public:
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiSliderEvent"), GetGC())); /*先让基类绘图*/
-		m_Slider.AddEvent((IGuiEvent*)ExGui(_T("CGuiSliBlkEvent"), GetGC()));
+		m_Slider.AddEvent((IGuiEvent*)ExGui(_T("CGuiSliBlkEvent"), m_Slider.GetGC()));
 		// 添加控件对象
 		InsComp(&m_Slider);
 	}
@@ -79,6 +79,9 @@ public:
 	{
 		if (m_Pos > m_All - m_Fra) m_Pos = m_All - m_Fra;
 		if (m_Pos < 0) m_Pos = 0;
+		IGuiCtrl* pare = ExDynCast<IGuiCtrl>(GetParent());
+		if (pare)
+			pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
 	}
 
 	state_t* GetState(const CString& sType, CGC* pGC = NULL)
@@ -181,6 +184,8 @@ public:
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiScrollEvent"), GetGC())); /*先让基类绘图*/
+		m_Up.InsEvent((IGuiEvent*)ExGui(_T("CGuiScrUpEvent"), m_Up.GetGC()));
+		m_Down.InsEvent((IGuiEvent*)ExGui(_T("CGuiScrDnEvent"), m_Down.GetGC()));
 		// 添加控件对象
 		InsComp(&m_Slider);
 		m_Up.SetWindowRect(CRect(0, 0, 20, 20));

@@ -23,7 +23,12 @@ public:
 			{
 				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 				if (!ctrl) continue;
-				ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
+				if (ctrl->IsVisible())
+					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
+			}
+			{
+				IGuiCtrl* ctrl = ::IsZoomed(board->GethWnd()) ? GUI_CTL(win_sysbtn_max) : GUI_CTL(win_sysbtn_restore);
+				ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
 			}
 			break;
 		case WM_DESTROY:
@@ -63,22 +68,21 @@ public:
 				SetResult((hit_test == HTCLIENT) ? HTCAPTION : hit_test);
 			}
 			break;
-		case WM_NCLBUTTONDOWN:
-			{
-				IGuiBoard* wnd = ctrl->GetBoard();
-				ExAssert(wnd);
-				m_bZoomed = ::IsZoomed(wnd->GethWnd());
-			}
-			break;
-		case WM_NCLBUTTONDBLCLK:
-			{
-				IGuiBoard* wnd = ctrl->GetBoard();
-				ExAssert(wnd);
-				IGuiComp::list_t::iterator_t ite = wnd->GetChildren().Last();
-				ctrl = m_bZoomed ? GUI_CTL(win_sysbtn_restore) : GUI_CTL(win_sysbtn_max);
-				ctrl->Send(ExDynCast<IGuiObject>(*ite), WM_COMMAND, BN_CLICKED);
-			}
-			break;
+		//case WM_NCLBUTTONDOWN:
+		//	{
+		//		IGuiBoard* wnd = ctrl->GetBoard();
+		//		ExAssert(wnd);
+		//		m_bZoomed = ::IsZoomed(wnd->GethWnd());
+		//	}
+		//	break;
+		//case WM_NCLBUTTONDBLCLK:
+		//	{
+		//		IGuiBoard* wnd = ctrl->GetBoard();
+		//		ExAssert(wnd);
+		//		ctrl = m_bZoomed ? GUI_CTL(win_sysbtn_restore) : GUI_CTL(win_sysbtn_max);
+		//		ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+		//	}
+		//	break;
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
@@ -817,11 +821,11 @@ public:
 				state = ctrl->GetState(_T("fra_line"), &gc);
 				if (!state) break;
 				LONG fra_line = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)all_line);
+				GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)fra_line);
 
 				if (all_line > fra_line)
 				{
-					GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)all_line);
-					GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)fra_line);
 					if (!GUI_CTL(scr_h)->IsVisible())
 					{
 						GUI_CTL(scr_h)->SetVisible(true);
@@ -843,6 +847,9 @@ public:
 					}
 				}
 			}
+			break;
+		case WM_MOUSEWHEEL:
+			GUI_CTL(scr_h)->Send(ExDynCast<IGuiObject>(GUI_CTL(scr_h)), nMessage, wParam, lParam);
 			break;
 		}
 	}
@@ -984,6 +991,7 @@ public:
 				IGuiBoard* board = ctrl->GetBoard();
 				if (!board) return;
 				ctrl->SetVisible(!::IsZoomed(board->GethWnd()));
+				GUI_CTL(win_sysbtn_restore)->SetVisible(::IsZoomed(board->GethWnd()));
 			}
 			break;
 		case BM_CLICK:
@@ -991,7 +999,8 @@ public:
 				IGuiBoard* board = ctrl->GetBoard();
 				if (!board) return;
 				// 先最大化窗口
-				board->ShowWindow(SW_SHOWMAXIMIZED);
+				if (!::IsZoomed(board->GethWnd()))
+					board->ShowWindow(SW_SHOWMAXIMIZED);
 				// 重新设置窗口大小
 				RECT rect;
 				::GetWindowRect(board->GethWnd(), &rect);
@@ -999,7 +1008,8 @@ public:
 				MONITORINFO mi = {0};
 				mi.cbSize = sizeof(mi);
 				::GetMonitorInfo(monitor, &mi);
-				board->MoveWindow(CRect(mi.rcWork));
+				if (memcmp(&rect, &(mi.rcWork), sizeof(RECT)) != 0)
+					board->MoveWindow(CRect(mi.rcWork));
 			}
 			break;
 		}
@@ -1046,6 +1056,7 @@ public:
 				IGuiBoard* board = ctrl->GetBoard();
 				if (!board) return;
 				ctrl->SetVisible(::IsZoomed(board->GethWnd()));
+				GUI_CTL(win_sysbtn_max)->SetVisible(!::IsZoomed(board->GethWnd()));
 			}
 			break;
 		case BM_CLICK:
@@ -1053,7 +1064,8 @@ public:
 				IGuiBoard* board = ctrl->GetBoard();
 				if (!board) return;
 				// 还原窗口
-				board->ShowWindow(SW_SHOWNORMAL);
+				if (::IsZoomed(board->GethWnd()))
+					board->ShowWindow(SW_SHOWNORMAL);
 			}
 			break;
 		}

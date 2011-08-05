@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-21
-// Version:	1.0.0001.1532
+// Date:	2011-08-05
+// Version:	1.0.0002.1744
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
 //	- 1.0.0001.1532(2011-07-21)	= 将CGuiListView内部items_t结构由指针改为对象,减轻调用复杂度
+//	- 1.0.0002.1744(2011-08-05)	+ 添加GuiListView焦点时默认列表项的背景图
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -116,6 +117,7 @@ protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
 	LONG m_AllLine, m_FraLine;
+	CImage m_FocImage;
 
 public:
 	CGuiListView()
@@ -139,6 +141,9 @@ public:
 		{
 			if (state->sta_typ == _T("items"))
 				state->sta_arr.Add(&m_ItemList);
+			else
+			if (state->sta_typ == _T("foc_image"))
+				state->sta_arr.Add(&m_FocImage);
 			else
 			if (state->sta_typ == _T("space"))
 				state->sta_arr.Add((void*)m_Space);
@@ -173,6 +178,12 @@ public:
 				if (!item) continue;
 				AddComp(item);
 			}
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("foc_image"))
+		{
+			m_FocImage = *(CImage*)pState;
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

@@ -240,7 +240,10 @@ protected:
 			nMessage == WM_NCHITTEST || 
 			nMessage == WM_COMMAND || 
 			nMessage == WM_NOTIFY)
+		{
+		//	ExTrace(_T("0x%04X\n"), nMessage);
 			goto EndBaseSend;
+		}
 		else
 		if (nMessage == WM_PAINT)
 		{

@@ -95,7 +95,7 @@ public:
 			ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), 
 			ExRGBA(0, 0, 0, EXP_CM)
 		};
-		SetState(_T("color"), pix);
+		SetState(_T("color"), (void*)(pix[0]));
 		SetState(_T("txt_sel_color"), pix);
 		pix[0] = ExRGBA(51, 153, EXP_CM, EXP_CM);
 		pix[1] = ExRGBA(191, 205, 219, EXP_CM);

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-03
-// Version:	1.0.0010.1720
+// Date:	2011-08-08
+// Version:	1.0.0011.1630
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -51,6 +51,7 @@
 //	- 1.0.0008.2000(2011-07-16)	+ 添加IGuiCtrl::GetClipRect()接口,用于绘图时动态获取当前剪切区下的绘图区域
 //	- 1.0.0009.2111(2011-07-31)	= IGuiCtrl::Init()将判断控件是否可见,并发送WM_SHOWWINDOW消息
 //	- 1.0.0010.1720(2011-08-03)	+ IGuiCtrl添加Scroll系列接口,支持事件响应获取滚动偏移并处理绘图
+//	- 1.0.0011.1630(2011-08-08)	+ IGuiCtrl添加Scroll控件绑定接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -83,10 +84,12 @@ protected:
 	static IGuiCtrl* m_Focus;
 	IGuiEffect* m_Effect;
 	CSize m_szScroll;
+	IGuiCtrl* m_Scroll;
 
 public:
 	IGuiCtrl()
 		: m_Effect(NULL)
+		, m_Scroll(NULL)
 	{}
 
 protected:
@@ -161,16 +164,34 @@ public:
 		rc.Offset(-rc_clp.pt1);
 		return true;
 	}
-	bool GetScrollSize(CSize& sz)
+	bool GetScrollSize(CSize& sz) const
 	{
 		sz = m_szScroll;
 		return true;
 	}
-	bool SetScrollSize(const CSize& sz)
+	bool SetScrollSize(const CSize& sz, bool bWheel = false)
 	{
+		if (m_Scroll && bWheel)
+			m_Scroll->Send(
+				ExDynCast<IGuiObject>(m_Scroll), WM_MOUSEWHEEL, 0, 
+				ExMakeLong(m_szScroll.cy - sz.cy, m_szScroll.cx - sz.cx));
 		m_szScroll = sz;
-		Refresh();
+
+		CRect rc;
+		GetWindowRect(rc);
+		Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
+			(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
+		Refresh(false);
 		return true;
+	}
+	IGuiCtrl* GetScroll() const
+	{
+		return m_Scroll;
+	}
+	void SetScroll(const IGuiCtrl* pScroll)
+	{
+		if (m_Scroll = (IGuiCtrl*)pScroll)
+			SetScrollSize(m_szScroll, true);
 	}
 
 	// 刷新绘图

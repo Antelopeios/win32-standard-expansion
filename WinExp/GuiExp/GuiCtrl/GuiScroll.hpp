@@ -133,22 +133,31 @@ public:
 	{
 		if (sType == _T("all"))
 		{
-			m_All = (LONG)(LONG_PTR)pState;
-			Format();
+			if (m_All != (LONG)(LONG_PTR)pState)
+			{
+				m_All = (LONG)(LONG_PTR)pState;
+				Format();
+			}
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("fra"))
 		{
-			m_Fra = (LONG)(LONG_PTR)pState;
-			Format();
+			if (m_Fra != (LONG)(LONG_PTR)pState)
+			{
+				m_Fra = (LONG)(LONG_PTR)pState;
+				Format();
+			}
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("pos"))
 		{
-			m_Pos = (LONG)(LONG_PTR)pState;
-			Format();
+			if (m_Pos != (LONG)(LONG_PTR)pState)
+			{
+				m_Pos = (LONG)(LONG_PTR)pState;
+				Format();
+			}
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

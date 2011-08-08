@@ -128,8 +128,7 @@ public:
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
-		pixel_t pix = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
-		SetState(_T("color"), &pix);
+		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 	}
 
 public:
@@ -199,13 +198,19 @@ public:
 		else
 		if (sType == _T("all_line"))
 		{
+			LONG old_sta = m_AllLine;
 			m_AllLine = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_AllLine && GetScroll())
+				GetScroll()->SetState(_T("sli_all"), (void*)m_AllLine);
 			return true;
 		}
 		else
 		if (sType == _T("fra_line"))
 		{
+			LONG old_sta = m_FraLine;
 			m_FraLine = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_FraLine && GetScroll())
+				GetScroll()->SetState(_T("sli_fra"), (void*)m_FraLine);
 			return true;
 		}
 		else

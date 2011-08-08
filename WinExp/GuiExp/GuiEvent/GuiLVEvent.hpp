@@ -279,6 +279,27 @@ public:
 		m_Ctrl->SetState(_T("fra_line"), (void*)rect.Height());
 		m_Ctrl->SetState(_T("all_line"), (void*)itm_rc.Bottom());
 	}
+	void ShowItem(IGuiCtrl* pItem)
+	{
+		if (!pItem) return;
+		ExAssert(m_Ctrl);
+
+		CSize scr_sz;
+		m_Ctrl->GetScrollSize(scr_sz);
+		CRect scr_rc;
+		m_Ctrl->GetClientRect(scr_rc);
+		scr_rc.MoveTo(CPoint(scr_sz.cx, scr_sz.cy));
+		CRect itm_rc;
+		pItem->GetWindowRect(itm_rc);
+
+		if(!scr_rc.PtInRect(itm_rc.pt1))
+			scr_sz.cy += (scr_rc.pt1.y - itm_rc.pt1.y);
+		else
+		if(!scr_rc.PtInRect(itm_rc.pt2))
+			scr_sz.cy += (itm_rc.pt2.y - scr_rc.pt2.y);
+
+		m_Ctrl->SetScrollSize(scr_sz, true);
+	}
 
 	// ÏûÏ¢ÏìÓ¦
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -292,34 +313,31 @@ public:
 		case WM_SHOWWINDOW:
 			if (!wParam) break;
 		case WM_SIZE:
-		case WM_PAINT:
 			{
 				CGC gc;
 				FormatItems(&gc);
+			}
+			break;
+		case WM_PAINT:
+			if (m_Ctrl->IsFocus())
+			{
+				CGC gc;
+				if(!m_FocItm)
+					m_FocItm = GetItems(&gc)->HeadItem();
+				if(!m_FocItm) break;
+				CImage* foc_img = GetFocImage(&gc);
+				if(!foc_img || foc_img->IsNull()) break;
+				CImage* mem_img = (CImage*)lParam;
+				if(!mem_img || mem_img->IsNull()) break;
 
-				if (WM_PAINT == nMessage && 
-					m_Ctrl->IsFocus())
-				{
-					if(!m_FocItm)
-						m_FocItm = GetItems(&gc)->HeadItem();
-					if(!m_FocItm) break;
-					CImage* foc_img = GetFocImage(&gc);
-					if(!foc_img || foc_img->IsNull()) break;
-					CImage* mem_img = (CImage*)lParam;
-					if(!mem_img || mem_img->IsNull()) break;
-
-					CRect foc_rct;
-					m_FocItm->GetWindowRect(foc_rct);
-					CImgRenderer::Render(mem_img->Get(), foc_img->Get(), foc_rct, CPoint());
-				}
+				CRect foc_rct;
+				m_FocItm->GetWindowRect(foc_rct);
+				CImgRenderer::Render(mem_img->Get(), foc_img->Get(), foc_rct, CPoint());
 			}
 			break;
 		case WM_COMMAND:
 			if (BN_SETFOCUS == wParam)
-			{
-				IGuiCtrl* itm = (IGuiCtrl*)lParam;
-				m_FocItm = itm;
-			}
+				ShowItem(m_FocItm = (IGuiCtrl*)lParam);
 			break;
 		}
 	}

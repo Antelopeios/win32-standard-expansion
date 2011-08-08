@@ -177,20 +177,20 @@ protected:
 		GUI_CTL(list)->SetState(_T("foc_image"), GUI_IMG(list_foc));
 		GUI_CTL(list)->SetState(_T("space"), (void*)5);
 		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
+		items_list.HeadItem()->SetFocus();
 
 		pixel_t pix[5] = {0};
 
 		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
-		pix[0] = ExRGBA(220, 220, 220, 255);
-		GUI_CTL(scr_h)->SetState(_T("sli_color"), pix);
+		GUI_CTL(scr_h)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 		pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
 		GUI_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
 		//GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)100);
 		//GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)10);
 		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
 		pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
-		GUI_CTL(scr_h)->SetState(_T("up_color"), (void*)pix);
-		GUI_CTL(scr_h)->SetState(_T("dn_color"), (void*)pix);
+		GUI_CTL(scr_h)->SetState(_T("up_color"), pix);
+		GUI_CTL(scr_h)->SetState(_T("dn_color"), pix);
 		//GUI_CTL(scr_h)->SetVisible(false);
 		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
 
@@ -234,7 +234,6 @@ protected:
 		{
 			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc));
 			itm->AddEvent(items_topbar_btn_evt);
-			GUI_CTL(topbar_btn)->AddComp(itm);
 			items_topbar_btn.Add(itm);
 		}
 		items_topbar_btn[0]->SetState(_T("status"), (void*)3);
@@ -333,6 +332,7 @@ protected:
 		GUI_WND(main)->AddComp(GUI_CTL(win_sysbtn_min));
 
 		// ÏÔÊ¾Ö÷´°¿Ú
+		GUI_CTL(list)->SetScroll(GUI_CTL(scr_h));
 		GUI_WND(main)->ShowWindow(SW_SHOW);
 	}
 

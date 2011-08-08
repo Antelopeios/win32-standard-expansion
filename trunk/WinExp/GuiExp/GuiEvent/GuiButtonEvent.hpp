@@ -189,8 +189,7 @@ public:
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
-				pixel_t* pixel = (pixel_t*)(state->sta_arr[status]);
-				if (!pixel) break;
+				pixel_t pixel = *(pixel_t*)(state->sta_arr[status]);
 
 				state = ctrl->GetState(_T("text"), &gc);
 				if (!state) break;
@@ -270,7 +269,7 @@ public:
 				}
 
 				// »æÍ¼
-				CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
+				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
 				// l-t
 				CImgRenderer::Render
 					(
@@ -600,8 +599,7 @@ public:
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
-				pixel_t* pixel = (pixel_t*)(state->sta_arr[status]);
-				if (!pixel) break;
+				pixel_t pixel = *(pixel_t*)(state->sta_arr[status]);
 
 				state = ctrl->GetState(_T("text"), &gc);
 				if (!state) break;
@@ -625,7 +623,7 @@ public:
 				}
 
 				// »æÍ¼
-				CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
+				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
 				// m-m
 				CImgRenderer::Render
 					(

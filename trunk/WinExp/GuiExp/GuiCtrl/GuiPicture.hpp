@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-25
-// Version:	1.0.0003.2305
+// Date:	2011-08-08
+// Version:	1.0.0004.1100
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ 添加CGuiPicture::IsUpdated()接口
@@ -42,6 +42,7 @@
 //	- 1.0.0003.2305(2011-05-25)	+ CGuiPicture添加Text属性
 //								= CGuiPicture调整控件状态接口
 //								= CGuiPicture不再托管内部的图片资源
+//	- 1.0.0004.1100(2011-08-08)	^ 将Color属性由指针赋值改为内容拷贝,减少调用复杂度
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPicture_hpp__
@@ -83,7 +84,7 @@ public:
 		if (state)
 		{
 			if (state->sta_typ == _T("color"))
-				state->sta_arr.Add(&m_Color);
+				state->sta_arr.Add((void*)m_Color);
 			else
 			if (state->sta_typ == _T("image"))
 				state->sta_arr.Add(&m_Image);
@@ -97,7 +98,7 @@ public:
 	{
 		if (sType == _T("color"))
 		{
-			m_Color = *(pixel_t*)pState;
+			m_Color = (pixel_t)(LONG_PTR)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else

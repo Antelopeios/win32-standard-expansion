@@ -86,8 +86,7 @@ public:
 
 				state = ctrl->GetState(_T("color"), &gc);
 				if (!state) break;
-				pixel_t* pixel = (pixel_t*)(state->sta_arr[0]);
-				if (!pixel) break;
+				pixel_t pixel = (pixel_t)(LONG_PTR)(state->sta_arr[0]);
 
 				state = ctrl->GetState(_T("text"), &gc);
 				if (!state) break;
@@ -108,7 +107,7 @@ public:
 				}
 
 				// »æÍ¼
-				CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
+				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
 				if (!image->IsNull())
 					CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
 				CImage txt_img(text->GetImage());

@@ -821,8 +821,6 @@ public:
 				state = ctrl->GetState(_T("fra_line"), &gc);
 				if (!state) break;
 				LONG fra_line = (LONG)(LONG_PTR)(state->sta_arr[0]);
-				GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)all_line);
-				GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)fra_line);
 
 				if (all_line > fra_line)
 				{

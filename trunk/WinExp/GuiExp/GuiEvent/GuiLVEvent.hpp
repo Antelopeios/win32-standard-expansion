@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-21
-// Version:	1.0.0001.1532
+// Date:	2011-08-09
+// Version:	1.0.0002.1712
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
 //	- 1.0.0001.1532(2011-07-21)	= 调整CGuiLVItemEvent的绘图算法
+//	- 1.0.0002.1712(2011-08-09)	^ 基本完善GuiLV与GuiScroll之间的接口对接
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -74,6 +75,100 @@ public:
 		// 处理消息
 		switch( nMessage )
 		{
+		case WM_KEYDOWN:
+			{
+				IGuiBoard* wnd = ctrl->GetBoard();
+				switch (wParam)
+				{
+				case VK_UP:
+					{
+						CRect rc_me, rc_it;
+						ctrl->GetWindowRect(rc_me);
+						LONG of_it = -1;
+
+						IGuiComp* comp = ctrl->GetParent();
+						IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
+						if (ite == comp->GetChildren().Head())
+							ite = comp->GetChildren().Last();
+						else
+							--ite;
+						while(true)
+						{
+							IGuiCtrl* it = ExDynCast<IGuiCtrl>(*ite);
+							it->GetWindowRect(rc_it);
+							if (rc_me.Top() != rc_it.Top())
+							{
+								LONG temp = abs(rc_me.Left() - rc_it.Left());
+								if (of_it >= 0 && of_it < temp)
+								{
+									if (ite == comp->GetChildren().Last())
+										ite = comp->GetChildren().Head();
+									else
+										++ite;
+									it = ExDynCast<IGuiCtrl>(*ite);
+									it->SetFocus();
+									break;
+								}
+								of_it = temp;
+							}
+							if (ite == comp->GetChildren().Head())
+								ite = comp->GetChildren().Last();
+							else
+								--ite;
+						}
+					}
+					break;
+				case VK_DOWN:
+					{
+						CRect rc_me, rc_it;
+						ctrl->GetWindowRect(rc_me);
+						LONG of_it = -1;
+
+						IGuiComp* comp = ctrl->GetParent();
+						IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
+						if (ite == comp->GetChildren().Last())
+							ite = comp->GetChildren().Head();
+						else
+							++ite;
+						while(true)
+						{
+							IGuiCtrl* it = ExDynCast<IGuiCtrl>(*ite);
+							it->GetWindowRect(rc_it);
+							if (rc_me.Top() != rc_it.Top())
+							{
+								LONG temp = abs(rc_me.Left() - rc_it.Left());
+								if (of_it >= 0 && of_it < temp)
+								{
+									if (ite == comp->GetChildren().Head())
+										ite = comp->GetChildren().Last();
+									else
+										--ite;
+									it = ExDynCast<IGuiCtrl>(*ite);
+									it->SetFocus();
+									break;
+								}
+								of_it = temp;
+							}
+							if (ite == comp->GetChildren().Last())
+								ite = comp->GetChildren().Head();
+							else
+								++ite;
+						}
+					}
+					break;
+				case VK_LEFT:
+					ctrl->SetFocus();
+					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_SHIFT);
+					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYUP, VK_SHIFT);
+					break;
+				case VK_RIGHT:
+					ctrl->SetFocus();
+					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					break;
+				}
+			}
+			break;
 		case WM_PAINT:
 			if (lParam)
 			{
@@ -288,16 +383,18 @@ public:
 		m_Ctrl->GetScrollSize(scr_sz);
 		CRect scr_rc;
 		m_Ctrl->GetClientRect(scr_rc);
-		scr_rc.MoveTo(CPoint(scr_sz.cx, scr_sz.cy));
 		CRect itm_rc;
 		pItem->GetWindowRect(itm_rc);
 
-		if(!scr_rc.PtInRect(itm_rc.pt1))
-			scr_sz.cy += (scr_rc.pt1.y - itm_rc.pt1.y);
-		else
-		if(!scr_rc.PtInRect(itm_rc.pt2))
-			scr_sz.cy += (itm_rc.pt2.y - scr_rc.pt2.y);
-
+		LONG off1 = 0, off2 = 0;
+		if (!scr_rc.PtInRect(itm_rc.pt1))
+			off1 = itm_rc.pt1.y - scr_rc.pt1.y;
+		if (!scr_rc.PtInRect(itm_rc.pt2))
+			off2 = itm_rc.pt2.y - scr_rc.pt2.y;
+		scr_sz.cy += 
+			(off1 && off2 ? 
+			(abs(off1) < abs(off2) ? off1 : off2) : 
+			(off1 ? off1 : off2));
 		m_Ctrl->SetScrollSize(scr_sz, true);
 	}
 
@@ -319,7 +416,7 @@ public:
 			}
 			break;
 		case WM_PAINT:
-			if (m_Ctrl->IsFocus())
+			if (m_Ctrl == IGuiCtrl::GetFocus())
 			{
 				CGC gc;
 				if(!m_FocItm)
@@ -334,6 +431,12 @@ public:
 				m_FocItm->GetWindowRect(foc_rct);
 				CImgRenderer::Render(mem_img->Get(), foc_img->Get(), foc_rct, CPoint());
 			}
+			break;
+		case WM_KEYDOWN:
+			if (wParam == VK_SPACE)
+				m_FocItm->SetFocus();
+			else
+				m_FocItm->Send(ExDynCast<IGuiObject>(m_FocItm), nMessage, wParam, lParam);
 			break;
 		case WM_COMMAND:
 			if (BN_SETFOCUS == wParam)

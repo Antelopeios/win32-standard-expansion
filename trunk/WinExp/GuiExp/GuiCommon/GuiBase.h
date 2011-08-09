@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-08
-// Version:	1.0.0007.1714
+// Date:	2011-07-16
+// Version:	1.0.0006.2000
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
@@ -42,7 +42,6 @@
 //	- 1.0.0004.1020(2011-07-01)	+ 重写IGuiBase::InsEvent()接口,当事件链表中有数据时,向第二个结点处插入新结点(为了保证第一个插入的结点始终最后执行)
 //	- 1.0.0005.1550(2011-07-07)	# IGuiBase::GetPtCtrl()会返回不可见控件,导致可见控件被遮住而无法响应消息
 //	- 1.0.0006.2000(2011-07-16)	+ 在IGuiBase中添加绘图剪切区的相关接口
-//	- 1.0.0007.1714(2011-08-08)	# 当IGuiBase没有父对象时忽略消息传递
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -92,11 +91,6 @@ public:
 			GetEvent().Add(pEvent, GetEvent().Head());
 		else
 			GetEvent().Add(pEvent, GetEvent().Head() + 1);
-	}
-	void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		if (GetParent())
-			IGuiSender::Send(pGui, nMessage, wParam, lParam);
 	}
 
 	virtual CGC* GetGC() { return m_GC; }

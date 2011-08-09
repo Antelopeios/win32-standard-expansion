@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-08
-// Version:	1.0.0011.1630
+// Date:	2011-08-09
+// Version:	1.0.0012.1715
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -51,7 +51,9 @@
 //	- 1.0.0008.2000(2011-07-16)	+ 添加IGuiCtrl::GetClipRect()接口,用于绘图时动态获取当前剪切区下的绘图区域
 //	- 1.0.0009.2111(2011-07-31)	= IGuiCtrl::Init()将判断控件是否可见,并发送WM_SHOWWINDOW消息
 //	- 1.0.0010.1720(2011-08-03)	+ IGuiCtrl添加Scroll系列接口,支持事件响应获取滚动偏移并处理绘图
-//	- 1.0.0011.1630(2011-08-08)	+ IGuiCtrl添加Scroll控件绑定接口
+//	- 1.0.0011.1714(2011-08-08)	+ IGuiCtrl添加Scroll控件绑定接口
+//	- 1.0.0012.1715(2011-08-09)	# 当IGuiCtrl没有父对象时忽略消息传递
+//								^ 优化Scroll控件绑定接口的消息传递
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -111,6 +113,12 @@ protected:
 	}
 
 public:
+	void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		if (GetParent())
+			IGuiSender::Send(pGui, nMessage, wParam, lParam);
+	}
+
 	// 获得控件状态
 	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
 	virtual bool SetState(const CString& sType, void* pState) = 0;
@@ -172,16 +180,21 @@ public:
 	bool SetScrollSize(const CSize& sz, bool bWheel = false)
 	{
 		if (m_Scroll && bWheel)
+		{
 			m_Scroll->Send(
-				ExDynCast<IGuiObject>(m_Scroll), WM_MOUSEWHEEL, 0, 
-				ExMakeLong(m_szScroll.cy - sz.cy, m_szScroll.cx - sz.cx));
-		m_szScroll = sz;
-
-		CRect rc;
-		GetWindowRect(rc);
-		Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
-			(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
-		Refresh(false);
+				ExDynCast<IGuiObject>(m_Scroll), WM_MOUSEWHEEL, 
+				ExMakeLong(m_szScroll.cx - sz.cx, m_szScroll.cy - sz.cy), 
+				ExMakeLong(-1, -1));
+		}
+		else
+		{
+			m_szScroll = sz;
+			CRect rc;
+			GetWindowRect(rc);
+			Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
+				(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
+			Refresh(false);
+		}
 		return true;
 	}
 	IGuiCtrl* GetScroll() const

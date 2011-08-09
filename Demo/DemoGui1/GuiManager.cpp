@@ -193,6 +193,7 @@ protected:
 		GUI_CTL(scr_h)->SetState(_T("dn_color"), pix);
 		//GUI_CTL(scr_h)->SetVisible(false);
 		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
+		GUI_CTL(list)->SetScroll(GUI_CTL(scr_h));
 
 	#define GuiLoadBtn(name, thr_sta) \
 		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
@@ -332,7 +333,6 @@ protected:
 		GUI_WND(main)->AddComp(GUI_CTL(win_sysbtn_min));
 
 		// ÏÔÊ¾Ö÷´°¿Ú
-		GUI_CTL(list)->SetScroll(GUI_CTL(scr_h));
 		GUI_WND(main)->ShowWindow(SW_SHOW);
 	}
 

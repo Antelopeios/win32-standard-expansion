@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-05
-// Version:	1.0.0007.1708
+// Date:	2011-08-10
+// Version:	1.0.0008.1755
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -49,6 +49,7 @@
 //	- 1.0.0005.1430(2011-07-01)	= 根据GuiButton的更新调整GuiButtonEvent
 //	- 1.0.0006.1616(2011-08-03)	= 调整按钮控件的事件发送,向自身发送BM_CLICK消息,并向父窗口发送BN_CLICKED的WM_COMMAND消息
 //	- 1.0.0007.1708(2011-08-05)	+ GuiButtonEvent向父窗口发送BN_SETFOCUS与BN_KILLFOCUS的WM_COMMAND消息
+//	- 1.0.0008.1755(2011-08-10)	^ GuiButtonEvent将自动对超出剪裁区域的文字做省略处理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -64,6 +65,70 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+EXP_INLINE void GetTxtRect(const CRect& rect, const CSize& txt_clp, DWORD locate, LONG loc_off, CRect& txt_rct)
+{
+	switch(locate)
+	{
+	case 0:	// center
+		txt_rct.Set
+			(
+			CPoint
+				(
+				rect.Left() + (rect.Width() - txt_clp.cx) / 2, 
+				rect.Top() + (rect.Height() - txt_clp.cy) / 2
+				), 
+			CPoint(rect.Right(), rect.Bottom())
+			);
+		break;
+	case 1:	// top
+		txt_rct.Set
+			(
+			CPoint
+				(
+				rect.Left() + (rect.Width() - txt_clp.cx) / 2, 
+				rect.Top() + loc_off
+				), 
+			CPoint(rect.Right(), rect.Bottom())
+			);
+		break;
+	case 2:	// bottom
+		txt_rct.Set
+			(
+			CPoint
+				(
+				rect.Left() + (rect.Width() - txt_clp.cx) / 2, 
+				rect.Bottom() - txt_clp.cy - loc_off
+				), 
+			CPoint(rect.Right(), rect.Bottom())
+			);
+		break;
+	case 3:	// left
+		txt_rct.Set
+			(
+			CPoint
+				(
+				rect.Left() + loc_off, 
+				rect.Top() + (rect.Height() - txt_clp.cy) / 2
+				), 
+			CPoint(rect.Right(), rect.Bottom())
+			);
+		break;
+	case 4:	// right
+		txt_rct.Set
+			(
+			CPoint
+				(
+				rect.Right() - txt_clp.cx - loc_off, 
+				rect.Top() + (rect.Height() - txt_clp.cy) / 2
+				), 
+			CPoint(rect.Right(), rect.Bottom())
+			);
+		break;
+	}
+}
+
+//////////////////////////////////////////////////////////////////
+
 class CGuiButtonEvent : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
@@ -71,6 +136,7 @@ class CGuiButtonEvent : public IGuiEvent
 protected:
 	CRect m_rcOld;
 	CImage m_imgTmp[9];
+	CText m_txtTmp, m_txtClp;
 
 public:
 	~CGuiButtonEvent()
@@ -387,78 +453,43 @@ public:
 						), 
 					CPoint(0, m_imgTmp[8].GetHeight() * status / sta_tim)
 					);
-				// 绘文字
-				CImage txt_img(text->GetImage());
-				if (!txt_img.IsNull())
-				{
-					state = ctrl->GetState(_T("locate"), &gc);
-					if (!state) break;
-					DWORD locate = (DWORD)(state->sta_arr[0]);
-					state = ctrl->GetState(_T("loc_off"), &gc);
-					if (!state) break;
-					LONG loc_off = (LONG)(state->sta_arr[0]);
 
-					CRect txt_rct;
-					switch(locate)
-					{
-					case 0:	// center
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 1:	// top
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-								rect.Top() + loc_off
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 2:	// bottom
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-								rect.Bottom() - txt_img.GetHeight() - loc_off
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 3:	// left
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + loc_off, 
-								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 4:	// right
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Right() - txt_img.GetWidth() - loc_off, 
-								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					}
-					CImgRenderer::Render(mem_img->Get(), txt_img, txt_rct, CPoint());
+				// 绘文字
+				state = ctrl->GetState(_T("locate"), &gc);
+				if (!state) break;
+				DWORD locate = (DWORD)(state->sta_arr[0]);
+				state = ctrl->GetState(_T("loc_off"), &gc);
+				if (!state) break;
+				LONG loc_off = (LONG)(state->sta_arr[0]);
+				CRect txt_rct;
+				CSize txt_clp;
+				if (m_txtTmp == (*text))
+				{
+					CGraph tmp_grp;
+					tmp_grp.Create();
+					m_txtClp.GetSize(tmp_grp, txt_clp);
 				}
+				else
+				{
+					m_txtTmp = (*text);
+					m_txtClp = m_txtTmp;
+					CGraph tmp_grp;
+					tmp_grp.Create();
+					m_txtClp.GetSize(tmp_grp, txt_clp);
+					if (txt_clp.cx > rect.Width() - 4)
+					{
+						CString tmp(m_txtClp.GetCStr());
+						do
+						{
+							tmp.LastItem() = 0;
+							m_txtClp.SetString(tmp);
+							m_txtClp += _T("...");
+							m_txtClp.GetSize(tmp_grp, txt_clp);
+						} while (!tmp.Empty() && txt_clp.cx > rect.Width() - 4);
+					}
+				}
+				GetTxtRect(rect, txt_clp, locate, loc_off, txt_rct);
+				CImgRenderer::Render(mem_img->Get(), m_txtClp.GetImage(), txt_rct, CPoint());
 			}
 			break;
 		}
@@ -474,6 +505,7 @@ class CGuiPushBtnEvent : public IGuiEvent
 protected:
 	CRect m_rcOld;
 	CImage m_imgTmp;
+	CText m_txtTmp, m_txtClp;
 
 public:
 	~CGuiPushBtnEvent()
@@ -630,78 +662,43 @@ public:
 					mem_img->Get(), m_imgTmp, rect, 
 					CPoint(0, m_imgTmp.GetHeight() * status / sta_tim)
 					);
-				// 绘文字
-				CImage txt_img(text->GetImage());
-				if (!txt_img.IsNull())
-				{
-					state = ctrl->GetState(_T("locate"), &gc);
-					if (!state) break;
-					DWORD locate = (DWORD)(state->sta_arr[0]);
-					state = ctrl->GetState(_T("loc_off"), &gc);
-					if (!state) break;
-					LONG loc_off = (LONG)(state->sta_arr[0]);
 
-					CRect txt_rct;
-					switch(locate)
-					{
-					case 0:	// center
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 1:	// top
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-								rect.Top() + loc_off
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 2:	// bottom
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + (rect.Width() - txt_img.GetWidth()) / 2, 
-								rect.Bottom() - txt_img.GetHeight() - loc_off
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 3:	// left
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Left() + loc_off, 
-								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					case 4:	// right
-						txt_rct.Set
-							(
-							CPoint
-								(
-								rect.Right() - txt_img.GetWidth() - loc_off, 
-								rect.Top() + (rect.Height() - txt_img.GetHeight()) / 2
-								), 
-							CPoint(rect.Right(), rect.Bottom())
-							);
-						break;
-					}
-					CImgRenderer::Render(mem_img->Get(), txt_img, txt_rct, CPoint());
+				// 绘文字
+				state = ctrl->GetState(_T("locate"), &gc);
+				if (!state) break;
+				DWORD locate = (DWORD)(state->sta_arr[0]);
+				state = ctrl->GetState(_T("loc_off"), &gc);
+				if (!state) break;
+				LONG loc_off = (LONG)(state->sta_arr[0]);
+				CRect txt_rct;
+				CSize txt_clp;
+				if (m_txtTmp == (*text))
+				{
+					CGraph tmp_grp;
+					tmp_grp.Create();
+					m_txtClp.GetSize(tmp_grp, txt_clp);
 				}
+				else
+				{
+					m_txtTmp = (*text);
+					m_txtClp = m_txtTmp;
+					CGraph tmp_grp;
+					tmp_grp.Create();
+					m_txtClp.GetSize(tmp_grp, txt_clp);
+					if (txt_clp.cx > rect.Width() - 4)
+					{
+						CString tmp(m_txtClp.GetCStr());
+						do
+						{
+							tmp.LastItem() = 0;
+							m_txtClp.SetString(tmp);
+							m_txtClp += _T("...");
+							m_txtClp.GetSize(tmp_grp, txt_clp);
+						} while (!tmp.Empty() && txt_clp.cx > rect.Width() - 4);
+					}
+				}
+				GetTxtRect(rect, txt_clp, locate, loc_off, txt_rct);
+				CImgRenderer::Render(mem_img->Get(), m_txtClp.GetImage(), txt_rct, CPoint());
 			}
 			break;
 		}

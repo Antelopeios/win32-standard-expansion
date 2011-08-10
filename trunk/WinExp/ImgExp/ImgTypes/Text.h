@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-24
-// Version:	1.0.0003.1919
+// Date:	2011-08-10
+// Version:	1.0.0004.1610
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
 //								# 修正CText::GetImage()接口对颜色处理的错误
 //	- 1.0.0002.1553(2011-05-30)	= 调整CText的基类,改为同时向CString与CFont继承,以统一他们之间的接口
 //	- 1.0.0003.1919(2011-06-24)	# 修正CText::GetSize()无法自动匹配字体获取大小的问题
+//	- 1.0.0004.1610(2011-08-10)	^ 使用缓存机制优化CText::GetImage()的效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -64,6 +65,11 @@ class CText : public CString, public CFont
 {
 protected:
 	pixel_t m_Color;
+	CImage m_MemImg;
+
+	CString m_MemStr;
+	CFont m_MemFnt;
+	pixel_t m_MemClr;
 
 public:
 	CText(LPCTSTR sCont = NULL, font_t tFont = NULL, pixel_t tColor = ExRGBA(0, 0, 0, EXP_CM))
@@ -104,11 +110,9 @@ public:
 	friend bool operator==(const CText& txt1, const CText& txt2)
 	{
 		if ((CString)txt1 != (CString)txt2) return false;
+		if ((CFont)txt1 != (CFont)txt2) return false;
 		if (txt1.m_Color != txt2.m_Color) return false;
-		LOGFONT lf1 = {0}, lf2 = {0};
-		txt1.GetLogFont(&lf1);
-		txt2.GetLogFont(&lf2);
-		return (memcmp(&lf1, &lf2, sizeof(LOGFONT)) == 0);
+		return true;
 	}
 	friend bool operator!=(const CText& txt1, const CText& txt2)
 	{
@@ -127,6 +131,12 @@ public:
 	image_t GetImage()
 	{
 		if (Empty()) return NULL;
+		if (m_MemStr == (CString)(*this) && 
+			m_MemFnt == (CFont)(*this) && 
+			m_MemClr == m_Color) return m_MemImg;
+		m_MemStr = (CString)(*this);
+		m_MemFnt = (CFont)(*this);
+		m_MemClr = m_Color;
 		// 创建临时画板
 		CGraph tmp_grp;
 		tmp_grp.Create();
@@ -136,21 +146,19 @@ public:
 		CSize sz;
 		GetSize(tmp_grp, sz);
 		// 创建文字图像
-		CImage img;
-		img.SetTrust(false);
-		img.Create(sz.cx, sz.cy);
-		if (img.IsNull()) return NULL;
-		tmp_grp.SetObject(img.Get());
+		m_MemImg.Create(sz.cx, sz.cy);
+		if (m_MemImg.IsNull()) return NULL;
+		tmp_grp.SetObject(m_MemImg.Get());
 		// 绘制文字
 		CRect rc(0, 0, sz.cx, sz.cy);
-		CImgFilter::Filter(img, rc, &CFilterFill(ExRGBA(0, 0, 0, EXP_CM), 0x1));
+		CImgFilter::Filter(m_MemImg, rc, &CFilterFill(ExRGBA(0, 0, 0, EXP_CM), 0x1));
 		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), 
 			&(RECT)rc, DT_LEFT | DT_TOP);
-		CImgFilter::Filter(img, rc, &CFilterInverse(0x1));
+		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0x1));
 		if (m_Color != ExRGBA(0, 0, 0, EXP_CM))
 			CImgFilter::Filter
 				(
-				img, rc, 
+				m_MemImg, rc, 
 				&CFilterFill
 					(
 					ExRGBA
@@ -165,7 +173,7 @@ public:
 				);
 		// 清理内存并返回
 		tmp_grp.Delete();
-		return img;
+		return m_MemImg;
 	}
 };
 

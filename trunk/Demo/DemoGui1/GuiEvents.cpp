@@ -805,7 +805,7 @@ public:
 				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth() - 
-					(GUI_CTL(scr_h)->IsVisible() ? 20 : 0);
+					(GUI_CTL(scr_h)->IsVisible() ? (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth()) : 0);
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
@@ -829,7 +829,7 @@ public:
 						GUI_CTL(scr_h)->SetVisible(true);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
-						rc.pt2.x -= 20;
+						rc.pt2.x -= (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());
 						ctrl->SetWindowRect(rc);
 					}
 				}
@@ -840,7 +840,7 @@ public:
 						GUI_CTL(scr_h)->SetVisible(false);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
-						rc.pt2.x += 20;
+						rc.pt2.x += (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());
 						ctrl->SetWindowRect(rc);
 					}
 				}
@@ -879,7 +879,8 @@ public:
 				rc_wnd.Inflate(CPoint(1, 1));
 
 				LONG l, r, t, b;
-				l = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth() - 20;
+				l = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth() - 
+					(GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();

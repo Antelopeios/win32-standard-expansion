@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-13
-// Version:	1.0.0009.0154
+// Date:	2011-08-10
+// Version:	1.0.0010.1530
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -49,6 +49,7 @@
 //	- 1.0.0007.1343(2011-04-28)	= CImage::Clone()具有默认参数
 //	- 1.0.0008.2319(2011-05-24)	+ 为CImage的属性获取接口及一些常量接口添加const类型
 //	- 1.0.0009.0154(2011-07-13)	^ 提高CImage::Clone()在默认参数下的执行效率
+//	- 1.0.0010.1530(2011-08-10)	^ 再次优化CImage::Clone()的执行效率
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
@@ -63,7 +64,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgTypes/Types/Types.h"
-#include "ImgTypes/Graph.h"
+#include "ImgTypes/TypeObject.h"
 
 EXP_BEG
 
@@ -122,36 +123,7 @@ public:
 		return Get();
 	}
 
-	image_t Clone(CRect& tRect = CRect()) const
-	{
-		CRect rc_tmp(tRect), rect(0, 0, GetWidth(), GetHeight());
-		if (rc_tmp.IsEmpty()) rc_tmp = rect;
-		// 创建临时对象
-		CImage exp_img;
-		exp_img.SetTrust(false);
-		if(!exp_img.Create(rc_tmp.Width(), rc_tmp.Height()))
-			return NULL;
-		if (rc_tmp == rect)
-			memcpy(exp_img.GetPixels(), GetPixels(), GetSize());
-		else
-		{
-			CGraph exp_gra;
-			if(!exp_gra.Create())
-				return NULL;
-			CGraph exp_mem;
-			if(!exp_mem.Create())
-				return NULL;
-			// 拷贝图像
-			exp_gra.SetObject(exp_img.Get());
-			exp_mem.SetObject(Get());
-			::BitBlt(exp_gra, 0, 0, exp_img.GetWidth(), exp_img.GetHeight(), 
-					 exp_mem, rc_tmp.Left(), rc_tmp.Top(), SRCCOPY);
-			// 清理并返回对象
-			exp_mem.Delete();
-			exp_gra.Delete();
-		}
-		return exp_img;
-	}
+	image_t Clone(const CRect& tRect = CRect()) const;
 
 	LONG GetWidth() const
 	{ return m_Bitmap.bmWidth; }

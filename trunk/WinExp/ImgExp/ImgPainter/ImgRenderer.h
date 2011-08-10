@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0013.1947
+// Date:	2011-08-10
+// Version:	1.0.0014.1540
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -57,6 +57,7 @@
 //	- 1.0.0011.2350(2011-07-14)	^ 使用sse优化CRenderCopy的执行效率
 //	- 1.0.0012.1640(2011-07-15)	# 修正CRenderNormal对alpha通道处理时出现的数据溢出误差
 //	- 1.0.0013.1947(2011-07-16)	# 修正CImgRenderer::Render()在执行后有可能修改传入区域的问题
+//	- 1.0.0014.1540(2011-08-10)	^ 为CImgRenderer::Render()增加默认参数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -67,6 +68,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgTypes/Types/Types.h"
+#include "ImgTypes/Image.h"
 
 EXP_BEG
 
@@ -380,7 +382,9 @@ public:
 class CImgRenderer
 {
 public:
-	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, const CRect& rcDes, const CPoint& ptSrc, 
+	EXP_INLINE static bool Render(image_t imgDes, image_t imgSrc, 
+								  const CRect& rcDes = CRect(), 
+								  const CPoint& ptSrc = CPoint(), 
 								  IRenderObject* pRender = NULL)
 	{
 		CImage exp_des;

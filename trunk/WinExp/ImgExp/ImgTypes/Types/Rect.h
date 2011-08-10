@@ -207,12 +207,12 @@ public:
 		return rc;
 	}
 
-	EXP_INLINE TypeT Left()		{ return pt1.x; }
-	EXP_INLINE TypeT Top()		{ return pt1.y; }
-	EXP_INLINE TypeT Right()	{ return pt2.x; }
-	EXP_INLINE TypeT Bottom()	{ return pt2.y; }
-	EXP_INLINE TypeT Width()	{ return Right() - Left(); }
-	EXP_INLINE TypeT Height()	{ return Bottom() - Top(); }
+	EXP_INLINE TypeT Left() const	{ return pt1.x; }
+	EXP_INLINE TypeT Top() const	{ return pt1.y; }
+	EXP_INLINE TypeT Right() const	{ return pt2.x; }
+	EXP_INLINE TypeT Bottom() const	{ return pt2.y; }
+	EXP_INLINE TypeT Width() const	{ return Right() - Left(); }
+	EXP_INLINE TypeT Height() const	{ return Bottom() - Top(); }
 };
 
 typedef CRectT<> CRect;

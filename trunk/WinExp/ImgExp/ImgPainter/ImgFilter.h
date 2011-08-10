@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0004.1947
+// Date:	2011-08-10
+// Version:	1.0.0005.1540
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
@@ -46,6 +46,7 @@
 //								# 修正高斯模糊算法中的内存泄漏
 //	- 1.0.0003.1800(2011-07-14)	# 修正浮雕滤镜的算法错误
 //	- 1.0.0004.1947(2011-07-16)	# 修正CImgFilter::Filter()在执行后有可能修改传入区域的问题
+//	- 1.0.0005.1540(2011-08-10)	+ 添加CImgFilter::Filter()的精简参数重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -490,6 +491,10 @@ public:
 		pixel_t* pix_des = exp_des.GetPixels();
 		pFilter->Filter(pix_des, sz_des, rc_des, w, h, inx_des);
 		return true;
+	}
+	EXP_INLINE static bool Filter(image_t imgDes, IFilterObject* pFilter)
+	{
+		return Filter(imgDes, CRect(), pFilter);
 	}
 };
 

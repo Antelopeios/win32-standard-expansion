@@ -28,85 +28,37 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Font - 字体对象类
+// Image - 图像对象类实现
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-08-10
-// Version:	1.0.0001.1600
+// Version:	1.0.0000.1530
 //
 // History:
-//	- 1.0.0001.1600(2011-08-10)	+ 添加CFont比较操作符重载
+//	- 1.0.0000.1530(2011-08-10)	= 将Image的部分实现移到cpp中完成
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Font_h__
-#define __Font_h__
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-#include "ImgTypes/TypeObject.h"
-
-EXP_BEG
+#include "Image.h"
+#include "ImgPainter/ImgRenderer.h"
 
 //////////////////////////////////////////////////////////////////
 
-class CFont : public ITypeObjectT<font_t>
+image_t CImage::Clone(const CRect& tRect/* = CRect()*/) const
 {
-public:
-	typedef ITypeObjectT<font_t> base_obj_t;
-
-public:
-	CFont(font_t tFont = NULL)
-		: base_obj_t()
-	{ Set(tFont); }
-	virtual ~CFont()
-	{}
-
-public:
-	font_t operator=(font_t tType)
+	CRect rc_tmp(tRect), rect(0, 0, GetWidth(), GetHeight());
+	if (rc_tmp.IsEmpty()) rc_tmp = rect;
+	// 创建临时对象
+	CImage exp_img;
+	exp_img.SetTrust(false);
+	if(!exp_img.Create(rc_tmp.Width(), rc_tmp.Height()))
+		return NULL;
+	// 拷贝图像
+	if(!CImgRenderer::Render(exp_img, Get(), CRect(), rc_tmp.pt1, &CRenderCopy()))
 	{
-		Set(tType);
-		return Get();
+		exp_img.Delete();
+		return NULL;
 	}
-
-	font_t Create(const LOGFONT* lpLogFont)
-	{
-		if (!lpLogFont) return Get();
-		Set(::CreateFontIndirect(lpLogFont));
-		return Get();
-	}
-
-	font_t Clone() const
-	{
-		LOGFONT lf = {0};
-		GetLogFont(&lf);
-		CFont font;
-		return font.Create(&lf);
-	}
-
-	int GetLogFont(LOGFONT* pLogFont) const
-	{
-		return ::GetObject(Get(), sizeof(LOGFONT), pLogFont);
-	}
-
-	friend bool operator==(const CFont& fnt1, const CFont& fnt2)
-	{
-		LOGFONT lf1 = {0}, lf2 = {0};
-		fnt1.GetLogFont(&lf1);
-		fnt2.GetLogFont(&lf2);
-		return (memcmp(&lf1, &lf2, sizeof(LOGFONT)) == 0);
-	}
-	friend bool operator!=(const CFont& fnt1, const CFont& fnt2)
-	{
-		return !(fnt1 == fnt2);
-	}
-};
-
-//////////////////////////////////////////////////////////////////
-
-EXP_END
-
-#endif/*__Font_h__*/
+	return exp_img;
+}

@@ -311,6 +311,13 @@ public:
 
 public:
 	// »ñµÃÊôÐÔ
+	IGuiCtrl* GetFocPic(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("foc"), pGC);
+		if (!state) return NULL;
+		return (IGuiCtrl*)(state->sta_arr[0]);
+	}
 	CListT<IGuiCtrl*>* GetItems(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
@@ -415,21 +422,28 @@ public:
 				FormatItems(&gc);
 			}
 			break;
-		case WM_PAINT:
+		case WM_SETFOCUS:
 			if (m_Ctrl == IGuiCtrl::GetFocus())
 			{
 				CGC gc;
 				if(!m_FocItm)
 					m_FocItm = GetItems(&gc)->HeadItem();
 				if(!m_FocItm) break;
-				CImage* foc_img = GetFocImage(&gc);
-				if(!foc_img || foc_img->IsNull()) break;
-				CImage* mem_img = (CImage*)lParam;
-				if(!mem_img || mem_img->IsNull()) break;
+				IGuiCtrl* pic = GetFocPic(&gc);
+				if(!pic) break;
 
 				CRect foc_rct;
 				m_FocItm->GetWindowRect(foc_rct);
-				CImgRenderer::Render(mem_img->Get(), foc_img->Get(), foc_rct, CPoint());
+				pic->SetWindowRect(foc_rct);
+				pic->SetVisible(true);
+				break;
+			}
+		case WM_KILLFOCUS:
+			{
+				CGC gc;
+				IGuiCtrl* pic = GetFocPic(&gc);
+				if(!pic) break;
+				pic->SetVisible(false);
 			}
 			break;
 		case WM_KEYDOWN:

@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-20
-// Version:	1.0.0002.1747
+// Date:	2011-08-10
+// Version:	1.0.0003.1540
 //
 // History:
 //	- 1.0.0000.1627(2011-06-20)	@ 重新构建ImgDrawer,作为ImgPainter的子模块,用于绘制基本图形
 //	- 1.0.0001.1942(2011-07-16)	# 修正当CImgDrawer::Fill()传入的CRect参数超出image_t界限时导致的访问异常
 //	- 1.0.0002.1747(2011-07-20)	# 修正CImgDrawer::Fill()像素循环遍历中的一个低级错误
+//	- 1.0.0003.1540(2011-08-10)	+ 添加CImgDrawer::Fill()的精简参数重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDrawer_h__
@@ -106,6 +107,10 @@ public:
 			for(LONG x = 0, i_d = inx_des; x < w; ++x, ++i_d)
 				pix_des[i_d] = pixSrc;
 		return true;
+	}
+	EXP_INLINE static bool Fill(image_t imgDes, const pixel_t pixSrc)
+	{
+		return Fill(imgDes, CRect(), pixSrc);
 	}
 
 #pragma push_macro("PreDraw")

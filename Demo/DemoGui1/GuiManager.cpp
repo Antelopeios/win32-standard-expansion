@@ -8,10 +8,11 @@ class CGuiLoader
 protected:
 	CGC& gc;
 
-	CListT<CImage*> list_icon;
+	CListT<CImage*> list_ico;
+	CListT<CString> list_str;
 
 protected:
-	void LoadDirImage(CListT<CImage*>& lstImage, LPCTSTR sPath, ICoderObject* pCoder, CGC* pGC)
+	void LoadDirImage(CListT<CImage*>& lstImage, CListT<CString>& lstString, LPCTSTR sPath, ICoderObject* pCoder, CGC* pGC)
 	{
 		if (!sPath || !pCoder || !pGC) return;
 		CString path(sPath); path += _T("\\");
@@ -30,7 +31,7 @@ protected:
 				if (0 == wcscmp(fd.cFileName, L".") || 
 					0 == wcscmp(fd.cFileName, L"..")) continue;
 				if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-					LoadDirImage(lstImage, path + fd.cFileName, pCoder, pGC);
+					LoadDirImage(lstImage, lstString, path + fd.cFileName, pCoder, pGC);
 				else
 				{
 					file.Open(path + fd.cFileName);
@@ -40,6 +41,7 @@ protected:
 						CImage* image = ExMem::Alloc<CImage>(pGC);
 						image->Set(img);
 						lstImage.Add(image);
+						lstString.Add(fd.cFileName);
 					}
 				}
 			} while (::FindNextFile(find, &fd));
@@ -93,7 +95,18 @@ protected:
 		REG_IMG(list_item, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(path + _T("\\list_foc.png"));
 		REG_IMG(list_foc, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
-		LoadDirImage(list_icon, path + _T("\\icon"), coder, &gc);
+		LoadDirImage(list_ico, list_str, path + _T("\\icon"), coder, &gc);
+
+		file.Open(path + _T("\\scr_h.png"));
+		REG_IMG(scr_h, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\scr_h_sli.png"));
+		REG_IMG(scr_h_sli, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\scr_h_ico.png"));
+		REG_IMG(scr_h_ico, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\scr_h_up.png"));
+		REG_IMG(scr_h_up, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\scr_h_dn.png"));
+		REG_IMG(scr_h_dn, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 
 		file.Open(path + _T("\\win_sysbtn_close.png"));
 		REG_IMG(win_sysbtn_close, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
@@ -157,42 +170,66 @@ protected:
 		GuiLoadPic(tag_bg);
 		GuiLoadPic(toolbar_bg);
 
+		CText txt_btn[5];
+		txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
+		txt_btn[0].SetColor(ExRGBA(0, 0, 0, 255));
+		for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
+
 		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
 		GUI_CTL(list)->SetState(_T("image"), GUI_IMG(list));
 		CListT<IGuiCtrl*> items_list;
-		for(CListT<CImage*>::iterator_t ite = list_icon.Head(); ite != list_icon.Tail(); ++ite)
+		CListT<CImage*>::iterator_t ite_ico = list_ico.Head();
+		CListT<CString>::iterator_t ite_str = list_str.Head();
+		for(; ite_ico != list_ico.Tail() && ite_str != list_str.Tail(); ++ite_ico, ++ite_str)
 		{
 			CImage img_btn[9];
 			img_btn[4] = GUI_IMG(list_item)->Get();
 			IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
 			btn->SetState(_T("image"), img_btn);
-			btn->SetState(_T("icon"), *ite);
-			//btn->SetState(_T("text"), txt_btn);
-			//btn->SetState(_T("locate"), (void*)2);
-			//btn->SetState(_T("loc_off"), (void*)5);
-			btn->SetWindowRect(CRect(0, 0, 70, 70));
+			btn->SetState(_T("icon"), *ite_ico);
+			for(int i = 0; i < _countof(txt_btn); ++i) txt_btn[i].SetString(*ite_str);
+			btn->SetState(_T("text"), txt_btn);
+			btn->SetState(_T("locate"), (void*)2);
+			btn->SetState(_T("loc_off"), (void*)8);
+			btn->SetWindowRect(CRect(0, 0, 80, 80));
 			items_list.Add(btn);
 		}
 		GUI_CTL(list)->SetState(_T("items"), &items_list);
 		GUI_CTL(list)->SetState(_T("foc_image"), GUI_IMG(list_foc));
-		GUI_CTL(list)->SetState(_T("space"), (void*)5);
+		GUI_CTL(list)->SetState(_T("space"), (void*)15);
 		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
 		items_list.HeadItem()->SetFocus();
 
-		pixel_t pix[5] = {0};
 
 		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
-		GUI_CTL(scr_h)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
-		pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
-		GUI_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
-		//GUI_CTL(scr_h)->SetState(_T("sli_all"), (void*)100);
-		//GUI_CTL(scr_h)->SetState(_T("sli_fra"), (void*)10);
-		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
-		pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
-		GUI_CTL(scr_h)->SetState(_T("up_color"), pix);
-		GUI_CTL(scr_h)->SetState(_T("dn_color"), pix);
-		//GUI_CTL(scr_h)->SetVisible(false);
+		GUI_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)true);
+		GUI_CTL(scr_h)->SetState(_T("up_thr_sta"), (void*)true);
+		GUI_CTL(scr_h)->SetState(_T("dn_thr_sta"), (void*)true);
+		if (!GUI_IMG(scr_h) || GUI_IMG(scr_h)->IsNull())
+		{
+			pixel_t pix[5] = {0};
+			GUI_CTL(scr_h)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
+			pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
+			GUI_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
+			GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
+			pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+			GUI_CTL(scr_h)->SetState(_T("up_color"), pix);
+			GUI_CTL(scr_h)->SetState(_T("dn_color"), pix);
+		}
+		else
+		{
+			CImage img[9];
+			GUI_CTL(scr_h)->SetState(_T("sli_image"), GUI_IMG(scr_h));
+			img[4] = GUI_IMG(scr_h_sli)->Get();
+			GUI_CTL(scr_h)->SetState(_T("sli_blk_image"), img);
+			GUI_CTL(scr_h)->SetState(_T("sli_blk_icon"), GUI_IMG(scr_h_ico));
+			img[4] = GUI_IMG(scr_h_up)->Get();
+			GUI_CTL(scr_h)->SetState(_T("up_image"), img);
+			img[4] = GUI_IMG(scr_h_dn)->Get();
+			GUI_CTL(scr_h)->SetState(_T("dn_image"), img);
+		}
 		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
+
 		GUI_CTL(list)->SetScroll(GUI_CTL(scr_h));
 
 	#define GuiLoadBtn(name, thr_sta) \

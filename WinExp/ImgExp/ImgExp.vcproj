@@ -605,6 +605,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ImgTypes\Image.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ImgTypes\Image.h"
 				>
 			</File>

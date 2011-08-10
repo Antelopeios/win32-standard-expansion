@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-05
-// Version:	1.0.0002.1744
+// Date:	2011-08-10
+// Version:	1.0.0003.1508
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
 //	- 1.0.0001.1532(2011-07-21)	= 将CGuiListView内部items_t结构由指针改为对象,减轻调用复杂度
 //	- 1.0.0002.1744(2011-08-05)	+ 添加GuiListView焦点时默认列表项的背景图
+//	- 1.0.0003.1508(2011-08-10)	= 将默认列表项的背景图由图片改为Pic控件
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -117,7 +118,7 @@ protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
 	LONG m_AllLine, m_FraLine;
-	CImage m_FocImage;
+	CGuiPicture m_FocPic;
 
 public:
 	CGuiListView()
@@ -129,20 +130,27 @@ public:
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
+		AddComp(&m_FocPic);
 	}
 
 public:
 	// 获得控件状态
 	state_t* GetState(const CString& sType, CGC* pGC = NULL)
 	{
+		CString type(sType);
+		if (type.Left(4) == _T("foc_"))
+		{
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.GetState(type, pGC);
+		}
 		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
 		if (state)
 		{
+			if (state->sta_typ == _T("foc"))
+				state->sta_arr.Add(&m_FocPic);
+			else
 			if (state->sta_typ == _T("items"))
 				state->sta_arr.Add(&m_ItemList);
-			else
-			if (state->sta_typ == _T("foc_image"))
-				state->sta_arr.Add(&m_FocImage);
 			else
 			if (state->sta_typ == _T("space"))
 				state->sta_arr.Add((void*)m_Space);
@@ -159,6 +167,13 @@ public:
 	}
 	bool SetState(const CString& sType, void* pState)
 	{
+		CString type(sType);
+		if (type.Left(4) == _T("foc_"))
+		{
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.SetState(type, pState);
+		}
+		else
 		if (sType == _T("items"))
 		{
 			items_t* new_sta = (items_t*)pState;
@@ -177,12 +192,6 @@ public:
 				if (!item) continue;
 				AddComp(item);
 			}
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("foc_image"))
-		{
-			m_FocImage = *(CImage*)pState;
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

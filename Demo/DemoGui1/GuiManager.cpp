@@ -191,6 +191,7 @@ protected:
 			btn->SetState(_T("text"), txt_btn);
 			btn->SetState(_T("locate"), (void*)2);
 			btn->SetState(_T("loc_off"), (void*)8);
+			btn->SetState(_T("ico_off"), (void*)8);
 			btn->SetWindowRect(CRect(0, 0, 80, 80));
 			items_list.Add(btn);
 		}

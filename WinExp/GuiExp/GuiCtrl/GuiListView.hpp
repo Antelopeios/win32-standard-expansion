@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-10
-// Version:	1.0.0003.1508
+// Date:	2011-08-11
+// Version:	1.0.0004.1730
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
 //	- 1.0.0001.1532(2011-07-21)	= 将CGuiListView内部items_t结构由指针改为对象,减轻调用复杂度
 //	- 1.0.0002.1744(2011-08-05)	+ 添加GuiListView焦点时默认列表项的背景图
 //	- 1.0.0003.1508(2011-08-10)	= 将默认列表项的背景图由图片改为Pic控件
+//	- 1.0.0004.1730(2011-08-11)	= 列表项的图标偏移采用单独的属性(ico_off)控制
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -61,10 +62,12 @@ class CGuiLVItem : public CGuiButton /*CGuiListView内部使用的列表项*/
 protected:
 	CImage m_Icon;
 	bool m_bGlow;
+	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
 
 public:
 	CGuiLVItem()
 		: m_bGlow(false)
+		, m_IcoOff(5)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVItemEvent"), GetGC())); /*先让基类绘图*/
@@ -80,6 +83,9 @@ public:
 			if (state->sta_typ == _T("icon"))
 				state->sta_arr.Add(&m_Icon);
 			else
+			if (state->sta_typ == _T("ico_off"))
+				state->sta_arr.Add((void*)m_IcoOff);
+			else
 			if (state->sta_typ == _T("glow"))
 				state->sta_arr.Add((void*)m_bGlow);
 			else
@@ -93,6 +99,16 @@ public:
 		{
 			m_Icon = *((CImage*)pState);
 			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("ico_off"))
+		{
+			LONG old_sta = m_IcoOff;
+			m_IcoOff = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_IcoOff)
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		else
 		if (sType == _T("glow"))

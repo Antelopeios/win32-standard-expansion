@@ -217,7 +217,7 @@ public:
 				state = ctrl->GetState(_T("locate"), &gc);
 				if (!state) break;
 				DWORD locate = (DWORD)(state->sta_arr[0]);
-				state = ctrl->GetState(_T("loc_off"), &gc);
+				state = ctrl->GetState(_T("ico_off"), &gc);
 				if (!state) break;
 				LONG loc_off = (LONG)(state->sta_arr[0]) - radius;
 

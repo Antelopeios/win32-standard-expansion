@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-09
-// Version:	1.0.0012.1715
+// Date:	2011-08-11
+// Version:	1.0.0013.1730
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -54,6 +54,7 @@
 //	- 1.0.0011.1714(2011-08-08)	+ IGuiCtrl添加Scroll控件绑定接口
 //	- 1.0.0012.1715(2011-08-09)	# 当IGuiCtrl没有父对象时忽略消息传递
 //								^ 优化Scroll控件绑定接口的消息传递
+//	- 1.0.0013.1730(2011-08-11)	= IGuiCtrl在SetFocus时先发送焦点失去消息,再发送焦点获得消息
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -236,15 +237,15 @@ public:
 			if (board) board->SetFocus();
 		}
 		// 发送焦点改变消息
-		if (m_Focus)
-		{
-			m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
-			m_Focus->UpdateState();
-		}
 		if (old_fc)
 		{
 			old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
 			old_fc->UpdateState();
+		}
+		if (m_Focus)
+		{
+			m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
+			m_Focus->UpdateState();
 		}
 		return old_fc;
 	}

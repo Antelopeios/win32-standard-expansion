@@ -784,6 +784,14 @@ class CEvent_list : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_list, IGuiEvent)
 
+protected:
+	IGuiCtrl* m_OldBtn;
+
+public:
+	CEvent_list()
+		: m_OldBtn(NULL)
+	{}
+
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
@@ -848,6 +856,31 @@ public:
 			break;
 		case WM_MOUSEWHEEL:
 			GUI_CTL(scr_h)->Send(ExDynCast<IGuiObject>(GUI_CTL(scr_h)), nMessage, wParam, lParam);
+			break;
+		case WM_COMMAND:
+			if (wParam == BN_CLICKED)
+			{
+				IGuiCtrl* btn = (IGuiCtrl*)lParam;
+				if (m_OldBtn == btn) break;
+				CRect rc_btn;
+				btn->GetWindowRect(rc_btn);
+				rc_btn.pt2.y += 10;
+				btn->SetWindowRect(rc_btn);
+				btn->SetState(_T("loc_off"), (void*)18);
+				m_OldBtn = btn;
+			}
+			else
+			if (wParam == BN_KILLFOCUS)
+			{
+				IGuiCtrl* btn = (IGuiCtrl*)lParam;
+				if (m_OldBtn != btn) break;
+				CRect rc_btn;
+				btn->GetWindowRect(rc_btn);
+				rc_btn.pt2.y -= 10;
+				btn->SetWindowRect(rc_btn);
+				btn->SetState(_T("loc_off"), (void*)8);
+				m_OldBtn = NULL;
+			}
 			break;
 		}
 	}

@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-03
-// Version:	1.2.0004.0954
+// Date:	2011-08-11
+// Version:	1.2.0005.1714
+//
+// History:
+//	- 1.2.0005.1714(2011-08-11)	+ #include <conio.h>,避免一些在ANSI字符集下的编译错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __LibStd_h__
@@ -49,6 +52,7 @@
 // 标准库支持
 
 #include <stdio.h>
+#include <conio.h>
 #include <tchar.h>
 #include <time.h>
 

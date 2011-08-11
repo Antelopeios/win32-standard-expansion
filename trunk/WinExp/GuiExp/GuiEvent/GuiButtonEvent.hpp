@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-10
-// Version:	1.0.0008.1755
+// Date:	2011-08-11
+// Version:	1.0.0009.1808
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -50,6 +50,7 @@
 //	- 1.0.0006.1616(2011-08-03)	= 调整按钮控件的事件发送,向自身发送BM_CLICK消息,并向父窗口发送BN_CLICKED的WM_COMMAND消息
 //	- 1.0.0007.1708(2011-08-05)	+ GuiButtonEvent向父窗口发送BN_SETFOCUS与BN_KILLFOCUS的WM_COMMAND消息
 //	- 1.0.0008.1755(2011-08-10)	^ GuiButtonEvent将自动对超出剪裁区域的文字做省略处理
+//	- 1.0.0009.1808(2011-08-11)	^ 改进GuiButtonEvent的文字绘制算法,在高度足够时自动对文字折行显示
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -136,7 +137,7 @@ class CGuiButtonEvent : public IGuiEvent
 protected:
 	CRect m_rcOld;
 	CImage m_imgTmp[9];
-	CText m_txtTmp, m_txtClp;
+	CText m_txtTmp, m_txtClp[2];
 
 public:
 	~CGuiButtonEvent()
@@ -462,34 +463,83 @@ public:
 				if (!state) break;
 				LONG loc_off = (LONG)(state->sta_arr[0]);
 				CRect txt_rct;
-				CSize txt_clp;
-				if (m_txtTmp == (*text))
+				CSize txt_clp[2];
+				CGraph tmp_grp;
+				tmp_grp.Create();
+				text->GetSize(tmp_grp, txt_clp[0]);
+				GetTxtRect(rect, txt_clp[0], locate, loc_off, txt_rct);
+				if ((txt_rct.Height() - 6) < (txt_clp[0].cy << 1))
 				{
-					CGraph tmp_grp;
-					tmp_grp.Create();
-					m_txtClp.GetSize(tmp_grp, txt_clp);
+					if (m_txtTmp == (*text) && m_txtClp[1].Empty())
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+					else
+					{
+						m_txtClp[1].Clear();
+						m_txtTmp = (*text);
+
+						m_txtClp[0] = m_txtTmp;
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+						if (txt_clp[0].cx > rect.Width() - 4)
+						{
+							CString tmp(m_txtClp[0].GetCStr());
+							do
+							{
+								tmp.LastItem() = 0;
+								m_txtClp[0].SetString(tmp);
+								m_txtClp[0] += _T("...");
+								m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+							} while (!tmp.Empty() && txt_clp[0].cx > rect.Width() - 4);
+						}
+					}
+					GetTxtRect(rect, txt_clp[0], locate, loc_off, txt_rct);
+					CImgRenderer::Render(mem_img->Get(), m_txtClp[0].GetImage(), txt_rct, CPoint());
 				}
 				else
 				{
-					m_txtTmp = (*text);
-					m_txtClp = m_txtTmp;
-					CGraph tmp_grp;
-					tmp_grp.Create();
-					m_txtClp.GetSize(tmp_grp, txt_clp);
-					if (txt_clp.cx > rect.Width() - 4)
+					if (m_txtTmp == (*text) && !m_txtClp[1].Empty())
 					{
-						CString tmp(m_txtClp.GetCStr());
-						do
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+						m_txtClp[1].GetSize(tmp_grp, txt_clp[1]);
+					}
+					else
+					{
+						m_txtClp[1].Clear();
+						m_txtTmp = (*text);
+
+						m_txtClp[0] = m_txtTmp;
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+						if (txt_clp[0].cx > rect.Width() - 4)
 						{
-							tmp.LastItem() = 0;
-							m_txtClp.SetString(tmp);
-							m_txtClp += _T("...");
-							m_txtClp.GetSize(tmp_grp, txt_clp);
-						} while (!tmp.Empty() && txt_clp.cx > rect.Width() - 4);
+							do
+							{
+								m_txtClp[0].LastItem() = 0;
+								m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+							} while (!m_txtClp[0].Empty() && txt_clp[0].cx > rect.Width() - 4);
+						}
+
+						CString tmp(((LPCTSTR)m_txtTmp) + m_txtClp[0].GetLength());
+						m_txtClp[1] = m_txtTmp;
+						m_txtClp[1].SetString(tmp);
+						m_txtClp[1].GetSize(tmp_grp, txt_clp[1]);
+						if (txt_clp[1].cx > rect.Width() - 4)
+						{
+							do
+							{
+								tmp.LastItem() = 0;
+								m_txtClp[1].SetString(tmp);
+								m_txtClp[1] += _T("...");
+								m_txtClp[1].GetSize(tmp_grp, txt_clp[1]);
+							} while (!tmp.Empty() && txt_clp[1].cx > rect.Width() - 4);
+						}
+					}
+					GetTxtRect(rect, txt_clp[0], locate, loc_off, txt_rct);
+					CImgRenderer::Render(mem_img->Get(), m_txtClp[0].GetImage(), txt_rct, CPoint());
+					if (!m_txtClp[1].Empty())
+					{
+						GetTxtRect(rect, txt_clp[1], locate, loc_off - (2 + txt_clp[0].cy), txt_rct);
+						CImgRenderer::Render(mem_img->Get(), m_txtClp[1].GetImage(), txt_rct, CPoint());
 					}
 				}
-				GetTxtRect(rect, txt_clp, locate, loc_off, txt_rct);
-				CImgRenderer::Render(mem_img->Get(), m_txtClp.GetImage(), txt_rct, CPoint());
 			}
 			break;
 		}
@@ -505,7 +555,7 @@ class CGuiPushBtnEvent : public IGuiEvent
 protected:
 	CRect m_rcOld;
 	CImage m_imgTmp;
-	CText m_txtTmp, m_txtClp;
+	CText m_txtTmp, m_txtClp[2];
 
 public:
 	~CGuiPushBtnEvent()
@@ -671,34 +721,83 @@ public:
 				if (!state) break;
 				LONG loc_off = (LONG)(state->sta_arr[0]);
 				CRect txt_rct;
-				CSize txt_clp;
-				if (m_txtTmp == (*text))
+				CSize txt_clp[2];
+				CGraph tmp_grp;
+				tmp_grp.Create();
+				text->GetSize(tmp_grp, txt_clp[0]);
+				GetTxtRect(rect, txt_clp[0], locate, loc_off, txt_rct);
+				if ((txt_rct.Height() - 6) < (txt_clp[0].cy << 1))
 				{
-					CGraph tmp_grp;
-					tmp_grp.Create();
-					m_txtClp.GetSize(tmp_grp, txt_clp);
+					if (m_txtTmp == (*text) && m_txtClp[1].Empty())
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+					else
+					{
+						m_txtClp[1].Clear();
+						m_txtTmp = (*text);
+
+						m_txtClp[0] = m_txtTmp;
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+						if (txt_clp[0].cx > rect.Width() - 4)
+						{
+							CString tmp(m_txtClp[0].GetCStr());
+							do
+							{
+								tmp.LastItem() = 0;
+								m_txtClp[0].SetString(tmp);
+								m_txtClp[0] += _T("...");
+								m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+							} while (!tmp.Empty() && txt_clp[0].cx > rect.Width() - 4);
+						}
+					}
+					GetTxtRect(rect, txt_clp[0], locate, loc_off, txt_rct);
+					CImgRenderer::Render(mem_img->Get(), m_txtClp[0].GetImage(), txt_rct, CPoint());
 				}
 				else
 				{
-					m_txtTmp = (*text);
-					m_txtClp = m_txtTmp;
-					CGraph tmp_grp;
-					tmp_grp.Create();
-					m_txtClp.GetSize(tmp_grp, txt_clp);
-					if (txt_clp.cx > rect.Width() - 4)
+					if (m_txtTmp == (*text) && !m_txtClp[1].Empty())
 					{
-						CString tmp(m_txtClp.GetCStr());
-						do
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+						m_txtClp[1].GetSize(tmp_grp, txt_clp[1]);
+					}
+					else
+					{
+						m_txtClp[1].Clear();
+						m_txtTmp = (*text);
+
+						m_txtClp[0] = m_txtTmp;
+						m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+						if (txt_clp[0].cx > rect.Width() - 4)
 						{
-							tmp.LastItem() = 0;
-							m_txtClp.SetString(tmp);
-							m_txtClp += _T("...");
-							m_txtClp.GetSize(tmp_grp, txt_clp);
-						} while (!tmp.Empty() && txt_clp.cx > rect.Width() - 4);
+							do
+							{
+								m_txtClp[0].LastItem() = 0;
+								m_txtClp[0].GetSize(tmp_grp, txt_clp[0]);
+							} while (!m_txtClp[0].Empty() && txt_clp[0].cx > rect.Width() - 4);
+						}
+
+						CString tmp(((LPCTSTR)m_txtTmp) + m_txtClp[0].GetLength());
+						m_txtClp[1] = m_txtTmp;
+						m_txtClp[1].SetString(tmp);
+						m_txtClp[1].GetSize(tmp_grp, txt_clp[1]);
+						if (txt_clp[1].cx > rect.Width() - 4)
+						{
+							do
+							{
+								tmp.LastItem() = 0;
+								m_txtClp[1].SetString(tmp);
+								m_txtClp[1] += _T("...");
+								m_txtClp[1].GetSize(tmp_grp, txt_clp[1]);
+							} while (!tmp.Empty() && txt_clp[1].cx > rect.Width() - 4);
+						}
+					}
+					GetTxtRect(rect, txt_clp[0], locate, loc_off, txt_rct);
+					CImgRenderer::Render(mem_img->Get(), m_txtClp[0].GetImage(), txt_rct, CPoint());
+					if (!m_txtClp[1].Empty())
+					{
+						GetTxtRect(rect, txt_clp[1], locate, loc_off - (2 + txt_clp[0].cy), txt_rct);
+						CImgRenderer::Render(mem_img->Get(), m_txtClp[1].GetImage(), txt_rct, CPoint());
 					}
 				}
-				GetTxtRect(rect, txt_clp, locate, loc_off, txt_rct);
-				CImgRenderer::Render(mem_img->Get(), m_txtClp.GetImage(), txt_rct, CPoint());
 			}
 			break;
 		}

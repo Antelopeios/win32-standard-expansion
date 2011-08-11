@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-09
-// Version:	1.0.0002.1712
+// Date:	2011-08-11
+// Version:	1.0.0003.2142
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
 //	- 1.0.0001.1532(2011-07-21)	= 调整CGuiLVItemEvent的绘图算法
 //	- 1.0.0002.1712(2011-08-09)	^ 基本完善GuiLV与GuiScroll之间的接口对接
+//	- 1.0.0003.2142(2011-08-11)	# 修正几个因GuiListView没有任何Item而导致的内存访问异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -426,8 +427,10 @@ public:
 			if (m_Ctrl == IGuiCtrl::GetFocus())
 			{
 				CGC gc;
+				CListT<IGuiCtrl*>* items = GetItems(&gc);
+				if (items->Empty()) break;
 				if(!m_FocItm)
-					m_FocItm = GetItems(&gc)->HeadItem();
+					m_FocItm = items->HeadItem();
 				if(!m_FocItm) break;
 				IGuiCtrl* pic = GetFocPic(&gc);
 				if(!pic) break;
@@ -447,6 +450,7 @@ public:
 			}
 			break;
 		case WM_KEYDOWN:
+			if (!m_FocItm) break;
 			if (wParam == VK_SPACE)
 				m_FocItm->SetFocus();
 			else

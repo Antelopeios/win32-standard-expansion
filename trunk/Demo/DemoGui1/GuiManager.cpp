@@ -199,7 +199,7 @@ protected:
 		GUI_CTL(list)->SetState(_T("foc_image"), GUI_IMG(list_foc));
 		GUI_CTL(list)->SetState(_T("space"), (void*)15);
 		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
-		items_list.HeadItem()->SetFocus();
+		if (!items_list.Empty()) items_list.HeadItem()->SetFocus();
 
 
 		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));

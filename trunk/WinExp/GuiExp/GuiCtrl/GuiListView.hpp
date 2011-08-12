@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-11
-// Version:	1.0.0004.1730
+// Date:	2011-08-12
+// Version:	1.0.0005.1030
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
@@ -42,6 +42,7 @@
 //	- 1.0.0002.1744(2011-08-05)	+ 添加GuiListView焦点时默认列表项的背景图
 //	- 1.0.0003.1508(2011-08-10)	= 将默认列表项的背景图由图片改为Pic控件
 //	- 1.0.0004.1730(2011-08-11)	= 列表项的图标偏移采用单独的属性(ico_off)控制
+//	- 1.0.0005.1030(2011-08-12)	= 将默认列表项的背景图由图片改为单态按钮控件,方便支持九宫格式的焦点图片
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -134,7 +135,7 @@ protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
 	LONG m_AllLine, m_FraLine;
-	CGuiPicture m_FocPic;
+	CGuiButton m_FocPic;
 
 public:
 	CGuiListView()
@@ -146,6 +147,7 @@ public:
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
+		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
 		AddComp(&m_FocPic);
 	}
 

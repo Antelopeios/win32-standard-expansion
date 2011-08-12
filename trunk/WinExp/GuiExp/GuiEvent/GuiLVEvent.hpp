@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-11
-// Version:	1.0.0003.2142
+// Date:	2011-08-12
+// Version:	1.0.0004.1720
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
 //	- 1.0.0001.1532(2011-07-21)	= 调整CGuiLVItemEvent的绘图算法
 //	- 1.0.0002.1712(2011-08-09)	^ 基本完善GuiLV与GuiScroll之间的接口对接
 //	- 1.0.0003.2142(2011-08-11)	# 修正几个因GuiListView没有任何Item而导致的内存访问异常
+//	- 1.0.0004.1720(2011-08-12)	# 修正GuiListView总显示区域的下端没有加上空白高度的小问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -378,7 +379,7 @@ public:
 		}
 
 		// 设置滚动区域
-		itm_rc.pt2.y += scr_sz.cy;
+		itm_rc.pt2.y += (scr_sz.cy + space);
 		m_Ctrl->SetState(_T("fra_line"), (void*)rect.Height());
 		m_Ctrl->SetState(_T("all_line"), (void*)itm_rc.Bottom());
 	}

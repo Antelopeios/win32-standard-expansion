@@ -862,11 +862,21 @@ public:
 			{
 				IGuiCtrl* btn = (IGuiCtrl*)lParam;
 				if (m_OldBtn == btn) break;
+
+				CGC gc;
+				IGuiCtrl::state_t* state = btn->GetState(_T("text"), &gc);
+				if (!state) break;
+				CText* text = (CText*)(state->sta_arr[0]);
+				if (!text) break;
+				CSize txt_clp;
+				text->GetSize(txt_clp);
+
 				CRect rc_btn;
 				btn->GetWindowRect(rc_btn);
-				rc_btn.pt2.y += 10;
+				if (txt_clp.cx <= ((rc_btn.Width() - 4) << 1)) break;
+				rc_btn.pt2.y += 14;
 				btn->SetWindowRect(rc_btn);
-				btn->SetState(_T("loc_off"), (void*)18);
+				btn->SetState(_T("loc_off"), (void*)32);
 				m_OldBtn = btn;
 			}
 			else
@@ -874,11 +884,21 @@ public:
 			{
 				IGuiCtrl* btn = (IGuiCtrl*)lParam;
 				if (m_OldBtn != btn) break;
+
+				CGC gc;
+				IGuiCtrl::state_t* state = btn->GetState(_T("text"), &gc);
+				if (!state) break;
+				CText* text = (CText*)(state->sta_arr[0]);
+				if (!text) break;
+				CSize txt_clp;
+				text->GetSize(txt_clp);
+
 				CRect rc_btn;
 				btn->GetWindowRect(rc_btn);
-				rc_btn.pt2.y -= 10;
+				if (txt_clp.cx <= ((rc_btn.Width() - 4) << 1)) break;
+				rc_btn.pt2.y -= 14;
 				btn->SetWindowRect(rc_btn);
-				btn->SetState(_T("loc_off"), (void*)8);
+				btn->SetState(_T("loc_off"), (void*)18);
 				m_OldBtn = NULL;
 			}
 			break;

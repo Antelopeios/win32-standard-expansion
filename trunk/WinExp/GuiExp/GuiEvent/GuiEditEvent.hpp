@@ -134,13 +134,10 @@ public:
 		ite2 = text->Head();
 		ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
 
-		CGraph tmp_grp;
-		tmp_grp.Create();
 		CSize sz;
-
 		text->SetString(show);
 		if (text->Empty()) return NULL;
-		text->GetSize(tmp_grp, sz);
+		text->GetSize(sz);
 		if (sz.cx < rect.Width())
 			ite2->nIndx = ite3->nIndx;
 		else
@@ -149,7 +146,7 @@ public:
 			text->SetString(show);
 			if (text->Empty()) break;
 			text->GetAt(ite2) = _T('\0');
-			text->GetSize(tmp_grp, sz);
+			text->GetSize(sz);
 			if (sz.cx > rect.Width())
 				ite3->nIndx = ite2->nIndx;
 			else
@@ -160,7 +157,6 @@ public:
 			ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
 		} while(ite2->nIndx > ite1->nIndx);
 		text->SetString(_T(""));
-		tmp_grp.Delete();
 
 		// 定位区域
 		show.GetAt(ite2->nIndx) = _T('\0');
@@ -238,14 +234,9 @@ public:
 		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
 		if (m_iteOffset->Index() > edit->Head()->Index())
 		{
-			CGraph tmp_grp;
-			tmp_grp.Create();
-
 			text->SetString(*edit);
 			text->GetAt(m_iteOffset->Index()) = _T('\0');
-			text->GetSize(tmp_grp, sz_off);
-
-			tmp_grp.Delete();
+			text->GetSize(sz_off);
 		}
 		CPoint point(ptPos);
 		point.x += sz_off.cx;
@@ -256,13 +247,10 @@ public:
 		ite2->nIndx = m_iteFlicker->nIndx;
 		ite3->nIndx = edit->Tail()->nIndx;
 
-		CGraph tmp_grp;
-		tmp_grp.Create();
 		CSize sz;
-
 		text->SetString(*edit);
 		if (text->Empty()) return;
-		text->GetSize(tmp_grp, sz);
+		text->GetSize(sz);
 		if (sz.cx < point.x)
 			ite2->nIndx = ite3->nIndx;
 		else
@@ -271,7 +259,7 @@ public:
 			text->SetString(*edit);
 			if (text->Empty()) break;
 			text->GetAt(ite2) = _T('\0');
-			text->GetSize(tmp_grp, sz);
+			text->GetSize(sz);
 			if (sz.cx > point.x)
 				ite3->nIndx = ite2->nIndx;
 			else
@@ -293,7 +281,6 @@ public:
 			m_iteSelect = m_iteFlicker;
 		}
 		text->SetString(_T(""));
-		tmp_grp.Delete();
 		CheckFlicker();
 	}
 	
@@ -573,14 +560,9 @@ public:
 		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
 		if (m_iteOffset->Index() > edit->Head()->Index())
 		{
-			CGraph tmp_grp;
-			tmp_grp.Create();
-
 			tmp_text.SetString(*edit);
 			tmp_text[m_iteOffset->Index()] = _T('\0');
-			tmp_text.GetSize(tmp_grp, sz_off);
-
-			tmp_grp.Delete();
+			tmp_text.GetSize(sz_off);
 		}
 
 		// 定位选区
@@ -590,19 +572,14 @@ public:
 		CSize sz_hed, sz_sel;
 		if (ite1 != ite2)
 		{
-			CGraph tmp_grp;
-			tmp_grp.Create();
-
 			tmp_text.SetString(*edit);
 			tmp_text[ite1->Index()] = _T('\0');
-			tmp_text.GetSize(tmp_grp, sz_hed);
+			tmp_text.GetSize(sz_hed);
 
 			tmp_text.SetString(*edit);
 			tmp_text[ite2->Index()] = _T('\0');
 			tmp_text.Del(tmp_text.Head(), ite1->Index());
-			tmp_text.GetSize(tmp_grp, sz_sel);
-
-			tmp_grp.Delete();
+			tmp_text.GetSize(sz_sel);
 		}
 
 		// 绘文字
@@ -627,16 +604,13 @@ public:
 		{
 			// 获得光标高度
 			tmp_text.SetString(_T("lq"));
-			CGraph tmp_grp;
-			tmp_grp.Create();
 			CSize sz_flk;
-			tmp_text.GetSize(tmp_grp, sz_flk);
+			tmp_text.GetSize(sz_flk);
 			// 获得文字宽度
 			tmp_text.SetString(*edit);
 			tmp_text.GetAt(m_iteFlicker->Index()) = _T('\0');
 			CSize sz_txt;
-			tmp_text.GetSize(tmp_grp, sz_txt);
-			tmp_grp.Delete();
+			tmp_text.GetSize(sz_txt);
 			// 画线
 			CImgDrawer::Line
 				(

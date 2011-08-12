@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-10
-// Version:	1.0.0004.1610
+// Date:	2011-08-12
+// Version:	1.0.0005.1742
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
@@ -42,6 +42,7 @@
 //	- 1.0.0002.1553(2011-05-30)	= 调整CText的基类,改为同时向CString与CFont继承,以统一他们之间的接口
 //	- 1.0.0003.1919(2011-06-24)	# 修正CText::GetSize()无法自动匹配字体获取大小的问题
 //	- 1.0.0004.1610(2011-08-10)	^ 使用缓存机制优化CText::GetImage()的效率
+//	- 1.0.0005.1742(2011-08-12)	^ 简化CText::GetSize()接口,可支持省略tGrp参数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -119,13 +120,16 @@ public:
 		return !(txt1 == txt2);
 	}
 
-	void GetSize(graph_t tGrp, CSize& szCont)
+	void GetSize(CSize& szCont, graph_t tGrp = NULL)
 	{
+		graph_t grp_tmp = NULL;
+		if (!tGrp) tGrp = grp_tmp = ::CreateCompatibleDC(NULL);
 		HGDIOBJ old = ::SelectObject(tGrp, Get());
 		SIZE size = {0};
 		::GetTextExtentPoint32(tGrp, GetCStr(), (int)GetLength(), &size);
 		szCont = size;
 		::SelectObject(tGrp, old);
+		if (grp_tmp) ::DeleteDC(grp_tmp);
 	}
 
 	image_t GetImage()
@@ -144,7 +148,7 @@ public:
 		::SetBkMode(tmp_grp, TRANSPARENT);
 		// 获得文字区域
 		CSize sz;
-		GetSize(tmp_grp, sz);
+		GetSize(sz, tmp_grp);
 		// 创建文字图像
 		m_MemImg.Create(sz.cx, sz.cy);
 		if (m_MemImg.IsNull()) return NULL;

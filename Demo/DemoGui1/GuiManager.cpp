@@ -91,14 +91,50 @@ protected:
 
 		file.Open(path + _T("\\list.png"));
 		REG_IMG(list, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_cor_lt.png"));
+		REG_IMG(list_cor_lt, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_item_top.png"));
+		REG_IMG(list_item_top, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_cor_rt.png"));
+		REG_IMG(list_cor_rt, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_item_left.png"));
+		REG_IMG(list_item_left, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(path + _T("\\list_item.png"));
 		REG_IMG(list_item, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_item_right.png"));
+		REG_IMG(list_item_right, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_cor_lb.png"));
+		REG_IMG(list_cor_lb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_item_bottom.png"));
+		REG_IMG(list_item_bottom, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_cor_rb.png"));
+		REG_IMG(list_cor_rb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_lt.png"));
+		REG_IMG(list_foc_lt, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_top.png"));
+		REG_IMG(list_foc_top, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_rt.png"));
+		REG_IMG(list_foc_rt, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_left.png"));
+		REG_IMG(list_foc_left, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(path + _T("\\list_foc.png"));
 		REG_IMG(list_foc, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_right.png"));
+		REG_IMG(list_foc_right, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_lb.png"));
+		REG_IMG(list_foc_lb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_bottom.png"));
+		REG_IMG(list_foc_bottom, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\list_foc_rb.png"));
+		REG_IMG(list_foc_rb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		LoadDirImage(list_ico, list_str, path + _T("\\icon"), coder, &gc);
 
 		file.Open(path + _T("\\scr_h.png"));
 		REG_IMG(scr_h, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\scr_h_sli_top.png"));
+		REG_IMG(scr_h_sli_top, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
+		file.Open(path + _T("\\scr_h_sli_bottom.png"));
+		REG_IMG(scr_h_sli_bottom, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(path + _T("\\scr_h_sli.png"));
 		REG_IMG(scr_h_sli, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(path + _T("\\scr_h_ico.png"));
@@ -177,26 +213,43 @@ protected:
 
 		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
 		GUI_CTL(list)->SetState(_T("image"), GUI_IMG(list));
+		CImage img_btn[9];
+		img_btn[0] = GUI_IMG(list_cor_lt)->Get();
+		img_btn[1] = GUI_IMG(list_item_top)->Get();
+		img_btn[2] = GUI_IMG(list_cor_rt)->Get();
+		img_btn[3] = GUI_IMG(list_item_left)->Get();
+		img_btn[4] = GUI_IMG(list_item)->Get();
+		img_btn[5] = GUI_IMG(list_item_right)->Get();
+		img_btn[6] = GUI_IMG(list_cor_lb)->Get();
+		img_btn[7] = GUI_IMG(list_item_bottom)->Get();
+		img_btn[8] = GUI_IMG(list_cor_rb)->Get();
 		CListT<IGuiCtrl*> items_list;
 		CListT<CImage*>::iterator_t ite_ico = list_ico.Head();
 		CListT<CString>::iterator_t ite_str = list_str.Head();
 		for(; ite_ico != list_ico.Tail() && ite_str != list_str.Tail(); ++ite_ico, ++ite_str)
 		{
-			CImage img_btn[9];
-			img_btn[4] = GUI_IMG(list_item)->Get();
 			IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
 			btn->SetState(_T("image"), img_btn);
 			btn->SetState(_T("icon"), *ite_ico);
 			for(int i = 0; i < _countof(txt_btn); ++i) txt_btn[i].SetString(*ite_str);
 			btn->SetState(_T("text"), txt_btn);
 			btn->SetState(_T("locate"), (void*)2);
-			btn->SetState(_T("loc_off"), (void*)8);
+			btn->SetState(_T("loc_off"), (void*)18);
 			btn->SetState(_T("ico_off"), (void*)8);
-			btn->SetWindowRect(CRect(0, 0, 80, 80));
+			btn->SetWindowRect(CRect(0, 0, 80, 90));
 			items_list.Add(btn);
 		}
 		GUI_CTL(list)->SetState(_T("items"), &items_list);
-		GUI_CTL(list)->SetState(_T("foc_image"), GUI_IMG(list_foc));
+		img_btn[0] = GUI_IMG(list_foc_lt)->Get();
+		img_btn[1] = GUI_IMG(list_foc_top)->Get();
+		img_btn[2] = GUI_IMG(list_foc_rt)->Get();
+		img_btn[3] = GUI_IMG(list_foc_left)->Get();
+		img_btn[4] = GUI_IMG(list_foc)->Get();
+		img_btn[5] = GUI_IMG(list_foc_right)->Get();
+		img_btn[6] = GUI_IMG(list_foc_lb)->Get();
+		img_btn[7] = GUI_IMG(list_foc_bottom)->Get();
+		img_btn[8] = GUI_IMG(list_foc_rb)->Get();
+		GUI_CTL(list)->SetState(_T("foc_image"), img_btn);
 		GUI_CTL(list)->SetState(_T("space"), (void*)15);
 		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
 		if (!items_list.Empty()) items_list.HeadItem()->SetFocus();
@@ -221,7 +274,9 @@ protected:
 		{
 			CImage img[9];
 			GUI_CTL(scr_h)->SetState(_T("sli_image"), GUI_IMG(scr_h));
+			img[1] = GUI_IMG(scr_h_sli_top)->Get();
 			img[4] = GUI_IMG(scr_h_sli)->Get();
+			img[7] = GUI_IMG(scr_h_sli_bottom)->Get();
 			GUI_CTL(scr_h)->SetState(_T("sli_blk_image"), img);
 			GUI_CTL(scr_h)->SetState(_T("sli_blk_icon"), GUI_IMG(scr_h_ico));
 			img[4] = GUI_IMG(scr_h_up)->Get();
@@ -244,10 +299,10 @@ protected:
 		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
 	//#define GuiLoadBtn()
 
-		GuiLoadBtn(win_sysbtn_close, true);
-		GuiLoadBtn(win_sysbtn_max, true);
-		GuiLoadBtn(win_sysbtn_restore, true);
-		GuiLoadBtn(win_sysbtn_min, true);
+		GuiLoadBtn(win_sysbtn_close, 1);
+		GuiLoadBtn(win_sysbtn_max, 1);
+		GuiLoadBtn(win_sysbtn_restore, 1);
+		GuiLoadBtn(win_sysbtn_min, 1);
 
 	#define GuiLoadGrp(name, count, thr_sta) \
 		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc))); \
@@ -263,8 +318,8 @@ protected:
 		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
 	//#define GuiLoadGrp()
 
-		GuiLoadGrp(gamesearch_charmap, 26, true);
-		GuiLoadGrp(toolbar_tools, 8, true);
+		GuiLoadGrp(gamesearch_charmap, 26, 1);
+		GuiLoadGrp(toolbar_tools, 8, 1);
 
 		REG_CTL(topbar_btn, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc)));
 		CArrayT<IGuiCtrl*> items_topbar_btn;

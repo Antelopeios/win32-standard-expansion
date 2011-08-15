@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-08-15
-// Version:	1.0.0005.1606
+// Version:	1.0.0005.1640
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -42,7 +42,8 @@
 //	- 1.0.0002.1712(2011-08-09)	^ 基本完善GuiLV与GuiScroll之间的接口对接
 //	- 1.0.0003.2142(2011-08-11)	# 修正几个因GuiListView没有任何Item而导致的内存访问异常
 //	- 1.0.0004.1720(2011-08-12)	# 修正GuiListView总显示区域的下端没有加上空白高度的小问题
-//	- 1.0.0005.1606(2011-08-15)	^ GuiListView仅实现特殊的消息处理(方向按钮,鼠标滚轮等),不再处理基本绘图
+//	- 1.0.0005.1640(2011-08-15)	^ GuiListView仅实现特殊的消息处理(方向按钮,鼠标滚轮等),不再处理基本绘图
+//								# 修正当列表视图中的Items大小不一时出现的换行对齐错位
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -61,12 +62,40 @@ class CGuiLVItemEvent : public IGuiEvent /*CGuiListView内部使用的列表项*/
 	EXP_DECLARE_DYNCREATE_CLS(CGuiLVItemEvent, IGuiEvent)
 
 public:
-	CGuiLVItemEvent()
-	{}
-
-public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
+#pragma push_macro("add")
+#undef add
+#pragma push_macro("sub")
+#undef sub
+
+#define add(ite) \
+	if (ite == comp->GetChildren().Last()) \
+		ite = comp->GetChildren().Head(); \
+	else \
+		++ite; \
+	if ((*ite) == focu) \
+	{ \
+		if (ite == comp->GetChildren().Last()) \
+			ite = comp->GetChildren().Head(); \
+		else \
+			++ite; \
+	}
+//#define add()
+#define sub(ite) \
+	if (ite == comp->GetChildren().Head()) \
+		ite = comp->GetChildren().Last(); \
+	else \
+		--ite; \
+	if ((*ite) == focu) \
+	{ \
+		if (ite == comp->GetChildren().Head()) \
+			ite = comp->GetChildren().Last(); \
+		else \
+			--ite; \
+	}
+//#define sub()
+
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
 		if (!ctrl) return;
 
@@ -80,16 +109,20 @@ public:
 				{
 				case VK_UP:
 					{
+						CGC gc;
+
 						CRect rc_me, rc_it;
 						ctrl->GetWindowRect(rc_me);
 						LONG of_it = -1;
 
-						IGuiComp* comp = ctrl->GetParent();
+						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
+						if (!state) break;
+						IGuiCtrl* focu = (IGuiCtrl*)(state->sta_arr[0]);
+
 						IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
-						if (ite == comp->GetChildren().Head())
-							ite = comp->GetChildren().Last();
-						else
-							--ite;
+						sub(ite);
+
 						while(true)
 						{
 							IGuiCtrl* it = ExDynCast<IGuiCtrl>(*ite);
@@ -99,35 +132,33 @@ public:
 								LONG temp = abs(rc_me.Left() - rc_it.Left());
 								if (of_it >= 0 && of_it < temp)
 								{
-									if (ite == comp->GetChildren().Last())
-										ite = comp->GetChildren().Head();
-									else
-										++ite;
+									add(ite);
 									it = ExDynCast<IGuiCtrl>(*ite);
 									it->SetFocus();
 									break;
 								}
 								of_it = temp;
 							}
-							if (ite == comp->GetChildren().Head())
-								ite = comp->GetChildren().Last();
-							else
-								--ite;
+							sub(ite);
 						}
 					}
 					break;
 				case VK_DOWN:
 					{
+						CGC gc;
+
 						CRect rc_me, rc_it;
 						ctrl->GetWindowRect(rc_me);
 						LONG of_it = -1;
 
-						IGuiComp* comp = ctrl->GetParent();
+						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
+						if (!state) break;
+						IGuiCtrl* focu = (IGuiCtrl*)(state->sta_arr[0]);
+
 						IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
-						if (ite == comp->GetChildren().Last())
-							ite = comp->GetChildren().Head();
-						else
-							++ite;
+						add(ite);
+
 						while(true)
 						{
 							IGuiCtrl* it = ExDynCast<IGuiCtrl>(*ite);
@@ -137,20 +168,14 @@ public:
 								LONG temp = abs(rc_me.Left() - rc_it.Left());
 								if (of_it >= 0 && of_it < temp)
 								{
-									if (ite == comp->GetChildren().Head())
-										ite = comp->GetChildren().Last();
-									else
-										--ite;
+									sub(ite);
 									it = ExDynCast<IGuiCtrl>(*ite);
 									it->SetFocus();
 									break;
 								}
 								of_it = temp;
 							}
-							if (ite == comp->GetChildren().Last())
-								ite = comp->GetChildren().Head();
-							else
-								++ite;
+							add(ite);
 						}
 					}
 					break;
@@ -158,11 +183,27 @@ public:
 					ctrl->SetFocus();
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_SHIFT);
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					{
+						CGC gc;
+						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
+						if (!state) break;
+						if (IGuiCtrl::GetFocus() == (IGuiCtrl*)(state->sta_arr[0]))
+							wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					}
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYUP, VK_SHIFT);
 					break;
 				case VK_RIGHT:
 					ctrl->SetFocus();
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					{
+						CGC gc;
+						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
+						if (!state) break;
+						if (IGuiCtrl::GetFocus() == (IGuiCtrl*)(state->sta_arr[0]))
+							wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					}
 					break;
 				}
 			}
@@ -174,6 +215,8 @@ public:
 			}
 			break;
 		}
+#pragma pop_macro("sub")
+#pragma pop_macro("add")
 	}
 };
 
@@ -243,7 +286,8 @@ public:
 
 		// 遍历列表项
 		LONG all_line = 0;
-		CRect itm_rc, old_rc(scr_sz.cx, space - scr_sz.cy, scr_sz.cx, space - scr_sz.cy);
+		CRect itm_rc, lst_rc/*保存最高的itm*/, 
+			old_rc(scr_sz.cx, space - scr_sz.cy, scr_sz.cx, space - scr_sz.cy);
 		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 		{
 			IGuiCtrl* item = *ite;
@@ -253,11 +297,16 @@ public:
 			// 调整区域
 			itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
 			if (itm_rc.Right() > rect.Right())
-				itm_rc.MoveTo(CPoint(rect.Left() + space, old_rc.Bottom() + space));
+			{
+				itm_rc.MoveTo(CPoint(rect.Left() + space, lst_rc.Bottom() + space));
+				lst_rc = itm_rc;
+			}
 			// 设置当前项区域
 			item->SetWindowRect(itm_rc);
 			// 存储区域
 			old_rc = itm_rc;
+			if (itm_rc.Height() > lst_rc.Height())
+				lst_rc = itm_rc;
 		}
 
 		// 设置滚动区域

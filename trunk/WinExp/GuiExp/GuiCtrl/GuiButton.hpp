@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-08-15
-// Version:	1.0.0006.1606
+// Version:	1.0.0006.1640
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -44,7 +44,8 @@
 //	- 1.0.0003.1648(2011-07-06)	+ CGuiButton添加thr_sta属性,支持三态按钮
 //	- 1.0.0004.1752(2011-07-11)	+ 添加CGuiPushBtn控件及其对应的事件响应
 //	- 1.0.0005.1030(2011-08-12)	+ CGuiButton支持单态按钮
-//	- 1.0.0006.1606(2011-08-15)	+ 在CGuiButton中实现icon相关属性
+//	- 1.0.0006.1640(2011-08-15)	+ 在CGuiButton中实现icon相关属性
+//								# 加上icon相关属性的初始化操作
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -91,6 +92,8 @@ public:
 		: m_Status(nor)
 		, m_Locate(center)
 		, m_LocOff(5)
+		, m_bGlow(false)
+		, m_IcoOff(5)
 		, m_ThreeSta(0)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));

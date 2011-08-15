@@ -56,7 +56,7 @@ class CGuiSlider : public CGuiPicture /*滚动条滑槽*/
 	EXP_DECLARE_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
 
 protected:
-	CGuiLVItem m_Slider;
+	CGuiButton m_Slider;
 	LONG m_All/*全部内容长度*/, m_Fra/*片段长度*/, m_Pos/*位置*/;
 	bool m_Ori; // 方向
 

@@ -14,8 +14,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	CIOFile f_xml(/*_T("E:/Administrator/桌面/test.xml")*/_T("C:/Users/Working/Desktop/test.xml"));
-	CGuiManager::Load(&f_xml);
+	//CIOFile f_xml(/*_T("E:/Administrator/桌面/test.xml")*/_T("C:/Users/Working/Desktop/test.xml"));
+	//CGuiManager::Load(&f_xml);
 
 	// 垃圾回收器
 	CGC& gc = ExGC();

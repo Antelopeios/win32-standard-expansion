@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-12
-// Version:	1.0.0004.1720
+// Date:	2011-08-15
+// Version:	1.0.0005.1606
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -42,6 +42,7 @@
 //	- 1.0.0002.1712(2011-08-09)	^ 基本完善GuiLV与GuiScroll之间的接口对接
 //	- 1.0.0003.2142(2011-08-11)	# 修正几个因GuiListView没有任何Item而导致的内存访问异常
 //	- 1.0.0004.1720(2011-08-12)	# 修正GuiListView总显示区域的下端没有加上空白高度的小问题
+//	- 1.0.0005.1606(2011-08-15)	^ GuiListView仅实现特殊的消息处理(方向按钮,鼠标滚轮等),不再处理基本绘图
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -59,13 +60,8 @@ class CGuiLVItemEvent : public IGuiEvent /*CGuiListView内部使用的列表项*/
 {
 	EXP_DECLARE_DYNCREATE_CLS(CGuiLVItemEvent, IGuiEvent)
 
-protected:
-	CImage* m_IconOld;
-	CImage m_IconTmp;
-
 public:
 	CGuiLVItemEvent()
-		: m_IconOld(NULL)
 	{}
 
 public:
@@ -169,120 +165,6 @@ public:
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
 					break;
 				}
-			}
-			break;
-		case WM_PAINT:
-			if (lParam)
-			{
-				CGC gc;
-
-				// 获得属性
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("icon"), &gc);
-				if (!state) break;
-				CImage* icon = (CImage*)(state->sta_arr[0]);
-				if (!icon || icon->IsNull()) break;
-
-				state = ctrl->GetState(_T("glow"), &gc);
-				if (!state) break;
-				bool glow = (bool)(LONG_PTR)(state->sta_arr[0]);
-
-				CImage* mem_img = (CImage*)lParam;
-				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect;
-				ctrl->GetClipRect(rect);
-
-				// 处理
-				LONG radius = 0;
-				if (glow)
-				{
-					CFilterGauss filter;
-					radius = filter.m_Radius;
-					if (m_IconOld != icon)
-					{
-						CPoint pt_flt(radius << 1, radius << 1);
-						// 将图片扩大
-						CRect rc(0, 0, icon->GetWidth(), icon->GetHeight());
-						m_IconTmp = icon->Clone(rc + pt_flt);
-						// 阴影化
-						CImgFilter::Filter(m_IconTmp, CRect(), &CFilterFill(0, 0xe));
-						CImgFilter::Filter(m_IconTmp, CRect(), &filter);
-						// 阴影叠加
-						rc.Offset(pt_flt);
-						CImgRenderer::Render(m_IconTmp, icon->Get(), rc, CPoint(), &CRenderOverlay());
-						// 保存指针
-						m_IconOld = icon;
-					}
-					icon = &m_IconTmp;
-				}
-
-				// 绘图
-				state = ctrl->GetState(_T("locate"), &gc);
-				if (!state) break;
-				DWORD locate = (DWORD)(state->sta_arr[0]);
-				state = ctrl->GetState(_T("ico_off"), &gc);
-				if (!state) break;
-				LONG loc_off = (LONG)(state->sta_arr[0]) - radius;
-
-				CRect icon_rct;
-				switch(locate)
-				{
-				case 0:	// center
-					icon_rct.Set
-						(
-						CPoint
-							(
-							rect.Left() + (rect.Width() - icon->GetWidth()) / 2, 
-							rect.Top() + (rect.Height() - icon->GetHeight()) / 2
-							), 
-						CPoint(rect.Right(), rect.Bottom())
-						);
-					break;
-				case 1:	// top
-					icon_rct.Set
-						(
-						CPoint
-							(
-							rect.Left() + (rect.Width() - icon->GetWidth()) / 2, 
-							rect.Bottom() - icon->GetHeight() - loc_off
-							), 
-						CPoint(rect.Right(), rect.Bottom())
-						);
-					break;
-				case 2:	// bottom
-					icon_rct.Set
-						(
-						CPoint
-							(
-							rect.Left() + (rect.Width() - icon->GetWidth()) / 2, 
-							rect.Top() + loc_off
-							), 
-						CPoint(rect.Right(), rect.Bottom())
-						);
-					break;
-				case 3:	// left
-					icon_rct.Set
-						(
-						CPoint
-							(
-							rect.Right() - icon->GetWidth() - loc_off, 
-							rect.Top() + (rect.Height() - icon->GetHeight()) / 2
-							), 
-						CPoint(rect.Right(), rect.Bottom())
-						);
-					break;
-				case 4:	// right
-					icon_rct.Set
-						(
-						CPoint
-							(
-							rect.Left() + loc_off, 
-							rect.Top() + (rect.Height() - icon->GetHeight()) / 2
-							), 
-						CPoint(rect.Right(), rect.Bottom())
-						);
-					break;
-				}
-				CImgRenderer::Render(mem_img->Get(), icon->Get(), icon_rct, CPoint());
 			}
 			break;
 		case WM_MOUSEWHEEL:

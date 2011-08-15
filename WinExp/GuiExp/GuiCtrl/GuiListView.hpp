@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-12
-// Version:	1.0.0005.1030
+// Date:	2011-08-15
+// Version:	1.0.0006.1606
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
@@ -43,6 +43,7 @@
 //	- 1.0.0003.1508(2011-08-10)	= 将默认列表项的背景图由图片改为Pic控件
 //	- 1.0.0004.1730(2011-08-11)	= 列表项的图标偏移采用单独的属性(ico_off)控制
 //	- 1.0.0005.1030(2011-08-12)	= 将默认列表项的背景图由图片改为单态按钮控件,方便支持九宫格式的焦点图片
+//	- 1.0.0006.1606(2011-08-15)	^ 将CGuiLVItem的具体属性转移到CGuiButton中实现,仅保留特殊的事件响应
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -60,65 +61,11 @@ class CGuiLVItem : public CGuiButton /*CGuiListView内部使用的列表项*/
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiLVItem, CGuiButton)
 
-protected:
-	CImage m_Icon;
-	bool m_bGlow;
-	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
-
 public:
 	CGuiLVItem()
-		: m_bGlow(false)
-		, m_IcoOff(5)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVItemEvent"), GetGC())); /*先让基类绘图*/
-	}
-
-public:
-	// 获得控件状态
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
-	{
-		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("icon"))
-				state->sta_arr.Add(&m_Icon);
-			else
-			if (state->sta_typ == _T("ico_off"))
-				state->sta_arr.Add((void*)m_IcoOff);
-			else
-			if (state->sta_typ == _T("glow"))
-				state->sta_arr.Add((void*)m_bGlow);
-			else
-				state = EXP_BASE::GetState(sType, pGC);
-		}
-		return state;
-	}
-	bool SetState(const CString& sType, void* pState)
-	{
-		if (sType == _T("icon"))
-		{
-			m_Icon = *((CImage*)pState);
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("ico_off"))
-		{
-			LONG old_sta = m_IcoOff;
-			m_IcoOff = (LONG)(LONG_PTR)pState;
-			if (old_sta != m_IcoOff)
-				return EXP_BASE::SetState(sType, pState);
-			else
-				return true;
-		}
-		else
-		if (sType == _T("glow"))
-		{
-			m_bGlow = (bool)(LONG_PTR)pState;
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-			return EXP_BASE::SetState(sType, pState);
 	}
 };
 

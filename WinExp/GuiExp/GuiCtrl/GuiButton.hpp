@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-12
-// Version:	1.0.0005.1030
+// Date:	2011-08-15
+// Version:	1.0.0006.1606
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -44,6 +44,7 @@
 //	- 1.0.0003.1648(2011-07-06)	+ CGuiButton添加thr_sta属性,支持三态按钮
 //	- 1.0.0004.1752(2011-07-11)	+ 添加CGuiPushBtn控件及其对应的事件响应
 //	- 1.0.0005.1030(2011-08-12)	+ CGuiButton支持单态按钮
+//	- 1.0.0006.1606(2011-08-15)	+ 在CGuiButton中实现icon相关属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -75,6 +76,10 @@ protected:
 	status_t m_Status;	// 按钮状态
 	locate_t m_Locate;	// 文字位置
 	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
+
+	CImage m_Icon;
+	bool m_bGlow;		// 是否绘制图标外发光
+	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
 
 	int m_ThreeSta;		// 是否是三态按钮
 	pixel_t m_Color[5];
@@ -125,6 +130,15 @@ public:
 			if (state->sta_typ == _T("text"))
 				for(int i = 0; i < _countof(m_Text); ++i)
 					state->sta_arr.Add(m_Text + i);
+			else
+			if (state->sta_typ == _T("icon"))
+				state->sta_arr.Add(&m_Icon);
+			else
+			if (state->sta_typ == _T("ico_off"))
+				state->sta_arr.Add((void*)m_IcoOff);
+			else
+			if (state->sta_typ == _T("glow"))
+				state->sta_arr.Add((void*)m_bGlow);
 		}
 		return state;
 	}
@@ -189,6 +203,32 @@ public:
 			for(int i = 0; i < _countof(m_Text); ++i)
 				m_Text[i] = *((CText*)pState + i);
 			return EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("icon"))
+		{
+			m_Icon = *((CImage*)pState);
+			return EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("ico_off"))
+		{
+			LONG old_sta = m_IcoOff;
+			m_IcoOff = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_IcoOff)
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
+		}
+		else
+		if (sType == _T("glow"))
+		{
+			bool old_sta = m_bGlow;
+			m_bGlow = (bool)(LONG_PTR)pState;
+			if (old_sta != m_bGlow)
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
 		}
 		return false;
 	}

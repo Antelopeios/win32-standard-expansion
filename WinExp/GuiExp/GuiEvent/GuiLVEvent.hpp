@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-08-15
-// Version:	1.0.0005.1640
+// Version:	1.0.0005.2236
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -42,8 +42,9 @@
 //	- 1.0.0002.1712(2011-08-09)	^ 基本完善GuiLV与GuiScroll之间的接口对接
 //	- 1.0.0003.2142(2011-08-11)	# 修正几个因GuiListView没有任何Item而导致的内存访问异常
 //	- 1.0.0004.1720(2011-08-12)	# 修正GuiListView总显示区域的下端没有加上空白高度的小问题
-//	- 1.0.0005.1640(2011-08-15)	^ GuiListView仅实现特殊的消息处理(方向按钮,鼠标滚轮等),不再处理基本绘图
+//	- 1.0.0005.2236(2011-08-15)	^ GuiListView仅实现特殊的消息处理(方向按钮,鼠标滚轮等),不再处理基本绘图
 //								# 修正当列表视图中的Items大小不一时出现的换行对齐错位
+//								# 修正使用方向键控制列表项焦点时偶尔出现无法移动焦点的情况
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -70,27 +71,27 @@ public:
 #undef sub
 
 #define add(ite) \
-	if (ite == comp->GetChildren().Last()) \
-		ite = comp->GetChildren().Head(); \
+	if (ite == items->Last()) \
+		ite = items->Head(); \
 	else \
 		++ite; \
-	if ((*ite) == focu) \
+	if (!IGuiCtrl::IsEffect(*ite)) \
 	{ \
-		if (ite == comp->GetChildren().Last()) \
-			ite = comp->GetChildren().Head(); \
+		if (ite == items->Last()) \
+			ite = items->Head(); \
 		else \
 			++ite; \
 	}
 //#define add()
 #define sub(ite) \
-	if (ite == comp->GetChildren().Head()) \
-		ite = comp->GetChildren().Last(); \
+	if (ite == items->Head()) \
+		ite = items->Last(); \
 	else \
 		--ite; \
-	if ((*ite) == focu) \
+	if (!IGuiCtrl::IsEffect(*ite)) \
 	{ \
-		if (ite == comp->GetChildren().Head()) \
-			ite = comp->GetChildren().Last(); \
+		if (ite == items->Head()) \
+			ite = items->Last(); \
 		else \
 			--ite; \
 	}
@@ -98,6 +99,8 @@ public:
 
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
 		if (!ctrl) return;
+
+		typedef CListT<IGuiCtrl*> items_t;
 
 		// 处理消息
 		switch( nMessage )
@@ -116,16 +119,16 @@ public:
 						LONG of_it = -1;
 
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
+						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
 						if (!state) break;
-						IGuiCtrl* focu = (IGuiCtrl*)(state->sta_arr[0]);
+						items_t* items = (items_t*)(state->sta_arr[0]);
 
-						IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
+						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
 						sub(ite);
 
 						while(true)
 						{
-							IGuiCtrl* it = ExDynCast<IGuiCtrl>(*ite);
+							IGuiCtrl* it = (*ite);
 							it->GetWindowRect(rc_it);
 							if (rc_me.Top() != rc_it.Top())
 							{
@@ -133,7 +136,14 @@ public:
 								if (of_it >= 0 && of_it < temp)
 								{
 									add(ite);
-									it = ExDynCast<IGuiCtrl>(*ite);
+									it = (*ite);
+									it->SetFocus();
+									break;
+								}
+								else
+								if (temp == 0)
+								{
+									it = (*ite);
 									it->SetFocus();
 									break;
 								}
@@ -152,16 +162,16 @@ public:
 						LONG of_it = -1;
 
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
+						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
 						if (!state) break;
-						IGuiCtrl* focu = (IGuiCtrl*)(state->sta_arr[0]);
+						items_t* items = (items_t*)(state->sta_arr[0]);
 
-						IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
+						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
 						add(ite);
 
 						while(true)
 						{
-							IGuiCtrl* it = ExDynCast<IGuiCtrl>(*ite);
+							IGuiCtrl* it = (*ite);
 							it->GetWindowRect(rc_it);
 							if (rc_me.Top() != rc_it.Top())
 							{
@@ -169,7 +179,14 @@ public:
 								if (of_it >= 0 && of_it < temp)
 								{
 									sub(ite);
-									it = ExDynCast<IGuiCtrl>(*ite);
+									it = (*ite);
+									it->SetFocus();
+									break;
+								}
+								else
+								if (temp == 0)
+								{
+									it = (*ite);
 									it->SetFocus();
 									break;
 								}
@@ -183,27 +200,11 @@ public:
 					ctrl->SetFocus();
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_SHIFT);
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
-					{
-						CGC gc;
-						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
-						if (!state) break;
-						if (IGuiCtrl::GetFocus() == (IGuiCtrl*)(state->sta_arr[0]))
-							wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
-					}
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYUP, VK_SHIFT);
 					break;
 				case VK_RIGHT:
 					ctrl->SetFocus();
 					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
-					{
-						CGC gc;
-						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("foc"), &gc);
-						if (!state) break;
-						if (IGuiCtrl::GetFocus() == (IGuiCtrl*)(state->sta_arr[0]))
-							wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
-					}
 					break;
 				}
 			}

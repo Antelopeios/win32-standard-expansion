@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-04
-// Version:	1.0.0014.1538
+// Date:	2011-08-15
+// Version:	1.0.0015.2236
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -54,6 +54,7 @@
 //	- 1.0.0012.1702(2011-07-15)	^ 优化WM_PAINT时位图覆盖的内存消耗及时间效率
 //	- 1.0.0013.1958(2011-07-16)	^ 采用剪切区方式优化WM_PAINT时所有内存缓冲位图的效率
 //	- 1.0.0014.1538(2011-08-04)	= 由于WM_COMMAND与WM_NOTIFY消息是子控件发给父控件的消息,因此不再向下转发这两个消息
+//	- 1.0.0015.2236(2011-08-15)	# 修正当某个控件不可见或无法拥有焦点时,焦点切换将被卡在它前一个控件那里无法继续的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -185,6 +186,13 @@ protected:
 							ite = comp->GetChildren().Last();
 						else
 							--ite;
+						if (!IGuiCtrl::IsEffect(ExDynCast<IGuiCtrl>(*ite)))
+						{
+							if (ite == comp->GetChildren().Head())
+								ite = comp->GetChildren().Last();
+							else
+								--ite;
+						}
 					}
 					else
 					{
@@ -192,6 +200,13 @@ protected:
 							ite = comp->GetChildren().Head();
 						else
 							++ite;
+						if (!IGuiCtrl::IsEffect(ExDynCast<IGuiCtrl>(*ite)))
+						{
+							if (ite == comp->GetChildren().Last())
+								ite = comp->GetChildren().Head();
+							else
+								++ite;
+						}
 					}
 					IGuiCtrl* next = ExDynCast<IGuiCtrl>(*ite);
 					if (!next) goto EndWndSend;

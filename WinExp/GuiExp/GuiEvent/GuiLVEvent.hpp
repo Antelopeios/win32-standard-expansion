@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-15
-// Version:	1.0.0005.2236
+// Date:	2011-08-17
+// Version:	1.0.0006.0940
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -45,6 +45,7 @@
 //	- 1.0.0005.2236(2011-08-15)	^ GuiListView仅实现特殊的消息处理(方向按钮,鼠标滚轮等),不再处理基本绘图
 //								# 修正当列表视图中的Items大小不一时出现的换行对齐错位
 //								# 修正使用方向键控制列表项焦点时偶尔出现无法移动焦点的情况
+//	- 1.0.0006.0940(2011-08-17)	# 当GuiListView中有子控件时,左右的方向键不应该将焦点移到子控件上去
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -114,14 +115,14 @@ public:
 					{
 						CGC gc;
 
-						CRect rc_me, rc_it;
-						ctrl->GetWindowRect(rc_me);
-						LONG of_it = -1;
-
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
 						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
 						if (!state) break;
 						items_t* items = (items_t*)(state->sta_arr[0]);
+
+						CRect rc_me, rc_it;
+						ctrl->GetWindowRect(rc_me);
+						LONG of_it = -1;
 
 						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
 						sub(ite);
@@ -157,14 +158,14 @@ public:
 					{
 						CGC gc;
 
-						CRect rc_me, rc_it;
-						ctrl->GetWindowRect(rc_me);
-						LONG of_it = -1;
-
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
 						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
 						if (!state) break;
 						items_t* items = (items_t*)(state->sta_arr[0]);
+
+						CRect rc_me, rc_it;
+						ctrl->GetWindowRect(rc_me);
+						LONG of_it = -1;
 
 						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
 						add(ite);
@@ -197,14 +198,32 @@ public:
 					}
 					break;
 				case VK_LEFT:
-					ctrl->SetFocus();
-					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_SHIFT);
-					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
-					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYUP, VK_SHIFT);
+					{
+						CGC gc;
+
+						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
+						if (!state) break;
+						items_t* items = (items_t*)(state->sta_arr[0]);
+
+						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
+						sub(ite);
+						(*ite)->SetFocus();
+					}
 					break;
 				case VK_RIGHT:
-					ctrl->SetFocus();
-					wnd->Send(ExDynCast<IGuiObject>(wnd), WM_KEYDOWN, VK_TAB);
+					{
+						CGC gc;
+
+						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
+						if (!state) break;
+						items_t* items = (items_t*)(state->sta_arr[0]);
+
+						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
+						add(ite);
+						(*ite)->SetFocus();
+					}
 					break;
 				}
 			}

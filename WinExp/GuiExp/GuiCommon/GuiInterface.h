@@ -122,7 +122,7 @@ public:
 	list_t& GetChildren() { return *m_Cldr; }
 
 	// 查找
-	list_t::iterator_t& FindComp(IGuiComp* pComp) { return list_t::finder_t::Find(GetChildren(), pComp); }
+	list_t::iterator_t& FindComp(IGuiComp* pComp) { return GetChildren().Find(pComp); }
 
 	// 组合接口
 	virtual void AddComp(IGuiComp* pComp)
@@ -231,7 +231,7 @@ public:
 	evt_list_t& GetEvent() { return *m_CldrEvt; }
 
 	// 查找
-	evt_list_t::iterator_t& FindEvent(IGuiEvent* pEvent) { return evt_list_t::finder_t::Find(GetEvent(), pEvent); }
+	evt_list_t::iterator_t& FindEvent(IGuiEvent* pEvent) { return GetEvent().Find(pEvent); }
 
 	// 组合接口
 	virtual void AddEvent(IGuiEvent* pEvent)

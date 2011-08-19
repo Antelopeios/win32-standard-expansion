@@ -115,10 +115,10 @@ public:
 	{
 		HGDIOBJ tmp_obj(::SelectObject(Get(), hObj));
 		DWORD type = ::GetObjectType(hObj);
-		if (typlst_t::finder_t::Find(m_TypLst, type) == m_TypLst.Tail())
+		if (m_TypLst.Find(m_TypLst) == m_TypLst.Tail())
 		{
 			m_TypLst.Add(type);
-			if (tmp_obj && (objlst_t::finder_t::Find(m_ObjLst, tmp_obj) == m_ObjLst.Tail()))
+			if (tmp_obj && (m_ObjLst.Find(tmp_obj) == m_ObjLst.Tail()))
 				m_ObjLst.Add(tmp_obj);
 		}
 		return tmp_obj;

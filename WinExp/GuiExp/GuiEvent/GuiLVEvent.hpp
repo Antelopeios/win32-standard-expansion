@@ -124,7 +124,7 @@ public:
 						ctrl->GetWindowRect(rc_me);
 						LONG of_it = -1;
 
-						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
+						items_t::iterator_t ite = items->Find(ctrl);
 						sub(ite);
 
 						while(true)
@@ -167,7 +167,7 @@ public:
 						ctrl->GetWindowRect(rc_me);
 						LONG of_it = -1;
 
-						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
+						items_t::iterator_t ite = items->Find(ctrl);
 						add(ite);
 
 						while(true)
@@ -206,7 +206,7 @@ public:
 						if (!state) break;
 						items_t* items = (items_t*)(state->sta_arr[0]);
 
-						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
+						items_t::iterator_t ite = items->Find(ctrl);
 						sub(ite);
 						(*ite)->SetFocus();
 					}
@@ -220,7 +220,7 @@ public:
 						if (!state) break;
 						items_t* items = (items_t*)(state->sta_arr[0]);
 
-						items_t::iterator_t ite = items_t::finder_t::Find(*items, ctrl);
+						items_t::iterator_t ite = items->Find(ctrl);
 						add(ite);
 						(*ite)->SetFocus();
 					}

@@ -147,7 +147,7 @@ public:
 			{
 				IGuiCtrl* item = *ite;
 				if (!item) continue;
-				items_t::iterator_t it = items_t::finder_t::Find(*new_sta, item);
+				items_t::iterator_t it = new_sta->Find(item);
 				if (it == new_sta->Tail()) DelComp(item);
 			}
 			m_ItemList = *(items_t*)pState;

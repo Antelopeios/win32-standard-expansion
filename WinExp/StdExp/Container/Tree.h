@@ -127,7 +127,7 @@ public:
 		{
 			if (!Pare) return NULL;
 			_Item* item = this;
-			ite_t ite = list_t::finder_t::Find(Pare->Chdr, item);
+			ite_t ite = Pare->Chdr.Find(item);
 			if (ite == Pare->Chdr.Tail()) return NULL;
 			if ((++ite) != Pare->Chdr.Tail()) return *ite;
 			// Tail, µÝ¹é±éÀú
@@ -143,7 +143,7 @@ public:
 		{
 			if (!Pare) return NULL;
 			_Item* item = this;
-			ite_t ite = list_t::finder_t::Find(Pare->Chdr, item);
+			ite_t ite = Pare->Chdr.Find(item);
 			if (ite == Pare->Chdr.Tail()) return NULL;
 			if (ite == Pare->Chdr.Head()) return Pare;
 			return (*(--ite))->GetChdrLast();
@@ -154,7 +154,7 @@ public:
 			if (!item) return;
 			ite_t ite = Chdr.Tail();
 			if (repl)
-				ite = list_t::finder_t::Find(Chdr, repl);
+				ite = Chdr.Find(repl);
 			Chdr.Add(item, ite);
 			item->Pare = this;
 		}

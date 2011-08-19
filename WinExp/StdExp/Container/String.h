@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-29
-// Version:	1.0.0023.1555
+// Date:	2011-08-19
+// Version:	1.0.0024.1105
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -52,6 +52,8 @@
 //								# 修正CStringT::LastItem()定位错误的问题
 //	- 1.0.0023.1555(2011-07-29)	+ CStringT::Compare()支持替换默认的比较函数接口进行字符串比较
 //								+ 为CStringT增加一些方便的功能接口
+//	- 1.0.0024.1105(2011-08-19)	+ 为CStringT的一些接口添加返回值
+//								+ 添加CStringT::Trim()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -257,28 +259,30 @@ public:
 		return Mid((int)GetLength() - nCount, -1);
 	}
 
-	void Upper()
+	CStringT& Upper()
 	{
-		if (Empty()) return;
+		if (Empty()) return (*this);
 		type_t* s = m_Array, *str = m_Array;
 		if (sizeof(type_t) == 1)
 			while(*s) *str++ = toupper(*s++);
 		else
 			while(*s) *str++ = towupper(*s++);
+		return (*this);
 	}
-	void Lower()
+	CStringT& Lower()
 	{
-		if (Empty()) return;
+		if (Empty()) return (*this);
 		type_t* s = m_Array, *str = m_Array;
 		if (sizeof(type_t) == 1)
 			while(*s) *str++ = tolower(*s++);
 		else
 			while(*s) *str++ = towlower(*s++);
+		return (*this);
 	}
 
-	void TrimLeft(const type_t cTar)
+	CStringT& TrimLeft(const type_t cTar)
 	{
-		if (Empty()) return;
+		if (Empty()) return (*this);
 		int cnt = 0;
 		type_t* str = m_Array;
 		while(*str)
@@ -287,16 +291,18 @@ public:
 			++cnt;
 		}
 		Del(Head(), cnt);
+		return (*this);
 	}
-	void TrimLeft(const type_t* sTar)
+	CStringT& TrimLeft(const type_t* sTar)
 	{
-		if (!sTar) return;
+		if (!sTar) return (*this);
 		type_t* str = (type_t*)sTar;
 		while(*str) TrimLeft(*str++);
+		return (*this);
 	}
-	void TrimRight(const type_t cTar)
+	CStringT& TrimRight(const type_t cTar)
 	{
-		if (Empty()) return;
+		if (Empty()) return (*this);
 		int cnt = 0, len = GetLength();
 		type_t* str = m_Array + len - 1;
 		while(cnt < len)
@@ -305,10 +311,11 @@ public:
 			++cnt;
 		}
 		Del(Tail() - cnt, cnt);
+		return (*this);
 	}
-	void TrimRight(const type_t* sTar)
+	CStringT& TrimRight(const type_t* sTar)
 	{
-		if (!sTar) return;
+		if (!sTar) return (*this);
 		int cnt = 0, len = (sizeof(type_t) == 1 ? strlen((char*)sTar) : wcslen((wchar_t*)sTar));
 		type_t* str = (type_t*)sTar + len - 1;
 		while(cnt < len)
@@ -316,6 +323,19 @@ public:
 			TrimRight(*str--);
 			++cnt;
 		}
+		return (*this);
+	}
+	CStringT& Trim(const type_t cTar)
+	{
+		TrimLeft(cTar);
+		TrimRight(cTar);
+		return (*this);
+	}
+	CStringT& Trim(const type_t* sTar)
+	{
+		TrimLeft(sTar);
+		TrimRight(sTar);
+		return (*this);
 	}
 
 	typedef int (__cdecl *a_comp_t)(const char*, const char*);

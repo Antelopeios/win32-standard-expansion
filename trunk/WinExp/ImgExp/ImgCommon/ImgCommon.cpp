@@ -40,8 +40,4 @@
 //	- 1.0.0000.0125(2011-07-07)	@ “˝»ÎStdExp.lib
 //////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#pragma comment(lib, "../../_Output/Debug/StdExp.lib")
-#else
-#pragma comment(lib, "../../_Output/Release/StdExp.lib")
-#endif
+#pragma comment(lib, "StdExp.lib")

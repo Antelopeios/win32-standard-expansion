@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)_Output\$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)_Output\Temp\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)!)bin\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)!)tmp\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;;&quot;$(OutDir)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -90,8 +90,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)_Output\$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)_Output\Temp\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)!)bin\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)!)tmp\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -115,7 +115,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;;&quot;$(OutDir)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"

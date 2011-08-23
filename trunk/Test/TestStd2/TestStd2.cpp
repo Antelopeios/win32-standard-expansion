@@ -14,6 +14,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	s.TrimRight(_T('钱'));
 	s.TrimRight(_T("h到一分钱"));
 
+	s = "我在马abcd路边捡EFGH到一分钱";
+	CStringT<char> c(s);
+
 	CArrayT<TCHAR> str(_T("1234")), str2(_T("123"));
 	TCHAR* a = NULL, b[MAX_PATH] = {0};
 	if (str/* == *//*a*//*b*//*str2*//*_T("123")*/)

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-19
-// Version:	1.0.0024.1105
+// Date:	2011-08-23
+// Version:	1.0.0025.1651
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -54,6 +54,7 @@
 //								+ 为CStringT增加一些方便的功能接口
 //	- 1.0.0024.1105(2011-08-19)	+ 为CStringT的一些接口添加返回值
 //								+ 添加CStringT::Trim()
+//	- 1.0.0025.1651(2011-08-23)	+ 字符串类增加自动转码功能,将根据自身的TypeT类型自动将传入的char或wchar_t转换为合适的类型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -97,15 +98,14 @@ public:
 		: m_Array(NULL)
 		, m_nSize(0)
 	{ (*this) = aString; }
-	CStringT(const type_t* pString)
+	CStringT(const char* pString)
 		: m_Array(NULL)
 		, m_nSize(0)
 	{ (*this) = pString; }
-	template <DWORD SizeT>
-	CStringT(const type_t (&aString)[SizeT])
+	CStringT(const wchar_t* pString)
 		: m_Array(NULL)
 		, m_nSize(0)
-	{ (*this) = (type_t*)aString; }
+	{ (*this) = pString; }
 
 	~CStringT()
 	{}
@@ -207,13 +207,34 @@ public:
 		va_end(args);
 	}
 
-	CStringT& SetString(const type_t* pString)
+	CStringT& SetString(const char* pString)
 	{
 		if (!pString) return (*this);
 		if (sizeof(type_t) == 1)
 		{
 			GetCStr(strlen((char*)pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			StringCchCopyA((char*)m_Array, GetSize(), (char*)pString);
+		}
+		else
+		{
+			size_t len = strlen(pString);
+			wchar_t* tmp_str = ExMem::Alloc<wchar_t>(len + 1);
+			::OemToCharW(pString, tmp_str); /*字符转码*/
+			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
+			StringCchCopyW((wchar_t*)m_Array, GetSize(), tmp_str);
+		}
+		return (*this);
+	}
+	CStringT& SetString(const wchar_t* pString)
+	{
+		if (!pString) return (*this);
+		if (sizeof(type_t) == 1)
+		{
+			size_t len = wcslen(pString);
+			char* tmp_str = ExMem::Alloc<char>(len + 1);
+			::CharToOemW(pString, tmp_str); /*字符转码*/
+			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
+			StringCchCopyA((char*)m_Array, GetSize(), tmp_str);
 		}
 		else
 		{
@@ -231,7 +252,9 @@ public:
 	{ return SetString(String); }
 	CStringT& operator=(const array_t& aString)
 	{ return SetString(aString); }
-	CStringT& operator=(const type_t* pString)
+	CStringT& operator=(const char* pString)
+	{ return SetString(pString); }
+	CStringT& operator=(const wchar_t* pString)
 	{ return SetString(pString); }
 
 	CStringT& Mid(int nStart, int nCount = -1) const

@@ -3,8 +3,7 @@
 for /r %%a in (.) do (
 set list=%%a
 setlocal enabledelayedexpansion
-if "!list:~-6,4!"==")tmp" rd /q /s "!list:~0,-2!"
-if "!list:~-6,4!"==")bin" rd /q /s "!list:~0,-2!"
+if "!list:~-8,6!"==")Build" rd /q /s "!list:~0,-2!"
 endlocal
 )
 

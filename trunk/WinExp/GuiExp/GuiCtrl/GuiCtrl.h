@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-11
-// Version:	1.0.0013.1730
+// Date:	2011-08-24
+// Version:	1.0.0014.1816
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -55,6 +55,7 @@
 //	- 1.0.0012.1715(2011-08-09)	# 当IGuiCtrl没有父对象时忽略消息传递
 //								^ 优化Scroll控件绑定接口的消息传递
 //	- 1.0.0013.1730(2011-08-11)	= IGuiCtrl在SetFocus时先发送焦点失去消息,再发送焦点获得消息
+//	- 1.0.0014.1816(2011-08-24)	+ 当IGuiCtrl添加一个Scroll对象时,自动对它设置main属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -202,10 +203,13 @@ public:
 	{
 		return m_Scroll;
 	}
-	void SetScroll(const IGuiCtrl* pScroll)
+	void SetScroll(IGuiCtrl* pScroll)
 	{
 		if (m_Scroll = (IGuiCtrl*)pScroll)
+		{
+			m_Scroll->SetState(_T("main"), this);
 			SetScrollSize(m_szScroll, true);
+		}
 	}
 
 	// 刷新绘图

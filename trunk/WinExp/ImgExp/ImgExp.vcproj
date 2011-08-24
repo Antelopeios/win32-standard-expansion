@@ -157,6 +157,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ImgCoder\IcoCoder.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ImgCoder\ImgAnalyzer.h"
 				>
 			</File>

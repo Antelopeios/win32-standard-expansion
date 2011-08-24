@@ -940,19 +940,6 @@ public:
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
-		case WM_COMMAND:
-			if (wParam == SB_THUMBPOSITION)
-			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("sli_pos"), &gc);
-				if (!state) break;
-				LONG pos = (LONG)(LONG_PTR)(state->sta_arr[0]);
-				CSize scr_sz;
-				GUI_CTL(list)->GetScrollSize(scr_sz);
-				scr_sz.cy = pos;
-				GUI_CTL(list)->SetScrollSize(scr_sz);
-			}
-			break;
 		}
 	}
 };

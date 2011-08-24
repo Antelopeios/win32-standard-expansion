@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-02
-// Version:	1.0.0000.0912
+// Date:	2011-08-24
+// Version:	1.0.0001.1816
 //
 // History:
 //	- 1.0.0000.0912(2011-08-02)	@ 准备构建GuiScroll
+//	- 1.0.0001.1816(2011-08-24)	+ 添加GuiScroll的main属性,方便在GuiScroll内部获取其关联的控件指针
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiScroll_hpp__
@@ -187,9 +188,11 @@ class CGuiScroll : public IGuiCtrlBase
 protected:
 	CGuiSlider m_Slider;
 	CGuiButton m_Up, m_Down;
+	IGuiCtrl* m_Main;
 
 public:
 	CGuiScroll()
+		: m_Main(NULL)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiScrollEvent"), GetGC())); /*先让基类绘图*/
@@ -207,6 +210,13 @@ public:
 	state_t* GetState(const CString& sType, CGC* pGC = NULL)
 	{
 		CString type(sType);
+		if (type == _T("main"))
+		{
+			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
+			if (state) state->sta_arr.Add(m_Main);
+			return state;
+		}
+		else
 		if (type == _T("slider"))
 		{
 			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
@@ -250,6 +260,16 @@ public:
 	bool SetState(const CString& sType, void* pState)
 	{
 		CString type(sType);
+		if (sType == _T("main"))
+		{
+			IGuiCtrl* old_sta = m_Main;
+			m_Main = (IGuiCtrl*)pState;
+			if (old_sta != m_Main)
+				return IGuiCtrlBase::SetState(sType, pState);
+			else
+				return true;
+		}
+		else
 		if (type.Left(4) == _T("sli_"))
 		{
 			type.TrimLeft(_T("sli_"));

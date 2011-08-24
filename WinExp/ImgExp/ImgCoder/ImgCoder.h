@@ -52,6 +52,7 @@
 #include "ImgCoder/BmpCoder.h"
 #include "ImgCoder/JpgCoder.h"
 #include "ImgCoder/PngCoder.h"
+#include "ImgCoder/IcoCoder.h"
 #include "ImgCoder/ImgAnalyzer.h"
 
 //////////////////////////////////////////////////////////////////

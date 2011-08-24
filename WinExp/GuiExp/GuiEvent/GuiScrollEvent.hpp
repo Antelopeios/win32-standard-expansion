@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-02
-// Version:	1.0.0000.1337
+// Date:	2011-08-24
+// Version:	1.0.0001.1816
 //
 // History:
 //	- 1.0.0000.1337(2011-08-02)	@ 准备构建GuiScrollEvent
+//	- 1.0.0001.1816(2011-08-24)	+ 当GuiScroll收到重定位消息时,自动通知其关联的控件进行滚动
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiScrollEvent_hpp__
@@ -428,6 +429,13 @@ public:
 
 public:
 	// 获得属性
+	IGuiCtrl* GetMain(CGC* pGC)
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("main"), pGC);
+		if (!state) return NULL;
+		return (IGuiCtrl*)(state->sta_arr[0]);
+	}
 	IGuiCtrl* GetSlider(CGC* pGC)
 	{
 		ExAssert(m_Ctrl);
@@ -523,6 +531,23 @@ public:
 				short scr_cnt = (short)ExHiWord(wParam);
 				CGC gc;
 				m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) - scr_cnt));
+			}
+			break;
+		case WM_COMMAND:
+			if (wParam == SB_THUMBPOSITION)
+			{
+				CGC gc;
+				IGuiCtrl* main = GetMain(&gc);
+				if (!main) break;
+				LONG pos = GetPos(&gc);
+				CSize scr_sz;
+				main->GetScrollSize(scr_sz);
+				bool ori = GetOri(&gc);
+				if (ori)
+					scr_sz.cy = pos;
+				else
+					scr_sz.cx = pos;
+				main->SetScrollSize(scr_sz);
 			}
 			break;
 		}

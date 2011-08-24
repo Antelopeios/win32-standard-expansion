@@ -215,7 +215,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				CString ret;
 				CSysDialog::FileDialog(ret, TRUE, NULL, NULL, 
-					_T("图片文件(*.bmp;*.jpg;*.png)\0*.bmp;*.jpg;*.png\0所有文件(*.*)\0*.*\0"));
+					_T("图片文件(*.bmp;*.jpg;*.png;*.ico)\0*.bmp;*.jpg;*.png;*.ico\0所有文件(*.*)\0*.*\0"));
 				OpenFile(hWnd, ret);
 				// 刷新窗口
 				Invalidate(hWnd);
@@ -226,7 +226,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				CString ret; DWORD inx = 0;
 				CSysDialog::FileDialog(ret, FALSE, NULL, NULL, 
-					_T("BMP文件(*.bmp)\0*.bmp\0JPG文件(*.jpg)\0*.jpg\0PNG文件(*.png)\0*.png\0"), &inx);
+					_T("BMP文件(*.bmp)\0*.bmp\0JPG文件(*.jpg)\0*.jpg\0PNG文件(*.png)\0*.png\0ICO文件(*.ico)\0*.ico\0"), &inx);
 				SaveFile(inx, ret);
 			}
 			break;

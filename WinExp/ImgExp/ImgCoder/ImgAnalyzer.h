@@ -51,6 +51,7 @@
 #include "ImgCoder/BmpCoder.h"
 #include "ImgCoder/JpgCoder.h"
 #include "ImgCoder/PngCoder.h"
+#include "ImgCoder/IcoCoder.h"
 
 EXP_BEG
 
@@ -59,7 +60,7 @@ EXP_BEG
 class CImgAnalyzer
 {
 public:
-	enum ImageFormat { raw, bmp, jpg, png };
+	enum ImageFormat { raw, bmp, jpg, png, ico };
 
 public:
 	static int GetImageFormat(IFileObject* pFile)
@@ -73,6 +74,9 @@ public:
 		else
 		if (CPngCoder::CheckFile(pFile))
 			return png;
+		else
+		if (CIcoCoder::CheckFile(pFile))
+			return ico;
 		return raw;
 	}
 	static ICoderObject* GetCoder(int nFormat, CGC* pGC = NULL)
@@ -88,6 +92,9 @@ public:
 			break;
 		case png:
 			coder = ExMem::Alloc<CPngCoder>(pGC);
+			break;
+		case ico:
+			coder = ExMem::Alloc<CIcoCoder>(pGC);
 			break;
 		}
 		return coder;

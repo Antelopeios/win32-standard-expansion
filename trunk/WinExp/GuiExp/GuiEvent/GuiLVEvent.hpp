@@ -113,12 +113,8 @@ public:
 				{
 				case VK_UP:
 					{
-						CGC gc;
-
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
-						if (!state) break;
-						items_t* items = (items_t*)(state->sta_arr[0]);
+						items_t* items = (items_t*)comp->GetState(_T("items"));
 
 						CRect rc_me, rc_it;
 						ctrl->GetWindowRect(rc_me);
@@ -156,12 +152,8 @@ public:
 					break;
 				case VK_DOWN:
 					{
-						CGC gc;
-
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
-						if (!state) break;
-						items_t* items = (items_t*)(state->sta_arr[0]);
+						items_t* items = (items_t*)comp->GetState(_T("items"));
 
 						CRect rc_me, rc_it;
 						ctrl->GetWindowRect(rc_me);
@@ -199,13 +191,8 @@ public:
 					break;
 				case VK_LEFT:
 					{
-						CGC gc;
-
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
-						if (!state) break;
-						items_t* items = (items_t*)(state->sta_arr[0]);
-
+						items_t* items = (items_t*)comp->GetState(_T("items"));
 						items_t::iterator_t ite = items->Find(ctrl);
 						sub(ite);
 						(*ite)->SetFocus();
@@ -213,13 +200,8 @@ public:
 					break;
 				case VK_RIGHT:
 					{
-						CGC gc;
-
 						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-						IGuiCtrl::state_t* state = comp->GetState(_T("items"), &gc);
-						if (!state) break;
-						items_t* items = (items_t*)(state->sta_arr[0]);
-
+						items_t* items = (items_t*)comp->GetState(_T("items"));
 						items_t::iterator_t ite = items->Find(ctrl);
 						add(ite);
 						(*ite)->SetFocus();
@@ -258,46 +240,34 @@ public:
 
 public:
 	// 获得属性
-	IGuiCtrl* GetFocPic(CGC* pGC)
+	IGuiCtrl* GetFocPic()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("foc"), pGC);
-		if (!state) return NULL;
-		return (IGuiCtrl*)(state->sta_arr[0]);
+		return (IGuiCtrl*)m_Ctrl->GetState(_T("foc"));
 	}
-	CListT<IGuiCtrl*>* GetItems(CGC* pGC)
+	CListT<IGuiCtrl*>* GetItems()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("items"), pGC);
-		if (!state) return NULL;
-		return (CListT<IGuiCtrl*>*)(state->sta_arr[0]);
+		return (CListT<IGuiCtrl*>*)m_Ctrl->GetState(_T("items"));
 	}
-	LONG GetSpace(CGC* pGC)
+	LONG GetSpace()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("space"), pGC);
-		if (!state) return NULL;
-		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+		return (LONG)(LONG_PTR)m_Ctrl->GetState(_T("space"));
 	}
-	CImage* GetFocImage(CGC* pGC)
+	CImage* GetFocImage()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("foc_image"), pGC);
-		if (!state) return NULL;
-		return (CImage*)(state->sta_arr[0]);
+		return (CImage*)m_Ctrl->GetState(_T("foc_image"));
 	}
 
 	// 格式化列表项的位置
-	void FormatItems(CGC* pGC)
+	void FormatItems()
 	{
 		ExAssert(m_Ctrl);
 
 		typedef CListT<IGuiCtrl*> items_t;
 
 		// 获得属性
-		items_t* items = GetItems(pGC);
+		items_t* items = GetItems();
 		if (!items || items->Empty()) return;
-		LONG space = GetSpace(pGC);
+		LONG space = GetSpace();
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
@@ -370,21 +340,17 @@ public:
 		case WM_SHOWWINDOW:
 			if (!wParam) break;
 		case WM_SIZE:
-			{
-				CGC gc;
-				FormatItems(&gc);
-			}
+			FormatItems();
 			break;
 		case WM_SETFOCUS:
 			if (m_Ctrl == IGuiCtrl::GetFocus())
 			{
-				CGC gc;
-				CListT<IGuiCtrl*>* items = GetItems(&gc);
+				CListT<IGuiCtrl*>* items = GetItems();
 				if (items->Empty()) break;
 				if(!m_FocItm)
 					m_FocItm = items->HeadItem();
 				if(!m_FocItm) break;
-				IGuiCtrl* pic = GetFocPic(&gc);
+				IGuiCtrl* pic = GetFocPic();
 				if(!pic) break;
 
 				CRect foc_rct;
@@ -395,8 +361,7 @@ public:
 			}
 		case WM_KILLFOCUS:
 			{
-				CGC gc;
-				IGuiCtrl* pic = GetFocPic(&gc);
+				IGuiCtrl* pic = GetFocPic();
 				if(!pic) break;
 				pic->SetVisible(false);
 			}

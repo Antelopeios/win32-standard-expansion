@@ -131,53 +131,38 @@ public:
 
 public:
 	// 获得属性
-	IGuiCtrl* GetSlider(CGC* pGC)
+	IGuiCtrl* GetSlider()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("slider"), pGC);
-		if (!state) return NULL;
-		return (IGuiCtrl*)(state->sta_arr[0]);
+		return (IGuiCtrl*)m_Ctrl->GetState(_T("slider"));
 	}
-	bool GetOri(CGC* pGC)
+	bool GetOri()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("ori"), pGC);
-		if (!state) return NULL;
-		return (bool)(LONG_PTR)(state->sta_arr[0]);
+		return (bool)(LONG_PTR)m_Ctrl->GetState(_T("ori"));
 	}
-	LONG GetAll(CGC* pGC)
+	LONG GetAll()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("all"), pGC);
-		if (!state) return NULL;
-		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+		return (LONG)(LONG_PTR)m_Ctrl->GetState(_T("all"));
 	}
-	LONG GetFra(CGC* pGC)
+	LONG GetFra()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("fra"), pGC);
-		if (!state) return NULL;
-		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+		return (LONG)(LONG_PTR)m_Ctrl->GetState(_T("fra"));
 	}
-	LONG GetPos(CGC* pGC)
+	LONG GetPos()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("pos"), pGC);
-		if (!state) return NULL;
-		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+		return (LONG)(LONG_PTR)m_Ctrl->GetState(_T("pos"));
 	}
 
 	// 格式化位置
-	void Format(CGC* pGC)
+	void Format()
 	{
 		ExAssert(m_Ctrl);
-		IGuiCtrl* sli = GetSlider(pGC);
+		IGuiCtrl* sli = GetSlider();
 		if (!sli) return;
 
-		bool ori = GetOri(pGC);
-		LONG all = GetAll(pGC);
-		LONG fra = GetFra(pGC);
-		LONG pos = GetPos(pGC);
+		bool ori = GetOri();
+		LONG all = GetAll();
+		LONG fra = GetFra();
+		LONG pos = GetPos();
 
 		if (all <= 0 || fra <= 0) return;
 		if (fra > all) fra = all;
@@ -213,10 +198,7 @@ public:
 			if (!wParam) break;
 		case WM_SIZE:
 		case WM_PAINT:
-			{
-				CGC gc;
-				Format(&gc);
-			}
+			Format();
 			break;
 		case WM_COMMAND:
 			if (wParam == SB_THUMBPOSITION)
@@ -225,19 +207,18 @@ public:
 				if (!pt) break;
 				CRect rect;
 				m_Ctrl->GetClientRect(rect);
-				CGC gc;
-				bool ori = GetOri(&gc);
+				bool ori = GetOri();
 				if (ori)
 				{
 					if (pt->y == 0) break;
-					LONG all = GetAll(&gc);
+					LONG all = GetAll();
 					LONG off = pt->y * all / rect.Height();
 					m_Ctrl->SetState(_T("pos"), (void*)(s_pos + off));
 				}
 				else
 				{
 					if (pt->x == 0) break;
-					LONG all = GetAll(&gc);
+					LONG all = GetAll();
 					LONG off = pt->x * all / rect.Width();
 					m_Ctrl->SetState(_T("pos"), (void*)(s_pos + off));
 				}
@@ -247,7 +228,7 @@ public:
 			else
 			if (wParam == SB_THUMBTRACK)
 			{
-				s_pos = GetPos(&CGC());
+				s_pos = GetPos();
 				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
 				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
 			}
@@ -261,8 +242,7 @@ public:
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 			{
-				CGC gc;
-				IGuiCtrl* sli = GetSlider(&gc);
+				IGuiCtrl* sli = GetSlider();
 				if (!sli) break;
 				CRect rect, rc_pt;
 				sli->GetWindowRect(rect);
@@ -271,17 +251,17 @@ public:
 				m_Ctrl->B2C(rc_pt);
 				rc_pt.pt1 -= CPoint((rect.Left() + rect.Right()) >> 1, (rect.Top() + rect.Bottom()) >> 1);
 				m_Ctrl->GetClientRect(rect);
-				LONG all = GetAll(&gc);
-				bool ori = GetOri(&gc);
+				LONG all = GetAll();
+				bool ori = GetOri();
 				if (ori)
 				{
 					LONG off = rc_pt.pt1.y * all / rect.Height();
-					m_Ctrl->SetState(_T("pos"), (void*)(GetPos(&gc) + off));
+					m_Ctrl->SetState(_T("pos"), (void*)(GetPos() + off));
 				}
 				else
 				{
 					LONG off = rc_pt.pt1.x * all / rect.Width();
-					m_Ctrl->SetState(_T("pos"), (void*)(GetPos(&gc) + off));
+					m_Ctrl->SetState(_T("pos"), (void*)(GetPos() + off));
 				}
 				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
 				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
@@ -343,11 +323,8 @@ public:
 		case WM_TIMER:
 			if (m_TimerId == wParam)
 			{
-				CGC gc;
 				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				IGuiCtrl::state_t* state = pare->GetState(_T("sli_pos"), &gc);
-				if (!state) break;
-				LONG pos = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				LONG pos = (LONG)(LONG_PTR)pare->GetState(_T("sli_pos"));
 				pare->SetState(_T("sli_pos"), (void*)(pos - WHEEL_DELTA));
 			}
 			break;
@@ -401,11 +378,8 @@ public:
 		case WM_TIMER:
 			if (m_TimerId == wParam)
 			{
-				CGC gc;
 				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				IGuiCtrl::state_t* state = pare->GetState(_T("sli_pos"), &gc);
-				if (!state) break;
-				LONG pos = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				LONG pos = (LONG)(LONG_PTR)pare->GetState(_T("sli_pos"));
 				pare->SetState(_T("sli_pos"), (void*)(pos + WHEEL_DELTA));
 			}
 			break;
@@ -429,60 +403,42 @@ public:
 
 public:
 	// 获得属性
-	IGuiCtrl* GetMain(CGC* pGC)
+	IGuiCtrl* GetMain()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("main"), pGC);
-		if (!state) return NULL;
-		return (IGuiCtrl*)(state->sta_arr[0]);
+		return (IGuiCtrl*)m_Ctrl->GetState(_T("main"));
 	}
-	IGuiCtrl* GetSlider(CGC* pGC)
+	IGuiCtrl* GetSlider()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("slider"), pGC);
-		if (!state) return NULL;
-		return (IGuiCtrl*)(state->sta_arr[0]);
+		return (IGuiCtrl*)m_Ctrl->GetState(_T("slider"));
 	}
-	IGuiCtrl* GetUp(CGC* pGC)
+	IGuiCtrl* GetUp()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("up"), pGC);
-		if (!state) return NULL;
-		return (IGuiCtrl*)(state->sta_arr[0]);
+		return (IGuiCtrl*)m_Ctrl->GetState(_T("up"));
 	}
-	IGuiCtrl* GetDn(CGC* pGC)
+	IGuiCtrl* GetDn()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("down"), pGC);
-		if (!state) return NULL;
-		return (IGuiCtrl*)(state->sta_arr[0]);
+		return (IGuiCtrl*)m_Ctrl->GetState(_T("down"));
 	}
-	bool GetOri(CGC* pGC)
+	bool GetOri()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("sli_ori"), pGC);
-		if (!state) return NULL;
-		return (bool)(LONG_PTR)(state->sta_arr[0]);
+		return (bool)(LONG_PTR)m_Ctrl->GetState(_T("sli_ori"));
 	}
-	LONG GetPos(CGC* pGC)
+	LONG GetPos()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("sli_pos"), pGC);
-		if (!state) return NULL;
-		return (LONG)(LONG_PTR)(state->sta_arr[0]);
+		return (LONG)(LONG_PTR)m_Ctrl->GetState(_T("sli_pos"));
 	}
 
 	// 格式化位置
-	void Format(CGC* pGC)
+	void Format()
 	{
 		ExAssert(m_Ctrl);
-		IGuiCtrl* sli = GetSlider(pGC);
+		IGuiCtrl* sli = GetSlider();
 		if (!sli) return;
-		IGuiCtrl* up = GetUp(pGC);
+		IGuiCtrl* up = GetUp();
 		if (!sli) return;
-		IGuiCtrl* dn = GetDn(pGC);
+		IGuiCtrl* dn = GetDn();
 		if (!sli) return;
-		bool ori = GetOri(pGC);
+		bool ori = GetOri();
 
 		CRect rc_scr, rc_sli, rc_up, rc_dn;
 		m_Ctrl->GetClientRect(rc_scr);
@@ -521,28 +477,23 @@ public:
 			if (!wParam) break;
 		case WM_SIZE:
 		case WM_PAINT:
-			{
-				CGC gc;
-				Format(&gc);
-			}
+			Format();
 			break;
 		case WM_MOUSEWHEEL:
 			{
 				short scr_cnt = (short)ExHiWord(wParam);
-				CGC gc;
-				m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos(&gc) - scr_cnt));
+				m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos() - scr_cnt));
 			}
 			break;
 		case WM_COMMAND:
 			if (wParam == SB_THUMBPOSITION)
 			{
-				CGC gc;
-				IGuiCtrl* main = GetMain(&gc);
+				IGuiCtrl* main = GetMain();
 				if (!main) break;
-				LONG pos = GetPos(&gc);
+				LONG pos = GetPos();
 				CSize scr_sz;
 				main->GetScrollSize(scr_sz);
-				bool ori = GetOri(&gc);
+				bool ori = GetOri();
 				if (ori)
 					scr_sz.cy = pos;
 				else

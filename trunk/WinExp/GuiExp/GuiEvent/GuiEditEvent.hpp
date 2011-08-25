@@ -94,30 +94,24 @@ public:
 
 public:
 	// 获得属性
-	CText* GetText(CGC* pGC)
+	CText* GetText()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), pGC);
-		if (!state) return NULL;
-		return (CText*)(state->sta_arr[0]);
+		return (CText*)m_Ctrl->GetState(_T("text"));
 	}
-	CString* GetEdit(CGC* pGC)
+	CString* GetEdit()
 	{
-		ExAssert(m_Ctrl);
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("edit"), pGC);
-		if (!state) return NULL;
-		return (CString*)(state->sta_arr[0]);
+		return (CString*)m_Ctrl->GetState(_T("edit"));
 	}
 
 	// 获得显示的文本内容,迭代器返回范围上限
-	CString* GetShowEdit(CString::iterator_t& ite2, CGC* pGC)
+	CString* GetShowEdit(CString::iterator_t& ite2)
 	{
 		ExAssert(m_Ctrl);
 
 		// 获得属性
-		CText* text = GetText(pGC);
+		CText* text = GetText();
 		if (!text) return NULL;
-		CString* edit = GetEdit(pGC);
+		CString* edit = GetEdit();
 		if (!edit) return NULL;
 		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
 		static CString show;
@@ -171,9 +165,8 @@ public:
 			do
 			{
 				// 获得显示上限迭代器
-				CGC gc;
 				CString::iterator_t ite;
-				GetShowEdit(ite, &gc);
+				GetShowEdit(ite);
 				ite->nIndx += m_iteOffset->Index();
 				// 判断是否超限并调整下限
 				if (m_iteFlicker->Index() > ite->Index())
@@ -221,12 +214,11 @@ public:
 	void PosFlicker(const CPoint& ptPos)
 	{
 		ExAssert(m_Ctrl);
-		CGC gc;
 
 		// 获得属性
-		CText* text = GetText(&gc);
+		CText* text = GetText();
 		if (!text) return;
-		CString* edit = GetEdit(&gc);
+		CString* edit = GetEdit();
 		if (!edit) return;
 
 		// 拿到偏移量
@@ -306,9 +298,8 @@ public:
 	void SelectAll()
 	{
 		ExAssert(m_Ctrl);
-		CGC gc;
 		// 获得属性
-		CString* edit = GetEdit(&gc);
+		CString* edit = GetEdit();
 		if (!edit) return;
 		// 全选文本
 		m_iteSelect = edit->Head();
@@ -328,10 +319,8 @@ public:
 			m_CtrlDown = true;
 		else
 		{
-			CGC gc;
-
 			// 获得属性
-			CString* edit = GetEdit(&gc);
+			CString* edit = GetEdit();
 			if (!edit) return;
 			if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
 
@@ -481,10 +470,9 @@ public:
 	void OnChar(TCHAR cInput)
 	{
 		ExAssert(m_Ctrl);
-		CGC gc;
 
 		// 获得属性
-		CString* edit = GetEdit(&gc);
+		CString* edit = GetEdit();
 		if (!edit) return;
 		if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
 
@@ -528,29 +516,16 @@ public:
 	{
 		ExAssert(m_Ctrl);
 		if (!mem_img || mem_img->IsNull()) return;
-		CGC gc;
 
 		// 获得属性
 		int no_foc = m_Ctrl->IsFocus() ? 0 : 1;
 
-		IGuiCtrl::state_t* state = m_Ctrl->GetState(_T("text"), &gc);
-		if (!state) return;
-		CText* text = (CText*)(state->sta_arr[0]);
-		if (!text) return;
+		CText* text = (CText*)m_Ctrl->GetState(_T("text"));
 		CText tmp_text = (*text);
+		CString* edit = (CString*)m_Ctrl->GetState(_T("edit"));
 
-		state = m_Ctrl->GetState(_T("edit"), &gc);
-		if (!state) return;
-		CString* edit = (CString*)(state->sta_arr[0]);
-		if (!edit) return;
-
-		state = m_Ctrl->GetState(_T("txt_sel_color"), &gc);
-		if (!state) return;
-		pixel_t txt_sel_color = *(pixel_t*)(state->sta_arr[no_foc]);
-
-		state = m_Ctrl->GetState(_T("bkg_sel_color"), &gc);
-		if (!state) return;
-		pixel_t bkg_sel_color = *(pixel_t*)(state->sta_arr[no_foc]);
+		pixel_t txt_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("txt_sel_color")))[no_foc];
+		pixel_t bkg_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("bkg_sel_color")))[no_foc];
 
 		CRect rect;
 		m_Ctrl->GetClipRect(rect);

@@ -100,35 +100,31 @@ public:
 
 public:
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		CString type(sType);
-		if (type.Left(4) == _T("foc_"))
+		if (sType.Left(4) == _T("foc_"))
 		{
+			CString type(sType);
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic.GetState(type, pGC);
+			return m_FocPic.GetState(type);
 		}
-		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("foc"))
-				state->sta_arr.Add(&m_FocPic);
-			else
-			if (state->sta_typ == _T("items"))
-				state->sta_arr.Add(&m_ItemList);
-			else
-			if (state->sta_typ == _T("space"))
-				state->sta_arr.Add((void*)m_Space);
-			else
-			if (state->sta_typ == _T("all_line"))
-				state->sta_arr.Add((void*)m_AllLine);
-			else
-			if (state->sta_typ == _T("fra_line"))
-				state->sta_arr.Add((void*)m_FraLine);
-			else
-				state = EXP_BASE::GetState(sType, pGC);
-		}
-		return state;
+		else
+		if (sType == _T("foc"))
+			return (void*)(&m_FocPic);
+		else
+		if (sType == _T("items"))
+			return (void*)(&m_ItemList);
+		else
+		if (sType == _T("space"))
+			return (void*)m_Space;
+		else
+		if (sType == _T("all_line"))
+			return (void*)m_AllLine;
+		else
+		if (sType == _T("fra_line"))
+			return (void*)m_FraLine;
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{

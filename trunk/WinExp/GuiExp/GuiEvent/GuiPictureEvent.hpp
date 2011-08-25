@@ -76,22 +76,10 @@ public:
 		case WM_PAINT:
 			if (lParam)
 			{
-				CGC gc;
-
 				// »ñµÃÊôÐÔ
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("image"), &gc);
-				if (!state) break;
-				CImage* image = (CImage*)(state->sta_arr[0]);
-				if (!image) break;
-
-				state = ctrl->GetState(_T("color"), &gc);
-				if (!state) break;
-				pixel_t pixel = (pixel_t)(LONG_PTR)(state->sta_arr[0]);
-
-				state = ctrl->GetState(_T("text"), &gc);
-				if (!state) break;
-				CText* text = (CText*)(state->sta_arr[0]);
-				if (!text) break;
+				CImage* image = (CImage*)ctrl->GetState(_T("image"));
+				pixel_t pixel = (pixel_t)(LONG_PTR)ctrl->GetState(_T("color"));
+				CText* text = (CText*)ctrl->GetState(_T("text"));
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;

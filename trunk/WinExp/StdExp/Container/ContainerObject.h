@@ -101,6 +101,9 @@ public:
 	type_t& LastItem() const
 	{ return This()->container_t::LastItem(); }
 
+	bool Replace(type_t& Type)
+	{ return This()->container_t::Del(Find(Type)); }
+
 	iterator_t& Find(iterator_t& Head, iterator_t& Tail, const type_t& Item)
 	{ return finder_t::Find(Head, Tail, Item); }
 	iterator_t& Find(const type_t& Item)
@@ -118,9 +121,6 @@ public:
 	{ return finder_t::RevFind(Head, Tail, cnt2); }
 	iterator_t& RevFind(const container_t& cnt2)
 	{ return finder_t::RevFind(*(This()), cnt2); }
-
-	bool Replace(type_t& Type)
-	{ return This()->container_t::Del(Find(Type)); }
 };
 
 //////////////////////////////////////////////////////////////////

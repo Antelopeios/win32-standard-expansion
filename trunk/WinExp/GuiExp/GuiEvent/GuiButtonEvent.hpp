@@ -166,10 +166,7 @@ public:
 		case WM_MOUSEMOVE:
 		case WM_NCMOUSEMOVE:
 			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)state->sta_arr[0];
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 				if (status != 2)
 				{
 					status = 1;
@@ -200,10 +197,7 @@ public:
 				CRect rc;
 				ctrl->GetRealRect(rc);
 
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)(state->sta_arr[0]);
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 				if (status == 2) // 当按下后抬起,视为一次Click
 				{
 					ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
@@ -242,20 +236,14 @@ public:
 		case WM_PAINT:
 			if (lParam)
 			{
-				CGC gc;
-
 				// 获得属性
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("thr_sta"), &gc);
-				if (!state) break;
-				int thr_sta = (int)(state->sta_arr[0]);
+				int thr_sta = (int)ctrl->GetState(_T("thr_sta"));
 				LONG sta_tim = (thr_sta == 1 ? 3 : (thr_sta == -1 ? 1 : 5));
 
 				DWORD status = 0;
 				if (thr_sta != -1)
 				{
-					state = ctrl->GetState(_T("status"), &gc);
-					if (!state) break;
-					status = (DWORD)(state->sta_arr[0]);
+					status = (DWORD)ctrl->GetState(_T("status"));
 					if (thr_sta == 0)
 					{
 						if (ctrl->IsFocus() && status == 0) status = 3;
@@ -263,29 +251,11 @@ public:
 					}
 				}
 
-				state = ctrl->GetState(_T("image"), &gc);
-				if (!state) break;
-				CImage* (image[9]);
-				for(int i = 0; i < _countof(image); ++i)
-					image[i] = (CImage*)(state->sta_arr[i]);
-
-				state = ctrl->GetState(_T("color"), &gc);
-				if (!state) break;
-				pixel_t pixel = *(pixel_t*)(state->sta_arr[status]);
-
-				state = ctrl->GetState(_T("text"), &gc);
-				if (!state) break;
-				CText* text = (CText*)(state->sta_arr[status]);
-				if (!text) break;
-
-				state = ctrl->GetState(_T("icon"), &gc);
-				if (!state) break;
-				CImage* icon = (CImage*)(state->sta_arr[0]);
-				if (!icon) break;
-
-				state = ctrl->GetState(_T("glow"), &gc);
-				if (!state) break;
-				bool glow = (bool)(LONG_PTR)(state->sta_arr[0]);
+				CImage* image = (CImage*)ctrl->GetState(_T("image"));
+				pixel_t pixel = ((pixel_t*)ctrl->GetState(_T("color")))[status];
+				CText* text = (CText*)ctrl->GetState(_T("text")) + status;
+				CImage* icon = (CImage*)ctrl->GetState(_T("icon"));
+				bool glow = (bool)(LONG_PTR)ctrl->GetState(_T("glow"));
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
@@ -298,27 +268,27 @@ public:
 				{
 					LONG r_h = clt_rct.Height() * sta_tim;
 					// l-t
-					m_imgTmp[0].Set(image[0]->Get());
+					m_imgTmp[0].Set(image[0].Get());
 					// m-t
 					m_imgTmp[1].Set
 						(
 						CImgDeformer::ZomDeform
 							(
-							image[1]->Get(), 
-							clt_rct.Width() - image[0]->GetWidth() - image[2]->GetWidth(), 
-							image[1]->GetHeight()
+							image[1].Get(), 
+							clt_rct.Width() - image[0].GetWidth() - image[2].GetWidth(), 
+							image[1].GetHeight()
 							)
 						);
 					// r-t
-					m_imgTmp[2].Set(image[2]->Get());
+					m_imgTmp[2].Set(image[2].Get());
 					// l-m
 					m_imgTmp[3].Set
 						(
 						CImgDeformer::ZomDeform
 							(
-							image[3]->Get(), 
-							image[3]->GetWidth(), 
-							r_h - image[0]->GetHeight() - image[6]->GetHeight()
+							image[3].Get(), 
+							image[3].GetWidth(), 
+							r_h - image[0].GetHeight() - image[6].GetHeight()
 							)
 						);
 					// m-m
@@ -326,9 +296,9 @@ public:
 						(
 						CImgDeformer::ZomDeform
 							(
-							image[4]->Get(), 
-							clt_rct.Width() - image[3]->GetWidth() - image[5]->GetWidth(), 
-							r_h - image[1]->GetHeight() - image[7]->GetHeight()
+							image[4].Get(), 
+							clt_rct.Width() - image[3].GetWidth() - image[5].GetWidth(), 
+							r_h - image[1].GetHeight() - image[7].GetHeight()
 							)
 						);
 					// r-m
@@ -336,25 +306,25 @@ public:
 						(
 						CImgDeformer::ZomDeform
 							(
-							image[5]->Get(), 
-							image[5]->GetWidth(), 
-							r_h - image[2]->GetHeight() - image[8]->GetHeight()
+							image[5].Get(), 
+							image[5].GetWidth(), 
+							r_h - image[2].GetHeight() - image[8].GetHeight()
 							)
 						);
 					// l-b
-					m_imgTmp[6].Set(image[6]->Get());
+					m_imgTmp[6].Set(image[6].Get());
 					// m-b
 					m_imgTmp[7].Set
 						(
 						CImgDeformer::ZomDeform
 							(
-							image[7]->Get(), 
-							clt_rct.Width() - image[6]->GetWidth() - image[8]->GetWidth(), 
-							image[7]->GetHeight()
+							image[7].Get(), 
+							clt_rct.Width() - image[6].GetWidth() - image[8].GetWidth(), 
+							image[7].GetHeight()
 							)
 						);
 					// r-b
-					m_imgTmp[8].Set(image[8]->Get());
+					m_imgTmp[8].Set(image[8].Get());
 					// Save
 					m_rcOld = clt_rct;
 				}
@@ -507,12 +477,8 @@ public:
 					);
 
 				// 绘文字
-				state = ctrl->GetState(_T("locate"), &gc);
-				if (!state) break;
-				DWORD locate = (DWORD)(state->sta_arr[0]);
-				state = ctrl->GetState(_T("loc_off"), &gc);
-				if (!state) break;
-				LONG loc_off = (LONG)(state->sta_arr[0]);
+				DWORD locate = (DWORD)ctrl->GetState(_T("locate"));
+				LONG loc_off = (LONG)ctrl->GetState(_T("loc_off"));
 				CRect txt_rct, img_rct(rect);
 				CSize txt_clp;
 				text->GetSize(txt_clp);
@@ -583,9 +549,7 @@ public:
 
 				// 绘图标
 				if (icon->IsNull()) break;
-				state = ctrl->GetState(_T("ico_off"), &gc);
-				if (!state) break;
-				loc_off = (LONG)(state->sta_arr[0]) - radius;
+				loc_off = (LONG)ctrl->GetState(_T("ico_off")) - radius;
 				CRect icon_rct;
 				switch(locate)
 				{
@@ -686,10 +650,7 @@ public:
 		case WM_MOUSEMOVE:
 		case WM_NCMOUSEMOVE:
 			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)(state->sta_arr[0]);
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 				if (status != 2 && status != 3)
 				{
 					status = 1;
@@ -702,10 +663,7 @@ public:
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)(state->sta_arr[0]);
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 				if (status == 3) break;
 				status = 2;
 				ctrl->SetState(_T("status"), (void*)status);
@@ -716,10 +674,7 @@ public:
 		case WM_LBUTTONUP:
 		case WM_NCLBUTTONUP:
 			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)(state->sta_arr[0]);
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 				if (status == 3) break;
 
 				IGuiBoard* board = ctrl->GetBoard();
@@ -739,9 +694,7 @@ public:
 						pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_CLICKED, (LPARAM)ctrl);
 				}
 
-				state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				status = (DWORD)(state->sta_arr[0]);
+				status = (DWORD)ctrl->GetState(_T("status"));
 				if (status == 3) break;
 
 				if (rc.PtInRect(pt))
@@ -753,10 +706,7 @@ public:
 			break;
 		case WM_MOUSELEAVE:
 			{
-				CGC gc;
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)(state->sta_arr[0]);
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 				if (status == 3) break;
 				status = 0;
 				ctrl->SetState(_T("status"), (void*)status);
@@ -779,27 +729,14 @@ public:
 		case WM_PAINT:
 			if (lParam)
 			{
-				CGC gc;
-
 				// 获得属性
 				LONG sta_tim = 4;
 
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("status"), &gc);
-				if (!state) break;
-				DWORD status = (DWORD)(state->sta_arr[0]);
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
 
-				state = ctrl->GetState(_T("image"), &gc);
-				if (!state) break;
-				CImage* image = (CImage*)(state->sta_arr[0]);
-
-				state = ctrl->GetState(_T("color"), &gc);
-				if (!state) break;
-				pixel_t pixel = *(pixel_t*)(state->sta_arr[status]);
-
-				state = ctrl->GetState(_T("text"), &gc);
-				if (!state) break;
-				CText* text = (CText*)(state->sta_arr[status]);
-				if (!text) break;
+				CImage* image = (CImage*)ctrl->GetState(_T("image"));
+				pixel_t pixel = ((pixel_t*)ctrl->GetState(_T("color")))[status];
+				CText* text = (CText*)ctrl->GetState(_T("text")) + status;
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
@@ -827,12 +764,8 @@ public:
 					);
 
 				// 绘文字
-				state = ctrl->GetState(_T("locate"), &gc);
-				if (!state) break;
-				DWORD locate = (DWORD)(state->sta_arr[0]);
-				state = ctrl->GetState(_T("loc_off"), &gc);
-				if (!state) break;
-				LONG loc_off = (LONG)(state->sta_arr[0]);
+				DWORD locate = (DWORD)ctrl->GetState(_T("locate"));
+				LONG loc_off = (LONG)ctrl->GetState(_T("loc_off"));
 				CRect txt_rct, img_rct(rect);
 				CSize txt_clp;
 				text->GetSize(txt_clp);

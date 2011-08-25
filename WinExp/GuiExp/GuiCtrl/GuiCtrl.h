@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-24
-// Version:	1.0.0014.1816
+// Date:	2011-08-25
+// Version:	1.0.0015.1643
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -56,6 +56,7 @@
 //								^ 优化Scroll控件绑定接口的消息传递
 //	- 1.0.0013.1730(2011-08-11)	= IGuiCtrl在SetFocus时先发送焦点失去消息,再发送焦点获得消息
 //	- 1.0.0014.1816(2011-08-24)	+ 当IGuiCtrl添加一个Scroll对象时,自动对它设置main属性
+//	- 1.0.0015.1643(2011-08-25)	^ 大幅简化IGuiCtrl::GetState()接口的调用方式及效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -76,13 +77,6 @@ EXP_BEG
 EXP_INTERFACE IGuiCtrl : public IGuiBase
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
-
-public:
-	EXP_STRUCT state_t : IPoolTypeT<state_t, EXP_MEMORY_ALLOC>
-	{
-		CString			sta_typ;
-		CArrayT<void*>	sta_arr;
-	};
 
 protected:
 	static IGuiCtrl* m_Focus;
@@ -122,7 +116,7 @@ public:
 	}
 
 	// 获得控件状态
-	virtual state_t* GetState(const CString& sType, CGC* pGC = NULL) = 0;
+	virtual void* GetState(const CString& sType) = 0;
 	virtual bool SetState(const CString& sType, void* pState) = 0;
 	virtual void UpdateState(bool bRefreshSelf = true) = 0;
 	virtual bool IsUpdated() = 0;
@@ -300,7 +294,7 @@ public:
 
 public:
 	// 更新状态
-	state_t* GetState(const CString& sType, CGC* pGC = NULL);
+	void* GetState(const CString& sType);
 	bool SetState(const CString& sType, void* pState);
 	void UpdateState(bool bRefreshSelf = true);
 	bool IsUpdated();

@@ -78,21 +78,18 @@ public:
 
 public:
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		state_t* state = EXP_BASE::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("color"))
-				state->sta_arr.Add((void*)m_Color);
-			else
-			if (state->sta_typ == _T("image"))
-				state->sta_arr.Add(&m_Image);
-			else
-			if (state->sta_typ == _T("text"))
-				state->sta_arr.Add(&m_Text);
-		}
-		return state;
+		if (sType == _T("color"))
+			return (void*)m_Color;
+		else
+		if (sType == _T("image"))
+			return (void*)(&m_Image);
+		else
+		if (sType == _T("text"))
+			return (void*)(&m_Text);
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{

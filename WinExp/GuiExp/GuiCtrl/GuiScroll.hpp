@@ -85,50 +85,30 @@ public:
 			pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
 	}
 
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		if (sType == _T("slider"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add(&m_Slider);
-			return state;
-		}
-		if (sType == _T("all"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add((void*)m_All);
-			return state;
-		}
-		else
-		if (sType == _T("fra"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add((void*)m_Fra);
-			return state;
-		}
-		else
-		if (sType == _T("pos"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add((void*)m_Pos);
-			return state;
-		}
-		else
-		if (sType == _T("ori"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add((void*)m_Ori);
-			return state;
-		}
-		else
 		if (sType.Left(4) == _T("blk_"))
 		{
 			CString type(sType);
 			type.TrimLeft(_T("blk_"));
-			return m_Slider.GetState(type, pGC);
+			return m_Slider.GetState(type);
 		}
 		else
-			return CGuiPicture::GetState(sType, pGC);
+		if (sType == _T("slider"))
+			return (void*)(&m_Slider);
+		if (sType == _T("all"))
+			return (void*)m_All;
+		else
+		if (sType == _T("fra"))
+			return (void*)m_Fra;
+		else
+		if (sType == _T("pos"))
+			return (void*)m_Pos;
+		else
+		if (sType == _T("ori"))
+			return (void*)m_Ori;
+		else
+			return CGuiPicture::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{
@@ -207,55 +187,40 @@ public:
 	}
 
 public:
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
 		CString type(sType);
-		if (type == _T("main"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add(m_Main);
-			return state;
-		}
-		else
-		if (type == _T("slider"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add(&m_Slider);
-			return state;
-		}
-		else
-		if (type == _T("up"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add(&m_Up);
-			return state;
-		}
-		else
-		if (type == _T("down"))
-		{
-			state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-			if (state) state->sta_arr.Add(&m_Down);
-			return state;
-		}
-		else
-		if (type.Left(4) == _T("sli_"))
+		if (sType.Left(4) == _T("sli_"))
 		{
 			type.TrimLeft(_T("sli_"));
-			return m_Slider.GetState(type, pGC);
+			return m_Slider.GetState(type);
 		}
 		else
-		if (type.Left(3) == _T("up_"))
+		if (sType.Left(3) == _T("up_"))
 		{
 			type.TrimLeft(_T("up_"));
-			return m_Up.GetState(type, pGC);
+			return m_Up.GetState(type);
 		}
 		else
-		if (type.Left(3) == _T("dn_"))
+		if (sType.Left(3) == _T("dn_"))
 		{
 			type.TrimLeft(_T("dn_"));
-			return m_Down.GetState(type, pGC);
+			return m_Down.GetState(type);
 		}
-		return NULL;
+		else
+		if (sType == _T("main"))
+			return (void*)m_Main;
+		else
+		if (sType == _T("slider"))
+			return (void*)(&m_Slider);
+		else
+		if (sType == _T("up"))
+			return (void*)(&m_Up);
+		else
+		if (sType == _T("down"))
+			return (void*)(&m_Down);
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{

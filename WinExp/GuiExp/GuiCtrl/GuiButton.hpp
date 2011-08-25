@@ -105,45 +105,39 @@ public:
 
 public:
 	// 获得控件状态
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		state_t* state = EXP_BASE::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("status"))
-				state->sta_arr.Add((void*)m_Status);
-			else
-			if (state->sta_typ == _T("locate"))
-				state->sta_arr.Add((void*)m_Locate);
-			else
-			if (state->sta_typ == _T("loc_off"))
-				state->sta_arr.Add((void*)m_LocOff);
-			else
-			if (state->sta_typ == _T("thr_sta"))
-				state->sta_arr.Add((void*)m_ThreeSta);
-			else
-			if (state->sta_typ == _T("color"))
-				for(int i = 0; i < _countof(m_Color); ++i)
-					state->sta_arr.Add(m_Color + i);
-			else
-			if (state->sta_typ == _T("image"))
-				for(int i = 0; i < _countof(m_Image); ++i)
-					state->sta_arr.Add(m_Image + i);
-			else
-			if (state->sta_typ == _T("text"))
-				for(int i = 0; i < _countof(m_Text); ++i)
-					state->sta_arr.Add(m_Text + i);
-			else
-			if (state->sta_typ == _T("icon"))
-				state->sta_arr.Add(&m_Icon);
-			else
-			if (state->sta_typ == _T("ico_off"))
-				state->sta_arr.Add((void*)m_IcoOff);
-			else
-			if (state->sta_typ == _T("glow"))
-				state->sta_arr.Add((void*)m_bGlow);
-		}
-		return state;
+		if (sType == _T("status"))
+			return (void*)m_Status;
+		else
+		if (sType == _T("locate"))
+			return (void*)m_Locate;
+		else
+		if (sType == _T("loc_off"))
+			return (void*)m_LocOff;
+		else
+		if (sType == _T("thr_sta"))
+			return (void*)m_ThreeSta;
+		else
+		if (sType == _T("color"))
+			return (void*)m_Color;
+		else
+		if (sType == _T("image"))
+			return (void*)m_Image;
+		else
+		if (sType == _T("text"))
+			return (void*)m_Text;
+		else
+		if (sType == _T("icon"))
+			return (void*)(&m_Icon);
+		else
+		if (sType == _T("ico_off"))
+			return (void*)m_IcoOff;
+		else
+		if (sType == _T("glow"))
+			return (void*)m_bGlow;
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{
@@ -277,32 +271,27 @@ public:
 
 public:
 	// 获得控件状态
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		state_t* state = EXP_BASE::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("status"))
-				state->sta_arr.Add((void*)m_Status);
-			else
-			if (state->sta_typ == _T("locate"))
-				state->sta_arr.Add((void*)m_Locate);
-			else
-			if (state->sta_typ == _T("loc_off"))
-				state->sta_arr.Add((void*)m_LocOff);
-			else
-			if (state->sta_typ == _T("color"))
-				for(int i = 0; i < _countof(m_Color); ++i)
-					state->sta_arr.Add(m_Color + i);
-			else
-			if (state->sta_typ == _T("image"))
-				state->sta_arr.Add(&m_Image);
-			else
-			if (state->sta_typ == _T("text"))
-				for(int i = 0; i < _countof(m_Text); ++i)
-					state->sta_arr.Add(m_Text + i);
-		}
-		return state;
+		if (sType == _T("status"))
+			return (void*)m_Status;
+		else
+		if (sType == _T("locate"))
+			return (void*)m_Locate;
+		else
+		if (sType == _T("loc_off"))
+			return (void*)m_LocOff;
+		else
+		if (sType == _T("color"))
+			return (void*)m_Color;
+		else
+		if (sType == _T("image"))
+			return (void*)(&m_Image);
+		else
+		if (sType == _T("text"))
+			return (void*)m_Text;
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{

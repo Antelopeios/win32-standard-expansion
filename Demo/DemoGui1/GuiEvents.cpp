@@ -820,15 +820,8 @@ public:
 			break;
 		case WM_SIZE:
 			{
-				CGC gc;
-
-				IGuiCtrl::state_t* state = ctrl->GetState(_T("all_line"), &gc);
-				if (!state) break;
-				LONG all_line = (LONG)(LONG_PTR)(state->sta_arr[0]);
-
-				state = ctrl->GetState(_T("fra_line"), &gc);
-				if (!state) break;
-				LONG fra_line = (LONG)(LONG_PTR)(state->sta_arr[0]);
+				LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
+				LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
 
 				if (all_line > fra_line)
 				{
@@ -863,10 +856,7 @@ public:
 				IGuiCtrl* btn = (IGuiCtrl*)lParam;
 				if (m_OldBtn == btn) break;
 
-				CGC gc;
-				IGuiCtrl::state_t* state = btn->GetState(_T("text"), &gc);
-				if (!state) break;
-				CText* text = (CText*)(state->sta_arr[0]);
+				CText* text = (CText*)btn->GetState(_T("text"));
 				if (!text) break;
 				CSize txt_clp;
 				text->GetSize(txt_clp);
@@ -885,10 +875,7 @@ public:
 				IGuiCtrl* btn = (IGuiCtrl*)lParam;
 				if (m_OldBtn != btn) break;
 
-				CGC gc;
-				IGuiCtrl::state_t* state = btn->GetState(_T("text"), &gc);
-				if (!state) break;
-				CText* text = (CText*)(state->sta_arr[0]);
+				CText* text = (CText*)btn->GetState(_T("text"));
 				if (!text) break;
 				CSize txt_clp;
 				text->GetSize(txt_clp);

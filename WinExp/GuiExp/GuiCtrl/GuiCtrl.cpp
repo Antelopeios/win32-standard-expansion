@@ -66,12 +66,9 @@ IGuiCtrlBase::IGuiCtrlBase()
 {}
 
 // ¸üÐÂ×´Ì¬
-IGuiCtrlBase::state_t* IGuiCtrlBase::GetState(const CString& sType, CGC* pGC/* = NULL*/)
+void* IGuiCtrlBase::GetState(const CString& sType)
 {
-	state_t* state = pGC ? ExMem::Alloc<state_t>(pGC) : state_t::Alloc();
-	ExAssert(state);
-	if (state) state->sta_typ = sType;
-	return state;
+	return NULL;
 }
 bool IGuiCtrlBase::SetState(const CString& sType, void* pState)
 {

@@ -72,15 +72,12 @@ public:
 
 public:
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		state_t* state = EXP_BASE::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("items"))
-				state->sta_arr.Add(&m_ItemList);
-		}
-		return state;
+		if (sType == _T("items"))
+			return (void*)(&m_ItemList);
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{

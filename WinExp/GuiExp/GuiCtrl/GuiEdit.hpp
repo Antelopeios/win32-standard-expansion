@@ -104,25 +104,18 @@ public:
 
 public:
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	state_t* GetState(const CString& sType, CGC* pGC = NULL)
+	void* GetState(const CString& sType)
 	{
-		state_t* state = IGuiCtrlBase::GetState(sType, pGC);
-		if (state)
-		{
-			if (state->sta_typ == _T("edit"))
-				state->sta_arr.Add(&m_Edit);
-			else
-			if (state->sta_typ == _T("txt_sel_color"))
-				for(int i = 0; i < _countof(m_ColorSelTxt); ++i)
-					state->sta_arr.Add(m_ColorSelTxt + i);
-			else
-			if (state->sta_typ == _T("bkg_sel_color"))
-				for(int i = 0; i < _countof(m_ColorSelBkg); ++i)
-					state->sta_arr.Add(m_ColorSelBkg + i);
-			else
-				state = EXP_BASE::GetState(sType, pGC);
-		}
-		return state;
+		if (sType == _T("edit"))
+			return (void*)(&m_Edit);
+		else
+		if (sType == _T("txt_sel_color"))
+			return (void*)m_ColorSelTxt;
+		else
+		if (sType == _T("bkg_sel_color"))
+			return (void*)m_ColorSelBkg;
+		else
+			return EXP_BASE::GetState(sType);
 	}
 	bool SetState(const CString& sType, void* pState)
 	{

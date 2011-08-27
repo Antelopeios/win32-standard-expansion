@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-15
-// Version:	1.0.0006.1606
+// Date:	2011-08-26
+// Version:	1.0.0007.1623
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
@@ -44,6 +44,7 @@
 //	- 1.0.0004.1730(2011-08-11)	= 列表项的图标偏移采用单独的属性(ico_off)控制
 //	- 1.0.0005.1030(2011-08-12)	= 将默认列表项的背景图由图片改为单态按钮控件,方便支持九宫格式的焦点图片
 //	- 1.0.0006.1606(2011-08-15)	^ 将CGuiLVItem的具体属性转移到CGuiButton中实现,仅保留特殊的事件响应
+//	- 1.0.0007.1623(2011-08-26)	# 修正当GuiListView在运行过程中修改列表项时,不会自动格式化列表项位置的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -146,13 +147,14 @@ public:
 				items_t::iterator_t it = new_sta->Find(item);
 				if (it == new_sta->Tail()) DelComp(item);
 			}
-			m_ItemList = *(items_t*)pState;
+			m_ItemList = *new_sta;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
 				IGuiCtrl* item = *ite;
 				if (!item) continue;
 				AddComp(item);
 			}
+			Send(ExDynCast<IGuiObject>(this), WM_SIZE);
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-07
-// Version:	1.0.0012.1523
+// Date:	2011-08-26
+// Version:	1.0.0013.1537
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -55,6 +55,7 @@
 //								^ IGuiSender后添加的事件优先执行,优先执行自身的事件对象,再向子控件传递消息
 //								+ 相关组合接口添加Ins...()操作,用于在组合队列的头部添加子对象
 //	- 1.0.0012.1523(2011-07-07)	# 调整Comp与Event接口内Find()的命名,防止外部调用冲突
+//	- 1.0.0013.1537(2011-08-26)	# 调整Comp与Event接口内Trust相关接口的命名,防止外部调用冲突
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -225,8 +226,8 @@ public:
 
 public:
 	// 是否对子容器做托管
-	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
-	bool IsTrust() { return m_bTru; }
+	void SetTrustEvent(bool bTruCldr = true) { m_bTru = bTruCldr; }
+	bool IsTrustEvent() { return m_bTru; }
 	// 获得内部对象
 	evt_list_t& GetEvent() { return *m_CldrEvt; }
 

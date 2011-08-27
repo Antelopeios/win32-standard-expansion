@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-01
-// Version:	1.0.0003.0455
+// Date:	2011-08-26
+// Version:	1.0.0004.1107
 //
 // History:
 //	- 1.0.0000.1030(2011-06-21)	@ 开始构建GuiEdit
@@ -43,6 +43,7 @@
 //								^ 简化CGuiEdit的属性定义
 //								+ 添加创建输入法上下文的相关代码
 //	- 1.0.0003.0455(2011-08-01)	+ 将CGuiEdit的一些属性拓展为数组,以支持更多属性状态
+//	- 1.0.0004.1107(2011-08-26)	+ 添加CGuiEdit的empty_text属性,支持无文字时显示默认文字
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEdit_hpp__
@@ -64,6 +65,7 @@ class CGuiEdit : public CGuiPicture
 
 protected:
 	CString m_Edit;
+	CText m_EmptyText;
 	pixel_t m_ColorSelTxt[2];
 	pixel_t m_ColorSelBkg[2];
 	HIMC	m_ImmContext;
@@ -109,6 +111,9 @@ public:
 		if (sType == _T("edit"))
 			return (void*)(&m_Edit);
 		else
+		if (sType == _T("empty_text"))
+			return (void*)(&m_EmptyText);
+		else
 		if (sType == _T("txt_sel_color"))
 			return (void*)m_ColorSelTxt;
 		else
@@ -122,6 +127,12 @@ public:
 		if (sType == _T("edit"))
 		{
 			m_Edit = *((CString*)pState);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("empty_text"))
+		{
+			m_EmptyText = *((CText*)pState);
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else

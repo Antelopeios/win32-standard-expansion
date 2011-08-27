@@ -33,14 +33,16 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0005.2000
+// Date:	2011-08-26
+// Version:	1.0.0006.2050
 //
 // History:
 //	- 1.0.0002.1525(2011-05-13)	^ 将IGuiBoardBase接口实现与GuiBoard的实现分离
 //	- 1.0.0003.0942(2011-06-17)	= 将IGuiBoardBase接口重新移回到GuiBoard.cpp中
 //	- 1.0.0004.1253(2011-06-24)	+ 添加WNDCLASSEX::style控制接口实现
 //	- 1.0.0005.2000(2011-07-16)	= 根据剪切区绘图的优化调整IGuiBoardBase::LayeredWindow()的实现
+//	- 1.0.0006.2050(2011-08-26)	# 修正一处IGuiBoardBase::SetLayered()内部错误
+//								# 修正当窗口有子窗口时,绘图会将子窗口覆盖的问题
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -65,6 +67,7 @@ const LPCTSTR IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
 
 IGuiBoardBase::IGuiBoardBase(void)
 	: m_hIns(::GetModuleHandle(NULL))
+	, m_bPaint(true)
 	, m_bLayered(false)
 	, m_bColorKey(false)
 	, m_crKey(ExRGB(255, 0, 255))
@@ -72,6 +75,7 @@ IGuiBoardBase::IGuiBoardBase(void)
 IGuiBoardBase::IGuiBoardBase(wnd_t hWnd)
 	: m_hIns(::GetModuleHandle(NULL))
 	, type_base_t(hWnd)
+	, m_bPaint(true)
 	, m_bLayered(false)
 	, m_bColorKey(false)
 	, m_crKey(ExRGB(255, 0, 255))
@@ -158,6 +162,16 @@ LRESULT IGuiBoardBase::SendMessage(UINT nMessage, WPARAM wParam/* = 0*/, LPARAM 
 bool IGuiBoardBase::PostMessage(UINT nMessage, WPARAM wParam/* = 0*/, LPARAM lParam/* = 0*/)
 {
 	return ::PostMessage(Get(), nMessage, wParam, lParam);
+}
+
+// 是否绘图
+void IGuiBoardBase::SetCusPaint(bool bPaint)
+{
+	m_bPaint = bPaint;
+}
+bool IGuiBoardBase::IsCusPaint() const
+{
+	return m_bPaint;
 }
 
 // 窗口属性修改
@@ -453,7 +467,7 @@ void IGuiBoardBase::SetLayered(bool bLayered/* = true*/, bool bColorKey/* = true
 		}
 		else
 		{
-			if (ex_style | WS_EX_LAYERED)
+			if (ex_style & WS_EX_LAYERED)
 				SetWindowLong(GWL_EXSTYLE, ex_style & ~WS_EX_LAYERED);
 		}
 	}
@@ -496,6 +510,50 @@ void IGuiBoardBase::LayeredWindow(HDC hDC, HDC tGrp)
 	else
 	{
 		CRect rect;
+		GetClientRect(rect);
+
+		// 脏矩形镂空
+		HRGN bkg_rgn = ::CreateRectRgnIndirect(&(RECT)rect);
+		HWND cld_wnd_fst = ::GetWindow(GethWnd(), GW_CHILD);
+		HWND cld_wnd_lst = cld_wnd_fst ? ::GetWindow(cld_wnd_fst, GW_HWNDLAST) : NULL;
+		while (cld_wnd_fst 
+			&& cld_wnd_fst != cld_wnd_lst)
+		{	// 遍历子窗口
+			if (::IsWindowVisible(cld_wnd_fst))
+			{
+				RECT cld_rct;
+				::GetWindowRect(cld_wnd_fst, &cld_rct);
+				POINT pt = {cld_rct.left, cld_rct.top};
+				::ScreenToClient(GethWnd(), &pt);
+				cld_rct.right	+= (pt.x - cld_rct.left);
+				cld_rct.bottom	+= (pt.y - cld_rct.top);
+				cld_rct.left	= pt.x;
+				cld_rct.top		= pt.y;
+				HRGN cld_rgn = ::CreateRectRgnIndirect(&cld_rct);
+				::CombineRgn(bkg_rgn, bkg_rgn, cld_rgn, RGN_DIFF);
+				::DeleteObject(cld_rgn);
+			}
+			cld_wnd_fst = ::GetWindow(cld_wnd_fst, GW_HWNDNEXT);
+		}
+		if (cld_wnd_lst && 
+			::IsWindowVisible(cld_wnd_lst))
+		{	// 最后一个子窗口
+			RECT cld_rct;
+			::GetWindowRect(cld_wnd_lst, &cld_rct);
+			POINT pt = {cld_rct.left, cld_rct.top};
+			::ScreenToClient(GethWnd(), &pt);
+			cld_rct.right	+= (pt.x - cld_rct.left);
+			cld_rct.bottom	+= (pt.y - cld_rct.top);
+			cld_rct.left	= pt.x;
+			cld_rct.top		= pt.y;
+			HRGN cld_rgn = ::CreateRectRgnIndirect(&cld_rct);
+			::CombineRgn(bkg_rgn, bkg_rgn, cld_rgn, RGN_DIFF);
+			::DeleteObject(cld_rgn);
+		}
+		::SelectClipRgn(hDC, bkg_rgn);
+		::DeleteObject(bkg_rgn);
+
+		// 镂空后绘图
 		GetClipBox(rect);
 		::BitBlt(hDC, rect.Left(), rect.Top(), rect.Width(), rect.Height(), tGrp, 0, 0, SRCCOPY);
 	}

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-25
-// Version:	1.0.0005.0106
+// Date:	2011-08-26
+// Version:	1.0.0006.1525
 //
 // History:
 //	- 1.0.0005.0106(2011-02-25)	= 以模板的形式为一般类型做更为通用的泛型算法
+//	- 1.0.0006.1525(2011-08-26)	# 使用模板特化解决目标类无法重载DWORD_PTR操作符时将无法正常使用HashKey函数计算Hash的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Hash_h__
@@ -47,6 +48,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Container/String.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
@@ -54,11 +57,6 @@ EXP_BEG
 class CHash
 {
 public:
-	template<typename KeyT>
-	EXP_INLINE static DWORD HashKey(KeyT Key)
-	{
-		return (DWORD)(DWORD_PTR)(Key);
-	}
 	template<typename AryT>
 	EXP_INLINE static DWORD HashAry(AryT Ary)
 	{
@@ -67,6 +65,21 @@ public:
 		while (*Ary)
 			hash = (hash << 5) + hash + *Ary++;
 		return hash;
+	}
+	template<typename KeyT>
+	EXP_INLINE static DWORD HashKey(KeyT Key)
+	{
+		return (DWORD)(DWORD_PTR)(Key);
+	}
+	template<>
+	EXP_INLINE static DWORD HashKey<CStringT<char> >(CStringT<char> Key)
+	{
+		return HashAry<char*>(Key);
+	}
+	template<>
+	EXP_INLINE static DWORD HashKey<CStringT<wchar_t> >(CStringT<wchar_t> Key)
+	{
+		return HashAry<wchar_t*>(Key);
 	}
 };
 

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-23
-// Version:	1.0.0025.1651
+// Date:	2011-08-26
+// Version:	1.0.0026.1505
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -55,6 +55,7 @@
 //	- 1.0.0024.1105(2011-08-19)	+ 为CStringT的一些接口添加返回值
 //								+ 添加CStringT::Trim()
 //	- 1.0.0025.1651(2011-08-23)	+ 字符串类增加自动转码功能,将根据自身的TypeT类型自动将传入的char或wchar_t转换为合适的类型
+//	- 1.0.0026.1505(2011-08-26)	# 修正某些情况下字符串类的+号重载编译时出现error C2666的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -65,7 +66,6 @@
 #endif // _MSC_VER > 1000
 
 #include "Container/Array.h"
-#include "Algorithm/Hash.h"
 
 EXP_BEG
 
@@ -109,9 +109,6 @@ public:
 
 	~CStringT()
 	{}
-
-	operator DWORD_PTR()
-	{ return CHash::HashAry<type_t*>(m_Array); }
 
 public:
 	DWORD GetSize()
@@ -404,30 +401,16 @@ public:
 		}
 		return (*this);
 	}
-	CStringT& operator+=(const array_t& aString)
-	{ return operator+=((const type_t*)aString); }
-	CStringT& operator+=(const CStringT& String)
-	{ return operator+=((const type_t*)String); }
 	CStringT& operator+=(const type_t Char)
 	{
 		type_t tmp_chr[2] = {Char, 0};
 		return operator+=(tmp_chr);
 	}
 
-	CStringT operator+(const type_t* pString)
-	{
-		CStringT tmp_str(*this);
-		return tmp_str += pString;
-	}
-	CStringT operator+(const array_t& aString)
-	{ return operator+((const type_t*)aString); }
-	CStringT operator+(const CStringT& String)
-	{ return operator+((const type_t*)String); }
-	CStringT operator+(const type_t Char)
-	{
-		CStringT tmp_str(*this);
-		return tmp_str += Char;
-	}
+	CStringT operator+(const type_t* str2)
+	{ return (CStringT(*this) += str2); }
+	CStringT operator+(const type_t str2)
+	{ return (CStringT(*this) += str2); }
 
 	type_t* GetCStr(DWORD nLen = 0)
 	{

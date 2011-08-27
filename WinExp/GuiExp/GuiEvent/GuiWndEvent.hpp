@@ -385,6 +385,7 @@ public:
 				ret = WndSend(board, nMessage, wParam, lParam);
 				break;
 			case WM_PAINT:
+				if (board->IsCusPaint())
 				{
 					PAINTSTRUCT ps = {0};
 					HDC hdc = ::BeginPaint(board->GethWnd(), &ps);
@@ -420,6 +421,8 @@ public:
 					mem_grp.Delete();
 					::EndPaint(board->GethWnd(), &ps);
 				}
+				else
+					ret = board->DefProc(nMessage, wParam, lParam);
 				break;
 			case WM_ERASEBKGND:
 				ret = WndSend(board, nMessage, wParam, lParam);

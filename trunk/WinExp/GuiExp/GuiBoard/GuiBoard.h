@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0009.2008
+// Date:	2011-08-26
+// Version:	1.0.0010.1818
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -47,6 +47,7 @@
 //	- 1.0.0007.0942(2011-06-17)	= 将IGuiBoardBase接口移动到GuiBoard.h中,使外部可以使用此接口
 //	- 1.0.0008.1253(2011-06-24)	+ 将IGuiBoard支持通过Create接口控制WNDCLASSEX的style
 //	- 1.0.0009.2008(2011-07-16)	= 调整SetLayered()接口,支持在非半透明图层化模式下设置透明色
+//	- 1.0.0010.1818(2011-08-26)	+ 添加控制是否窗口自绘的接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -79,6 +80,10 @@ public:
 
 	virtual bool Attach(wnd_t hWnd) = 0;
 	virtual wnd_t Detach() = 0;
+
+	// 是否绘图
+	virtual void SetCusPaint(bool bPaint) = 0;
+	virtual bool IsCusPaint() const = 0;
 
 	// 窗口消息
 	virtual LRESULT DefProc(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
@@ -159,6 +164,8 @@ protected:
 	static const LPCTSTR s_ClassName;
 	HINSTANCE m_hIns;
 
+	bool m_bPaint;
+
 	bool m_bLayered;
 	bool m_bColorKey;
 	pixel_t m_crKey;
@@ -188,6 +195,10 @@ public:
 	// 窗口消息
 	LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
 	bool PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+
+	// 是否绘图
+	void SetCusPaint(bool bPaint);
+	bool IsCusPaint() const;
 
 	// 窗口属性修改
 	DWORD GetStyle();

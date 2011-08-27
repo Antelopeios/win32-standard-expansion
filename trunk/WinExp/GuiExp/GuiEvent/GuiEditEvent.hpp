@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-01
-// Version:	1.0.0003.0505
+// Date:	2011-08-26
+// Version:	1.0.0004.1107
 //
 // History:
 //	- 1.0.0000.1055(2011-06-21)	@ 开始构建GuiEditEvent
@@ -43,6 +43,7 @@
 //	- 1.0.0002.2018(2011-07-31)	+ 当Edit内容变化时会向控件自身发送EN_CHANGE的命令消息
 //								# 修正光标显示判断不够准确的问题
 //	- 1.0.0002.2018(2011-07-31)	+ 添加Edit无焦点时选中的文字背景与颜色的变化
+//	- 1.0.0004.1107(2011-08-26)	+ 添加empty_text属性的事件控制支持
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiEditEvent_hpp__
@@ -523,6 +524,7 @@ public:
 		CText* text = (CText*)m_Ctrl->GetState(_T("text"));
 		CText tmp_text = (*text);
 		CString* edit = (CString*)m_Ctrl->GetState(_T("edit"));
+		CText* empt = (CText*)m_Ctrl->GetState(_T("empty_text"));
 
 		pixel_t txt_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("txt_sel_color")))[no_foc];
 		pixel_t bkg_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("bkg_sel_color")))[no_foc];
@@ -558,20 +560,29 @@ public:
 		}
 
 		// 绘文字
-		tmp_text.SetString(*edit);
-		CImage txt_img(tmp_text.GetImage());
-		if(!txt_img.IsNull())
+		if (edit->Empty())
 		{
-			CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
-			if (!sel_rc.IsEmpty())
+			CImage txt_img(empt->GetImage());
+			if(!txt_img.IsNull())
+				CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+		}
+		else
+		{
+			tmp_text.SetString(*edit);
+			CImage txt_img(tmp_text.GetImage());
+			if(!txt_img.IsNull())
 			{
-				CFilterFill filter(ExRevColor(txt_sel_color), 0xf, true);
-				CImgFilter::Filter(txt_img, sel_rc, &filter);
-				filter.m_Const = ExRevColor(bkg_sel_color);
-				filter.m_ClrMask = txt_sel_color;
-				CImgFilter::Filter(txt_img, sel_rc, &filter);
+				CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
+				if (!sel_rc.IsEmpty())
+				{
+					CFilterFill filter(ExRevColor(txt_sel_color), 0xf, true);
+					CImgFilter::Filter(txt_img, sel_rc, &filter);
+					filter.m_Const = ExRevColor(bkg_sel_color);
+					filter.m_ClrMask = txt_sel_color;
+					CImgFilter::Filter(txt_img, sel_rc, &filter);
+				}
+				CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 			}
-			CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 		}
 
 		// 绘光标

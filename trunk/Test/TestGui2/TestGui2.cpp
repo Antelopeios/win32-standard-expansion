@@ -40,6 +40,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	IGuiCtrl* edit = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc));
 	edit->SetWindowRect(rc_wnd);
 	edit->SetState(_T("text"), &txt_edt);
+	txt_edt.SetColor(ExRGBA(128, 128, 128, 255));
+	txt_edt.SetString(_T("现在的Edit里面什么都没有哦"));
+	edit->SetState(_T("empty_text"), &txt_edt);
 
 	// 创建事件对象并设置
 	CCustomEvent cus_evt;

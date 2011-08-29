@@ -128,7 +128,7 @@ public:
 		return (len / nSize);
 	}
 
-	virtual bool Seek(uint64_t nOffset, int iOrigin = current)
+	virtual bool Seek(int64_t nOffset, int iOrigin = current)
 	{
 		if (Error()) return false;
 		long new_pos = m_Position->Index();

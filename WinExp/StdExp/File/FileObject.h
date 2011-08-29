@@ -71,7 +71,7 @@ public:
 	virtual DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR)) = 0;
 	virtual DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR)) = 0;
 
-	virtual bool Seek(uint64_t nOffset, int iOrigin = current) = 0;
+	virtual bool Seek(int64_t nOffset, int iOrigin = current) = 0;
 	virtual uint64_t Tell() = 0;
 	virtual uint64_t Size() = 0;
 	virtual bool Flush() = 0;

@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-14
-// Version:	1.0.0002.1500
+// Date:	2011-08-29
+// Version:	1.0.0003.1151
+//
+// History:
+//	- 1.0.0003.1151(2011-08-29)	# 调整文件Seek接口的nOffset参数为int64_t类型,原来使用的uint64_t无法传入负值
 //////////////////////////////////////////////////////////////////
 
 #ifndef __IOFile_h__
@@ -206,7 +209,7 @@ public:
 		return (len / nSize);
 	}
 
-	virtual bool Seek(uint64_t nOffset, int iOrigin = current)
+	virtual bool Seek(int64_t nOffset, int iOrigin = current)
 	{
 		if (Error()) return false;
 		if (iOrigin != begin && iOrigin != end && iOrigin != current)

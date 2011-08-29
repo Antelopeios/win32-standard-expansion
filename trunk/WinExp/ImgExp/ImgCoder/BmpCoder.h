@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.0.0005.1710
+// Date:	2011-08-29
+// Version:	1.0.0006.1155
 //
 // History:
 //	- 1.0.0001.2350(2011-04-05)	^ 优化BmpCoder的结构
@@ -43,6 +43,7 @@
 //	- 1.0.0003.1544(2011-04-06)	^ 支持任何格式的16位位图解码
 //	- 1.0.0004.1730(2011-04-07)	+ 添加BmpCoder::Encode()实现
 //	- 1.0.0005.1710(2011-05-19)	# 修正32位位图像素解析的错误
+//	- 1.0.0006.1155(2011-08-29)	^ 新增一个内部接口,让整体结构更加模块化,并调整内部16/32位解码器的实现,使之更为通用
 //////////////////////////////////////////////////////////////////
 
 #ifndef __BmpCoder_h__
@@ -98,6 +99,7 @@ public:
 	{}
 
 protected:
+
 #pragma push_macro("PreDecode")
 #undef PreDecode
 #define PreDecode() \
@@ -127,10 +129,10 @@ protected:
 			{
 				bmBuff[pos] = ExRGBA
 					(
+					temp[inx + 0], 
 					temp[inx + 1], 
 					temp[inx + 2], 
-					temp[inx + 3], 
-					EXP_CM
+					bmiInfo.bmiHeader.biSizeImage ? EXP_CM : temp[inx + 3] /*32位icon取temp[inx + 3]*/
 					);
 			}
 		}
@@ -174,7 +176,7 @@ protected:
 			mask[2] = 0x001F;
 		} else // BI_BITFIELDS
 		{
-			pFile->Seek(sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), IFileObject::begin);
+			pFile->Seek(-(int)sizeof(RGBQUAD), IFileObject::current);
 			pFile->Read(mask, sizeof(mask), 1);
 		}
 		BYTE cnt_m[3] = 
@@ -301,6 +303,31 @@ protected:
 
 #pragma pop_macro("PreDecode")
 
+	EXP_INLINE static void Decode(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	{
+		switch (bmiInfo.bmiHeader.biBitCount)
+		{
+		case 32:
+			Decode32(pFile, bmhHead, bmiInfo, bmBuff);
+			break;
+		case 24:
+			Decode24(pFile, bmhHead, bmiInfo, bmBuff);
+			break;
+		case 16:
+			Decode16(pFile, bmhHead, bmiInfo, bmBuff);
+			break;
+		case 8:
+			Decode8(pFile, bmhHead, bmiInfo, bmBuff);
+			break;
+		case 4:
+			Decode4(pFile, bmhHead, bmiInfo, bmBuff);
+			break;
+		case 1:
+			Decode1(pFile, bmhHead, bmiInfo, bmBuff);
+			break;
+		}
+	}
+
 public:
 	bool Encode(image_t Image)
 	{
@@ -349,27 +376,7 @@ public:
 			GetImageBuff(file_info.bmiHeader.biWidth, file_info.bmiHeader.biHeight, (BYTE*&)bmbf);
 		if(!image) return NULL;
 		// 解析图像信息
-		switch (file_info.bmiHeader.biBitCount)
-		{
-		case 32:
-			Decode32(file, file_head, file_info, bmbf);
-			break;
-		case 24:
-			Decode24(file, file_head, file_info, bmbf);
-			break;
-		case 16:
-			Decode16(file, file_head, file_info, bmbf);
-			break;
-		case 8:
-			Decode8(file, file_head, file_info, bmbf);
-			break;
-		case 4:
-			Decode4(file, file_head, file_info, bmbf);
-			break;
-		case 1:
-			Decode1(file, file_head, file_info, bmbf);
-			break;
-		}
+		Decode(file, file_head, file_info, bmbf);
 		// 返回image_t
 		return image;
 	}

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-26
-// Version:	1.0.0013.1537
+// Date:	2011-08-29
+// Version:	1.0.0014.1646
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -56,6 +56,7 @@
 //								+ 相关组合接口添加Ins...()操作,用于在组合队列的头部添加子对象
 //	- 1.0.0012.1523(2011-07-07)	# 调整Comp与Event接口内Find()的命名,防止外部调用冲突
 //	- 1.0.0013.1537(2011-08-26)	# 调整Comp与Event接口内Trust相关接口的命名,防止外部调用冲突
+//	- 1.0.0014.1646(2011-08-29)	+ 添加IGuiEvent::Param()接口,方便外部自定义参数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -191,6 +192,8 @@ public:
 	{}
 
 public:
+	// 额外的存储指针
+	virtual void* Param() { return NULL; }
 	// 事件结果接口
 	void SetResult(LRESULT lrRes = 0) { m_Result = lrRes; }
 	LRESULT GetResult() { return m_Result; }

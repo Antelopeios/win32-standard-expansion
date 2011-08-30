@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-18
-// Version:	1.0.0007.1546
+// Date:	2011-08-30
+// Version:	1.0.0008.2229
 //
 // History:
 //	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
@@ -46,6 +46,8 @@
 //	- 1.0.0005.1452(2011-04-27)	# 修正CRectT::Inter()与CRectT::Union()中的错误
 //	- 1.0.0006.1730(2011-05-05)	# 修正构造时传入基本数据类型将导致堆栈溢出的问题
 //	- 1.0.0007.1546(2011-05-18)	+ 添加CRectT::operator!=()与CRectT::operator RECT()
+//	- 1.0.0008.2229(2011-08-30)	+ 添加可以方便直观的修改CRectT中Left;Right等属性的接口
+//								+ 添加直接获取及修改顶点的接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -213,6 +215,39 @@ public:
 	EXP_INLINE TypeT Bottom() const	{ return pt2.y; }
 	EXP_INLINE TypeT Width() const	{ return Right() - Left(); }
 	EXP_INLINE TypeT Height() const	{ return Bottom() - Top(); }
+
+	EXP_INLINE TypeT Left(TypeT nSize)
+	{ return pt1.x = nSize; }
+	EXP_INLINE TypeT Top(TypeT nSize)
+	{ return pt1.y = nSize; }
+	EXP_INLINE TypeT Right(TypeT nSize)
+	{ return pt2.x = nSize; }
+	EXP_INLINE TypeT Bottom(TypeT nSize)
+	{ return pt2.y = nSize; }
+	EXP_INLINE TypeT Width(TypeT nSize)
+	{
+		Right(Left() + nSize);
+		return Width();
+	}
+	EXP_INLINE TypeT Height(TypeT nSize)
+	{
+		Bottom(Top() + nSize);
+		return Height();
+	}
+
+	EXP_INLINE CPointT<TypeT>& LeftTop() const		{ return pt1; }
+	EXP_INLINE CPointT<TypeT> RightTop() const		{ return CPointT<TypeT>(pt2.x, pt1.y); }
+	EXP_INLINE CPointT<TypeT> LeftBottom() const	{ return CPointT<TypeT>(pt1.x, pt2.y); }
+	EXP_INLINE CPointT<TypeT>& RightBottom() const	{ return pt2; }
+
+	EXP_INLINE CPointT<TypeT>& LeftTop(CPointT<TypeT>& pt)
+	{ return pt1 = pt; }
+	EXP_INLINE CPointT<TypeT> RightTop(CPointT<TypeT>& pt)
+	{ return CPointT<TypeT>(pt2.x = pt.x, pt1.y = pt.y); }
+	EXP_INLINE CPointT<TypeT> LeftBottom(CPointT<TypeT>& pt)
+	{ return CPointT<TypeT>(pt1.x = pt.x, pt2.y = pt.y); }
+	EXP_INLINE CPointT<TypeT>& RightBottom(CPointT<TypeT>& pt)
+	{ return pt2 = pt; }
 };
 
 typedef CRectT<> CRect;

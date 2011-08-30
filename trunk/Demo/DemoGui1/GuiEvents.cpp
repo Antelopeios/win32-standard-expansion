@@ -31,6 +31,9 @@ public:
 				ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
 			}
 			break;
+		case WM_CLOSE:
+			board->DefProc(nMessage, wParam, lParam);
+			break;
 		case WM_DESTROY:
 			::PostQuitMessage(0);
 			break;

@@ -213,6 +213,7 @@ protected:
 
 		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
 		GUI_CTL(list)->SetState(_T("image"), GUI_IMG(list));
+		//GUI_CTL(list)->SetState(_T("align_top"), (void*)false);
 		CImage img_btn[9];
 		img_btn[0] = GUI_IMG(list_cor_lt)->Get();
 		img_btn[1] = GUI_IMG(list_item_top)->Get();

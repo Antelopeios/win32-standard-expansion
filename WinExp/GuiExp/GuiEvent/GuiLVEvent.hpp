@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-17
-// Version:	1.0.0006.0940
+// Date:	2011-08-30
+// Version:	1.0.0007.2317
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -46,6 +46,8 @@
 //								# 修正当列表视图中的Items大小不一时出现的换行对齐错位
 //								# 修正使用方向键控制列表项焦点时偶尔出现无法移动焦点的情况
 //	- 1.0.0006.0940(2011-08-17)	# 当GuiListView中有子控件时,左右的方向键不应该将焦点移到子控件上去
+//	- 1.0.0007.2317(2011-08-30)	+ 添加GuiListView列表项上/下不同对齐方式的排列实现
+//								# 修正当GuiListView宽度小于某列表项宽度时引起的列表项排列出错
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -277,9 +279,10 @@ public:
 
 		// 遍历列表项
 		LONG all_line = 0;
-		CRect itm_rc, lst_rc/*保存最高的itm*/, 
+		CRect itm_rc, him_rc/*保存最高的itm*/, 
 			old_rc(scr_sz.cx, space - scr_sz.cy, scr_sz.cx, space - scr_sz.cy);
 		if (b_top)
+		{	// 向上对齐
 			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 			{
 				IGuiCtrl* item = *ite;
@@ -288,34 +291,62 @@ public:
 				item->GetWindowRect(itm_rc);
 				// 调整区域
 				itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
-				if (itm_rc.Right() > rect.Right())
+				if (itm_rc.Right() > rect.Right() && itm_rc.Left() > scr_sz.cx + space)
 				{
-					itm_rc.MoveTo(CPoint(rect.Left() + space, lst_rc.Bottom() + space));
-					lst_rc = itm_rc;
+					itm_rc.MoveTo(CPoint(rect.Left() + space, him_rc.Bottom() + space));
+					him_rc = itm_rc;
 				}
 				// 设置当前项区域
 				item->SetWindowRect(itm_rc);
 				// 存储区域
 				old_rc = itm_rc;
-				if (itm_rc.Height() > lst_rc.Height())
-					lst_rc = itm_rc;
+				if (itm_rc.Height() > him_rc.Height())
+					him_rc = itm_rc;
 			}
+		}
 		else
-		{
+		{	// 向下对齐
 			for(items_t::iterator_t ite = items->Head(); ite != items->Tail();)
-			{
-				long w_itm = 0;
+			{	// 第一次遍历,先取得一行中最高的高度
 				items_t::iterator_t it = ite;
-				for(; w_itm <= rect.Right(); ++it)
+				for(long w_itm = 0; it != items->Tail(); ++it)
 				{
 					IGuiCtrl* item = *it;
 					if (!item) continue;
+					// 获取当前项的区域
 					w_itm += space;
 					item->GetWindowRect(itm_rc);
 					w_itm += itm_rc.Width();
-					if (itm_rc.Height() > lst_rc.Height())
-						lst_rc = itm_rc;
+					if (w_itm > rect.Right() && it != ite) break;
+					// 存储区域
+					if (itm_rc.Height() > him_rc.Height())
+						him_rc = itm_rc;
 				}
+				old_rc.Height(him_rc.Height());
+				// 第二次遍历,以最大高度的下端对齐一行
+				it = ite;
+				for(long w_itm = 0; it != items->Tail(); ++it)
+				{
+					IGuiCtrl* item = *it;
+					if (!item) continue;
+					// 获取当前项的区域
+					w_itm += space;
+					item->GetWindowRect(itm_rc);
+					w_itm += itm_rc.Width();
+					if (w_itm > rect.Right() && it != ite) break;
+					// 调整区域
+					itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Bottom() - itm_rc.Height()));
+					// 设置当前项区域
+					item->SetWindowRect(itm_rc);
+					// 存储区域
+					old_rc.Left(itm_rc.Left());
+					old_rc.Right(itm_rc.Right());
+				}
+				// 起点移动一行
+				old_rc.MoveTo(CPoint(scr_sz.cx, old_rc.Bottom() + space));
+				old_rc.Width(0);
+				// 迭代器指向下一行
+				ite = it;
 			}
 		}
 

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-15
-// Version:	1.0.0015.2236
+// Date:	2011-08-30
+// Version:	1.0.0016.1644
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -55,6 +55,7 @@
 //	- 1.0.0013.1958(2011-07-16)	^ 采用剪切区方式优化WM_PAINT时所有内存缓冲位图的效率
 //	- 1.0.0014.1538(2011-08-04)	= 由于WM_COMMAND与WM_NOTIFY消息是子控件发给父控件的消息,因此不再向下转发这两个消息
 //	- 1.0.0015.2236(2011-08-15)	# 修正当某个控件不可见或无法拥有焦点时,焦点切换将被卡在它前一个控件那里无法继续的问题
+//	- 1.0.0016.1644(2011-08-30)	= WM_CLOSE消息不再走默认的系统消息处理,否则外部无法屏蔽默认的WM_CLOSE响应
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -426,6 +427,8 @@ public:
 				break;
 			case WM_ERASEBKGND:
 				ret = WndSend(board, nMessage, wParam, lParam);
+				break;
+			case WM_CLOSE:
 				break;
 			default:
 				ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));

@@ -268,6 +268,7 @@ public:
 		items_t* items = GetItems();
 		if (!items || items->Empty()) return;
 		LONG space = GetSpace();
+		bool b_top = (bool)(LONG_PTR)m_Ctrl->GetState(_T("align_top"));
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
@@ -278,25 +279,44 @@ public:
 		LONG all_line = 0;
 		CRect itm_rc, lst_rc/*保存最高的itm*/, 
 			old_rc(scr_sz.cx, space - scr_sz.cy, scr_sz.cx, space - scr_sz.cy);
-		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
-		{
-			IGuiCtrl* item = *ite;
-			if (!item) continue;
-			// 获取当前项的区域
-			item->GetWindowRect(itm_rc);
-			// 调整区域
-			itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
-			if (itm_rc.Right() > rect.Right())
+		if (b_top)
+			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 			{
-				itm_rc.MoveTo(CPoint(rect.Left() + space, lst_rc.Bottom() + space));
-				lst_rc = itm_rc;
+				IGuiCtrl* item = *ite;
+				if (!item) continue;
+				// 获取当前项的区域
+				item->GetWindowRect(itm_rc);
+				// 调整区域
+				itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
+				if (itm_rc.Right() > rect.Right())
+				{
+					itm_rc.MoveTo(CPoint(rect.Left() + space, lst_rc.Bottom() + space));
+					lst_rc = itm_rc;
+				}
+				// 设置当前项区域
+				item->SetWindowRect(itm_rc);
+				// 存储区域
+				old_rc = itm_rc;
+				if (itm_rc.Height() > lst_rc.Height())
+					lst_rc = itm_rc;
 			}
-			// 设置当前项区域
-			item->SetWindowRect(itm_rc);
-			// 存储区域
-			old_rc = itm_rc;
-			if (itm_rc.Height() > lst_rc.Height())
-				lst_rc = itm_rc;
+		else
+		{
+			for(items_t::iterator_t ite = items->Head(); ite != items->Tail();)
+			{
+				long w_itm = 0;
+				items_t::iterator_t it = ite;
+				for(; w_itm <= rect.Right(); ++it)
+				{
+					IGuiCtrl* item = *it;
+					if (!item) continue;
+					w_itm += space;
+					item->GetWindowRect(itm_rc);
+					w_itm += itm_rc.Width();
+					if (itm_rc.Height() > lst_rc.Height())
+						lst_rc = itm_rc;
+				}
+			}
 		}
 
 		// 设置滚动区域

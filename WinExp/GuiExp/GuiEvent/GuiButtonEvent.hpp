@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-15
-// Version:	1.0.0011.1606
+// Date:	2011-08-30
+// Version:	1.0.0012.1716
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -54,6 +54,7 @@
 //	- 1.0.0010.1533(2011-08-12)	^ GuiButtonEvent的文字折行算法支持自动适应任意高度(上一版本仅能对折)
 //								# 修正一处GuiButtonEvent状态判断的逻辑错误
 //	- 1.0.0011.1606(2011-08-15)	+ 在GuiButtonEvent中实现icon相关属性的绘图处理
+//	- 1.0.0012.1716(2011-08-30)	+ 添加双击按钮时的BN_DOUBLECLICKED消息发送
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -163,6 +164,14 @@ public:
 		// 处理消息
 		switch( nMessage )
 		{
+		case WM_LBUTTONDBLCLK:
+		case WM_NCLBUTTONDBLCLK:
+			{
+				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				if (pare)
+					pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_DOUBLECLICKED, (LPARAM)ctrl);
+			}
+			break;
 		case WM_MOUSEMOVE:
 		case WM_NCMOUSEMOVE:
 			{

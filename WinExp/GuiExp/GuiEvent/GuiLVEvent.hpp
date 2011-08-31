@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-30
-// Version:	1.0.0007.2317
+// Date:	2011-08-31
+// Version:	1.0.0008.2333
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -48,6 +48,7 @@
 //	- 1.0.0006.0940(2011-08-17)	# 当GuiListView中有子控件时,左右的方向键不应该将焦点移到子控件上去
 //	- 1.0.0007.2317(2011-08-30)	+ 添加GuiListView列表项上/下不同对齐方式的排列实现
 //								# 修正当GuiListView宽度小于某列表项宽度时引起的列表项排列出错
+//	- 1.0.0008.2333(2011-08-31)	= 当GuiListView没有关联滚动条时,点击列表项不会引起列表视图滚动
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -359,6 +360,7 @@ public:
 	{
 		if (!pItem) return;
 		ExAssert(m_Ctrl);
+		if (!m_Ctrl->GetScroll()) return;
 
 		CSize scr_sz;
 		m_Ctrl->GetScrollSize(scr_sz);

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-30
-// Version:	1.0.0008.2229
+// Date:	2011-08-31
+// Version:	1.0.0009.1308
 //
 // History:
 //	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
@@ -48,6 +48,7 @@
 //	- 1.0.0007.1546(2011-05-18)	+ 添加CRectT::operator!=()与CRectT::operator RECT()
 //	- 1.0.0008.2229(2011-08-30)	+ 添加可以方便直观的修改CRectT中Left;Right等属性的接口
 //								+ 添加直接获取及修改顶点的接口
+//	- 1.0.0009.1308(2011-08-31)	= 调整CRectT::IsEmpty()接口,当区域大小为负数时也判定为true
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -136,7 +137,7 @@ public:
 	}
 
 	EXP_INLINE bool IsEmpty()
-	{ return (pt1.x == pt2.x || pt1.y == pt2.y); }
+	{ return (pt1.x >= pt2.x || pt1.y >= pt2.y); }
 	EXP_INLINE bool IsNull()
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 

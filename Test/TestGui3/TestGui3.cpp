@@ -73,17 +73,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	for(int i = 0; i < 10; ++i)
 	{
 		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
-		btn->SetState(_T("icon"), &img_pic);
-		btn->SetState(_T("glow"), (void*)1);
-		btn->SetState(_T("image"), img_btn);
+		//btn->SetState(_T("icon"), &img_pic);
+		//btn->SetState(_T("glow"), (void*)1);
+		//btn->SetState(_T("image"), img_btn);
 		btn->SetState(_T("text"), txt_btn);
-		btn->SetState(_T("locate"), (void*)2);
-		btn->SetState(_T("loc_off"), (void*)5);
-		btn->SetWindowRect(CRect(0, 0, 80, 80));
+		CSize sz;
+		txt_btn->GetSize(sz);
+		//btn->SetState(_T("locate"), (void*)2);
+		//btn->SetState(_T("loc_off"), (void*)5);
+		btn->SetWindowRect(CRect(0, 0, sz.cx + 8, sz.cy));
 		items.Add(btn);
 	}
 	list->SetState(_T("items"), &items);
-	list->SetState(_T("space"), (void*)5);
+	//list->SetState(_T("space"), (void*)5);
 	list->SetWindowRect(rc_wnd);
 
 	// 创建事件对象并设置

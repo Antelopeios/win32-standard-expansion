@@ -20,6 +20,9 @@ public:
 					board->PostMessage(WM_CLOSE);
 			}
 			break;
+		case WM_CLOSE:
+			board->DefProc(nMessage, wParam, lParam);
+			break;
 		case WM_DESTROY:
 			::PostQuitMessage(0);
 			break;

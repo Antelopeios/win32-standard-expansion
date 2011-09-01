@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-30
-// Version:	1.0.0012.1716
+// Date:	2011-09-01
+// Version:	1.0.0013.1048
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -55,6 +55,7 @@
 //								# 修正一处GuiButtonEvent状态判断的逻辑错误
 //	- 1.0.0011.1606(2011-08-15)	+ 在GuiButtonEvent中实现icon相关属性的绘图处理
 //	- 1.0.0012.1716(2011-08-30)	+ 添加双击按钮时的BN_DOUBLECLICKED消息发送
+//	- 1.0.0013.1048(2011-09-01)	# 修正当按钮比文字预留区域小时将不会显示文字的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -508,7 +509,7 @@ public:
 						CString clp_str(m_txtTmp.GetCStr());
 						m_imgClp.Create(img_rct.Width(), img_rct.Height());
 						LONG txt_off = 0;
-						while(txt_off + txt_clp.cy <= img_rct.Height() - 4)
+						do
 						{
 							// 计算剪切文本
 							clp_txt.GetSize(txt_clp);
@@ -552,6 +553,7 @@ public:
 							clp_txt.SetString(clp_str);
 							txt_off += (txt_clp.cy + 2);
 						}
+						while(txt_off + txt_clp.cy <= img_rct.Height() - 4);
 					}
 					CImgRenderer::Render(mem_img->Get(), m_imgClp, img_rct);
 				}

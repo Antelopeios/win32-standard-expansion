@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-31
-// Version:	1.0.0008.2333
+// Date:	2011-09-01
+// Version:	1.0.0009.1035
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -49,6 +49,7 @@
 //	- 1.0.0007.2317(2011-08-30)	+ 添加GuiListView列表项上/下不同对齐方式的排列实现
 //								# 修正当GuiListView宽度小于某列表项宽度时引起的列表项排列出错
 //	- 1.0.0008.2333(2011-08-31)	= 当GuiListView没有关联滚动条时,点击列表项不会引起列表视图滚动
+//	- 1.0.0009.1035(2011-09-01)	# 修正焦点列表项自动滚动功能存在的小bug,同时回滚上一项更新
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -360,7 +361,6 @@ public:
 	{
 		if (!pItem) return;
 		ExAssert(m_Ctrl);
-		if (!m_Ctrl->GetScroll()) return;
 
 		CSize scr_sz;
 		m_Ctrl->GetScrollSize(scr_sz);
@@ -370,10 +370,10 @@ public:
 		pItem->GetWindowRect(itm_rc);
 
 		LONG off1 = 0, off2 = 0;
-		if (!scr_rc.PtInRect(itm_rc.pt1))
-			off1 = itm_rc.pt1.y - scr_rc.pt1.y;
-		if (!scr_rc.PtInRect(itm_rc.pt2))
-			off2 = itm_rc.pt2.y - scr_rc.pt2.y;
+		if (scr_rc.Top() > itm_rc.Top())
+			off1 = itm_rc.Top() - scr_rc.Top();
+		if (scr_rc.Bottom() < itm_rc.Bottom())
+			off2 = itm_rc.Bottom() - scr_rc.Bottom();
 		scr_sz.cy += 
 			(off1 && off2 ? 
 			(abs(off1) < abs(off2) ? off1 : off2) : 

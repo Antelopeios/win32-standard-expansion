@@ -129,7 +129,7 @@ protected:
 		REG_IMG(list_foc_rb, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		LoadDirImage(list_ico, list_str, path + _T("\\icon"), coder, &gc);
 
-		file.Open(path + _T("\\scr_h.png"));
+		file.Open(path + _T("\\scr_h_bg.png"));
 		REG_IMG(scr_h, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
 		file.Open(path + _T("\\scr_h_sli_top.png"));
 		REG_IMG(scr_h_sli_top, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());
@@ -260,13 +260,13 @@ protected:
 		GUI_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)true);
 		GUI_CTL(scr_h)->SetState(_T("up_thr_sta"), (void*)true);
 		GUI_CTL(scr_h)->SetState(_T("dn_thr_sta"), (void*)true);
+		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
 		if (!GUI_IMG(scr_h) || GUI_IMG(scr_h)->IsNull())
 		{
 			pixel_t pix[5] = {0};
 			GUI_CTL(scr_h)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 			pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
 			GUI_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
-			GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
 			pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
 			GUI_CTL(scr_h)->SetState(_T("up_color"), pix);
 			GUI_CTL(scr_h)->SetState(_T("dn_color"), pix);
@@ -280,10 +280,13 @@ protected:
 			img[7] = GUI_IMG(scr_h_sli_bottom)->Get();
 			GUI_CTL(scr_h)->SetState(_T("sli_blk_image"), img);
 			GUI_CTL(scr_h)->SetState(_T("sli_blk_icon"), GUI_IMG(scr_h_ico));
+			img[1] = img[7] = NULL;
 			img[4] = GUI_IMG(scr_h_up)->Get();
 			GUI_CTL(scr_h)->SetState(_T("up_image"), img);
+			((IGuiCtrl*)GUI_CTL(scr_h)->GetState(_T("up")))->SetWindowRect(CRect(0, 0, img[4].GetWidth(), img[4].GetHeight() / 3));
 			img[4] = GUI_IMG(scr_h_dn)->Get();
 			GUI_CTL(scr_h)->SetState(_T("dn_image"), img);
+			((IGuiCtrl*)GUI_CTL(scr_h)->GetState(_T("down")))->SetWindowRect(CRect(0, 0, img[4].GetWidth(), img[4].GetHeight() / 3));
 		}
 		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
 

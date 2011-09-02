@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-29
-// Version:	1.0.0014.1646
+// Date:	2011-09-02
+// Version:	1.0.0015.1454
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -57,6 +57,7 @@
 //	- 1.0.0012.1523(2011-07-07)	# 调整Comp与Event接口内Find()的命名,防止外部调用冲突
 //	- 1.0.0013.1537(2011-08-26)	# 调整Comp与Event接口内Trust相关接口的命名,防止外部调用冲突
 //	- 1.0.0014.1646(2011-08-29)	+ 添加IGuiEvent::Param()接口,方便外部自定义参数
+//	- 1.0.0015.1454(2011-09-02)	+ 添加IGuiEvent的事件状态接口,当当前事件处理完后,可根据保存的事件状态判断是否继续执行下一个事件对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -181,12 +182,22 @@ EXP_INTERFACE IGuiEvent : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiEvent, IGuiObject)
 
+public:
+	enum state_t
+	{
+		continue_next,	// 继续下个事件
+		break_next,		// 跳过下个事件事件
+		return_next, 	// 下个事件时跳出事件队列
+	};
+
 protected:
 	LRESULT m_Result;
+	state_t m_State;
 
 public:
 	IGuiEvent()
 		: m_Result(0)
+		, m_State(continue_next)
 	{}
 	virtual ~IGuiEvent()
 	{}
@@ -196,7 +207,15 @@ public:
 	virtual void* Param() { return NULL; }
 	// 事件结果接口
 	void SetResult(LRESULT lrRes = 0) { m_Result = lrRes; }
-	LRESULT GetResult() { return m_Result; }
+	LRESULT GetResult() const { return m_Result; }
+	// 事件状态接口
+	void SetState(state_t eSta) { m_State = eSta; }
+	state_t GetState()
+	{
+		state_t sta = m_State;
+		m_State = continue_next;
+		return sta;
+	}
 	// 事件传递接口
 	virtual void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
 };
@@ -308,16 +327,24 @@ public:
 	{
 		if (GetEvent().Empty()) return;
 		LRESULT ret = GetResult();
+		IGuiEvent::state_t sta = IGuiEvent::continue_next;
 		// 后添加的事件优先执行
 		evt_list_t::iterator_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)
 		{
+			if (sta == IGuiEvent::break_next)
+				continue;
+			else
+			if (sta == IGuiEvent::return_next)
+				return;
 			if (!(*ite)) continue;
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			sta = (*ite)->GetState();
 			LRESULT r = (*ite)->GetResult();
 			if (r != 0 && ret != r) ret = r;
 		}
+		if (sta != IGuiEvent::continue_next) return;
 		if (*ite)
 		{
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果

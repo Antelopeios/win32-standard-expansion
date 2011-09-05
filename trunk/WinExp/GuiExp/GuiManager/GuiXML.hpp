@@ -322,15 +322,13 @@ public:
 		Clear();
 		// 编码转换
 		uint64_t len64 = m_pFile->Size();
-		if (len64 > (1 << 30)) return false;
+		if (len64 > (1 << 30)) return false; // 忽略大于1G的文件
 		DWORD len = (DWORD)len64 + 1;
 		char* buf = ExMem::Alloc<char>(&m_GC, len);
 		ZeroMemory(buf, len);
 		if (m_pFile->Read(buf, len - 1, sizeof(char)) != len - 1)
 			return false;
-		CString oem;
-		if (!::OemToChar(buf, oem.GetCStr(len)))
-			return false;
+		CString oem(buf);
 		if (m_mFile.Write(oem.GetCStr(), oem.GetLength()) != oem.GetLength())
 			return false;
 		if (!m_mFile.Seek(0, IFileObject::begin))

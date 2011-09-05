@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-26
-// Version:	1.0.0026.1505
+// Date:	2011-09-05
+// Version:	1.0.0027.1524
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -56,6 +56,7 @@
 //								+ 添加CStringT::Trim()
 //	- 1.0.0025.1651(2011-08-23)	+ 字符串类增加自动转码功能,将根据自身的TypeT类型自动将传入的char或wchar_t转换为合适的类型
 //	- 1.0.0026.1505(2011-08-26)	# 修正某些情况下字符串类的+号重载编译时出现error C2666的问题
+//	- 1.0.0027.1524(2011-09-05)	# 删除掉多余的字符串赋值接口,防止函数内出现递归赋值的编译错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -240,15 +241,7 @@ public:
 		}
 		return (*this);
 	}
-	CStringT& SetString(const array_t& aString)
-	{ return SetString(aString); }
-	CStringT& SetString(const CStringT& String)
-	{ return SetString(String.m_Array); }
 
-	CStringT& operator=(const CStringT& String)
-	{ return SetString(String); }
-	CStringT& operator=(const array_t& aString)
-	{ return SetString(aString); }
 	CStringT& operator=(const char* pString)
 	{ return SetString(pString); }
 	CStringT& operator=(const wchar_t* pString)

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-05
-// Version:	1.0.0010.1709
+// Date:	2011-09-06
+// Version:	1.0.0011.1154
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -51,6 +51,7 @@
 //	- 1.0.0008.2333(2011-08-31)	= 当GuiListView没有关联滚动条时,点击列表项不会引起列表视图滚动
 //	- 1.0.0009.1035(2011-09-01)	# 修正焦点列表项自动滚动功能存在的小bug,同时回滚上一项更新
 //	- 1.0.0010.1709(2011-09-05)	# 修正当列表项为空时,格式化列表项的函数不会刷新all_line与fra_line属性的问题
+//	- 1.0.0011.1154(2011-09-06)	# 修正当列表项为空时,由于没有将焦点指针置空,导致向列表发送按键消息时崩溃
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -271,6 +272,7 @@ public:
 
 		// 获得属性
 		items_t* items = GetItems();
+		if (items->Empty()) m_FocItm = NULL;
 		LONG space = GetSpace();
 		bool b_top = (bool)(LONG_PTR)m_Ctrl->GetState(_T("align_top"));
 

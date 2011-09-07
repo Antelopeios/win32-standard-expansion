@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-29
-// Version:	0.1.0015.1750
+// Date:	2011-09-07
+// Version:	0.1.0016.1217
 //
 // History:
 //	- 0.1.0005.2000(2010-12-11)	@ 完成Memory部分所有类的构建

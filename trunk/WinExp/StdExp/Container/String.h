@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-06
-// Version:	1.0.0028.0935
+// Date:	2011-09-07
+// Version:	1.0.0029.1157
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -58,6 +58,7 @@
 //	- 1.0.0026.1505(2011-08-26)	# 修正某些情况下字符串类的+号重载编译时出现error C2666的问题
 //	- 1.0.0027.1524(2011-09-05)	# 删除掉多余的字符串赋值接口,防止函数内出现递归赋值的编译错误
 //	- 1.0.0028.0935(2011-09-06)	# 修正构造时意外的字符串浅拷贝现象
+//	- 1.0.0029.1157(2011-09-07)	# 修正字符串转码算法中的内存溢出及内存泄漏现象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -216,11 +217,12 @@ public:
 		}
 		else
 		{
-			size_t len = strlen(pString);
-			wchar_t* tmp_str = ExMem::Alloc<wchar_t>(len + 1);
-			::OemToCharW(pString, tmp_str); /*字符转码*/
+			DWORD len = ::MultiByteToWideChar(CP_ACP, NULL, pString, -1, NULL, 0);
+			wchar_t* tmp_str = ExMem::Alloc<wchar_t>(len);
+			::MultiByteToWideChar(CP_ACP, 0, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			StringCchCopyW((wchar_t*)m_Array, GetSize(), tmp_str);
+			ExMem::Free(tmp_str);
 		}
 		return (*this);
 	}
@@ -229,11 +231,12 @@ public:
 		if (!pString) return (*this);
 		if (sizeof(type_t) == 1)
 		{
-			size_t len = wcslen(pString);
-			char* tmp_str = ExMem::Alloc<char>(len + 1);
-			::CharToOemW(pString, tmp_str); /*字符转码*/
+			DWORD len = ::WideCharToMultiByte(CP_OEMCP, NULL, pString, -1, NULL, 0, NULL, FALSE);
+			char* tmp_str = ExMem::Alloc<char>(len);
+			::WideCharToMultiByte(CP_OEMCP, NULL, pString, -1, tmp_str, len, NULL, FALSE);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			StringCchCopyA((char*)m_Array, GetSize(), tmp_str);
+			ExMem::Free(tmp_str);
 		}
 		else
 		{

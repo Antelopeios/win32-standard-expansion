@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-14
-// Version:	1.0.0004.1500
+// Date:	2011-09-08
+// Version:	1.0.0005.1722
+//
+// History:
+//	- 1.0.0005.1722(2011-09-08)	+ 添加CMemFileT::SetSize()接口实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemFile_h__
@@ -153,6 +156,21 @@ public:
 	{
 		if (Error()) return -1;
 		return m_MemBuff.GetCount();
+	}
+	virtual bool SetSize(uint64_t nSize)
+	{
+		if (!Seek(nSize, begin)) return false;
+		if (nSize < Size())
+			return m_MemBuff.Del(m_Position + 1, -1);
+		else
+		if (nSize > Size())
+		{	// 填充空白空间
+			DWORD fill = m_Position->Index() - m_MemBuff.GetCount();
+			BYTE* buff = alloc_t::Alloc<BYTE>(fill);
+			bool r = m_MemBuff.AddArray(buff, fill);
+			alloc_t::Free(buff);
+			return r;
+		}
 	}
 	virtual bool Flush()
 	{

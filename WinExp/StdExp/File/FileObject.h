@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-04
-// Version:	1.0.0003.0106
+// Date:	2011-09-08
+// Version:	1.0.0004.1722
 //
 // History:
 //	- 1.0.0003.0106(2011-04-04)	+ 添加CFileSeeker类,用于自动还原文件索引
+//	- 1.0.0004.1722(2011-09-08)	+ 添加IFileObject::SetSize()接口,方便调整文件大小
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FileObject_h__
@@ -74,6 +75,7 @@ public:
 	virtual bool Seek(int64_t nOffset, int iOrigin = current) = 0;
 	virtual uint64_t Tell() = 0;
 	virtual uint64_t Size() = 0;
+	virtual bool SetSize(uint64_t nSize) = 0;
 	virtual bool Flush() = 0;
 	virtual bool Eof() = 0;
 	virtual bool Error() = 0;

@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-29
-// Version:	1.0.0003.1151
+// Date:	2011-09-08
+// Version:	1.0.0004.1722
 //
 // History:
 //	- 1.0.0003.1151(2011-08-29)	# 调整文件Seek接口的nOffset参数为int64_t类型,原来使用的uint64_t无法传入负值
+//	- 1.0.0004.1722(2011-09-08)	+ 添加CIOFile::SetSize()接口实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __IOFile_h__
@@ -243,6 +244,11 @@ public:
 			return -1;
 
 		return liSize.QuadPart;
+	}
+	virtual bool SetSize(uint64_t nSize)
+	{
+		if (!Seek(nSize, begin)) return false;
+		return (bool)::SetEndOfFile(m_hFile);
 	}
 	virtual bool Flush()
 	{

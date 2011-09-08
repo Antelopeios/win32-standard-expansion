@@ -308,9 +308,12 @@ public:
 	bool Encode()
 	{
 		if (!m_pFile) return false;
-		if (!m_pFile->Seek(0, IFileObject::begin) || 
-			!m_mFile.Seek(0, IFileObject::begin))
+		if (!m_pFile->SetSize(0))
 			return false;
+		// 开始编码
+		for(iterator_t ite = m_xData.Head(); ite != m_xData.Tail(); ++ite)
+		{
+		}
 		return true;
 	}
 	// 解码
@@ -322,16 +325,16 @@ public:
 		Clear();
 		// 编码转换
 		uint64_t len64 = m_pFile->Size();
-		if (len64 > (1 << 30)) return false; // 忽略大于1G的文件
-		DWORD len = (DWORD)len64 + 1;
-		char* buf = ExMem::Alloc<char>(&m_GC, len);
-		ZeroMemory(buf, len);
-		if (m_pFile->Read(buf, len - 1, sizeof(char)) != len - 1)
-			return false;
-		CString oem(buf);
-		if (m_mFile.Write(oem.GetCStr(), oem.GetLength()) != oem.GetLength())
-			return false;
-		if (!m_mFile.Seek(0, IFileObject::begin))
+		if (len64 > (1 << 30)) return false;			// 忽略大于1G的文件
+		char* buf = ExMem::Alloc<char>(&m_GC, 1 << 20);	// 1M的缓存区
+		while(m_pFile->Read(buf, 1 << 20, sizeof(char)) != 0)
+		{
+			CString oem(buf);
+			if (m_mFile.Write(oem.GetCStr(), oem.GetLength()) != oem.GetLength())
+				break;
+		}
+		ExMem::Free(buf);
+		if(!m_mFile.Seek(0, IFileObject::begin))
 			return false;
 		// 开始解析
 		bool ret = false;
@@ -417,6 +420,33 @@ public:
 		map_t::iterator_t ite_att = (*rIte)->att.Locate(sAttr);
 		if (ite_att == (*rIte)->att.Tail()) return _T("");
 		return ite_att->Val();
+	}
+
+	bool AddNode(const node_t& node, iterator_t& ite)
+	{
+		node_t* p = ExMem::Alloc<node_t>(&m_GC);
+		(*p) = node;
+		return m_xData.Add(p, ite);
+	}
+	bool DelNode(iterator_t& ite)
+	{
+		return m_xData.Del(ite);
+	}
+
+	bool AddAttr(LPCTSTR key, LPCTSTR val, iterator_t& ite)
+	{
+		if (!key) return false;
+		if (ite == m_xData.Head() || 
+			ite == m_xData.Tail()) return false;
+		(*ite)->att[key] = val;
+		return true;
+	}
+	bool DelAttr(LPCTSTR key, iterator_t& ite)
+	{
+		if (!key) return false;
+		if (ite == m_xData.Head() || 
+			ite == m_xData.Tail()) return false;
+		return (*ite)->att.Del(key);
 	}
 };
 

@@ -325,8 +325,8 @@ public:
 		Clear();
 		// 编码转换
 		uint64_t len64 = m_pFile->Size();
-		if (len64 > (1 << 30)) return false;			// 忽略大于1G的文件
-		char* buf = ExMem::Alloc<char>(&m_GC, 1 << 20);	// 1M的缓存区
+		if (len64 > (1 << 30)) return false;		// 忽略大于1G的文件
+		char* buf = ExMem::Alloc<char>(1 << 20);	// 1M的缓存区
 		while(m_pFile->Read(buf, 1 << 20, sizeof(char)) != 0)
 		{
 			CString oem(buf);

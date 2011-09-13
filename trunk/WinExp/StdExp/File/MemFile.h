@@ -171,6 +171,7 @@ public:
 			alloc_t::Free(buff);
 			return r;
 		}
+		return true;
 	}
 	virtual bool Flush()
 	{

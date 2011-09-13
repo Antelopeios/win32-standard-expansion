@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-15
-// Version:	1.0.0005.1651
+// Date:	2011-09-13
+// Version:	1.0.0006.1546
 //
 // History:
 //	- 1.0.0000.1336(2011-06-01)	@ 开始构建Tree
@@ -46,6 +46,7 @@
 //								# 修正CTreeT::Del()直接删除根节点时,不会清空根节点标记指针的问题
 //	- 1.0.0005.1651(2011-06-15)	# 修正CTreeT::_Item内部调用finder_t::Find()时不规范导致的编译错误
 //								# 修正当迭代器已移到Last的位置时,_TreePolicyT::node_t::Next()会将迭代器重新送回Head位置的问题(正常应该是Tail)
+//	- 1.0.0006.1546(2011-09-13)	# 修正CTreeT::node_t::Children()的算法书写错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Tree_h__
@@ -411,11 +412,12 @@ struct _TreePolicyT
 		const iter_list_t& Children()
 		{
 			static iter_list_t list;
+			static iter_t iter;
+			iter = node_t(pCont);
 			list.Clear();
-			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++nIndx->Chdr)
+			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++ite)
 			{
 				if (!(*ite)) continue;
-				iter_t iter(node_t(pCont));
 				iter->nIndx = (*ite);
 				list.Add(iter);
 			}

@@ -290,6 +290,74 @@ protected:
 		return true;
 	}
 
+	void Encode(iterator_t& ite)
+	{
+		typedef CListT<iterator_t> list_t;
+
+		node_t* node = (*ite);
+		CStringT<char> buf;
+
+		if(!node->nam.Empty())
+		{
+			// 写入名称
+			buf = "<";
+			buf += CStringT<char>(node->nam);
+			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+
+			// 写入属性
+			for(map_t::iterator_t it = node->att.Head(); it != node->att.Tail(); ++it)
+			{
+				buf = " ";
+				buf += CStringT<char>(it->Key());
+				buf += "=\"";
+				buf += CStringT<char>(it->Val());
+				buf += "\"";
+				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			}
+
+			if(!node->val.Empty())
+			{	// 写入值
+				buf = ">";
+				buf += CStringT<char>(node->val);
+				buf += "</";
+				buf += CStringT<char>(node->nam);
+				buf += ">";
+				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			}
+			else
+			{	// 写入子节点
+				const list_t& list = ite->Children();
+				if(!list.Empty())
+				{
+					for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
+						Encode(*it);
+					buf = "</";
+					buf += CStringT<char>(node->nam);
+					buf += ">";
+					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+				}
+				else
+				{
+					buf = "/>";
+					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+				}
+			}
+		}
+		else
+		{	// 写入子节点
+			const list_t& list = ite->Children();
+			if(!list.Empty())
+			{
+				for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
+					Encode(*it);
+				buf = "</";
+				buf += CStringT<char>(node->nam);
+				buf += ">";
+				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			}
+		}
+	}
+
 public:
 	void SetFile(IFileObject* pFile)
 	{ m_pFile = pFile; }
@@ -311,9 +379,7 @@ public:
 		if (!m_pFile->SetSize(0))
 			return false;
 		// 开始编码
-		for(iterator_t ite = m_xData.Head(); ite != m_xData.Tail(); ++ite)
-		{
-		}
+		Encode(m_xData.Head());
 		return true;
 	}
 	// 解码

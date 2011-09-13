@@ -13,6 +13,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	xml.SetFile(&file);
 	if (!xml.Decode()) return 0;
 
+	file.Open(_T("test_encode.xml"), CIOFile::modeWrite | CIOFile::modeCreate);
+	if (!xml.Encode()) return 0;
+
 	return 0;
 }
 

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-07
-// Version:	1.0.0029.1157
+// Date:	2011-09-14
+// Version:	1.0.0030.1557
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -59,6 +59,7 @@
 //	- 1.0.0027.1524(2011-09-05)	# 删除掉多余的字符串赋值接口,防止函数内出现递归赋值的编译错误
 //	- 1.0.0028.0935(2011-09-06)	# 修正构造时意外的字符串浅拷贝现象
 //	- 1.0.0029.1157(2011-09-07)	# 修正字符串转码算法中的内存溢出及内存泄漏现象
+//	- 1.0.0030.1557(2011-09-14)	+ 为字符串Format;=;+=接口添加自动编码转换的相关重载
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -190,7 +191,7 @@ public:
 	const type_t& operator[](iterator_t& nIndex) const
 	{ return GetAt(nIndex); }
 
-	void Format(const type_t* lpFormat, ...)
+	void Format(const char* lpFormat, ...)
 	{
 		va_list args;
 		va_start(args, lpFormat);
@@ -198,6 +199,24 @@ public:
 		{
 			size_t len = _vscprintf((char*)lpFormat, args) + 1;
 			StringCchVPrintfA((char*)GetCStr(len), len, (char*)lpFormat, args);
+		}
+		else
+		{
+			CStringT fmt(lpFormat);
+			size_t len = _vscwprintf((wchar_t*)fmt.GetCStr(), args) + 1;
+			StringCchVPrintfW((wchar_t*)GetCStr(len), len, (wchar_t*)fmt.GetCStr(), args);
+		}
+		va_end(args);
+	}
+	void Format(const wchar_t* lpFormat, ...)
+	{
+		va_list args;
+		va_start(args, lpFormat);
+		if (sizeof(type_t) == 1)
+		{
+			CStringT fmt(lpFormat);
+			size_t len = _vscprintf((char*)fmt.GetCStr(), args) + 1;
+			StringCchVPrintfA((char*)GetCStr(len), len, (char*)fmt.GetCStr(), args);
 		}
 		else
 		{
@@ -252,6 +271,16 @@ public:
 	{ return SetString(str); }
 	CStringT& operator=(const wchar_t* str)
 	{ return SetString(str); }
+	CStringT& operator=(const char c)
+	{
+		char tmp_chr[2] = {c, 0};
+		return SetString(tmp_chr);
+	}
+	CStringT& operator=(const wchar_t c)
+	{
+		wchar_t tmp_chr[2] = {c, 0};
+		return SetString(tmp_chr);
+	}
 
 	CStringT& Mid(int nStart, int nCount = -1) const
 	{
@@ -385,31 +414,57 @@ public:
 	friend bool operator!=(const type_t* str1, const CStringT& str2)
 	{ return (str2.Compare(str1) != 0); }
 
-	CStringT& operator+=(const type_t* pString)
+	CStringT& operator+=(const char* str)
 	{
-		if (!pString || pString[0] == 0) return (*this);
+		if (!str || str[0] == 0) return (*this);
 		if (sizeof(type_t) == 1)
 		{
-			GetCStr(GetLength() + strlen((char*)pString));
-			StringCchCatA((char*)m_Array, GetSize(), (char*)pString);
+			GetCStr(GetLength() + strlen((char*)str));
+			StringCchCatA((char*)m_Array, GetSize(), (char*)str);
 		}
 		else
 		{
-			GetCStr(GetLength() + wcslen((wchar_t*)pString));
-			StringCchCatW((wchar_t*)m_Array, GetSize(), (wchar_t*)pString);
+			CStringT fmt(str);
+			GetCStr(GetLength() + fmt.GetLength());
+			StringCchCatW((wchar_t*)m_Array, GetSize(), (wchar_t*)fmt.GetCStr());
 		}
 		return (*this);
 	}
-	CStringT& operator+=(const type_t Char)
+	CStringT& operator+=(const wchar_t* str)
 	{
-		type_t tmp_chr[2] = {Char, 0};
+		if (!str || str[0] == 0) return (*this);
+		if (sizeof(type_t) == 1)
+		{
+			CStringT fmt(str);
+			GetCStr(GetLength() + fmt.GetLength());
+			StringCchCatA((char*)m_Array, GetSize(), (char*)fmt.GetCStr());
+		}
+		else
+		{
+			GetCStr(GetLength() + wcslen((wchar_t*)str));
+			StringCchCatW((wchar_t*)m_Array, GetSize(), (wchar_t*)str);
+		}
+		return (*this);
+	}
+	CStringT& operator+=(const char c)
+	{
+		char tmp_chr[2] = {c, 0};
+		return operator+=(tmp_chr);
+	}
+	CStringT& operator+=(const wchar_t c)
+	{
+		wchar_t tmp_chr[2] = {c, 0};
 		return operator+=(tmp_chr);
 	}
 
-	CStringT operator+(const type_t* str2)
-	{ return (CStringT(*this) += str2); }
-	CStringT operator+(const type_t str2)
-	{ return (CStringT(*this) += str2); }
+	CStringT operator+(const char* str)
+	{ return (CStringT(*this) += str); }
+	CStringT operator+(const wchar_t* str)
+	{ return (CStringT(*this) += str); }
+	CStringT operator+(const char c)
+	{ return (CStringT(*this) += c); }
+	CStringT operator+(const wchar_t c)
+	{ return (CStringT(*this) += c); }
 
 	type_t* GetCStr(DWORD nLen = 0)
 	{

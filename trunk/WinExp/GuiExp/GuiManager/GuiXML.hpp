@@ -72,6 +72,7 @@ public:
 	enum state_t
 	{
 		sta_nor, // 正常
+		sta_not, // 注释
 		sta_tag, // 标签
 		sta_tco, // 标签内容
 		sta_tce, // 标签内容完毕
@@ -87,6 +88,7 @@ protected:
 	CMemFile	 m_mFile;
 	tree_t		 m_xData;
 	CGC			 m_GC;
+	CString		 m_sTemp;
 
 public:
 	CGuiXML()
@@ -100,6 +102,7 @@ protected:
 	bool Nor(state_t& eSta, iterator_t& ite)
 	{
 		if (eSta != sta_nor && 
+			eSta != sta_not && 
 			eSta != sta_tce && 
 			eSta != sta_wat) return false;
 		TCHAR buf = _T('\0');
@@ -118,6 +121,41 @@ protected:
 		}
 		return true;
 	}
+	// 注释
+	bool Not(state_t& eSta, iterator_t& ite)
+	{
+		if (eSta != sta_not && 
+			eSta != sta_tag) return false;
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
+			return false;
+		switch (buf)
+		{
+		case _T('-'):
+			if (m_sTemp == _T("-"))
+				m_sTemp += buf;
+			else
+				m_sTemp = buf;
+			eSta = sta_not;
+			break;
+		case _T('>'):
+			if (m_sTemp == _T("--"))
+			{
+				m_sTemp = _T("");
+				eSta = sta_nor;
+			}
+			else
+			{
+				m_sTemp = buf;
+				eSta = sta_not;
+			}
+			break;
+		default:
+			m_sTemp = buf;
+			eSta = sta_not;
+		}
+		return true;
+	}
 	// 标签
 	bool Tag(state_t& eSta, iterator_t& ite)
 	{
@@ -128,6 +166,31 @@ protected:
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
+
+		if (sta_tag != eSta && buf == _T('!'))
+		{
+			m_sTemp = buf;
+			eSta = sta_tag;
+			return true;
+		}
+		else
+		if (m_sTemp != _T(""))
+		{
+			m_sTemp += buf;
+			if (m_sTemp.GetLength() < 3)
+			{
+				eSta = sta_tag;
+				return true;
+			}
+			else
+			if (m_sTemp == _T("!--"))
+			{
+				m_sTemp = _T("");
+				eSta = sta_not;
+				return true;
+			}
+		}
+
 		switch (buf)
 		{
 		case _T('>'):	// 标签内容
@@ -154,7 +217,13 @@ protected:
 			if (eSta == sta_tag)
 			{
 				node_t* node = *ite;
-				node->nam += buf;
+				if (m_sTemp == _T(""))
+					node->nam += buf;
+				else
+				{
+					node->nam += m_sTemp;
+					m_sTemp = _T("");
+				}
 			}
 			eSta = sta_tag;
 		}
@@ -176,6 +245,7 @@ protected:
 			eSta = sta_tag;
 			break;
 		default:
+			if (buf >= 32)
 			{
 				node_t* node = *ite;
 				node->val += buf;
@@ -294,66 +364,62 @@ protected:
 	{
 		typedef CListT<iterator_t> list_t;
 
-		node_t* node = (*ite);
+		node_t* node = ite->Val();
 		CStringT<char> buf;
 
-		if(!node->nam.Empty())
+		if (node->nam != "")
 		{
 			// 写入名称
 			buf = "<";
-			buf += CStringT<char>(node->nam);
+			buf += node->nam;
 			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 
 			// 写入属性
 			for(map_t::iterator_t it = node->att.Head(); it != node->att.Tail(); ++it)
 			{
 				buf = " ";
-				buf += CStringT<char>(it->Key());
+				buf += it->Key();
 				buf += "=\"";
-				buf += CStringT<char>(it->Val());
+				buf += it->Val();
 				buf += "\"";
 				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 			}
 
-			if(!node->val.Empty())
+			if (node->val != "")
 			{	// 写入值
 				buf = ">";
-				buf += CStringT<char>(node->val);
+				buf += node->val;
 				buf += "</";
-				buf += CStringT<char>(node->nam);
+				buf += node->nam;
 				buf += ">";
 				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 			}
 			else
 			{	// 写入子节点
-				const list_t& list = ite->Children();
+				list_t list = ite->Children();
 				if(!list.Empty())
 				{
 					for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
 						Encode(*it);
 					buf = "</";
-					buf += CStringT<char>(node->nam);
-					buf += ">";
+					buf += node->nam;
+					buf += ">\r\n";
 					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 				}
 				else
 				{
-					buf = "/>";
+					buf = "/>\r\n";
 					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 				}
 			}
 		}
 		else
 		{	// 写入子节点
-			const list_t& list = ite->Children();
+			list_t list = ite->Children();
 			if(!list.Empty())
 			{
 				for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
 					Encode(*it);
-				buf = "</";
-				buf += CStringT<char>(node->nam);
-				buf += ">";
-				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 			}
 		}
 	}
@@ -414,6 +480,11 @@ public:
 				cur_sta = old_sta;
 				if (!Nor(cur_sta, ite)) goto Return;
 				old_sta = sta_nor;
+				break;
+			case sta_not:
+				cur_sta = old_sta;
+				if (!Not(cur_sta, ite)) goto Return;
+				old_sta = sta_not;
 				break;
 			case sta_tag:
 				cur_sta = old_sta;

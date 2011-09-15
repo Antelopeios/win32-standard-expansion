@@ -33,14 +33,16 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-15
-// Version:	1.0.0002.1926
+// Date:	2011-09-15
+// Version:	1.0.0003.1024
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
 //	- 1.0.0001.1205(2011-06-14)	@ 基本完成GuiXML的核心功能
 //	- 1.0.0002.1926(2011-06-15)	# 修正当遇到换行与tab键时无法识别,并添加入字段中的问题
 //								+ 添加一些数据获取接口
+//	- 1.0.0003.1024(2011-09-15)	+ 添加xml注释的读取过程
+//								+ 添加xml的添加;修改;删除及保存接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -399,6 +401,8 @@ protected:
 				list_t list = ite->Children();
 				if(!list.Empty())
 				{
+					buf = ">\r\n";
+					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 					for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
 						Encode(*it);
 					buf = "</";

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-14
-// Version:	1.0.0030.1557
+// Date:	2011-09-15
+// Version:	1.0.0031.1557
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -60,6 +60,7 @@
 //	- 1.0.0028.0935(2011-09-06)	# 修正构造时意外的字符串浅拷贝现象
 //	- 1.0.0029.1157(2011-09-07)	# 修正字符串转码算法中的内存溢出及内存泄漏现象
 //	- 1.0.0030.1557(2011-09-14)	+ 为字符串Format;=;+=接口添加自动编码转换的相关重载
+//	- 1.0.0031.1557(2011-09-15)	# 修正Compare接口在某些情况下返回结果错误的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -390,9 +391,21 @@ public:
 	typedef int (__cdecl *w_comp_t)(const wchar_t*, const wchar_t*);
 	int Compare(const type_t* pString, a_comp_t a_comp = NULL, w_comp_t w_comp = NULL) const
 	{
-		if (m_Array == pString) return true;
-		if (m_Array == NULL || 
-			pString == NULL) return false;
+		if (m_Array == pString) return 0;
+		if (m_Array == NULL)
+		{
+			if (pString[0] == _T('\0'))
+				return 0;
+			else
+				return -1;
+		}
+		if (pString == NULL)
+		{
+			if (m_Array[0] == _T('\0'))
+				return 0;
+			else
+				return 1;
+		}
 		if (a_comp == NULL) a_comp = strcmp;
 		if (w_comp == NULL) w_comp = wcscmp;
 		if (sizeof(type_t) == 1)

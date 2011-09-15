@@ -34,15 +34,16 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-09-15
-// Version:	1.0.0003.1024
+// Version:	1.0.0003.1630
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
 //	- 1.0.0001.1205(2011-06-14)	@ 基本完成GuiXML的核心功能
 //	- 1.0.0002.1926(2011-06-15)	# 修正当遇到换行与tab键时无法识别,并添加入字段中的问题
 //								+ 添加一些数据获取接口
-//	- 1.0.0003.1024(2011-09-15)	+ 添加xml注释的读取过程
-//								+ 添加xml的添加;修改;删除及保存接口
+//	- 1.0.0003.1630(2011-09-15)	+ 添加XML注释的读取过程
+//								+ 添加XML的添加;修改;删除及保存接口
+//								+ 添加XML声明段的解析,并优化解析状态迁移
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -74,6 +75,8 @@ public:
 	enum state_t
 	{
 		sta_nor, // 正常
+		sta_jud, // 判断
+		sta_xml, // XML声明
 		sta_not, // 注释
 		sta_tag, // 标签
 		sta_tco, // 标签内容
@@ -103,10 +106,6 @@ protected:
 	// 正常
 	bool Nor(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_nor && 
-			eSta != sta_not && 
-			eSta != sta_tce && 
-			eSta != sta_wat) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 		{
@@ -115,19 +114,72 @@ protected:
 		}
 		switch (buf)
 		{
-		case _T('<'):	// 标签
-			eSta = sta_tag;
+		case _T('<'):	// 判断
+			eSta = sta_jud;
 			break;
 		default:		// 正常
 			eSta = sta_nor;
 		}
 		return true;
 	}
+	// 判断
+	bool Jud(state_t& eSta, iterator_t& ite)
+	{
+		TCHAR buf = _T('\0');
+		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
+			return false;
+		// 注释判断
+		if (sta_jud == eSta)
+		{
+			m_sTemp += buf;
+			if (m_sTemp.GetLength() <= 4)
+			{
+				if (m_sTemp == _T("!--"))
+				{
+					m_sTemp = _T("");
+					eSta = sta_not;
+				}
+				else
+				if (m_sTemp == _T("?xml"))
+					eSta = sta_xml;
+				else
+					eSta = sta_jud;
+			}
+			else
+				eSta = sta_tag;
+		}
+		else
+		{
+			if (buf == _T('!') || 
+				buf == _T('?'))
+			{
+				m_sTemp = buf;
+				eSta = sta_jud;
+			}
+			else
+			if (buf == _T('/'))
+				eSta = sta_tce;
+			else
+			{
+				m_sTemp = buf;
+				eSta = sta_tag;
+			}
+		}
+		return true;
+	}
+	// XML声明
+	bool Xml(state_t& eSta, iterator_t& ite)
+	{
+		m_xData.Add(ExMem::Alloc<node_t>(&m_GC), ite);
+		node_t* node = *ite;
+		node->nam += m_sTemp;
+		m_sTemp = _T("");
+		eSta = sta_tag;
+		return true;
+	}
 	// 注释
 	bool Not(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_not && 
-			eSta != sta_tag) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
@@ -161,55 +213,34 @@ protected:
 	// 标签
 	bool Tag(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_tag && 
-			eSta != sta_nor && 
-			eSta != sta_tco && 
-			eSta != sta_ace) return false;
 		TCHAR buf = _T('\0');
-		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
-
-		if (sta_tag != eSta && buf == _T('!'))
+		if (m_sTemp == _T(""))
 		{
-			m_sTemp = buf;
-			eSta = sta_tag;
-			return true;
+			if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
+				return false;
 		}
 		else
-		if (m_sTemp != _T(""))
 		{
-			m_sTemp += buf;
-			if (m_sTemp.GetLength() < 3)
-			{
-				eSta = sta_tag;
-				return true;
-			}
-			else
-			if (m_sTemp == _T("!--"))
-			{
-				m_sTemp = _T("");
-				eSta = sta_not;
-				return true;
-			}
+			buf = m_sTemp[0];
+			m_sTemp.Del(m_sTemp.Head());
 		}
-
 		switch (buf)
 		{
-		case _T('>'):	// 标签内容
-			eSta = sta_tco;
-			break;
 		case _T(' '):	// 等待属性
 		case _T('\r'):
 		case _T('\n'):
 		case _T('\t'):
 			eSta = sta_wat;
 			break;
-		case _T('/'):	// 标签内容赋值完毕
+		case _T('/'):
+		case _T('?'):	// XML声明结束
 			eSta = sta_tce;
 			break;
+		case _T('>'):
+			eSta = sta_tco;
+			break;
 		default:
-			if (eSta == sta_nor || 
-				eSta == sta_tco)
+			if (eSta == sta_jud)
 			{
 				m_xData.Add(ExMem::Alloc<node_t>(&m_GC), ite);
 				node_t* node = *ite;
@@ -219,13 +250,7 @@ protected:
 			if (eSta == sta_tag)
 			{
 				node_t* node = *ite;
-				if (m_sTemp == _T(""))
-					node->nam += buf;
-				else
-				{
-					node->nam += m_sTemp;
-					m_sTemp = _T("");
-				}
+				node->nam += buf;
 			}
 			eSta = sta_tag;
 		}
@@ -234,9 +259,6 @@ protected:
 	// 标签内容
 	bool Tco(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_tco && 
-			eSta != sta_tag && 
-			eSta != sta_wat) return false;
 		if (ite == m_xData.Head()) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
@@ -244,7 +266,7 @@ protected:
 		switch (buf)
 		{
 		case _T('<'):
-			eSta = sta_tag;
+			eSta = sta_jud;
 			break;
 		default:
 			if (buf >= 32)
@@ -260,8 +282,6 @@ protected:
 	// 标签内容完毕
 	bool Tce(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_tag && 
-			eSta != sta_wat) return false;
 		ite = ite->Parent();
 		eSta = sta_nor;
 		return true;
@@ -269,8 +289,6 @@ protected:
 	// 等待属性
 	bool Wat(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_wat && 
-			eSta != sta_tag) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
@@ -285,6 +303,7 @@ protected:
 			eSta = sta_wat;
 			break;
 		case _T('/'):
+		case _T('?'):	// XML声明结束
 			eSta = sta_tce;
 			break;
 		case _T('>'):
@@ -313,8 +332,6 @@ protected:
 	// 属性赋值
 	bool Avl(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_avl && 
-			eSta != sta_wat) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
@@ -332,8 +349,6 @@ protected:
 	// 属性内容
 	bool Aco(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_aco && 
-			eSta != sta_avl) return false;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 			return false;
@@ -355,10 +370,9 @@ protected:
 	// 属性内容完毕
 	bool Ace(state_t& eSta, iterator_t& ite)
 	{
-		if (eSta != sta_aco) return false;
 		node_t* node = *ite;
 		node->tmp.Clear();
-		eSta = sta_tag;
+		eSta = sta_wat;
 		return true;
 	}
 
@@ -369,7 +383,27 @@ protected:
 		node_t* node = ite->Val();
 		CStringT<char> buf;
 
-		if (node->nam != "")
+		if (node->nam == _T("?xml"))
+		{
+			// 写入名称
+			buf = "<?xml";
+			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			// 写入属性
+			for(map_t::iterator_t it = node->att.Head(); it != node->att.Tail(); ++it)
+			{
+				buf = " ";
+				buf += it->Key();
+				buf += "=\"";
+				buf += it->Val();
+				buf += "\"";
+				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			}
+			// 完毕
+			buf = "?>\r\n";
+			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+		}
+		else
+		if (node->nam != _T(""))
 		{
 			// 写入名称
 			buf = "<";
@@ -387,7 +421,7 @@ protected:
 				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
 			}
 
-			if (node->val != "")
+			if (node->val != _T(""))
 			{	// 写入值
 				buf = ">";
 				buf += node->val;
@@ -482,47 +516,68 @@ public:
 			{
 			case sta_nor:
 				cur_sta = old_sta;
-				if (!Nor(cur_sta, ite)) goto Return;
+				if (!Nor(cur_sta, ite))
+					goto Return;
 				old_sta = sta_nor;
+				break;
+			case sta_jud:
+				cur_sta = old_sta;
+				if (!Jud(cur_sta, ite))
+					goto Return;
+				old_sta = sta_jud;
+				break;
+			case sta_xml:
+				cur_sta = old_sta;
+				if (!Xml(cur_sta, ite))
+					goto Return;
+				old_sta = sta_xml;
 				break;
 			case sta_not:
 				cur_sta = old_sta;
-				if (!Not(cur_sta, ite)) goto Return;
+				if (!Not(cur_sta, ite))
+					goto Return;
 				old_sta = sta_not;
 				break;
 			case sta_tag:
 				cur_sta = old_sta;
-				if (!Tag(cur_sta, ite)) goto Return;
+				if (!Tag(cur_sta, ite))
+					goto Return;
 				old_sta = sta_tag;
 				break;
 			case sta_tco:
 				cur_sta = old_sta;
-				if (!Tco(cur_sta, ite)) goto Return;
+				if (!Tco(cur_sta, ite))
+					goto Return;
 				old_sta = sta_tco;
 				break;
 			case sta_tce:
 				cur_sta = old_sta;
-				if (!Tce(cur_sta, ite)) goto Return;
+				if (!Tce(cur_sta, ite))
+					goto Return;
 				old_sta = sta_tce;
 				break;
 			case sta_wat:
 				cur_sta = old_sta;
-				if (!Wat(cur_sta, ite)) goto Return;
+				if (!Wat(cur_sta, ite))
+					goto Return;
 				old_sta = sta_wat;
 				break;
 			case sta_avl:
 				cur_sta = old_sta;
-				if (!Avl(cur_sta, ite)) goto Return;
+				if (!Avl(cur_sta, ite))
+					goto Return;
 				old_sta = sta_avl;
 				break;
 			case sta_aco:
 				cur_sta = old_sta;
-				if (!Aco(cur_sta, ite)) goto Return;
+				if (!Aco(cur_sta, ite))
+					goto Return;
 				old_sta = sta_aco;
 				break;
 			case sta_ace:
 				cur_sta = old_sta;
-				if (!Ace(cur_sta, ite)) goto Return;
+				if (!Ace(cur_sta, ite))
+					goto Return;
 				old_sta = sta_ace;
 				break;
 			case sta_end:

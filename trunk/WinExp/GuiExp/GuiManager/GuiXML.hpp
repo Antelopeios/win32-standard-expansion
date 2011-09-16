@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-15
-// Version:	1.0.0003.1630
+// Date:	2011-09-16
+// Version:	1.0.0004.1121
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
@@ -44,6 +44,7 @@
 //	- 1.0.0003.1630(2011-09-15)	+ 添加XML注释的读取过程
 //								+ 添加XML的添加;修改;删除及保存接口
 //								+ 添加XML声明段的解析,并优化解析状态迁移
+//	- 1.0.0004.1121(2011-09-16)	+ 添加CGuiXML::AddNode()接口重载,支持直接通过名字创建结点
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -622,6 +623,12 @@ public:
 	{
 		node_t* p = ExMem::Alloc<node_t>(&m_GC);
 		(*p) = node;
+		return m_xData.Add(p, ite);
+	}
+	bool AddNode(LPCTSTR sName, iterator_t& ite)
+	{
+		node_t* p = ExMem::Alloc<node_t>(&m_GC);
+		p->nam = sName;
 		return m_xData.Add(p, ite);
 	}
 	bool DelNode(iterator_t& ite)

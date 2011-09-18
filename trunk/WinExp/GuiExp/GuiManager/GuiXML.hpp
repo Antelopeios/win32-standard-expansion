@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-16
-// Version:	1.0.0004.1121
+// Date:	2011-09-18
+// Version:	1.0.0005.2056
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
@@ -45,6 +45,7 @@
 //								+ 添加XML的添加;修改;删除及保存接口
 //								+ 添加XML声明段的解析,并优化解析状态迁移
 //	- 1.0.0004.1121(2011-09-16)	+ 添加CGuiXML::AddNode()接口重载,支持直接通过名字创建结点
+//	- 1.0.0005.2056(2011-09-18)	^ 简化CGuiXML中的部分实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -513,79 +514,60 @@ public:
 		iterator_t ite = m_xData.Head();
 		while(1)
 		{
-			switch(cur_sta)
+			state_t tmp_sta = cur_sta;
+			cur_sta = old_sta;
+			switch(tmp_sta)
 			{
 			case sta_nor:
-				cur_sta = old_sta;
 				if (!Nor(cur_sta, ite))
 					goto Return;
-				old_sta = sta_nor;
 				break;
 			case sta_jud:
-				cur_sta = old_sta;
 				if (!Jud(cur_sta, ite))
 					goto Return;
-				old_sta = sta_jud;
 				break;
 			case sta_xml:
-				cur_sta = old_sta;
 				if (!Xml(cur_sta, ite))
 					goto Return;
-				old_sta = sta_xml;
 				break;
 			case sta_not:
-				cur_sta = old_sta;
 				if (!Not(cur_sta, ite))
 					goto Return;
-				old_sta = sta_not;
 				break;
 			case sta_tag:
-				cur_sta = old_sta;
 				if (!Tag(cur_sta, ite))
 					goto Return;
-				old_sta = sta_tag;
 				break;
 			case sta_tco:
-				cur_sta = old_sta;
 				if (!Tco(cur_sta, ite))
 					goto Return;
-				old_sta = sta_tco;
 				break;
 			case sta_tce:
-				cur_sta = old_sta;
 				if (!Tce(cur_sta, ite))
 					goto Return;
-				old_sta = sta_tce;
 				break;
 			case sta_wat:
-				cur_sta = old_sta;
 				if (!Wat(cur_sta, ite))
 					goto Return;
-				old_sta = sta_wat;
 				break;
 			case sta_avl:
-				cur_sta = old_sta;
 				if (!Avl(cur_sta, ite))
 					goto Return;
-				old_sta = sta_avl;
 				break;
 			case sta_aco:
-				cur_sta = old_sta;
 				if (!Aco(cur_sta, ite))
 					goto Return;
-				old_sta = sta_aco;
 				break;
 			case sta_ace:
-				cur_sta = old_sta;
 				if (!Ace(cur_sta, ite))
 					goto Return;
-				old_sta = sta_ace;
 				break;
 			case sta_end:
 				ret = true;
 			default:
 				goto Return;
 			}
+			old_sta = tmp_sta;
 		}
 	Return:
 		return ret;

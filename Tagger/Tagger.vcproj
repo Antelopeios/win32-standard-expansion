@@ -227,6 +227,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Data"
+			>
+			<File
+				RelativePath=".\Data\Data.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Data\Data.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\stdafx.cpp"
 			>

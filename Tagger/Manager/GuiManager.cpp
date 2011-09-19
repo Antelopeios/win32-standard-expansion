@@ -27,31 +27,31 @@ protected:
 	{
 		// 内容打底
 		REG_CTL(ground, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)));
-		GUI_CTL(ground)->SetState(_T("color"), (void*)ExRGBA(242, 242, 242, 255));
-		GUI_CTL(ground)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_ground"), &gc)));
+		GET_CTL(ground)->SetState(_T("color"), (void*)ExRGBA(242, 242, 242, 255));
+		GET_CTL(ground)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_ground"), &gc)));
 
 		// 搜索框打底
 		REG_CTL(bottom1, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)));
-		GUI_CTL(bottom1)->SetState(_T("color"), (void*)ExRGBA(222, 222, 222, 255));
-		GUI_CTL(bottom1)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom1"), &gc)));
+		GET_CTL(bottom1)->SetState(_T("color"), (void*)ExRGBA(222, 222, 222, 255));
+		GET_CTL(bottom1)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom1"), &gc)));
 		REG_CTL(bottom2, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)));
-		GUI_CTL(bottom2)->SetState(_T("color"), (void*)ExRGBA(255, 255, 255, 255));
-		GUI_CTL(bottom2)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom2"), &gc)));
+		GET_CTL(bottom2)->SetState(_T("color"), (void*)ExRGBA(255, 255, 255, 255));
+		GET_CTL(bottom2)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom2"), &gc)));
 		// 搜索框
 		REG_CTL(search, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc)));
-		GUI_CTL(search)->SetState(_T("text"), GUI_TXT(search));
-		GUI_CTL(search)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_search"), &gc)));
+		GET_CTL(search)->SetState(_T("text"), GET_TXT(search));
+		GET_CTL(search)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_search"), &gc)));
 		// 覆盖框
 		REG_CTL(cover, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc)));
-		GUI_CTL(cover)->SetState(_T("text"), GUI_TXT(cover));
-		GUI_CTL(cover)->SetState(_T("edit"), &CString(_T("请输入待查询标签")));
-		GUI_CTL(cover)->SetVisible(false);
-		GUI_CTL(cover)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cover"), &gc)));
+		GET_CTL(cover)->SetState(_T("text"), GET_TXT(cover));
+		GET_CTL(cover)->SetState(_T("edit"), &CString(_T("请输入待查询标签")));
+		GET_CTL(cover)->SetVisible(false);
+		GET_CTL(cover)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cover"), &gc)));
 
 		// 标签云
 		REG_CTL(cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
-		GUI_CTL(cloud)->SetState(_T("align_top"), (void*)false);
-		GUI_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
+		GET_CTL(cloud)->SetState(_T("align_top"), (void*)false);
+		GET_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 		// 加载标签
 		CListT<IGuiCtrl*> tags_list;
 		for(int i = 0; i < 40; ++i)
@@ -81,57 +81,57 @@ protected:
 			tag->SetWindowRect(CRect(0, 0, sz.cx + 8, sz.cy + 8));
 			tags_list.Add(tag);
 		}
-		GUI_CTL(cloud)->SetState(_T("items"), &tags_list);
-		GUI_CTL(cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cloud"), &gc)));
+		GET_CTL(cloud)->SetState(_T("items"), &tags_list);
+		GET_CTL(cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cloud"), &gc)));
 	}
 
 	// 加载窗口
 	void LoadWnd()
 	{
 		// 窗口资源定义
-		CRect rc_dsk;
-		::GetClientRect(::GetDesktopWindow(), (LPRECT)&rc_dsk);
-		CRect rc_wnd(0, 0, (LONG)(rc_dsk.Width() * 0.6), (LONG)(rc_dsk.Height() * 0.6));
-		HICON ic_wnd = ::LoadIcon(::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_TAGGER));
+		CRect rc_wnd(0, 0, GET_GBL()->GetDefSize().cx, GET_GBL()->GetDefSize().cy);
+		HICON ic_wnd = ::LoadIcon(GET_GBL()->GetAppInst(), MAKEINTRESOURCE(IDI_TAGGER));
 
 		// 创建窗口对象并设置
 		REG_WND(main, ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc)));
-		GUI_WND(main)->Create(_T("Tagger"), rc_wnd, SW_HIDE, 
+		GET_WND(main)->Create(_T("Tagger"), rc_wnd, SW_HIDE, 
 			/*WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX*/WS_OVERLAPPEDWINDOW);
-		GUI_WND(main)->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
-		GUI_WND(main)->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
-		GUI_WND(main)->CenterWindow();
-		GUI_WND(main)->SetLayered(false, false);
-		GUI_WND(main)->GetClientRect(rc_wnd);
+		GET_WND(main)->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
+		GET_WND(main)->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
+		GET_WND(main)->CenterWindow();
+		GET_WND(main)->SetLayered(false, false);
+		GET_WND(main)->GetClientRect(rc_wnd);
 
 		// 事件关联
-		GUI_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
+		GET_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
 	}
 
 	// 关联对象
 	void LinkGui()
 	{
 		// 显示主窗口
-		GUI_WND(main)->ShowWindow(SW_SHOW);
+		GET_WND(main)->ShowWindow(SW_SHOW);
 
 		// 内容打底
-		GUI_WND(main)->AddComp(GUI_CTL(ground));
+		GET_WND(main)->AddComp(GET_CTL(ground));
 		// 搜索框打底
-		GUI_WND(main)->AddComp(GUI_CTL(bottom1));
-		GUI_WND(main)->AddComp(GUI_CTL(bottom2));
+		GET_WND(main)->AddComp(GET_CTL(bottom1));
+		GET_WND(main)->AddComp(GET_CTL(bottom2));
 		// 搜索框
-		GUI_WND(main)->AddComp(GUI_CTL(search));
+		GET_WND(main)->AddComp(GET_CTL(search));
 		// 覆盖框
-		GUI_WND(main)->AddComp(GUI_CTL(cover));
+		GET_WND(main)->AddComp(GET_CTL(cover));
 
 		// 标签云
-		GUI_WND(main)->AddComp(GUI_CTL(cloud));
+		GET_WND(main)->AddComp(GET_CTL(cloud));
 	}
 
 public:
 	CGuiLoader()
 		: gc(ExGC())
 	{
+		GET_GBL()->Init();
+		GET_DAT()->Init();
 		LoadRes();
 		LoadCtl();
 		LoadWnd();

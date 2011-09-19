@@ -1,0 +1,20 @@
+#pragma once
+
+//////////////////////////////////////////////////////////////////
+
+class CData
+{
+protected:
+	CIOFile m_File;
+	CGuiXML m_Data;
+
+public:
+	static CData* Instance();
+
+public:
+	void Init();
+};
+
+//////////////////////////////////////////////////////////////////
+
+#define GET_DAT() CData::Instance()

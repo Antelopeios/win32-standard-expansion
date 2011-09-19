@@ -157,7 +157,7 @@ public:
 			{
 				CString* edit = (CString*)ctrl->GetState(_T("edit"));
 				if (edit->Empty())
-					GUI_CTL(cover)->SetVisible(true);
+					GET_CTL(cover)->SetVisible(true);
 			}
 			break;
 		}
@@ -183,7 +183,7 @@ public:
 		case WM_SETFOCUS:
 			{
 				ctrl->SetVisible(false);
-				GUI_CTL(search)->SetFocus();
+				GET_CTL(search)->SetFocus();
 			}
 			break;
 		case WM_KILLFOCUS:

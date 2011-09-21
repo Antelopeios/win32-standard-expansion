@@ -28,13 +28,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ThreadHeap - 系统线程创建器
+// ThreadHeap - 系统线程对象接口
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-23
-// Version:	1.0.0002.1124
+// Date:	2011-09-20
+// Version:	1.0.0003.1706
+//
+// History:
+//	- 1.0.0003.1706(2011-09-20) = 将handle_t的定义移除
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadHeap_h__
@@ -51,25 +54,25 @@ EXP_BEG
 class CThreadHeapCreator
 {
 public:
+	enum { IsPoolCreator = 0 };
 	typedef CThreadHeapCreator creator_t;
-	typedef HANDLE handle_t;
 	typedef DWORD (__stdcall* call_t)(LPVOID);
 
 public:
-	static handle_t Create(_IN_ call_t lpStartAddr, 
-						   _IN_ LPVOID lpParam = NULL, 
-						   _IN_ DWORD dwFlag = 0, 
-						   _OT_ LPDWORD lpIDThread = NULL)
+	static HANDLE Create(_IN_ call_t lpStartAddr, 
+					     _IN_ LPVOID lpParam = NULL, 
+					     _IN_ DWORD dwFlag = 0, 
+					     _OT_ LPDWORD lpIDThread = NULL)
 	{ return CreateThread(NULL, 0, lpStartAddr, lpParam, dwFlag, lpIDThread); }
-	static bool Close(handle_t hTrd)
+	static bool Close(HANDLE hTrd)
 	{ return CloseHandle(hTrd); }
 
-	static DWORD Suspend(handle_t hTrd)
+	static DWORD Suspend(HANDLE hTrd)
 	{ return SuspendThread(hTrd); }
-	static DWORD Resume(handle_t hTrd)
+	static DWORD Resume(HANDLE hTrd)
 	{ return ResumeThread(hTrd); }
 
-	static bool Terminate(handle_t hTrd, DWORD dwExitCode = 0)
+	static bool Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
 	{ return TerminateThread(hTrd, dwExitCode); }
 };
 

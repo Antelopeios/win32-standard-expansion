@@ -33,11 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-20
-// Version:	1.0.0002.1540
+// Date:	2011-09-21
+// Version:	1.1.0004.1600
 //
 // History:
 //	- 1.0.0002.1540(2011-07-20)	= 将CThreadAdapterT的单例独立到外部,定义EXP_SINGLETON_TRDCREATOR,可由外部按需要自行替换
+//	- 1.0.0003.1529(2011-09-20)	^ 简化EXP_THREAD_CREATOR,直接调用_ThreadHeap来完成功能
+//	- 1.1.0004.1600(2011-09-21)	+ 添加IThreadT对象接口模板,用于整合线程的所有操作,并对象化线程管理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadCreator_h__
@@ -51,43 +53,74 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#ifndef EXP_SINGLETON_TRDCREATOR
-#define EXP_SINGLETON_TRDCREATOR EXP_SINGLETON<CreatorT>
-#endif/*EXP_SINGLETON_TRDCREATOR*/
+#ifndef EXP_THREAD_CREATOR
+#define EXP_THREAD_CREATOR _ThreadHeap
+#endif/*EXP_THREAD_CREATOR*/
 
-// 将普通线程分配转换为静态线程分配的适配器
-template <typename CreatorT = _ThreadHeap>
-class CThreadAdapterT : public EXP_SINGLETON_TRDCREATOR
+typedef EXP_THREAD_CREATOR ExThread;
+
+//////////////////////////////////////////////////////////////////
+
+template <typename CreatorT = EXP_THREAD_CREATOR>
+class IThreadT : public ISyncObject
 {
 public:
 	typedef CreatorT creator_t;
-	typedef typename creator_t::handle_t handle_t;
-	typedef typename creator_t::call_t call_t;
 
-	EXP_INLINE static creator_t& GetCreator()
-	{ return Instance(); }
+protected:
+	LPVOID m_lpParam;
 
 public:
-	static handle_t Create(_IN_ call_t lpStartAddr, 
-						   _IN_ LPVOID lpParam = NULL, 
-						   _IN_ DWORD dwFlag = 0, 
-						   _OT_ LPDWORD lpIDThread = NULL)
-	{ return GetCreator().Create(lpStartAddr, lpParam, dwFlag, lpIDThread); }
-	static bool Close(handle_t hTrd)
-	{ return GetCreator().Close(hTrd); }
+	IThreadT()
+		: ISyncObject()
+		, m_lpParam(NULL)
+	{}
+	IThreadT(_IN_ LPVOID lpParam, 
+			 _IN_ DWORD dwFlag = 0, 
+			 _OT_ LPDWORD lpIDThread = NULL)
+		: ISyncObject()
+		, m_lpParam(NULL)
+	{ Create(lpParam, dwFlag, lpIDThread); }
+	~IThreadT()
+	{}
 
-	static DWORD Suspend(handle_t hTrd)
-	{ return GetCreator().Suspend(hTrd); }
-	static DWORD Resume(handle_t hTrd)
-	{ return GetCreator().Resume(hTrd); }
+protected:
+	static DWORD __stdcall ProxyProc(LPVOID lpParam)
+	{
+		IThread* _this = (IThread*)lpParam;
+		return _this->ThreadProc();
+	}
+	virtual DWORD ThreadProc() = 0;
 
-	static bool Terminate(handle_t hTrd, DWORD dwExitCode = 0)
-	{ return GetCreator().Terminate(hTrd, dwExitCode); }
+public:
+	bool Create(_IN_ LPVOID lpParam = NULL, 
+				_IN_ DWORD dwFlag = 0, 
+				_OT_ LPDWORD lpIDThread = NULL)
+	{
+		if (!IsClosed()) return false;
+		m_lpParam = lpParam;
+		m_hSync = creator_t::Create(ProxyProc, this, dwFlag, lpIDThread);
+		if (m_hSync == NULL) m_hSync = INVALID_HANDLE_VALUE;
+		if (m_hSync == INVALID_HANDLE_VALUE) return false;
+		return true;
+	}
+
+	LPVOID GetParam()
+	{ return m_lpParam; }
+
+	DWORD Suspend()
+	{ return creator_t::Suspend(m_hSync); }
+	DWORD Resume()
+	{ return creator_t::Resume(m_hSync); }
+
+	bool Terminate(DWORD dwExitCode = 0)
+	{
+		if (!creator_t::Terminate(m_hSync, dwExitCode)) return false;
+		return Close();
+	}
 };
 
-#ifndef EXP_THREAD_CREATOR
-#define EXP_THREAD_CREATOR CThreadAdapterT<>
-#endif/*EXP_THREAD_CREATOR*/
+typedef IThreadT<> IThread;
 
 //////////////////////////////////////////////////////////////////
 

@@ -137,4 +137,8 @@ public:
 		LoadWnd();
 		LinkGui();
 	}
+	~CGuiLoader()
+	{
+		GET_DAT()->Term();
+	}
 } g_GuiLoader;

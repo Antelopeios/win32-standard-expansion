@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-13
-// Version:	1.0.0007.1048
+// Date:	2011-09-21
+// Version:	1.0.0008.1554
 //
 // History:
 //	- 1.0.0004.0400(2011-02-25)	^ 简化CallProc中锁的调用
@@ -42,6 +42,7 @@
 //	- 1.0.0006.1520(2011-03-02)	+ 支持通过策略控制CThreadPoolT是否限制最大线程数
 //								# 修正当线程数为空时,CThreadPoolT::Clear(INFINITE)死锁的问题
 //	- 1.0.0007.1048(2011-06-13)	# 修正CThreadPoolT的限制最大线程数策略无效的问题
+//	- 1.0.0008.1554(2011-09-21)	+ 对_ThreadPool添加一一对应_ThreadHeap的常规接口定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadPool_h__
@@ -60,7 +61,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename CreatorT = CThreadHeapCreator, typename AllocT = EXP_MEMORY_ALLOC>
+template <typename CreatorT = _ThreadHeap, typename AllocT = EXP_MEMORY_ALLOC>
 struct _ThreadPoolPolicyT
 {
 	typedef typename CreatorT::creator_t creator_t;
@@ -88,7 +89,6 @@ class CThreadPoolT
 {
 public:
 	typedef typename PolicyT::creator_t creator_t;
-	typedef typename creator_t::handle_t handle_t;
 	typedef typename creator_t::call_t call_t;
 	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
@@ -97,12 +97,12 @@ public:
 	// 内部线程对象
 	typedef struct _Trd
 	{
-		handle_t hTrd;
+		HANDLE hTrd;
 
-		_Trd(handle_t trd = NULL)
+		_Trd(HANDLE trd = NULL)
 			: hTrd(trd)
 		{}
-		operator handle_t()
+		operator HANDLE()
 		{ return hTrd; }
 	} trd_t;
 	typedef CListT<trd_t, _ListPolicyT<alloc_t> > trd_list_t;
@@ -113,7 +113,7 @@ public:
 		call_t pCal;
 		LPVOID pPar;
 		CEvent* evtR;	// 任务执行信号量
-		handle_t* hdlR;	// 任务执行返回值
+		HANDLE* hdlR;	// 任务执行返回值
 		LPDWORD tidR;
 
 		_Tsk(call_t cal = NULL, LPVOID par = NULL)
@@ -160,7 +160,7 @@ protected:
 		ExAssert(par);
 		CThreadPoolT* ths = par->pThs;
 		ExAssert(ths);
-		handle_t hdl = par->tIte->Val().hTrd;
+		HANDLE hdl = par->tIte->Val().hTrd;
 		ExAssert(hdl);
 
 		HANDLE sync[2] =
@@ -212,7 +212,7 @@ protected:
 		return 0;
 	}
 
-	handle_t AddTrd(DWORD dwFlag, LPDWORD lpIDThread)
+	HANDLE AddTrd(DWORD dwFlag, LPDWORD lpIDThread)
 	{
 		m_TrdList.Add(trd_t());
 		par_t* par = alloc_t::Alloc<par_t>();
@@ -266,13 +266,13 @@ public:
 	}
 
 	// 创建线程
-	handle_t Create(_IN_ call_t lpStartAddr, 
-					_IN_ LPVOID lpParam = NULL, 
-					_IN_ DWORD dwFlag = 0, 
-					_OT_ LPDWORD lpIDThread = NULL, 
-					_IN_ DWORD dwWaitTime = 100)
+	HANDLE Create(_IN_ call_t lpStartAddr, 
+				  _IN_ LPVOID lpParam = NULL, 
+				  _IN_ DWORD dwFlag = 0, 
+				  _OT_ LPDWORD lpIDThread = NULL, 
+				  _IN_ DWORD dwWaitTime = 100)
 	{
-		handle_t hdl = NULL;
+		HANDLE hdl = NULL;
 		if (lpStartAddr)
 		{	// 给用户分配线程
 			m_Mutex.Lock(false);
@@ -334,10 +334,45 @@ typedef CThreadPoolT<> CThreadPool;
 
 //////////////////////////////////////////////////////////////////
 
-class CThreadPoolCreator : public CThreadPool
+class CThreadPoolCreator
 {
 public:
-	typedef CThreadPool creator_t;
+	enum { IsPoolCreator = 1 };
+	typedef CThreadPoolCreator creator_t;
+	typedef CThreadPool::call_t call_t;
+	typedef CThreadPool::creator_t heap_creator_t;
+
+	EXP_INLINE static CThreadPool& GetPool()
+	{
+		static CThreadPool* instance = NULL;
+		if (instance == NULL)
+		{
+			ExLockThis();
+			if (instance == NULL)
+			{
+				static CThreadPool pool;
+				instance = &pool;
+			}
+		}
+		return (*instance);
+	}
+
+public:
+	static HANDLE Create(_IN_ call_t lpStartAddr, 
+					     _IN_ LPVOID lpParam = NULL, 
+					     _IN_ DWORD dwFlag = 0, 
+					     _OT_ LPDWORD lpIDThread = NULL)
+	{ return GetPool().Create(lpStartAddr, lpParam, dwFlag, lpIDThread); }
+	static bool Close(HANDLE hTrd)
+	{ return heap_creator_t::Close(hTrd); }
+
+	static DWORD Suspend(HANDLE hTrd)
+	{ return heap_creator_t::Suspend(hTrd); }
+	static DWORD Resume(HANDLE hTrd)
+	{ return heap_creator_t::Resume(hTrd); }
+
+	static bool Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
+	{ return heap_creator_t::Terminate(hTrd, dwExitCode); }
 };
 
 typedef CThreadPoolCreator _ThreadPool;

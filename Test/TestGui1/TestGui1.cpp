@@ -47,7 +47,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	file.Open(_T("btn_bg_bottom_right.png"));
 	img_btn[8].Set(coder->Decode());
 	// ÎÄ×Ö×ÊÔ´
-	CText txt_btn[5];
+	CText txt_btn[8];
 	txt_btn[0].SetString(_T("Dark C.at"));
 	txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_btn[0].SetColor(ExRGBA(0, 60, 116, 200));

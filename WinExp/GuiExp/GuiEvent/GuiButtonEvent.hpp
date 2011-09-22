@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-01
-// Version:	1.0.0013.1048
+// Date:	2011-09-22
+// Version:	1.0.0014.1540
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -56,6 +56,7 @@
 //	- 1.0.0011.1606(2011-08-15)	+ 在GuiButtonEvent中实现icon相关属性的绘图处理
 //	- 1.0.0012.1716(2011-08-30)	+ 添加双击按钮时的BN_DOUBLECLICKED消息发送
 //	- 1.0.0013.1048(2011-09-01)	# 修正当按钮比文字预留区域小时将不会显示文字的问题
+//	- 1.0.0014.1540(2011-09-22)	= 按钮状态最多支持8个变化
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -248,17 +249,23 @@ public:
 			{
 				// 获得属性
 				int thr_sta = (int)ctrl->GetState(_T("thr_sta"));
-				LONG sta_tim = (thr_sta == 1 ? 3 : (thr_sta == -1 ? 1 : 5));
+				LONG sta_tim = (thr_sta == 1 ? 3 : (thr_sta == -1 ? 1 : 8));
 
-				DWORD status = 0;
-				if (thr_sta != -1)
-				{
-					status = (DWORD)ctrl->GetState(_T("status"));
-					if (thr_sta == 0)
-					{
-						if (ctrl->IsFocus() && status == 0) status = 3;
-						if (!ctrl->IsEnabled()) status = 4;
-					}
+				DWORD status = (DWORD)ctrl->GetState(_T("status"));
+				if (thr_sta == 0)
+				{	// 正常情况
+					if (!ctrl->IsEnabled()) status = 3;
+					if (ctrl->IsFocus()) status += 4;
+				}
+				else
+				if (thr_sta == 1)
+				{	// 无焦点状态
+				//	if (!ctrl->IsEnabled()) status = 3;
+				}
+				else
+				if (thr_sta == -1)
+				{	// 单态按钮
+					status = 0;
 				}
 
 				CImage* image = (CImage*)ctrl->GetState(_T("image"));

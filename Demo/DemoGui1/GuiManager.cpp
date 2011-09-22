@@ -206,7 +206,7 @@ protected:
 		GuiLoadPic(tag_bg);
 		GuiLoadPic(toolbar_bg);
 
-		CText txt_btn[5];
+		CText txt_btn[8];
 		txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 		txt_btn[0].SetColor(ExRGBA(0, 0, 0, 255));
 		for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
@@ -263,11 +263,11 @@ protected:
 		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
 		if (!GUI_IMG(scr_h) || GUI_IMG(scr_h)->IsNull())
 		{
-			pixel_t pix[5] = {0};
+			pixel_t pix[8] = {0};
 			GUI_CTL(scr_h)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
-			pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
+			for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(120, 120, 120, 255);
 			GUI_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
-			pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+			for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
 			GUI_CTL(scr_h)->SetState(_T("up_color"), pix);
 			GUI_CTL(scr_h)->SetState(_T("dn_color"), pix);
 		}

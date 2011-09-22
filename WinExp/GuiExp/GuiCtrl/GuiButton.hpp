@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-15
-// Version:	1.0.0006.1640
+// Date:	2011-09-22
+// Version:	1.0.0007.1513
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -46,6 +46,7 @@
 //	- 1.0.0005.1030(2011-08-12)	+ CGuiButton支持单态按钮
 //	- 1.0.0006.1640(2011-08-15)	+ 在CGuiButton中实现icon相关属性
 //								# 加上icon相关属性的初始化操作
+//	- 1.0.0007.1513(2011-09-22)	= CGuiButton按钮状态改为8态
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -65,9 +66,9 @@ class CGuiButton : public IGuiCtrlBase
 
 public:
 	/*
-		正常; 浮动; 按下; 焦点; 禁止
+		正常; 浮动; 按下
 	*/
-	enum status_t {nor, ovr, hit/*, foc, dis*/};
+	enum status_t {nor, ovr, hit};
 	/*
 		文字位置: 中; 上; 下; 左; 右
 	*/
@@ -83,9 +84,9 @@ protected:
 	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
 
 	int m_ThreeSta;		// 是否是三态按钮
-	pixel_t m_Color[5];
-	CImage m_Image[9];	// 九宫格分割,每个小块保存5个状态
-	CText m_Text[5];
+	pixel_t m_Color[8];
+	CImage m_Image[9];	// 九宫格分割,每个小块保存8个状态
+	CText m_Text[8];
 
 public:
 	CGuiButton()

@@ -255,7 +255,6 @@ protected:
 		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
 		if (!items_list.Empty()) items_list.HeadItem()->SetFocus();
 
-
 		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
 		GUI_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)true);
 		GUI_CTL(scr_h)->SetState(_T("up_thr_sta"), (void*)true);

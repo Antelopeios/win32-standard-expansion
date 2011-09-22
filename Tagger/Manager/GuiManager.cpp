@@ -59,7 +59,7 @@ protected:
 			IGuiCtrl* tag = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
 			tag->SetState(_T("thr_sta"), (void*)true);
 
-			CText txt[5];
+			CText txt[8];
 			txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 			LOGFONT lf = {0};
 			txt[0].GetLogFont(&lf);
@@ -83,6 +83,19 @@ protected:
 		}
 		GET_CTL(cloud)->SetState(_T("items"), &tags_list);
 		GET_CTL(cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cloud"), &gc)));
+
+		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
+		ExDynCast<IGuiCtrl>(GET_CTL(scr_h)->GetState(_T("up")))->SetWindowRect(CRect());
+		ExDynCast<IGuiCtrl>(GET_CTL(scr_h)->GetState(_T("down")))->SetWindowRect(CRect());
+		GET_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)true);
+		GET_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
+		GET_CTL(scr_h)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
+		pixel_t pix[8] = {0};
+		for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
+		GET_CTL(scr_h)->SetState(_T("sli_blk_color"), pix);
+		GET_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
+
+		GET_CTL(cloud)->SetScroll(GET_CTL(scr_h));
 	}
 
 	// ¼ÓÔØ´°¿Ú
@@ -124,6 +137,7 @@ protected:
 
 		// ±êÇ©ÔÆ
 		GET_WND(main)->AddComp(GET_CTL(cloud));
+		GET_WND(main)->AddComp(GET_CTL(scr_h));
 	}
 
 public:

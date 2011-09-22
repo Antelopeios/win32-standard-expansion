@@ -51,7 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	file.Open(_T("../TestGui1/btn_bg_bottom_right.png"));
 	img_btn[8].Set(coder->Decode());
 	// 文字资源
-	CText txt_btn[5];
+	CText txt_btn[8];
 	txt_btn[0].SetString(_T("Dark C.at"));
 	txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_btn[0].SetColor(ExRGBA(0, 60, 116, 200));
@@ -70,22 +70,22 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 创建列表控件
 	IGuiCtrl* list = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc));
 	CListT<IGuiCtrl*> items;
-	for(int i = 0; i < 10; ++i)
+	for(int i = 0; i < 100; ++i)
 	{
 		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
-		//btn->SetState(_T("icon"), &img_pic);
+		btn->SetState(_T("icon"), &img_pic);
 		//btn->SetState(_T("glow"), (void*)1);
-		//btn->SetState(_T("image"), img_btn);
+		btn->SetState(_T("image"), img_btn);
 		btn->SetState(_T("text"), txt_btn);
 		CSize sz;
-		txt_btn->GetSize(sz);
-		//btn->SetState(_T("locate"), (void*)2);
-		//btn->SetState(_T("loc_off"), (void*)5);
-		btn->SetWindowRect(CRect(0, 0, sz.cx + 8, sz.cy));
+		//txt_btn->GetSize(sz);
+		btn->SetState(_T("locate"), (void*)2);
+		btn->SetState(_T("loc_off"), (void*)5);
+		btn->SetWindowRect(CRect(0, 0, 70, 70/*sz.cx + 8, sz.cy*/));
 		items.Add(btn);
 	}
 	list->SetState(_T("items"), &items);
-	//list->SetState(_T("space"), (void*)5);
+	list->SetState(_T("space"), (void*)5);
 	list->SetWindowRect(rc_wnd);
 
 	// 创建事件对象并设置

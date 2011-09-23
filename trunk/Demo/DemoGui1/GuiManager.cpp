@@ -237,6 +237,7 @@ protected:
 			btn->SetState(_T("locate"), (void*)2);
 			btn->SetState(_T("loc_off"), (void*)18);
 			btn->SetState(_T("ico_off"), (void*)8);
+			btn->SetState(_T("shake_ico"), (void*)1);
 			btn->SetWindowRect(CRect(0, 0, 80, 90));
 			items_list.Add(btn);
 		}

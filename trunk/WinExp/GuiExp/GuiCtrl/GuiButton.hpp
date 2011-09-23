@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-22
-// Version:	1.0.0007.1513
+// Date:	2011-09-23
+// Version:	1.0.0008.1216
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -47,6 +47,7 @@
 //	- 1.0.0006.1640(2011-08-15)	+ 在CGuiButton中实现icon相关属性
 //								# 加上icon相关属性的初始化操作
 //	- 1.0.0007.1513(2011-09-22)	= CGuiButton按钮状态改为8态
+//	- 1.0.0008.1216(2011-09-23)	+ 添加shake_ico属性,支持点击时晃动图标及文字
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -82,6 +83,7 @@ protected:
 	CImage m_Icon;
 	bool m_bGlow;		// 是否绘制图标外发光
 	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
+	int m_ShakeIco;		// 图标点击摇晃
 
 	int m_ThreeSta;		// 是否是三态按钮
 	pixel_t m_Color[8];
@@ -95,6 +97,7 @@ public:
 		, m_LocOff(5)
 		, m_bGlow(false)
 		, m_IcoOff(5)
+		, m_ShakeIco(0)
 		, m_ThreeSta(0)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
@@ -116,6 +119,9 @@ public:
 		else
 		if (sType == _T("loc_off"))
 			return (void*)m_LocOff;
+		else
+		if (sType == _T("shake_ico"))
+			return (void*)m_ShakeIco;
 		else
 		if (sType == _T("thr_sta"))
 			return (void*)m_ThreeSta;
@@ -167,6 +173,16 @@ public:
 			LONG old_sta = m_LocOff;
 			m_LocOff = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_LocOff)
+				return EXP_BASE::SetState(sType, pState);
+			else
+				return true;
+		}
+		else
+		if (sType == _T("shake_ico"))
+		{
+			int old_sta = m_ShakeIco;
+			m_ShakeIco = (int)(LONG_PTR)pState;
+			if (old_sta != m_ShakeIco)
 				return EXP_BASE::SetState(sType, pState);
 			else
 				return true;

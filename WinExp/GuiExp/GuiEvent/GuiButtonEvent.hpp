@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-22
-// Version:	1.0.0014.1540
+// Date:	2011-09-23
+// Version:	1.0.0015.1234
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -57,6 +57,7 @@
 //	- 1.0.0012.1716(2011-08-30)	+ 添加双击按钮时的BN_DOUBLECLICKED消息发送
 //	- 1.0.0013.1048(2011-09-01)	# 修正当按钮比文字预留区域小时将不会显示文字的问题
 //	- 1.0.0014.1540(2011-09-22)	= 按钮状态最多支持8个变化
+//	- 1.0.0015.1234(2011-09-23)	+ 添加shake_ico属性,支持点击时晃动图标及文字
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -267,6 +268,8 @@ public:
 				{	// 单态按钮
 					status = 0;
 				}
+
+				int shake_ico = (int)ctrl->GetState(_T("shake_ico"));
 
 				CImage* image = (CImage*)ctrl->GetState(_T("image"));
 				pixel_t pixel = ((pixel_t*)ctrl->GetState(_T("color")))[status];
@@ -562,6 +565,7 @@ public:
 						}
 						while(txt_off + txt_clp.cy <= img_rct.Height() - 4);
 					}
+					if (shake_ico != 0 && (status == 2 || status == 6)) img_rct.Offset(CPoint(1, 1));
 					CImgRenderer::Render(mem_img->Get(), m_imgClp, img_rct);
 				}
 
@@ -627,6 +631,7 @@ public:
 						);
 					break;
 				}
+				if (shake_ico != 0 && (status == 2 || status == 6)) icon_rct.Offset(CPoint(1, 1));
 				CImgRenderer::Render(mem_img->Get(), icon->Get(), icon_rct, CPoint());
 			}
 			break;

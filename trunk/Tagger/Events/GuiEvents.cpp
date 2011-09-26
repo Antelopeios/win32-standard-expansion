@@ -218,8 +218,8 @@ public:
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				if (GET_CTL(scr_h)->IsVisible())
-					rc_wnd.Right(rc_wnd.Right() - 10);
+				if (GET_CTL(scr_cloud)->IsVisible())
+					rc_wnd.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;
@@ -235,20 +235,20 @@ public:
 
 				if (all_line > fra_line)
 				{
-					if(!GET_CTL(scr_h)->IsVisible())
+					if(!GET_CTL(scr_cloud)->IsVisible())
 					{
-						GET_CTL(scr_h)->SetVisible(true);
+						GET_CTL(scr_cloud)->SetVisible(true);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right() - 10);
+						rc.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
 						ctrl->SetWindowRect(rc);
 					}
 				}
 				else
 				{
-					if (GET_CTL(scr_h)->IsVisible())
+					if (GET_CTL(scr_cloud)->IsVisible())
 					{
-						GET_CTL(scr_h)->SetVisible(false);
+						GET_CTL(scr_cloud)->SetVisible(false);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.Right(rc_wnd.Right());
@@ -258,7 +258,12 @@ public:
 			}
 			break;
 		case WM_MOUSEWHEEL:
-			GET_CTL(scr_h)->Send(ExDynCast<IGuiObject>(GET_CTL(scr_h)), nMessage, wParam, lParam);
+			GET_CTL(scr_cloud)->Send(ExDynCast<IGuiObject>(GET_CTL(scr_cloud)), nMessage, wParam, lParam);
+			break;
+		case WM_COMMAND:
+			if (wParam == BN_CLICKED)
+			{
+			}
 			break;
 		}
 	}
@@ -268,9 +273,9 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_cloud, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 
-class CEvent_scr_h : public IGuiEvent
+class CEvent_scr_cloud : public IGuiEvent
 {
-	EXP_DECLARE_DYNCREATE_CLS(CEvent_scr_h, IGuiEvent)
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_scr_cloud, IGuiEvent)
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -289,7 +294,7 @@ public:
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				rc_wnd.Left(rc_wnd.Right() - 10);
+				rc_wnd.Left(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;
@@ -297,4 +302,113 @@ public:
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_scr_h, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_scr_cloud, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_files : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_files, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				CRect rc_wnd;
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Top(22);
+
+				if (GET_CTL(scr_files)->IsVisible())
+					rc_wnd.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+				ctrl->SetWindowRect(rc_wnd);
+			}
+			break;
+		case WM_SIZE:
+			{
+				LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
+				LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
+
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				CRect rc_wnd;
+				wnd->GetClientRect(rc_wnd);
+
+				if (all_line > fra_line)
+				{
+					if(!GET_CTL(scr_files)->IsVisible())
+					{
+						GET_CTL(scr_files)->SetVisible(true);
+						CRect rc;
+						ctrl->GetWindowRect(rc);
+						rc.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+						ctrl->SetWindowRect(rc);
+					}
+				}
+				else
+				{
+					if (GET_CTL(scr_files)->IsVisible())
+					{
+						GET_CTL(scr_files)->SetVisible(false);
+						CRect rc;
+						ctrl->GetWindowRect(rc);
+						rc.Right(rc_wnd.Right());
+						ctrl->SetWindowRect(rc);
+					}
+				}
+			}
+			break;
+		case WM_MOUSEWHEEL:
+			GET_CTL(scr_files)->Send(ExDynCast<IGuiObject>(GET_CTL(scr_files)), nMessage, wParam, lParam);
+			break;
+		case WM_COMMAND:
+			if (wParam == BN_CLICKED)
+			{
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_files, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_scr_files : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_scr_files, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Top(22);
+
+				rc_wnd.Left(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+				ctrl->SetWindowRect(rc_wnd);
+			}
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_scr_files, IGuiEvent)

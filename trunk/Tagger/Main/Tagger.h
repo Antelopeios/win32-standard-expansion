@@ -25,6 +25,11 @@ public:
 	CString GetAppPath();
 	CString GetAppName();
 	CSize GetDefSize();
+
+	int GetGuiScrW();
+
+	HGLOBAL GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance = NULL);
+	BOOL ReleaseBinary(HGLOBAL hData);
 };
 
 //////////////////////////////////////////////////////////////////

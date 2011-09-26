@@ -267,7 +267,7 @@ bool CData::SetRet(tsk_t& task)
 }
 
 // 用于更新数据库的线程
-DWORD CData::ThreadProc()
+DWORD CData::ThreadProc(LPVOID lpParam)
 {
 	HANDLE sync[2] =
 	{

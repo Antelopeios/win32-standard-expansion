@@ -66,6 +66,21 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDB_FILE_B              PNG                     "file_b.png"
+IDB_FILE_C              PNG                     "file_c.png"
+IDB_FILE_L              PNG                     "file_l.png"
+IDB_FILE_LB             PNG                     "file_lb.png"
+IDB_FILE_LT             PNG                     "file_lt.png"
+IDB_FILE_R              PNG                     "file_r.png"
+IDB_FILE_RB             PNG                     "file_rb.png"
+IDB_FILE_RT             PNG                     "file_rt.png"
+IDB_FILE_T              PNG                     "file_t.png"
 #endif    // 中文(中华人民共和国) resources
 /////////////////////////////////////////////////////////////////////////////
 

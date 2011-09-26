@@ -61,7 +61,7 @@ protected:
 	bool AddRet(tsk_t& task);	// 添加/修改
 	bool DelRet(tsk_t& task);	// 删除
 	bool SetRet(tsk_t& task);	// 改名
-	DWORD ThreadProc();
+	DWORD ThreadProc(LPVOID lpParam);
 
 public:
 	static CData* Instance();

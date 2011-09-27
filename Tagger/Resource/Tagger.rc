@@ -81,6 +81,14 @@ IDB_FILE_R              PNG                     "file_r.png"
 IDB_FILE_RB             PNG                     "file_rb.png"
 IDB_FILE_RT             PNG                     "file_rt.png"
 IDB_FILE_T              PNG                     "file_t.png"
+IDB_FOC_B               PNG                     "foc_b.png"
+IDB_FOC_L               PNG                     "foc_l.png"
+IDB_FOC_LB              PNG                     "foc_lb.png"
+IDB_FOC_LT              PNG                     "foc_lt.png"
+IDB_FOC_R               PNG                     "foc_r.png"
+IDB_FOC_RB              PNG                     "foc_rb.png"
+IDB_FOC_RT              PNG                     "foc_rt.png"
+IDB_FOC_T               PNG                     "foc_t.png"
 #endif    // 中文(中华人民共和国) resources
 /////////////////////////////////////////////////////////////////////////////
 

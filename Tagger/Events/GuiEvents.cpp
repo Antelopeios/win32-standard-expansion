@@ -23,6 +23,15 @@ public:
 				ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
 			}
 			break;
+		case WM_KEYDOWN:
+			if (wParam == VK_ESCAPE || 
+				wParam == VK_DELETE)
+			{
+				GET_CTL(files)->SetVisible(false);
+				GET_CTL(scr_files)->SetVisible(false);
+				GET_CTL(cloud)->SetVisible(true);
+			}
+			break;
 		case WM_CLOSE:
 			board->DefProc(nMessage, wParam, lParam);
 			break;
@@ -263,6 +272,9 @@ public:
 		case WM_COMMAND:
 			if (wParam == BN_CLICKED)
 			{
+				GET_CTL(cloud)->SetVisible(false);
+				GET_CTL(scr_cloud)->SetVisible(false);
+				GET_CTL(files)->SetVisible(true);
 			}
 			break;
 		}

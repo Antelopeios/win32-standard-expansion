@@ -21,11 +21,12 @@ protected:
 		txt->SetColor(ExRGBA(0, 0, 0, 100));
 		REG_TXT(cover, txt);
 
+		// 获取解码器
 		ICoderObject* coder = CImgAnalyzer::GetCoder(CImgAnalyzer::png, &gc);
 		if (!coder) return;
 		CMemFile file;
 		coder->SetFile(&file);
-
+		// 加载图片前的准备工作
 		BYTE* buff = NULL; DWORD size = 0;
 		HGLOBAL hres = NULL;
 	#define REG_RES_IMG(res_id, img_id) \
@@ -37,6 +38,7 @@ protected:
 			GET_GBL()->ReleaseBinary(hres); \
 		}
 	//#define REG_RES_IMG(res_id, img_id)
+		// 加载文件项图片
 		REG_RES_IMG(IDB_FILE_C, file_c);
 		REG_RES_IMG(IDB_FILE_L, file_l);
 		REG_RES_IMG(IDB_FILE_R, file_r);
@@ -46,6 +48,15 @@ protected:
 		REG_RES_IMG(IDB_FILE_LB, file_lb);
 		REG_RES_IMG(IDB_FILE_RT, file_rt);
 		REG_RES_IMG(IDB_FILE_RB, file_rb);
+		// 加载焦点项图片
+		REG_RES_IMG(IDB_FOC_L, foc_l);
+		REG_RES_IMG(IDB_FOC_R, foc_r);
+		REG_RES_IMG(IDB_FOC_T, foc_t);
+		REG_RES_IMG(IDB_FOC_B, foc_b);
+		REG_RES_IMG(IDB_FOC_LT, foc_lt);
+		REG_RES_IMG(IDB_FOC_LB, foc_lb);
+		REG_RES_IMG(IDB_FOC_RT, foc_rt);
+		REG_RES_IMG(IDB_FOC_RB, foc_rb);
 	}
 
 	// 加载控件
@@ -121,16 +132,39 @@ protected:
 		// 关联滚动条
 		GET_CTL(cloud)->SetScroll(GET_CTL(scr_cloud));
 
+		// 预读取资源
+		CImage img_btn[9];
+		img_btn[0] = GET_IMG(file_lt)->Get();
+		img_btn[1] = GET_IMG(file_t)->Get();
+		img_btn[2] = GET_IMG(file_rt)->Get();
+		img_btn[3] = GET_IMG(file_l)->Get();
+		img_btn[4] = GET_IMG(file_c)->Get();
+		img_btn[5] = GET_IMG(file_r)->Get();
+		img_btn[6] = GET_IMG(file_lb)->Get();
+		img_btn[7] = GET_IMG(file_b)->Get();
+		img_btn[8] = GET_IMG(file_rb)->Get();
+		CImage img_foc[9];
+		img_foc[0] = GET_IMG(foc_lt)->Get();
+		img_foc[1] = GET_IMG(foc_t)->Get();
+		img_foc[2] = GET_IMG(foc_rt)->Get();
+		img_foc[3] = GET_IMG(foc_l)->Get();
+		//img_foc[4] = GET_IMG(foc_c)->Get();
+		img_foc[5] = GET_IMG(foc_r)->Get();
+		img_foc[6] = GET_IMG(foc_lb)->Get();
+		img_foc[7] = GET_IMG(foc_b)->Get();
+		img_foc[8] = GET_IMG(foc_rb)->Get();
 		// 文件列表
 		REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
 		GET_CTL(files)->SetVisible(false);
 		GET_CTL(files)->SetState(_T("align_top"), (void*)false);
 		GET_CTL(files)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
+		GET_CTL(files)->SetState(_T("foc_image"), img_foc);
 		// 加载文件
 		CListT<IGuiCtrl*> file_list;
 		for(int i = 0; i < 40; ++i)
 		{
 			IGuiCtrl* file = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
+			file->SetState(_T("image"), img_btn);
 			file->SetState(_T("locate"), (void*)2);
 			file->SetState(_T("loc_off"), (void*)18);
 			file->SetState(_T("ico_off"), (void*)8);

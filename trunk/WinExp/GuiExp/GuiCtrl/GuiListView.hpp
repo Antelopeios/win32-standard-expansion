@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-30
-// Version:	1.0.0008.2317
+// Date:	2011-09-28
+// Version:	1.0.0009.1517
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
@@ -46,6 +46,7 @@
 //	- 1.0.0006.1606(2011-08-15)	^ 将CGuiLVItem的具体属性转移到CGuiButton中实现,仅保留特殊的事件响应
 //	- 1.0.0007.1623(2011-08-26)	# 修正当GuiListView在运行过程中修改列表项时,不会自动格式化列表项位置的问题
 //	- 1.0.0008.2317(2011-08-30)	+ GuiListView添加align_top属性,支持列表项上对齐/下对齐调整
+//	- 1.0.0009.1517(2011-09-28)	# 修正当外部销毁控件对象时,GuiListView因内部对象析构顺序问题导致的内存访问异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -89,8 +90,7 @@ protected:
 
 public:
 	CGuiListView()
-		: m_ItemList(NULL)
-		, m_Space(0)
+		: m_Space(0)
 		, m_AllLine(0)
 		, m_FraLine(0)
 		, m_AlignTop(true)
@@ -100,6 +100,10 @@ public:
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
 		AddComp(&m_FocPic);
+	}
+	~CGuiListView()
+	{
+		ClearComp();
 	}
 
 public:

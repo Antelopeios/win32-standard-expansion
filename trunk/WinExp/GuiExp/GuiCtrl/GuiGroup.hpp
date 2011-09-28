@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-21
-// Version:	1.0.0002.1532
+// Date:	2011-09-28
+// Version:	1.0.0003.1517
 //
 // History:
 //	- 1.0.0000.0940(2011-07-07)	@ 开始构建GuiGroup
 //	- 1.0.0001.1752(2011-07-11)	^ 优化GuiGroup的外部调用属性
 //	- 1.0.0002.1532(2011-07-21)	= 将CGuiGroup内部items_t结构由指针改为对象,减轻调用复杂度
+//	- 1.0.0003.1517(2011-09-28)	# 修正当外部销毁控件对象时,GuiGroup因内部对象析构顺序问题导致的内存访问异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiGroup_hpp__
@@ -69,6 +70,10 @@ public:
 		, m_StatusCount(3)
 		, m_StyleBox(true)
 	{}
+	~CGuiGroup()
+	{
+		ClearComp();
+	}
 
 public:
 	// 获得控件状态

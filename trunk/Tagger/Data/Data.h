@@ -74,4 +74,4 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-#define GET_DAT() CData::Instance()
+#define DAT() CData::Instance()

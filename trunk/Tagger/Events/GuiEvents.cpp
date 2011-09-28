@@ -228,7 +228,7 @@ public:
 				rc_wnd.Top(22);
 
 				if (GET_CTL(scr_cloud)->IsVisible())
-					rc_wnd.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+					rc_wnd.Right(rc_wnd.Right() - GUI()->ScrWidth());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;
@@ -249,7 +249,7 @@ public:
 						GET_CTL(scr_cloud)->SetVisible(true);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+						rc.Right(rc_wnd.Right() - GUI()->ScrWidth());
 						ctrl->SetWindowRect(rc);
 					}
 				}
@@ -306,7 +306,7 @@ public:
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				rc_wnd.Left(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+				rc_wnd.Left(rc_wnd.Right() - GUI()->ScrWidth());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;
@@ -340,7 +340,7 @@ public:
 				rc_wnd.Top(22);
 
 				if (GET_CTL(scr_files)->IsVisible())
-					rc_wnd.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+					rc_wnd.Right(rc_wnd.Right() - GUI()->ScrWidth());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;
@@ -361,7 +361,7 @@ public:
 						GET_CTL(scr_files)->SetVisible(true);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+						rc.Right(rc_wnd.Right() - GUI()->ScrWidth());
 						ctrl->SetWindowRect(rc);
 					}
 				}
@@ -415,7 +415,7 @@ public:
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				rc_wnd.Left(rc_wnd.Right() - GET_GBL()->GetGuiScrW());
+				rc_wnd.Left(rc_wnd.Right() - GUI()->ScrWidth());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;

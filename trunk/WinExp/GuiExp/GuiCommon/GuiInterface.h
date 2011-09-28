@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-02
-// Version:	1.0.0015.1454
+// Date:	2011-09-28
+// Version:	1.0.0016.1517
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -58,6 +58,7 @@
 //	- 1.0.0013.1537(2011-08-26)	# 调整Comp与Event接口内Trust相关接口的命名,防止外部调用冲突
 //	- 1.0.0014.1646(2011-08-29)	+ 添加IGuiEvent::Param()接口,方便外部自定义参数
 //	- 1.0.0015.1454(2011-09-02)	+ 添加IGuiEvent的事件状态接口,当当前事件处理完后,可根据保存的事件状态判断是否继续执行下一个事件对象
+//	- 1.0.0016.1517(2011-09-28)	+ 为IGuiComp::DelComp()接口添加是否自动释放移除的关联对象的参数
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -152,7 +153,7 @@ public:
 		pComp->Init(this);
 		GetChildren().Add(pComp, GetChildren().Head());
 	}
-	virtual void DelComp(IGuiComp* pComp)
+	virtual void DelComp(IGuiComp* pComp, bool bAutoTru = true)
 	{
 		if (!pComp) return ;
 		// 定位对象
@@ -161,7 +162,7 @@ public:
 		// 删除对象
 		GetChildren().Del(ite);
 		pComp->Fina();
-		if (m_bTru) pComp->Free();
+		if (bAutoTru && m_bTru) pComp->Free();
 	}
 	virtual void ClearComp()
 	{

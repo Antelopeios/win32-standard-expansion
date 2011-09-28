@@ -11,10 +11,12 @@ CGlobal::CGlobal()
 {
 }
 
+CGlobal* g_instance = NULL;
 CGlobal* CGlobal::Instance()
 {
-	static CGlobal glb;
-	return &glb;
+	if (g_instance == NULL)
+		g_instance = ExMem::Alloc<CGlobal>();
+	return g_instance;
 }
 
 void CGlobal::Init()
@@ -25,36 +27,27 @@ void CGlobal::Init()
 	int inx = (m_AppPath.RevFind(_T('\\')) + 1)->Index();
 	m_AppName = ((LPCTSTR)m_AppPath) + inx;
 	m_AppPath[inx] = _T('\0');
-
-	CRect rc_dsk;
-	::GetClientRect(::GetDesktopWindow(), (LPRECT)&rc_dsk);
-	m_DefSize.cx = (LONG)(rc_dsk.Width() * 0.6);
-	m_DefSize.cy = (LONG)(rc_dsk.Height() * 0.6);
 }
 
-HINSTANCE CGlobal::GetAppInst()
+void CGlobal::Term()
+{
+	ExMem::Free(this);
+	g_instance = NULL;
+}
+
+HINSTANCE CGlobal::AppInst()
 {
 	return m_AppInst;
 }
 
-CString CGlobal::GetAppPath()
+CString CGlobal::AppPath()
 {
 	return m_AppPath;
 }
 
-CString CGlobal::GetAppName()
+CString CGlobal::AppName()
 {
 	return m_AppName;
-}
-
-CSize CGlobal::GetDefSize()
-{
-	return m_DefSize;
-}
-
-int CGlobal::GetGuiScrW()
-{
-	return 10;
 }
 
 HGLOBAL CGlobal::GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/)
@@ -98,6 +91,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	// 初始化
+	GBL()->Init();
+	DAT()->Init();
+	GUI()->Init();
+
 	// 主消息循环
 	MSG msg = {0};
 	while (::GetMessage(&msg, NULL, 0, 0))
@@ -105,5 +103,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		::TranslateMessage(&msg);
 		::DispatchMessage(&msg);
 	}
+
+	// 释放资源
+	GUI()->Term();
+	DAT()->Term();
+	GBL()->Term();
+
 	return (int) msg.wParam;
 }

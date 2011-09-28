@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-24
-// Version:	1.0.0001.1816
+// Date:	2011-09-28
+// Version:	1.0.0002.1517
 //
 // History:
 //	- 1.0.0000.0912(2011-08-02)	@ 准备构建GuiScroll
 //	- 1.0.0001.1816(2011-08-24)	+ 添加GuiScroll的main属性,方便在GuiScroll内部获取其关联的控件指针
+//	- 1.0.0002.1517(2011-09-28)	# 修正当外部销毁控件对象时,GuiScroll因内部对象析构顺序问题导致的内存访问异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiScroll_hpp__
@@ -73,6 +74,10 @@ public:
 		m_Slider.AddEvent((IGuiEvent*)ExGui(_T("CGuiSliBlkEvent"), m_Slider.GetGC()));
 		// 添加控件对象
 		InsComp(&m_Slider);
+	}
+	~CGuiSlider()
+	{
+		DelComp(&m_Slider, false);
 	}
 
 public:
@@ -184,6 +189,12 @@ public:
 		InsComp(&m_Up);
 		m_Down.SetWindowRect(CRect(0, 0, 20, 20));
 		InsComp(&m_Down);
+	}
+	~CGuiScroll()
+	{
+		DelComp(&m_Slider, false);
+		DelComp(&m_Up, false);
+		DelComp(&m_Down, false);
 	}
 
 public:

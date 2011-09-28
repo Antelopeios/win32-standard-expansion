@@ -320,10 +320,12 @@ DWORD CData::ThreadProc(LPVOID lpParam)
 
 //////////////////////////////////////////////////////////////////
 
+CData* g_instance = NULL;
 CData* CData::Instance()
 {
-	static CData data;
-	return &data;
+	if (g_instance == NULL)
+		g_instance = ExMem::Alloc<CData>();
+	return g_instance;
 }
 
 void CData::Init()
@@ -331,7 +333,7 @@ void CData::Init()
 	m_TaskSmph.Create(0, 0x7FFFFFFF);
 	m_ComplEvt.Create(true);
 
-	m_File.Open(GET_GBL()->GetAppPath() + _T("Data.dat"), CIOFile::modeReadWrite | CIOFile::modeCreate);
+	m_File.Open(GBL()->AppPath() + _T("Data.dat"), CIOFile::modeReadWrite | CIOFile::modeCreate);
 	m_Data.SetFile(&m_File);
 	m_Data.Decode();
 
@@ -342,12 +344,16 @@ void CData::Term()
 {
 	m_ComplEvt.Set();
 	Wait();
+
 	Close();
 	if (m_EncdCntr > 0)
 	{
 		m_Data.Encode();
 		m_EncdCntr = 0;
 	}
+
+	ExMem::Free(this);
+	g_instance = NULL;
 }
 
 void CData::PostTask(tsk_t& task)

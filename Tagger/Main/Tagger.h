@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Resource/resource.h"
-#include "Manager/GuiManager.h"
+#include "GUI/GuiManager.h"
+#include "GUI/GuiLoader.h"
 #include "Data/Data.h"
 
 //////////////////////////////////////////////////////////////////
@@ -12,7 +13,6 @@ protected:
 	HINSTANCE m_AppInst;
 	CString m_AppPath;
 	CString m_AppName;
-	CSize m_DefSize;
 
 public:
 	CGlobal();
@@ -21,12 +21,11 @@ public:
 
 public:
 	void Init();
-	HINSTANCE GetAppInst();
-	CString GetAppPath();
-	CString GetAppName();
-	CSize GetDefSize();
+	void Term();
 
-	int GetGuiScrW();
+	HINSTANCE AppInst();
+	CString AppPath();
+	CString AppName();
 
 	HGLOBAL GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance = NULL);
 	BOOL ReleaseBinary(HGLOBAL hData);
@@ -34,4 +33,4 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-#define GET_GBL() CGlobal::Instance()
+#define GBL() CGlobal::Instance()

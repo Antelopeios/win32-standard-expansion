@@ -92,16 +92,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// 初始化
-	GBL()->Init();
-	DAT()->Init();
-	GUI()->Init();
+	GBL()->Init();	// 全局初始化
+	DAT()->Init();	// 数据层初始化
+	GUI()->Init();	// 界面层初始化
 
 	// 主消息循环
-	MSG msg = {0};
-	while (::GetMessage(&msg, NULL, 0, 0))
+	MSG msg = {0}; BOOL ret = FALSE;
+	while ((ret = ::GetMessage(&msg, NULL, 0, 0)) != 0)
 	{
-		::TranslateMessage(&msg);
-		::DispatchMessage(&msg);
+		if (ret == -1)
+			break;
+		else
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
 	}
 
 	// 释放资源

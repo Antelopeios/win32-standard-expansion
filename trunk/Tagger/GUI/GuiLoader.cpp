@@ -81,6 +81,7 @@ void CGuiLoader::LoadCtl()
 
 	// 标签云
 	REG_CTL(cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
+	GET_CTL(cloud)->SetTrust(true);
 	GET_CTL(cloud)->SetState(_T("align_top"), (void*)false);
 	GET_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 	// 加载标签
@@ -149,6 +150,7 @@ void CGuiLoader::LoadCtl()
 	img_foc[8] = GET_IMG(foc_rb)->Get();
 	// 文件列表
 	REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
+	GET_CTL(files)->SetTrust(true);
 	GET_CTL(files)->SetVisible(false);
 	GET_CTL(files)->SetState(_T("align_top"), (void*)false);
 	GET_CTL(files)->SetState(_T("space"), (void*)4);
@@ -274,4 +276,9 @@ CSize CGuiLoader::DefSize()
 int CGuiLoader::ScrWidth()
 {
 	return 10;
+}
+
+// 重新获取数据
+void CGuiLoader::Refresh()
+{
 }

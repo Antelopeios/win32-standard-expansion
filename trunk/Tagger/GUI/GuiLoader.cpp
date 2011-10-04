@@ -237,6 +237,8 @@ void CGuiLoader::LinkGui()
 	GET_WND(main)->AddComp(GET_CTL(scr_files));
 }
 
+//////////////////////////////////////////////////////////////////
+
 CGuiLoader::CGuiLoader()
 {
 }
@@ -277,6 +279,8 @@ int CGuiLoader::ScrWidth()
 {
 	return 10;
 }
+
+//////////////////////////////////////////////////////////////////
 
 // 重新获取数据
 void CGuiLoader::Refresh()

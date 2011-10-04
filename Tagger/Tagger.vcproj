@@ -173,6 +173,14 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\Main\Global.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Main\Global.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Main\Tagger.cpp"
 				>
 			</File>
@@ -187,15 +195,11 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\Resource\file_b.png"
-				>
-			</File>
-			<File
 				RelativePath=".\file_b.png"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\file_c.png"
+				RelativePath=".\Resource\file_b.png"
 				>
 			</File>
 			<File
@@ -203,7 +207,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\file_l.png"
+				RelativePath=".\Resource\file_c.png"
 				>
 			</File>
 			<File
@@ -211,11 +215,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\file_lb.png"
+				RelativePath=".\Resource\file_l.png"
 				>
 			</File>
 			<File
 				RelativePath=".\Resource\file_lb.png"
+				>
+			</File>
+			<File
+				RelativePath=".\file_lb.png"
 				>
 			</File>
 			<File
@@ -227,15 +235,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\file_r.png"
-				>
-			</File>
-			<File
 				RelativePath=".\file_r.png"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\file_rb.png"
+				RelativePath=".\Resource\file_r.png"
 				>
 			</File>
 			<File
@@ -243,7 +247,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\file_rt.png"
+				RelativePath=".\Resource\file_rb.png"
 				>
 			</File>
 			<File
@@ -251,11 +255,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\file_t.png"
+				RelativePath=".\Resource\file_rt.png"
 				>
 			</File>
 			<File
 				RelativePath=".\file_t.png"
+				>
+			</File>
+			<File
+				RelativePath=".\Resource\file_t.png"
 				>
 			</File>
 			<File
@@ -267,15 +275,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\foc_l.png"
-				>
-			</File>
-			<File
 				RelativePath=".\foc_l.png"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\foc_lb.png"
+				RelativePath=".\Resource\foc_l.png"
 				>
 			</File>
 			<File
@@ -283,7 +287,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\foc_lt.png"
+				RelativePath=".\Resource\foc_lb.png"
 				>
 			</File>
 			<File
@@ -291,11 +295,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\foc_r.png"
+				RelativePath=".\foc_lt.png"
 				>
 			</File>
 			<File
 				RelativePath=".\foc_r.png"
+				>
+			</File>
+			<File
+				RelativePath=".\Resource\foc_r.png"
 				>
 			</File>
 			<File
@@ -307,19 +315,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\foc_rt.png"
-				>
-			</File>
-			<File
 				RelativePath=".\Resource\foc_rt.png"
 				>
 			</File>
 			<File
-				RelativePath=".\foc_t.png"
+				RelativePath=".\foc_rt.png"
 				>
 			</File>
 			<File
 				RelativePath=".\Resource\foc_t.png"
+				>
+			</File>
+			<File
+				RelativePath=".\foc_t.png"
 				>
 			</File>
 			<File

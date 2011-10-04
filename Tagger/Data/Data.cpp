@@ -41,7 +41,7 @@ bool CData::GetRet(tsk_t& task)
 			while(m_Data.GetNode(_T("link"), ite))
 			{
 				CString name = m_Data.GetAttr(_T("file"), ite);
-				if (task.rest.name == name)
+				if (task.rest.name.Empty() || task.rest.name == name)
 				{
 					task.rest.link.Add(m_Data.GetAttr(_T("tag"), ite));
 					retn = true;
@@ -52,7 +52,7 @@ bool CData::GetRet(tsk_t& task)
 			while(m_Data.GetNode(_T("link"), ite))
 			{
 				CString name = m_Data.GetAttr(_T("tag"), ite);
-				if (task.rest.name == name)
+				if (task.rest.name.Empty() || task.rest.name == name)
 				{
 					task.rest.link.Add(m_Data.GetAttr(_T("file"), ite));
 					retn = true;

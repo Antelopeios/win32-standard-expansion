@@ -6,83 +6,6 @@
 
 //////////////////////////////////////////////////////////////////
 
-CGlobal::CGlobal()
-	: m_AppInst(NULL)
-{
-}
-
-CGlobal* g_instance = NULL;
-CGlobal* CGlobal::Instance()
-{
-	if (g_instance == NULL)
-		g_instance = ExMem::Alloc<CGlobal>();
-	return g_instance;
-}
-
-void CGlobal::Init()
-{
-	m_AppInst = ::GetModuleHandle(NULL);
-
-	::GetModuleFileName(NULL, m_AppPath.GetCStr(MAX_PATH), MAX_PATH);
-	int inx = (m_AppPath.RevFind(_T('\\')) + 1)->Index();
-	m_AppName = ((LPCTSTR)m_AppPath) + inx;
-	m_AppPath[inx] = _T('\0');
-}
-
-void CGlobal::Term()
-{
-	ExMem::Free(this);
-	g_instance = NULL;
-}
-
-HINSTANCE CGlobal::AppInst()
-{
-	return m_AppInst;
-}
-
-CString CGlobal::AppPath()
-{
-	return m_AppPath;
-}
-
-CString CGlobal::AppName()
-{
-	return m_AppName;
-}
-
-HGLOBAL CGlobal::GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/)
-{
-	// 加载资源内存
-	HRSRC info = ::FindResource(hInstance, MAKEINTRESOURCE(nID), szType);
-	if( info == NULL ) return NULL;
-	HGLOBAL data = ::LoadResource(hInstance, info);
-	if( data == NULL ) return NULL;
-	// 获得资源内存块
-	dwSize = ::SizeofResource(hInstance, info);
-	if( dwSize == NULL )
-	{
-		ReleaseBinary(data);
-		return NULL;
-	}
-	btBuff = (BYTE*)::LockResource(data);
-	if( btBuff == NULL )
-	{
-		ReleaseBinary(data);
-		return NULL;
-	}
-	return data;
-}
-
-BOOL CGlobal::ReleaseBinary(HGLOBAL hData)
-{
-	if (!hData) return TRUE;
-	// 释放资源内存块
-	UnlockResource(hData);
-	return FreeResource(hData);
-}
-
-//////////////////////////////////////////////////////////////////
-
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,
 					   LPTSTR    lpCmdLine,
@@ -94,6 +17,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 初始化
 	GBL()->Init();	// 全局初始化
 	DAT()->Init();	// 数据层初始化
+	TAG()->Init();	// 逻辑层初始化
 	GUI()->Init();	// 界面层初始化
 
 	// 主消息循环
@@ -111,8 +35,76 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 释放资源
 	GUI()->Term();
+	TAG()->Term();
 	DAT()->Term();
 	GBL()->Term();
 
 	return (int) msg.wParam;
+}
+
+//////////////////////////////////////////////////////////////////
+
+CTagger::CTagger()
+{
+}
+
+CTagger* g_instance = NULL;
+CTagger* CTagger::Instance()
+{
+	if (g_instance == NULL)
+		g_instance = ExMem::Alloc<CTagger>();
+	return g_instance;
+}
+
+void CTagger::Init()
+{
+}
+
+void CTagger::Term()
+{
+	ExMem::Free(this);
+	g_instance = NULL;
+}
+
+//////////////////////////////////////////////////////////////////
+
+void CTagger::RetProc(CData::ret_t ret)
+{
+	if (ret.type == CData::err) return;
+	TAG()->m_RetBuf = ret.link;
+	GUI()->Refresh();
+}
+
+CTagger::list_t& CTagger::GetRet()
+{
+	return m_RetBuf;
+}
+
+void CTagger::GetTags()
+{
+	CData::tsk_t task;
+	task.oper = CData::get;
+	task.rest.type = CData::tag;
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::GetTags(const CString& sFile)
+{
+	CData::tsk_t task;
+	task.oper = CData::get;
+	task.rest.type = CData::file;
+	task.rest.name = sFile;
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::GetFiles(const CString& sTag)
+{
+	CData::tsk_t task;
+	task.oper = CData::get;
+	task.rest.type = CData::tag;
+	task.rest.name = sTag;
+	task.call = RetProc;
+	DAT()->PostTask(task);
 }

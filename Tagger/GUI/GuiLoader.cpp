@@ -295,6 +295,48 @@ void CGuiLoader::Init()
 			TAG()->Add(CString(t.Mid(0, i->Index())), CString(t.Mid(i->Index() + 1)));
 		}
 		else
+		if (s.Left(8) == "del tag ")
+			TAG()->DelTag(CString(s.Mid(8)));
+		else
+		if (s.Left(9) == "del file ")
+			TAG()->DelFile(CString(s.Mid(9)));
+		else
+		if (s.Left(4) == "del ")
+		{
+			CString t(s.Mid(4));
+			CString::iterator_t i = t.Find(_T(';'));
+			if (i == t.Tail())
+			{
+				_tcprintf_s(_T("输入命令不正确\n\n"));
+				continue;
+			}
+			TAG()->Del(CString(t.Mid(0, i->Index())), CString(t.Mid(i->Index() + 1)));
+		}
+		else
+		if (s.Left(8) == "set tag ")
+		{
+			CString t(s.Mid(8));
+			CString::iterator_t i = t.Find(_T(';'));
+			if (i == t.Tail())
+			{
+				_tcprintf_s(_T("输入命令不正确\n\n"));
+				continue;
+			}
+			TAG()->SetTag(CString(t.Mid(0, i->Index())), CString(t.Mid(i->Index() + 1)));
+		}
+		else
+		if (s.Left(9) == "set file ")
+		{
+			CString t(s.Mid(9));
+			CString::iterator_t i = t.Find(_T(';'));
+			if (i == t.Tail())
+			{
+				_tcprintf_s(_T("输入命令不正确\n\n"));
+				continue;
+			}
+			TAG()->SetTag(CString(t.Mid(0, i->Index())), CString(t.Mid(i->Index() + 1)));
+		}
+		else
 		{
 			_tcprintf_s(_T("输入命令不正确\n\n"));
 			continue;
@@ -306,10 +348,15 @@ void CGuiLoader::Init()
 			_tcprintf_s(_T("没有找到任何结果\n\n"));
 		else
 		{
+			CTagger::list_t tmp;
 			CTagger::list_t::iterator_t ite = ret.Head();
 			for(; ite != ret.Tail(); ++ite)
+			{
+				if (tmp.Find(*ite) != tmp.Tail()) continue;
+				tmp.Add(*ite);
 				_tcprintf_s(_T("%s\n"), (*ite).GetCStr());
-			_tcprintf_s(_T("共找到%d条结果\n\n"), ret.GetCount());
+			}
+			_tcprintf_s(_T("共找到%d条结果\n\n"), tmp.GetCount());
 		}
 	}
 #else /*_CONSOLE*/

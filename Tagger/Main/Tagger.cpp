@@ -20,16 +20,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 #endif/*_CONSOLE*/
 
 	// 初始化
-	GLB()->Init();	// 全局初始化
-	DAT()->Init();	// 数据层初始化
-	TAG()->Init();	// 逻辑层初始化
-	GUI()->Init();	// 界面层初始化
+	TAG()->Init();
 
-	// 释放资源
-	GUI()->Term();
+	// 卸载
 	TAG()->Term();
-	DAT()->Term();
-	GLB()->Term();
 
 	return 0;
 }
@@ -50,10 +44,17 @@ CTagger* CTagger::Instance()
 
 void CTagger::Init()
 {
+	GLB()->Init();	// 全局初始化
+	DAT()->Init();	// 数据层初始化
+	GUI()->Init();	// 界面层初始化
 }
 
 void CTagger::Term()
 {
+	GUI()->Term();	// 界面层卸载
+	DAT()->Term();	// 数据层卸载
+	GLB()->Term();	// 全局卸载
+
 	ExMem::Free(this);
 	g_instance = NULL;
 }
@@ -116,6 +117,59 @@ void CTagger::Add(const CString& sFile, const CString& sTag)
 	task.rest.type = CData::file;
 	task.rest.name = sFile;
 	task.rest.link.Add(sTag);
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::Del(const CString& sFile, const CString& sTag)
+{
+	CData::tsk_t task;
+	task.oper = CData::del;
+	task.rest.type = CData::file;
+	task.rest.name = sFile;
+	task.rest.link.Add(sTag);
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::DelTag(const CString& sName)
+{
+	CData::tsk_t task;
+	task.oper = CData::del;
+	task.rest.type = CData::tag;
+	task.rest.name = sName;
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::DelFile(const CString& sName)
+{
+	CData::tsk_t task;
+	task.oper = CData::del;
+	task.rest.type = CData::file;
+	task.rest.name = sName;
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::SetTag(const CString& sOld, const CString& sNew)
+{
+	CData::tsk_t task;
+	task.oper = CData::set;
+	task.rest.type = CData::tag;
+	task.rest.name = sOld;
+	task.name = sNew;
+	task.call = RetProc;
+	DAT()->PostTask(task);
+}
+
+void CTagger::SetFile(const CString& sOld, const CString& sNew)
+{
+	CData::tsk_t task;
+	task.oper = CData::set;
+	task.rest.type = CData::file;
+	task.rest.name = sOld;
+	task.name = sNew;
 	task.call = RetProc;
 	DAT()->PostTask(task);
 }

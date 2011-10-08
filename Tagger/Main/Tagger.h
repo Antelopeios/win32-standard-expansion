@@ -34,6 +34,13 @@ public:
 	void GetFile(const CString& sName);
 
 	void Add(const CString& sFile, const CString& sTag);
+
+	void Del(const CString& sFile, const CString& sTag);
+	void DelTag(const CString& sName);
+	void DelFile(const CString& sName);
+
+	void SetTag(const CString& sOld, const CString& sNew);
+	void SetFile(const CString& sOld, const CString& sNew);
 };
 
 //////////////////////////////////////////////////////////////////

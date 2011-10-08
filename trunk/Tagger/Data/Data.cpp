@@ -33,9 +33,9 @@ bool CData::GetRet(tsk_t& task)
 				retn = true;
 			}
 		}
-	}*/
+	}
 	if(!retn)
-	{	// 未命中缓存,查找数据库
+	{	// 未命中缓存,查找数据库*/
 		CGuiXML::iterator_t ite = m_Data.GetRoot();
 		switch(task.rest.type)
 		{
@@ -62,15 +62,15 @@ bool CData::GetRet(tsk_t& task)
 			}
 			break;
 		}
-		if (retn)
+/*		if (retn)
 		{	// 命中
 			task.rest.cntr = 1;
-/*			// 写入缓存
+			// 写入缓存
 			m_RestList.Add(task.rest);
 			if (m_RestList.GetCount() > REST_MAX)
-				m_RestList.Del(dun); // 释放掉命中次数最少的缓存项*/
+				m_RestList.Del(dun); // 释放掉命中次数最少的缓存项
 		}
-	}
+	}*/
 	if (!retn) task.rest.type = err;
 	if (task.call) task.call(task.rest);
 	return retn;
@@ -233,40 +233,47 @@ bool CData::SetRet(tsk_t& task)
 	if (task.rest.type == err) return false;
 	if (task.name == _T("")) return false;
 	// 修改所有当前项名称
-	bool retn = false;
+	CListT<CGuiXML::iterator_t> ite_list;
 	CGuiXML::iterator_t ite = m_Data.GetRoot();
+	CString file_name, tag_name;
 	while(m_Data.GetNode(_T("link"), ite))
 	{
-		CString file_name, tag_name;
 		file_name = m_Data.GetAttr(_T("file"), ite);
 		tag_name = m_Data.GetAttr(_T("tag"), ite);
 		if (task.rest.type == file)
 		{
 			if (task.rest.name == file_name)
-			{
-				m_Data.DelNode(ite);
-				CGuiXML::iterator_t it = m_Data.GetRoot();
-				m_Data.AddNode(_T("link"), it);
-				m_Data.AddAttr(_T("file"), task.name, it);
-				m_Data.AddAttr(_T("tag"), tag_name, it);
-				retn = true;
-			}
+				ite_list.Add(ite);
 		}
 		else
 		{
 			if (task.rest.name == tag_name)
-			{
-				m_Data.DelNode(ite);
-				CGuiXML::iterator_t it = m_Data.GetRoot();
-				m_Data.AddNode(_T("link"), it);
-				m_Data.AddAttr(_T("file"), file_name, it);
-				m_Data.AddAttr(_T("tag"), task.name, it);
-				retn = true;
-			}
+				ite_list.Add(ite);
+		}
+	}
+	// 真正的数据修改
+	CListT<CGuiXML::iterator_t>::iterator_t set_ite = ite_list.Head();
+	for(; set_ite != ite_list.Tail(); ++set_ite)
+	{
+		file_name = m_Data.GetAttr(_T("file"), *set_ite);
+		tag_name = m_Data.GetAttr(_T("tag"), *set_ite);
+		m_Data.DelNode(*set_ite);
+		CGuiXML::iterator_t it = m_Data.GetRoot();
+		m_Data.AddNode(_T("link"), it);
+		if (task.rest.type == file)
+		{
+			m_Data.AddAttr(_T("file"), task.name, it);
+			m_Data.AddAttr(_T("tag"), tag_name, it);
+		}
+		else
+		{
+			m_Data.AddAttr(_T("file"), file_name, it);
+			m_Data.AddAttr(_T("tag"), task.name, it);
 		}
 	}
 	task.rest.name = task.name;
-	return GetRet(task);
+	GetRet(task);
+	return (!ite_list.Empty());
 }
 
 // 用于更新数据库的线程

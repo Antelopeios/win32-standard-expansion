@@ -49,15 +49,15 @@ protected:
 	CSemaphore m_TaskSmph;
 	CEvent m_ComplEvt;
 
-	typedef CListT<ret_t> ret_list_t;
-	ret_list_t m_RestList;
-	static const int REST_MAX = 10;		// 内存数据缓存粒度最大个数
-	static const int ENCD_MAX = 100;	// 100次写入操作将回写磁盘一次
-	int m_EncdCntr;
+//	typedef CListT<ret_t> ret_list_t;
+//	ret_list_t m_RestList;
+//	static const int REST_MAX = 10;		// 内存数据缓存粒度最大个数
 
 	typedef CListT<tsk_t> tsk_list_t;
 	tsk_list_t m_TaskList;
 	CMutex m_TaskLock;
+	static const int ENCD_MAX = 100;	// 100次写入操作将回写磁盘一次
+	int m_EncdCntr;
 
 protected:
 	bool GetRet(tsk_t& task);	// 获取

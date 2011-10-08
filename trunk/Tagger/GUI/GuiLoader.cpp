@@ -24,12 +24,12 @@ void CGuiLoader::LoadRes()
 	BYTE* buff = NULL; DWORD size = 0;
 	HGLOBAL hres = NULL;
 #define REG_RES_IMG(res_id, img_id) \
-	hres = GBL()->GetBinary(res_id, _T("PNG"), buff, size); \
+	hres = GLB()->GetBinary(res_id, _T("PNG"), buff, size); \
 	if (hres) \
 	{ \
 		file.Open(buff, size); \
 		REG_IMG(img_id, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode()); \
-		GBL()->ReleaseBinary(hres); \
+		GLB()->ReleaseBinary(hres); \
 	}
 //#define REG_RES_IMG(res_id, img_id)
 	// 加载文件项图片
@@ -196,7 +196,7 @@ void CGuiLoader::LoadWnd()
 {
 	// 窗口资源定义
 	CRect rc_wnd(0, 0, GUI()->DefSize().cx, GUI()->DefSize().cy);
-	HICON ic_wnd = ::LoadIcon(GBL()->AppInst(), MAKEINTRESOURCE(IDI_TAGGER));
+	HICON ic_wnd = ::LoadIcon(GLB()->AppInst(), MAKEINTRESOURCE(IDI_TAGGER));
 
 	// 创建窗口对象并设置
 	REG_WND(main, ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc)));
@@ -253,6 +253,66 @@ CGuiLoader* CGuiLoader::Instance()
 
 void CGuiLoader::Init()
 {
+#ifdef	_CONSOLE
+	m_Msg.Create();
+	while(true)
+	{
+		// 获得输入
+		CStringT<char> s;
+		char c = 0;
+		putchar('>');
+		do 
+		{
+			c = getchar();
+			if (c == '\n') break;
+			s += c;
+		} while(true);
+		// 判断输入
+		if (s == "exit")
+			break;
+		else
+		if (s == "get tags")
+			TAG()->GetTags();
+		else
+		if (s == "get files")
+			TAG()->GetFiles();
+		else
+		if (s.Left(8) == "get tag ")
+			TAG()->GetTag(CString(s.Mid(8)));
+		else
+		if (s.Left(9) == "get file ")
+			TAG()->GetFile(CString(s.Mid(9)));
+		else
+		if (s.Left(4) == "add ")
+		{
+			CString t(s.Mid(4));
+			CString::iterator_t i = t.Find(_T(';'));
+			if (i == t.Tail())
+			{
+				_tcprintf_s(_T("输入命令不正确\n\n"));
+				continue;
+			}
+			TAG()->Add(CString(t.Mid(0, i->Index())), CString(t.Mid(i->Index() + 1)));
+		}
+		else
+		{
+			_tcprintf_s(_T("输入命令不正确\n\n"));
+			continue;
+		}
+		// 获得并显示处理结果
+		m_Msg.Wait();
+		CTagger::list_t ret = TAG()->GetRet();
+		if (ret.Empty())
+			_tcprintf_s(_T("没有找到任何结果\n\n"));
+		else
+		{
+			CTagger::list_t::iterator_t ite = ret.Head();
+			for(; ite != ret.Tail(); ++ite)
+				_tcprintf_s(_T("%s\n"), (*ite).GetCStr());
+			_tcprintf_s(_T("共找到%d条结果\n\n"), ret.GetCount());
+		}
+	}
+#else /*_CONSOLE*/
 	CRect rc_dsk;
 	::GetClientRect(::GetDesktopWindow(), (LPRECT)&rc_dsk);
 	m_DefSize.cx = (LONG)(rc_dsk.Width() * 0.6);
@@ -262,6 +322,20 @@ void CGuiLoader::Init()
 	LoadCtl();
 	LoadWnd();
 	LinkGui();
+
+	// 主消息循环
+	MSG msg = {0}; BOOL ret = FALSE;
+	while ((ret = ::GetMessage(&msg, NULL, 0, 0)) != 0)
+	{
+		if (ret == -1)
+			break;
+		else
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
+	}
+#endif/*_CONSOLE*/
 }
 
 void CGuiLoader::Term()
@@ -285,4 +359,8 @@ int CGuiLoader::ScrWidth()
 // 重新获取数据
 void CGuiLoader::Refresh()
 {
+#ifdef	_CONSOLE
+	m_Msg.Set();
+#else /*_CONSOLE*/
+#endif/*_CONSOLE*/
 }

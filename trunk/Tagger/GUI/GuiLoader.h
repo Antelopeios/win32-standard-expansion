@@ -8,6 +8,10 @@ protected:
 	CGC gc;
 	CSize m_DefSize;
 
+#ifdef	_CONSOLE
+	CEvent m_Msg;
+#endif/*_CONSOLE*/
+
 protected:
 	// МгдизЪдД
 	void LoadRes();

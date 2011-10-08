@@ -28,4 +28,4 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-#define GBL() CGlobal::Instance()
+#define GLB() CGlobal::Instance()

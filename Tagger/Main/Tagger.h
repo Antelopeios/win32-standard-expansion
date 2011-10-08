@@ -29,8 +29,11 @@ public:
 	list_t& GetRet();
 
 	void GetTags();
-	void GetTags(const CString& sFile);
-	void GetFiles(const CString& sTag);
+	void GetFiles();
+	void GetTag(const CString& sName);
+	void GetFile(const CString& sName);
+
+	void Add(const CString& sFile, const CString& sTag);
 };
 
 //////////////////////////////////////////////////////////////////

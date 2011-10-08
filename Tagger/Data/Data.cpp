@@ -6,8 +6,10 @@
 // 获取
 bool CData::GetRet(tsk_t& task)
 {
+	if (task.rest.type == err) return false;
+	task.rest.link.Clear();
 	bool retn = false;
-	ret_list_t::iterator_t dun = m_RestList.Tail();
+/*	ret_list_t::iterator_t dun = m_RestList.Tail();
 	if(!m_RestList.Empty())
 	{	// 遍历缓存查找结果
 		ret_list_t::iterator_t ite = m_RestList.Head();
@@ -31,7 +33,7 @@ bool CData::GetRet(tsk_t& task)
 				retn = true;
 			}
 		}
-	}
+	}*/
 	if(!retn)
 	{	// 未命中缓存,查找数据库
 		CGuiXML::iterator_t ite = m_Data.GetRoot();
@@ -63,14 +65,15 @@ bool CData::GetRet(tsk_t& task)
 		if (retn)
 		{	// 命中
 			task.rest.cntr = 1;
-			// 写入缓存
+/*			// 写入缓存
 			m_RestList.Add(task.rest);
 			if (m_RestList.GetCount() > REST_MAX)
-				m_RestList.Del(dun); // 释放掉命中次数最少的缓存项
+				m_RestList.Del(dun); // 释放掉命中次数最少的缓存项*/
 		}
 	}
+	if (!retn) task.rest.type = err;
 	if (task.call) task.call(task.rest);
-	return false;
+	return retn;
 }
 
 // 添加/修改
@@ -79,9 +82,9 @@ bool CData::AddRet(tsk_t& task)
 	if (task.rest.type == err) return false;
 	if (task.rest.link.Empty()) return false;
 	ret_t ret = task.rest;
-	task.rest.type = err;
+	ret_call_t call = task.call;
+	task.call = NULL;
 	GetRet(task);
-	bool retn = false;
 	if (task.rest.type == err)
 	{	// 数据不存在,添加
 		ret_t::lnk_list_t::iterator_t ret_it = ret.link.Head();
@@ -100,7 +103,6 @@ bool CData::AddRet(tsk_t& task)
 				m_Data.AddAttr(_T("file"), *ret_it, ite);
 			}
 		}
-		retn = true;
 	}
 	else
 	{	// 数据已存在,修改
@@ -122,9 +124,8 @@ bool CData::AddRet(tsk_t& task)
 				m_Data.AddAttr(_T("tag"), ret.name, ite);
 				m_Data.AddAttr(_T("file"), *ret_it, ite);
 			}
-			retn = true;
 		}
-		ret_t::lnk_list_t::iterator_t tsk_it = task.rest.link.Head();
+/*		ret_t::lnk_list_t::iterator_t tsk_it = task.rest.link.Head();
 		for(; tsk_it != task.rest.link.Tail(); ++tsk_it)
 		{
 			ret_t::lnk_list_t::iterator_t ret_it = ret.link.Find(*tsk_it);
@@ -161,10 +162,11 @@ bool CData::AddRet(tsk_t& task)
 					}
 				}
 			}
-			retn = true;
-		}
+		}*/
 	}
-	return retn;
+	task.rest = ret;
+	task.call = call;
+	return GetRet(task);
 }
 
 // 删除
@@ -220,8 +222,8 @@ bool CData::DelRet(tsk_t& task)
 	}
 	// 真正的数据删除
 	CListT<CGuiXML::iterator_t>::iterator_t del_ite = ite_list.Head();
-	for(; del_ite != ite_list.Tail(); ++del_ite)
-		m_Data.DelNode(*del_ite);
+	for(; del_ite != ite_list.Tail(); ++del_ite) m_Data.DelNode(*del_ite);
+	GetRet(task);
 	return (!ite_list.Empty());
 }
 
@@ -263,7 +265,8 @@ bool CData::SetRet(tsk_t& task)
 			}
 		}
 	}
-	return retn;
+	task.rest.name = task.name;
+	return GetRet(task);
 }
 
 // 用于更新数据库的线程
@@ -333,7 +336,8 @@ void CData::Init()
 	m_TaskSmph.Create(0, 0x7FFFFFFF);
 	m_ComplEvt.Create(true);
 
-	m_File.Open(GBL()->AppPath() + _T("Data.dat"), CIOFile::modeReadWrite | CIOFile::modeCreate);
+	m_File.Open(GLB()->AppPath() + _T("Data.dat"), 
+		CIOFile::modeReadWrite | CIOFile::modeCreate | CIOFile::modeNoTruncate);
 	m_Data.SetFile(&m_File);
 	m_Data.Decode();
 

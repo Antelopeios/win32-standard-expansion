@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-15
-// Version:	1.0.0031.1557
+// Date:	2011-10-10
+// Version:	1.0.0032.1256
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -61,6 +61,7 @@
 //	- 1.0.0029.1157(2011-09-07)	# 修正字符串转码算法中的内存溢出及内存泄漏现象
 //	- 1.0.0030.1557(2011-09-14)	+ 为字符串Format;=;+=接口添加自动编码转换的相关重载
 //	- 1.0.0031.1557(2011-09-15)	# 修正Compare接口在某些情况下返回结果错误的问题
+//	- 1.0.0032.1256(2011-10-10)	^ 将负责编码转换的部分单独提取出来,作为独立的静态接口,方便外部直接调用
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -82,6 +83,21 @@ struct _StringPolicyT;
 template <typename TypeT = TCHAR, typename PolicyT = _StringPolicyT<> >
 class CStringT : public IContainerObjectT<TypeT, PolicyT, CStringT<TypeT, PolicyT> >
 {
+public:
+	static int MultiByteToWideChar(UINT CodePage, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR& lpWideCharStr, int& cchWideChar, void* pGC = NULL)
+	{
+		cchWideChar = ::MultiByteToWideChar(CodePage, NULL, lpMultiByteStr, cbMultiByte, NULL, 0);
+		lpWideCharStr = ExMem::Alloc<wchar_t>((CGC*)pGC, cchWideChar);
+		return ::MultiByteToWideChar(CodePage, NULL, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
+	}
+
+	static int WideCharToMultiByte(UINT CodePage, LPCWSTR lpWideCharStr, int cchWideChar, LPSTR& lpMultiByteStr, int& cbMultiByte, void* pGC = NULL)
+	{
+		cbMultiByte = ::WideCharToMultiByte(CodePage, NULL, lpWideCharStr, cchWideChar, NULL, 0, NULL, FALSE);
+		lpMultiByteStr = ExMem::Alloc<char>((CGC*)pGC, cbMultiByte);
+		return ::WideCharToMultiByte(CodePage, NULL, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, NULL, FALSE);
+	}
+
 public:
 	typedef typename CArrayT<type_t> array_t;
 
@@ -237,9 +253,8 @@ public:
 		}
 		else
 		{
-			DWORD len = ::MultiByteToWideChar(CP_ACP, NULL, pString, -1, NULL, 0);
-			wchar_t* tmp_str = ExMem::Alloc<wchar_t>(len);
-			::MultiByteToWideChar(CP_ACP, 0, pString, -1, tmp_str, len);
+			wchar_t* tmp_str = NULL; int len = 0;
+			MultiByteToWideChar(CP_ACP, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			StringCchCopyW((wchar_t*)m_Array, GetSize(), tmp_str);
 			ExMem::Free(tmp_str);
@@ -251,9 +266,8 @@ public:
 		if (!pString) return (*this);
 		if (sizeof(type_t) == 1)
 		{
-			DWORD len = ::WideCharToMultiByte(CP_OEMCP, NULL, pString, -1, NULL, 0, NULL, FALSE);
-			char* tmp_str = ExMem::Alloc<char>(len);
-			::WideCharToMultiByte(CP_OEMCP, NULL, pString, -1, tmp_str, len, NULL, FALSE);
+			char* tmp_str = NULL; int len = 0;
+			WideCharToMultiByte(CP_OEMCP, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			StringCchCopyA((char*)m_Array, GetSize(), tmp_str);
 			ExMem::Free(tmp_str);
@@ -313,9 +327,9 @@ public:
 		if (Empty()) return (*this);
 		type_t* s = m_Array, *str = m_Array;
 		if (sizeof(type_t) == 1)
-			while(*s) *str++ = toupper(*s++);
+			while(*s) *str++ = (type_t)toupper(*s++);
 		else
-			while(*s) *str++ = towupper(*s++);
+			while(*s) *str++ = (type_t)towupper(*s++);
 		return (*this);
 	}
 	CStringT& Lower()
@@ -323,9 +337,9 @@ public:
 		if (Empty()) return (*this);
 		type_t* s = m_Array, *str = m_Array;
 		if (sizeof(type_t) == 1)
-			while(*s) *str++ = tolower(*s++);
+			while(*s) *str++ = (type_t)tolower(*s++);
 		else
-			while(*s) *str++ = towlower(*s++);
+			while(*s) *str++ = (type_t)towlower(*s++);
 		return (*this);
 	}
 

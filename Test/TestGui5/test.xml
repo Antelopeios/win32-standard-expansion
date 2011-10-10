@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <skin>
-<!--ÕªÒª¶¨Òå-->
-<detail name="Test" author="Ä¾Í·ÔÆ" home="http://dark-c.at" email="mark.lonr@tom.com" version="1.0" date="2011-05-31" />
-<!--×ÊÔ´¶¨Òå-->
-<font name="1" face="Î¢ÈíÑÅºÚ" size="22" color="#a0a0a0" weight="bold" italic="0" underline="0" />
-<font name="2" face="Î¢ÈíÑÅºÚ" size="22" color="#3e7eaa" weight="normal" italic="0" underline="0" />
+<!--æ‘˜è¦å®šä¹‰-->
+<detail name="Test" author="æœ¨å¤´äº‘" home="http://dark-c.at" email="mark.lonr@tom.com" version="1.0" date="2011-05-31" />
+<!--èµ„æºå®šä¹‰-->
+<font name="1" face="å¾®è½¯é›…é»‘" size="22" color="#a0a0a0" weight="bold" italic="0" underline="0" />
+<font name="2" face="å¾®è½¯é›…é»‘" size="22" color="#3e7eaa" weight="normal" italic="0" underline="0" />
 <image name="bk" path="../TestImg1/ground.png" />
 <image name="btn-t-l" path="btn_bg_cap_left.png" />
 <image name="btn-t" path="btn_bg_cap.png" />
@@ -15,19 +15,19 @@
 <image name="btn-b-l" path="btn_bg_bottom_left.png" />
 <image name="btn-b" path="btn_bg_bottom.png" />
 <image name="btn-b-r" path="btn_bg_bottom_right.png" />
-<!--ÑùÊ½±í-->
+<!--æ ·å¼è¡¨-->
 <style name="style-gnd" font="1" color="#336699" image="bk" />
 <style name="style-btn" font="2,2,2,2,2" image="btn-t-l,btn-t,btn-t-r,btn-l,btn,btn-r,btn-b-l,btn-b,btn-b-r" />
-<!--²ã¶¨Òå-->
+<!--å±‚å®šä¹‰-->
 <div name="wnd" class="CGuiWnd" rect="0,0,500,300" pos="center" layer="1" visible="show">
-	<!--ÊÂ¼þ,Ã¿¸ö²ã¿ÉÒÔ¶¨ÒåÈÎÒâ¸öÊÂ¼þ-->
+	<!--äº‹ä»¶,æ¯ä¸ªå±‚å¯ä»¥å®šä¹‰ä»»æ„ä¸ªäº‹ä»¶-->
 	<event class="CCustomEvent" />
-	<!--Ç¶Ì×²ã¶¨Òå(¿Ø¼þ)-->
+	<!--åµŒå¥—å±‚å®šä¹‰(æŽ§ä»¶)-->
 	<div name="gnd" class="CGuiPicture" style="style-gnd">
 		<event class="CCusPicEvent" />
-		<!--ÌØÐ§,Ã¿¸ö²ãÖ»ÄÜ¶¨ÒåÒ»¸öÌØÐ§-->
+		<!--ç‰¹æ•ˆ,æ¯ä¸ªå±‚åªèƒ½å®šä¹‰ä¸€ä¸ªç‰¹æ•ˆ-->
 		<effect class="CGuiFade" />
-		<!--Ç¶Ì×²ã¶¨Òå(¿Ø¼þµÄ×Ó¿Ø¼þ)-->
+		<!--åµŒå¥—å±‚å®šä¹‰(æŽ§ä»¶çš„å­æŽ§ä»¶)-->
 		<div name="btn" class="CGuiButton" style="style-btn" text="Dark C.at" rect="70,100,180,140">
 			<effect class="CGuiFade" />
 			<event class="CCusBtnEvent" />

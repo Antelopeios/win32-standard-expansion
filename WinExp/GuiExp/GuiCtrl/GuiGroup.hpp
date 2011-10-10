@@ -50,6 +50,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+EXP_BEG
+
 //////////////////////////////////////////////////////////////////
 
 class CGuiGroup : public IGuiCtrlBase
@@ -164,5 +166,7 @@ public:
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiGroup, IGuiCtrlBase)
 
 //////////////////////////////////////////////////////////////////
+
+EXP_END
 
 #endif/*__GuiGroup_hpp__*/

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-18
-// Version:	1.0.0005.2056
+// Date:	2011-10-10
+// Version:	1.0.0006.1256
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
@@ -46,6 +46,7 @@
 //								+ 添加XML声明段的解析,并优化解析状态迁移
 //	- 1.0.0004.1121(2011-09-16)	+ 添加CGuiXML::AddNode()接口重载,支持直接通过名字创建结点
 //	- 1.0.0005.2056(2011-09-18)	^ 简化CGuiXML中的部分实现
+//	- 1.0.0006.1256(2011-10-10)	+ CGuiXML支持UTF-8格式的xml解析
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -498,14 +499,30 @@ public:
 		// 编码转换
 		uint64_t len64 = m_pFile->Size();
 		if (len64 > (1 << 30)) return false;		// 忽略大于1G的文件
-		char* buf = ExMem::Alloc<char>(1 << 20);	// 1M的缓存区
-		while(m_pFile->Read(buf, 1 << 20, sizeof(char)) != 0)
 		{
-			CString oem(buf);
-			if (m_mFile.Write(oem.GetCStr(), oem.GetLength()) != oem.GetLength())
-				break;
+			CStringT<char> buf; buf.GetCStr(1 << 19);	// 1M的缓存区(CStringT默认会将传入大小翻倍拓展)
+			while(m_pFile->Read(buf.GetCStr(), buf.GetSize(), sizeof(char)) != 0)
+			{
+				CGC gc; wchar_t* tmp_str = NULL; int len = 0;
+				CStringT<char>::iterator_t ite_stt = buf.Find("<?xml");
+				CStringT<char>::iterator_t ite_end = buf.Find(ite_stt, buf.Tail(), "?>");
+				if (ite_stt == buf.Tail() || ite_end == buf.Tail())
+					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+				else
+				{
+					CStringT<char> tmp(buf.Mid(ite_stt->Index(), ite_end->Index() - ite_stt->Index()));
+					tmp.Lower();
+					if (tmp.Find("encoding=\"utf-8\"") != tmp.Tail())
+						CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+					else
+					if (tmp.Find("encoding=\"gb2312\"") != tmp.Tail())
+						CString::MultiByteToWideChar(CP_ACP, buf.GetCStr(), -1, tmp_str, len, &gc);
+					else
+						CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+				}
+				if (m_mFile.Write(tmp_str, len, sizeof(wchar_t)) != len) break;
+			}
 		}
-		ExMem::Free(buf);
 		if(!m_mFile.Seek(0, IFileObject::begin))
 			return false;
 		// 开始解析

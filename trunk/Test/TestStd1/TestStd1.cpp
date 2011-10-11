@@ -109,7 +109,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = CMemAdapterT<_MemPool>::Alloc(Size[j]);
 		for(int j = 0; j < TestLast; j++)
-			CMemAdapterT<_MemPool>::Free(Test[j]);
+			CMemAdapterT<_MemPool>::Free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -162,6 +162,22 @@ int _tmain(int argc, _TCHAR* argv[])
 			Test[j] = pool.Alloc();
 		for(int j = 0; j < TestLast; j++)
 			pool.Free(Test[TestLast - 1 - j]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+
+	CBlockPool blk_pool(TestSMax);
+
+	ExCPrintf(_T("Start for BlkPool...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		for(int j = 0; j < TestLast; j++)
+			Test[j] = blk_pool.Alloc();
+		for(int j = 0; j < TestLast; j++)
+			blk_pool.Free(Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);

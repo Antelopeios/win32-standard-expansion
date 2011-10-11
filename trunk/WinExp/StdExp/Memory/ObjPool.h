@@ -200,7 +200,7 @@ public:
 		return m_Alloc.Size(block) - sizeof(block_t);
 	}
 	// 分配内存
-	void* Alloc(DWORD nSize = m_nObjSize)
+	void* Alloc(DWORD nSize)
 	{
 		if (nSize == 0) return NULL;
 		ExLock(m_Mutex, false, mutex_t);
@@ -220,6 +220,7 @@ public:
 		// 构造=>返回内存
 		return (void*)(CTraits::Construct<block_t>(block) + 1);
 	}
+	void* Alloc() { return Alloc(m_nObjSize); }
 	// 回收内存
 	void Free(void* pPtr)
 	{

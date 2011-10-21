@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,1110,2117
+ FILEVERSION 1,0,1110,2122
  PRODUCTVERSION 1,0,0,5
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -70,7 +70,7 @@ BEGIN
         BLOCK "080404b0"
         BEGIN
             VALUE "FileDescription", "GuiExp - 界面拓展库(GUI Expansion)"
-            VALUE "FileVersion", "1, 0, 1110, 2117"
+            VALUE "FileVersion", "1, 0, 1110, 2122"
             VALUE "InternalName", "GuiExp"
             VALUE "LegalCopyright", "Copyright (C) 2011 木头云"
             VALUE "OriginalFilename", "GuiExp.dll"

@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-29
-// Version:	1.0.0003.2006
+// Date:	2011-10-21
+// Version:	1.0.0004.2225
 //
 // History:
 //	- 1.0.0001.1500(2011-05-24)	+ CGuiPictureEvent添加Color属性的处理
 //	- 1.0.0002.1424(2011-05-25)	+ CGuiPictureEvent添加Text属性的处理
 //								# 修正CGuiPictureEvent添对Text属性处理过程中的内存泄漏
 //	- 1.0.0003.2006(2011-06-29)	# 修正当不设置背景图片时,CGuiPictureEvent将跳过所有绘图的bug
+//	- 1.0.0004.2225(2011-10-21)	+ 添加关闭缓存时的绘图逻辑
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiPictureEvent_hpp__
@@ -88,7 +89,7 @@ public:
 				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (!image->IsNull() && m_rcOld != clt_rct)
+				if (!ctrl->IsCache() || (!image->IsNull() && m_rcOld != clt_rct))
 				{
 					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), clt_rct.Width(), clt_rct.Height()));
 					m_rcOld = clt_rct;
@@ -111,6 +112,9 @@ public:
 							), 
 						CPoint()
 						);
+
+				// 清理缓存
+				if (!ctrl->IsCache()) m_imgTmp.Delete();
 			}
 			break;
 		}

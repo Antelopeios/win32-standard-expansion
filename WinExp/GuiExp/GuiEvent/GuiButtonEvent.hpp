@@ -773,7 +773,7 @@ public:
 				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (m_rcOld != clt_rct)
+				if (!ctrl->IsCache() || m_rcOld != clt_rct)
 				{
 					LONG r_h = clt_rct.Height() * sta_tim;
 					// m-m
@@ -859,6 +859,13 @@ public:
 					}
 				}
 				CImgRenderer::Render(mem_img->Get(), m_imgClp, img_rct);
+
+				// 清理缓存
+				if (!ctrl->IsCache())
+				{
+					m_imgTmp.Delete();
+					m_imgClp.Delete();
+				}
 			}
 			break;
 		}

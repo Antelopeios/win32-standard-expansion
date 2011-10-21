@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-23
-// Version:	1.0.0015.1234
+// Date:	2011-10-21
+// Version:	1.0.0016.1710
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -58,6 +58,7 @@
 //	- 1.0.0013.1048(2011-09-01)	# 修正当按钮比文字预留区域小时将不会显示文字的问题
 //	- 1.0.0014.1540(2011-09-22)	= 按钮状态最多支持8个变化
 //	- 1.0.0015.1234(2011-09-23)	+ 添加shake_ico属性,支持点击时晃动图标及文字
+//	- 1.0.0016.1710(2011-10-21)	+ 添加关闭缓存时的绘图逻辑
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -284,7 +285,7 @@ public:
 				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (m_rcOld != clt_rct)
+				if (!ctrl->IsCache() || m_rcOld != clt_rct)
 				{
 					LONG r_h = clt_rct.Height() * sta_tim;
 					// l-t
@@ -495,6 +496,10 @@ public:
 						), 
 					CPoint(0, m_imgTmp[8].GetHeight() * status / sta_tim)
 					);
+				// 清理缓存
+				if (!ctrl->IsCache())
+					for(int i = 0; i < _countof(m_imgTmp); ++i)
+						m_imgTmp[i].Delete();
 
 				// 绘文字
 				DWORD locate = (DWORD)ctrl->GetState(_T("locate"));

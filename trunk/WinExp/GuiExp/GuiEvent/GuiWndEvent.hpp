@@ -79,7 +79,6 @@ protected:
 	// 鼠标离开检测
 	static UINT_PTR s_MLCheckID, s_MLCheckCT;
 	static HWND s_MLCheckWD;
-	static IGuiCtrl* s_MLMove;
 	static void CALLBACK MouseLeaveCheck(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		// 得到鼠标坐标
@@ -442,7 +441,6 @@ public:
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
 UINT_PTR CGuiWndEvent::s_MLCheckID = 0, CGuiWndEvent::s_MLCheckCT = 0;
 HWND CGuiWndEvent::s_MLCheckWD = NULL;
-IGuiCtrl* CGuiWndEvent::s_MLMove = NULL;
 
 //////////////////////////////////////////////////////////////////
 

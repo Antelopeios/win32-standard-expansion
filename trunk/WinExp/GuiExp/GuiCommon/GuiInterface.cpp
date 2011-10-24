@@ -51,9 +51,10 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
+IGuiCtrl* IGuiEvent::s_MLMove = NULL;
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffect, IGuiObject)
 
 //////////////////////////////////////////////////////////////////

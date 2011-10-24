@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-21
-// Version:	1.0.0005.2230
+// Date:	2011-10-24
+// Version:	1.0.0006.1720
 //
 // History:
 //	- 1.0.0001.1539(2011-05-31)	@ 基本完成GuiBoard;GuiCtrl;GuiEffect;GuiEvent等模块的架构构建

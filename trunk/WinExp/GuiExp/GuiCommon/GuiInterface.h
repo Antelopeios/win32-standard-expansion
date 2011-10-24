@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-28
-// Version:	1.0.0016.1517
+// Date:	2011-10-24
+// Version:	1.0.0017.1720
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -59,6 +59,7 @@
 //	- 1.0.0014.1646(2011-08-29)	+ 添加IGuiEvent::Param()接口,方便外部自定义参数
 //	- 1.0.0015.1454(2011-09-02)	+ 添加IGuiEvent的事件状态接口,当当前事件处理完后,可根据保存的事件状态判断是否继续执行下一个事件对象
 //	- 1.0.0016.1517(2011-09-28)	+ 为IGuiComp::DelComp()接口添加是否自动释放移除的关联对象的参数
+//	- 1.0.0017.1720(2011-10-24)	# 修正因Event在MouseMove时对Ctrl指针的依赖,导致当一个Comp对象移除自身的Ctrl子对象时MouseMove引起的Run-Time异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -87,101 +88,15 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-// GUI 组合接口
-EXP_INTERFACE IGuiComp : public IGuiObject
-{
-	EXP_DECLARE_DYNAMIC_CLS(IGuiComp, IGuiObject)
-
-public:
-	typedef CListT<IGuiComp*> list_t;
-
-protected:
-	bool		m_bTru;		// 子容器链托管标记
-	IGuiComp*	m_Pare;		// 父对象指针
-private:
-	list_t* m_Cldr;
-
-public:
-	IGuiComp(void)
-		: m_bTru(false)
-		, m_Pare(NULL)
-		, m_Cldr(ExMem::Alloc<list_t>())
-	{}
-	virtual ~IGuiComp(void)
-	{
-		ClearComp();
-		ExMem::Free(m_Cldr);
-	}
-
-protected:
-	virtual void Init(IGuiComp* pComp) { m_Pare = pComp; }
-	virtual void Fina() { m_Pare = NULL; }
-
-public:
-	// 是否对子容器做托管
-	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
-	bool IsTrust() { return m_bTru; }
-	// 获得内部对象
-	IGuiComp* GetParent() { return m_Pare; }
-	list_t& GetChildren() { return *m_Cldr; }
-
-	// 查找
-	list_t::iterator_t& FindComp(IGuiComp* pComp) { return GetChildren().Find(pComp); }
-
-	// 组合接口
-	virtual void AddComp(IGuiComp* pComp)
-	{
-		if (!pComp) return ;
-		// 定位对象
-		list_t::iterator_t ite = FindComp(pComp);
-		if (ite != GetChildren().Tail()) return;
-		// 添加新对象
-		if( pComp->m_Pare )
-			pComp->m_Pare->DelComp(pComp);
-		pComp->Init(this);
-		GetChildren().Add(pComp);
-	}
-	virtual void InsComp(IGuiComp* pComp)
-	{
-		if (!pComp) return ;
-		// 定位对象
-		list_t::iterator_t ite = FindComp(pComp);
-		if (ite != GetChildren().Tail()) return;
-		// 添加新对象
-		if( pComp->m_Pare )
-			pComp->m_Pare->DelComp(pComp);
-		pComp->Init(this);
-		GetChildren().Add(pComp, GetChildren().Head());
-	}
-	virtual void DelComp(IGuiComp* pComp, bool bAutoTru = true)
-	{
-		if (!pComp) return ;
-		// 定位对象
-		list_t::iterator_t ite = FindComp(pComp);
-		if (ite == GetChildren().Tail()) return;
-		// 删除对象
-		GetChildren().Del(ite);
-		pComp->Fina();
-		if (bAutoTru && m_bTru) pComp->Free();
-	}
-	virtual void ClearComp()
-	{
-		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
-		{
-			if (!(*ite)) continue;
-			(*ite)->Fina();
-			if (m_bTru) (*ite)->Free();
-		}
-		GetChildren().Clear();
-	}
-};
-
-//////////////////////////////////////////////////////////////////
+EXP_INTERFACE IGuiComp;
+EXP_INTERFACE IGuiCtrl;
 
 // GUI 事件接口
 EXP_INTERFACE IGuiEvent : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiEvent, IGuiObject)
+
+	friend EXP_INTERFACE IGuiComp;
 
 public:
 	enum state_t
@@ -194,6 +109,10 @@ public:
 protected:
 	LRESULT m_Result;
 	state_t m_State;
+
+protected:
+	// 鼠标离开检测的全局静态控件指针
+	static IGuiCtrl* s_MLMove;
 
 public:
 	IGuiEvent()
@@ -351,6 +270,102 @@ public:
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
 		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 组合接口
+EXP_INTERFACE IGuiComp : public IGuiObject
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiComp, IGuiObject)
+
+public:
+	typedef CListT<IGuiComp*> list_t;
+
+protected:
+	bool		m_bTru;		// 子容器链托管标记
+	IGuiComp*	m_Pare;		// 父对象指针
+private:
+	list_t* m_Cldr;
+
+public:
+	IGuiComp(void)
+		: m_bTru(false)
+		, m_Pare(NULL)
+		, m_Cldr(ExMem::Alloc<list_t>())
+	{}
+	virtual ~IGuiComp(void)
+	{
+		ClearComp();
+		ExMem::Free(m_Cldr);
+	}
+
+protected:
+	virtual void Init(IGuiComp* pComp) { m_Pare = pComp; }
+	virtual void Fina() { m_Pare = NULL; }
+
+public:
+	// 是否对子容器做托管
+	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
+	bool IsTrust() { return m_bTru; }
+	// 获得内部对象
+	IGuiComp* GetParent() { return m_Pare; }
+	list_t& GetChildren() { return *m_Cldr; }
+
+	// 查找
+	list_t::iterator_t& FindComp(IGuiComp* pComp) { return GetChildren().Find(pComp); }
+
+	// 组合接口
+	virtual void AddComp(IGuiComp* pComp)
+	{
+		if (!pComp) return ;
+		// 定位对象
+		list_t::iterator_t ite = FindComp(pComp);
+		if (ite != GetChildren().Tail()) return;
+		// 添加新对象
+		if( pComp->m_Pare )
+			pComp->m_Pare->DelComp(pComp);
+		pComp->Init(this);
+		GetChildren().Add(pComp);
+	}
+	virtual void InsComp(IGuiComp* pComp)
+	{
+		if (!pComp) return ;
+		// 定位对象
+		list_t::iterator_t ite = FindComp(pComp);
+		if (ite != GetChildren().Tail()) return;
+		// 添加新对象
+		if( pComp->m_Pare )
+			pComp->m_Pare->DelComp(pComp);
+		pComp->Init(this);
+		GetChildren().Add(pComp, GetChildren().Head());
+	}
+	virtual void DelComp(IGuiComp* pComp, bool bAutoTru = true)
+	{
+		if (!pComp) return ;
+		// 定位对象
+		list_t::iterator_t ite = FindComp(pComp);
+		if (ite == GetChildren().Tail()) return;
+		// 删除对象
+		GetChildren().Del(ite);
+		pComp->Fina();
+		if (bAutoTru && m_bTru)
+		{
+			if (IGuiEvent::s_MLMove == (IGuiCtrl*)pComp)
+				IGuiEvent::s_MLMove = NULL;
+			pComp->Free();
+		}
+	}
+	virtual void ClearComp()
+	{
+		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
+		{
+			if (!(*ite)) continue;
+			(*ite)->Fina();
+			if (m_bTru) (*ite)->Free();
+		}
+		GetChildren().Clear();
 	}
 };
 

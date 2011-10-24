@@ -790,6 +790,8 @@ public:
 					mem_img->Get(), m_imgTmp, rect, 
 					CPoint(0, m_imgTmp.GetHeight() * status / sta_tim)
 					);
+				// 清理缓存
+				if (!ctrl->IsCache()) m_imgTmp.Delete();
 
 				// 绘文字
 				DWORD locate = (DWORD)ctrl->GetState(_T("locate"));
@@ -859,13 +861,6 @@ public:
 					}
 				}
 				CImgRenderer::Render(mem_img->Get(), m_imgClp, img_rct);
-
-				// 清理缓存
-				if (!ctrl->IsCache())
-				{
-					m_imgTmp.Delete();
-					m_imgClp.Delete();
-				}
 			}
 			break;
 		}

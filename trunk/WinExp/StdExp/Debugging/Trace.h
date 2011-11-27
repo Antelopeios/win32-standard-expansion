@@ -65,14 +65,14 @@ EXP_INLINE void __cdecl ExPrintfT(LPCTSTR lpFormat, ...)
 	va_start(args, lpFormat);
 
 	size_t len = _vsctprintf(lpFormat, args) + 1;
-	TCHAR* buf = (TCHAR*)CMemHeapAlloc::Alloc(len * sizeof(TCHAR));
+	TCHAR* buf = (TCHAR*)EXP_MEMHEAP_ALLOC::Alloc(len * sizeof(TCHAR));
 	if (!buf) return;
 	HRESULT r = StringCchVPrintf(buf, len, lpFormat, args);
 
 	va_end(args);
 
 	if( r == S_OK ) PolicyT::Output(buf);
-	if (buf) CMemHeapAlloc::Free(buf);
+	if (buf) EXP_MEMHEAP_ALLOC::Free(buf);
 }
 
 //////////////////////////////////////////////////////////////////

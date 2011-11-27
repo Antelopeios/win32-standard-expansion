@@ -64,7 +64,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = CMemHeapAlloc, typename ModelT = EXP_THREAD_MODEL>
+template <typename AllocT = EXP_MEMHEAP_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 struct _MemPoolPolicy;
 
 template <typename PolicyT = _MemPoolPolicy<> >
@@ -431,7 +431,7 @@ typedef CRegistAllocT<CMemPoolAlloc> _MemPool;
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT/* = CMemHeapAlloc*/, typename ModelT/* = EXP_THREAD_MODEL*/>
+template <typename AllocT/* = EXP_MEMHEAP_ALLOC*/, typename ModelT/* = EXP_THREAD_MODEL*/>
 struct _MemPoolPolicy
 {
 	typedef AllocT alloc_t;

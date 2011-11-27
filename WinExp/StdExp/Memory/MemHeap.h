@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-03-04
-// Version:	1.0.0004.2110
+// Date:	2011-11-27
+// Version:	1.0.0005.1316
 //
 // History:
 //	- 1.0.0004.2110(2011-03-04)	^ CMemHeapAlloc的接口添加EXP_INLINE提高效率
 //								+ 添加ExCheckMem()内存正确性检查接口
+//	- 1.0.0005.1316(2011-11-27)	+ 定义EXP_MEMHEAP_ALLOC宏,支持外部替换默认的堆分配器
 //////////////////////////////////////////////////////////////////
 
 #ifndef __HeapAlloc_h__
@@ -80,15 +81,19 @@ public:
 	}
 };
 
+#ifndef EXP_MEMHEAP_ALLOC
+#define EXP_MEMHEAP_ALLOC CMemHeapAlloc
+#endif/*EXP_MEMHEAP_ALLOC*/
+
 #ifndef ExCheckMem
 #ifdef _DEBUG
-#define ExCheckMem	CMemHeapAlloc::Check
+#define ExCheckMem	EXP_MEMHEAP_ALLOC::Check
 #else
 #define ExCheckMem	__noop
 #endif
 #endif
 
-typedef CRegistAllocT<CMemHeapAlloc> _MemHeap;
+typedef CRegistAllocT<EXP_MEMHEAP_ALLOC> _MemHeap;
 
 //////////////////////////////////////////////////////////////////
 

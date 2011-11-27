@@ -83,7 +83,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = CMemHeapAlloc, typename ModelT = EXP_THREAD_MODEL>
+template <typename AllocT = EXP_MEMHEAP_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 struct _ObjPoolPolicyT
 {
 	typedef AllocT alloc_t;

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-26
-// Version:	1.1.0005.1214
+// Date:	2011-12-07
+// Version:	1.1.0007.1150
 //
 // History:
 //	- 1.0.0002.1540(2011-07-20)	= 将CThreadAdapterT的单例独立到外部,定义EXP_SINGLETON_TRDCREATOR,可由外部按需要自行替换
@@ -42,6 +42,9 @@
 //	- 1.1.0004.1600(2011-09-21)	+ 添加IThreadT对象接口模板,用于整合线程的所有操作,并对象化线程管理
 //	- 1.1.0005.1214(2011-09-26)	+ IThreadT对象支持直接创建UI线程
 //								= 调整IThreadT::ThreadProc线程回调接口参数
+//	- 1.1.0006.1524(2011-11-30)	+ UI线程处理完自定义消息后可通过返回值设置是否进行默认的消息处理
+//	- 1.1.0007.1150(2011-12-07)	+ 添加OnMessage虚函数回调,方便UI线程处理消息之前的初始化过程
+//								= 调整回调接口名称为OnThread
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadCreator_h__
@@ -99,6 +102,9 @@ protected:
 		IThread* _this = (IThread*)lpParam;
 		if (_this->IsUIThread())
 		{
+			// 先执行线程过程
+			_this->OnThread(_this->GetParam());
+			// 开启UI消息循环
 			MSG msg = {0}; BOOL ret = FALSE;
 			while ((ret = ::GetMessage(&msg, NULL, 0, 0)) != 0)
 			{
@@ -107,15 +113,17 @@ protected:
 				else
 				{
 					::TranslateMessage(&msg);
-					_this->ThreadProc(&msg);
+					if (!_this->OnMessage(&msg))
+						::DispatchMessage(&msg);
 				}
 			}
 			return (DWORD)msg.wParam;
 		}
 		else
-			return _this->ThreadProc(_this->GetParam());
+			return _this->OnThread(_this->GetParam());
 	}
-	virtual DWORD ThreadProc(LPVOID lpParam) = 0;
+	virtual DWORD OnThread(LPVOID lpParam) = 0;
+	virtual bool OnMessage(const MSG* lpMsg) { return false; }
 
 public:
 	bool Create(_IN_ bool bUIThread = false, 

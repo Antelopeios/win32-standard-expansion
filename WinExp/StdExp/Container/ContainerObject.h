@@ -105,23 +105,23 @@ public:
 	bool Replace(type_t& Type)
 	{ return This()->container_t::Del(Find(Type)); }
 
-	iterator_t& Find(iterator_t& Head, iterator_t& Tail, const type_t& Item)
-	{ return Empty() ? Tail() : finder_t::Find(Head, Tail, Item); }
-	iterator_t& Find(const type_t& Item)
-	{ return Empty() ? Tail() : finder_t::Find(*(This()), Item); }
-	iterator_t& Find(iterator_t& Head, iterator_t& Tail, const container_t& cnt2)
-	{ return Empty() ? Tail() : finder_t::Find(Head, Tail, cnt2); }
-	iterator_t& Find(const container_t& cnt2)
-	{ return Empty() ? Tail() : finder_t::Find(*(This()), cnt2); }
+	iterator_t& Find(iterator_t& iHead, iterator_t& iTail, const type_t& tItem) const
+	{ return Empty() ? iTail : finder_t::Find(iHead, iTail, tItem); }
+	iterator_t& Find(const type_t& tItem) const
+	{ return Empty() ? Tail() : finder_t::Find(*(This()), tItem); }
+	iterator_t& Find(iterator_t& iHead, iterator_t& iTail, const container_t& tCnt2) const
+	{ return Empty() ? iTail : finder_t::Find(iHead, iTail, tCnt2); }
+	iterator_t& Find(const container_t& tCnt2) const
+	{ return Empty() ? Tail() : finder_t::Find(*(This()), tCnt2); }
 
-	iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, const type_t& Item)
-	{ return Empty() ? Tail() : finder_t::RevFind(Head, Tail, Item); }
-	iterator_t& RevFind(const type_t& Item)
-	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), Item); }
-	iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, const container_t& cnt2)
-	{ return Empty() ? Tail() : finder_t::RevFind(Head, Tail, cnt2); }
-	iterator_t& RevFind(const container_t& cnt2)
-	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), cnt2); }
+	iterator_t& RevFind(iterator_t& iHead, iterator_t& iTail, const type_t& tItem) const
+	{ return Empty() ? iTail : finder_t::RevFind(iHead, iTail, tItem); }
+	iterator_t& RevFind(const type_t& tItem) const
+	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), tItem); }
+	iterator_t& RevFind(iterator_t& iHead, iterator_t& iTail, const container_t& tCnt2) const
+	{ return Empty() ? iTail : finder_t::RevFind(iHead, iTail, tCnt2); }
+	iterator_t& RevFind(const container_t& tCnt2) const
+	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), tCnt2); }
 };
 
 //////////////////////////////////////////////////////////////////

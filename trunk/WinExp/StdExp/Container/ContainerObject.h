@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-19
-// Version:	1.0.0012.1050
+// Date:	2011-12-08
+// Version:	1.0.0013.2116
 //
 // History:
 //	- 1.0.0009.1617(2011-06-02)	+ 添加默认的IContainerObjectT::Del()接口,支持直接定位元素删除
 //	- 1.0.0010.0142(2011-06-12)	# 修正默认的IContainerObjectT::Del()接口与容器子类的Del()的重载冲突
 //	- 1.0.0011.1458(2011-07-28)	= 将容器的迭代器接口调整为const类型
 //	- 1.0.0012.1050(2011-08-19)	+ 添加容器的查找接口
+//	- 1.0.0013.2116(2011-12-08)	# 修正当待查找容器为空并查找时引起的迭代器访问异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ContainerObject_h__
@@ -105,22 +106,22 @@ public:
 	{ return This()->container_t::Del(Find(Type)); }
 
 	iterator_t& Find(iterator_t& Head, iterator_t& Tail, const type_t& Item)
-	{ return finder_t::Find(Head, Tail, Item); }
+	{ return Empty() ? Tail() : finder_t::Find(Head, Tail, Item); }
 	iterator_t& Find(const type_t& Item)
-	{ return finder_t::Find(*(This()), Item); }
+	{ return Empty() ? Tail() : finder_t::Find(*(This()), Item); }
 	iterator_t& Find(iterator_t& Head, iterator_t& Tail, const container_t& cnt2)
-	{ return finder_t::Find(Head, Tail, cnt2); }
+	{ return Empty() ? Tail() : finder_t::Find(Head, Tail, cnt2); }
 	iterator_t& Find(const container_t& cnt2)
-	{ return finder_t::Find(*(This()), cnt2); }
+	{ return Empty() ? Tail() : finder_t::Find(*(This()), cnt2); }
 
 	iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, const type_t& Item)
-	{ return finder_t::RevFind(Head, Tail, Item); }
+	{ return Empty() ? Tail() : finder_t::RevFind(Head, Tail, Item); }
 	iterator_t& RevFind(const type_t& Item)
-	{ return finder_t::RevFind(*(This()), Item); }
+	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), Item); }
 	iterator_t& RevFind(iterator_t& Head, iterator_t& Tail, const container_t& cnt2)
-	{ return finder_t::RevFind(Head, Tail, cnt2); }
+	{ return Empty() ? Tail() : finder_t::RevFind(Head, Tail, cnt2); }
 	iterator_t& RevFind(const container_t& cnt2)
-	{ return finder_t::RevFind(*(This()), cnt2); }
+	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), cnt2); }
 };
 
 //////////////////////////////////////////////////////////////////

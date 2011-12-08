@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-22
-// Version:	1.0.0003.1610
+// Date:	2011-12-08
+// Version:	1.0.0004.0946
+//
+// History:
+//	- 1.0.0004.0946(2011-12-08)	+ 添加一个新的静态Wait()接口,支持等待一个外部同步对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SyncObject_h__
@@ -77,7 +80,12 @@ public:
 	DWORD Wait(DWORD dwWaitTime = INFINITE)
 	{
 		if (IsClosed()) return WAIT_FAILED;
-		return WaitForSingleObject(m_hSync, dwWaitTime);
+		return Wait(m_hSync, dwWaitTime);
+	}
+	static DWORD Wait(HANDLE hSync, DWORD dwWaitTime/* = INFINITE*/)
+	{
+		if (hSync == NULL) return WAIT_FAILED;
+		return WaitForSingleObject(hSync, dwWaitTime);
 	}
 	static DWORD Wait(HANDLE* Syncs, DWORD nCount, bool bWaitAll, DWORD dwWaitTime = INFINITE)
 	{

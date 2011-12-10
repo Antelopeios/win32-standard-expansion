@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-01
-// Version:	1.0.0001.0527
+// Date:	2011-12-10
+// Version:	1.0.0002.0128
 //
 // History:
 //	- 1.0.0000.1622(2011-06-13)	@ 开始构建GuiManager接口
 //	- 1.0.0001.0527(2011-08-01)	= 将GuiManager改为模板形式,提供泛型化的界面元素管理
+//	- 1.0.0002.0128(2011-12-10)	+ GuiManager的Reg接口支持重复注册同一个key,第二次注册将会覆盖上次的注册
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiManager_h__
@@ -82,15 +83,7 @@ public:
 	static TypeT* Reg(LPCTSTR c_key, TypeT* inf)
 	{
 		if (!c_key) return NULL;
-		key_map_t& types = Instance();
-		CString key(c_key);
-		if (types.Locate(key) == types.Tail())
-		{
-			types.Add(key, inf);
-			return inf;
-		}
-		else
-			return NULL;
+		return (Instance()[c_key] = inf);
 	}
 	static TypeT* Get(LPCTSTR c_key)
 	{

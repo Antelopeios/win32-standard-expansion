@@ -169,26 +169,23 @@ public:
 	CListT& operator=(const CListT& List)
 	{ return SetList(List); }
 
-	iterator_t& Head() const
+	iterator_t Head() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_pHead;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_pHead;
+		return ite;
 	}
-	iterator_t& Tail() const
+	iterator_t Tail() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = NULL;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = NULL;
+		return ite;
 	}
-	iterator_t& Last() const
+	iterator_t Last() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_pLast;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_pLast;
+		return ite;
 	}
 	type_t& HeadItem() const
 	{ return m_pHead->Buff; }

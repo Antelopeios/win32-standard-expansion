@@ -230,26 +230,23 @@ public:
 	operator const type_t*() const
 	{ return m_Array; }
 
-	iterator_t& Head() const
+	iterator_t Head() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = 0;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = 0;
+		return ite;
 	}
-	iterator_t& Tail() const
+	iterator_t Tail() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_nCont;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_nCont;
+		return ite;
 	}
-	iterator_t& Last() const
+	iterator_t Last() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_nCont - 1;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_nCont - 1;
+		return ite;
 	}
 	type_t& HeadItem() const
 	{ return GetAt(0); }

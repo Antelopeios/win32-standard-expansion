@@ -590,7 +590,7 @@ public:
 		return ret;
 	}
 
-	iterator_t& GetRoot()
+	iterator_t GetRoot()
 	{
 		return m_xData.Head();
 	}

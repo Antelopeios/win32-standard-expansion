@@ -180,10 +180,9 @@ public:
 		return ite->Val()->Val;
 	}
 
-	iterator_t& Locate(const key_t& Key)
+	iterator_t Locate(const key_t& Key)
 	{
-		static iterator_t iter;
-		iter = node_t(this);
+		iterator_t iter(node_t(this));
 		ite_t ite;
 		if (Locate(Key, ite))
 		{
@@ -194,34 +193,31 @@ public:
 			return Tail();
 	}
 
-	iterator_t& Head() const
+	iterator_t Head() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_Assoc.Head();
-		if (iter->nIndx != m_Assoc.Tail() && !iter->nIndx->Val())
-			++ iter;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_Assoc.Head();
+		if (ite->nIndx != m_Assoc.Tail() && !ite->nIndx->Val())
+			++ ite;
+		return ite;
 	}
-	iterator_t& Tail() const
+	iterator_t Tail() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_Assoc.Tail();
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_Assoc.Tail();
+		return ite;
 	}
-	iterator_t& Last() const
+	iterator_t Last() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_Assoc.Last();
-		if (iter->nIndx != m_Assoc.Tail() && !iter->nIndx->Val())
-			-- iter;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_Assoc.Last();
+		if (ite->nIndx != m_Assoc.Tail() && !ite->nIndx->Val())
+			-- ite;
+		return ite;
 	}
-	type_t& HeadItem() const
+	type_t HeadItem() const
 	{ return Head()->Val()->Val; }
-	type_t& LastItem() const
+	type_t LastItem() const
 	{ return Last()->Val()->Val; }
 
 	bool Add(const key_t& Key, const type_t& Val)

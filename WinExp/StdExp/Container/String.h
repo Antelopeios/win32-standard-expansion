@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-10
-// Version:	1.0.0032.1256
+// Date:	2011-12-10
+// Version:	1.0.0033.1542
 //
 // History:
 //	- 1.0.0013.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -62,6 +62,7 @@
 //	- 1.0.0030.1557(2011-09-14)	+ 为字符串Format;=;+=接口添加自动编码转换的相关重载
 //	- 1.0.0031.1557(2011-09-15)	# 修正Compare接口在某些情况下返回结果错误的问题
 //	- 1.0.0032.1256(2011-10-10)	^ 将负责编码转换的部分单独提取出来,作为独立的静态接口,方便外部直接调用
+//	- 1.0.0033.1542(2011-12-10)	^ 单独定义并优化部分CStringT的Find及RevFind接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __String_h__
@@ -102,6 +103,10 @@ public:
 	typedef typename CArrayT<type_t> array_t;
 
 protected:
+	iterator_t m_Head;
+	iterator_t m_Tail;
+	iterator_t m_Last;
+
 	type_t*	m_Array;
 	DWORD	m_nSize;
 
@@ -297,15 +302,14 @@ public:
 		return SetString(tmp_chr);
 	}
 
-	CStringT& Mid(int nStart, int nCount = -1) const
+	CStringT Mid(int nStart, int nCount = -1) const
 	{
 		if (nStart < 0) nStart = 0;
 		if (nStart >= (int)GetLength()) nStart = (int)GetLength() - 1;
 		int max_cnt = (int)GetLength() - nStart;
 		if (nCount < 0 || nCount > max_cnt)
 			nCount = max_cnt;
-		static CStringT str;
-		str = _T("");
+		CStringT str;
 		if (nCount > 0)
 		{
 			memcpy(str.GetCStr(nCount), (m_Array + nStart), (nCount * sizeof(type_t)));
@@ -313,11 +317,11 @@ public:
 		}
 		return str;
 	}
-	CStringT& Left(int nCount) const
+	CStringT Left(int nCount) const
 	{
 		return Mid(0, nCount);
 	}
-	CStringT& Right(int nCount) const
+	CStringT Right(int nCount) const
 	{
 		return Mid((int)GetLength() - nCount, -1);
 	}
@@ -507,26 +511,23 @@ public:
 	operator const type_t*() const
 	{ return m_Array; }
 
-	iterator_t& Head() const
+	iterator_t Head() const
 	{
-		static iterator_t iter;
-		iter = node_t((CStringT*)this);
-		iter->nIndx = 0;
-		return iter;
+		iterator_t ite(node_t((CStringT*)this));
+		ite->nIndx = 0;
+		return ite;
 	}
-	iterator_t& Tail() const
+	iterator_t Tail() const
 	{
-		static iterator_t iter;
-		iter = node_t((CStringT*)this);
-		iter->nIndx = GetLength();
-		return iter;
+		iterator_t ite(node_t((CStringT*)this));
+		ite->nIndx = GetLength();
+		return ite;
 	}
-	iterator_t& Last()
+	iterator_t Last()
 	{
-		static iterator_t iter;
-		iter = node_t((CStringT*)this);
-		iter->nIndx = GetLength() - 1;
-		return iter;
+		iterator_t ite(node_t((CStringT*)this));
+		ite->nIndx = GetLength() - 1;
+		return ite;
 	}
 	type_t& HeadItem() const
 	{ return m_Array[0]; }
@@ -591,6 +592,103 @@ public:
 		}
 		return true;
 	}
+
+	iterator_t Find(const type_t& tItem) const
+	{
+		if (Empty()) return Tail();
+		if (sizeof(type_t) == 1)
+		{
+			char* c = strchr((char*)m_Array, (char)tItem);
+			if (c)
+			{
+				iterator_t ite(node_t((CStringT*)this));
+				ite->nIndx = (c - (char*)m_Array);
+				return ite;
+			}
+			else
+				return Tail();
+		}
+		else
+		{
+			wchar_t* c = wcschr((wchar_t*)m_Array, (wchar_t)tItem);
+			if (c)
+			{
+				iterator_t ite(node_t((CStringT*)this));
+				ite->nIndx = (c - (wchar_t*)m_Array);
+				return ite;
+			}
+			else
+				return Tail();
+		}
+	}
+	iterator_t RevFind(const type_t& tItem) const
+	{
+		if (Empty()) return Tail();
+		if (sizeof(type_t) == 1)
+		{
+			char* c = strrchr((char*)m_Array, (char)tItem);
+			if (c)
+			{
+				iterator_t ite(node_t((CStringT*)this));
+				ite->nIndx = (c - (char*)m_Array);
+				return ite;
+			}
+			else
+				return Tail();
+		}
+		else
+		{
+			wchar_t* c = wcsrchr((wchar_t*)m_Array, (wchar_t)tItem);
+			if (c)
+			{
+				iterator_t ite(node_t((CStringT*)this));
+				ite->nIndx = (c - (wchar_t*)m_Array);
+				return ite;
+			}
+			else
+				return Tail();
+		}
+	}
+	iterator_t Find(const container_t& tCnt2) const
+	{
+		if (Empty()) return Tail();
+		if (sizeof(type_t) == 1)
+		{
+			char* c = strstr((char*)m_Array, (char*)tCnt2.m_Array);
+			if (c)
+			{
+				iterator_t ite(node_t((CStringT*)this));
+				ite->nIndx = (c - (char*)m_Array);
+				return ite;
+			}
+			else
+				return Tail();
+		}
+		else
+		{
+			wchar_t* c = wcsstr((wchar_t*)m_Array, (wchar_t*)tCnt2.m_Array);
+			if (c)
+			{
+				iterator_t ite(node_t((CStringT*)this));
+				ite->nIndx = (c - (wchar_t*)m_Array);
+				return ite;
+			}
+			else
+				return Tail();
+		}
+	}
+
+	iterator_t Find(iterator_t& iHead, iterator_t& iTail, const type_t& tItem) const
+	{ return Empty() ? iTail : finder_t::Find(iHead, iTail, tItem); }
+	iterator_t Find(iterator_t& iHead, iterator_t& iTail, const container_t& tCnt2) const
+	{ return Empty() ? iTail : finder_t::Find(iHead, iTail, tCnt2); }
+
+	iterator_t RevFind(iterator_t& iHead, iterator_t& iTail, const type_t& tItem) const
+	{ return Empty() ? iTail : finder_t::RevFind(iHead, iTail, tItem); }
+	iterator_t RevFind(iterator_t& iHead, iterator_t& iTail, const container_t& tCnt2) const
+	{ return Empty() ? iTail : finder_t::RevFind(iHead, iTail, tCnt2); }
+	iterator_t RevFind(const container_t& tCnt2) const
+	{ return Empty() ? Tail() : finder_t::RevFind(*(This()), tCnt2); }
 };
 
 typedef CStringT<> CString;

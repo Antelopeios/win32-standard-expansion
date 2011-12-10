@@ -102,7 +102,7 @@ public:
 	enum state_t
 	{
 		continue_next,	// 继续下个事件
-		break_next,		// 跳过下个事件事件
+		break_next,		// 跳过下个事件
 		return_next, 	// 下个事件时跳出事件队列
 	};
 
@@ -174,7 +174,7 @@ public:
 	evt_list_t& GetEvent() { return *m_CldrEvt; }
 
 	// 查找
-	evt_list_t::iterator_t& FindEvent(IGuiEvent* pEvent) { return GetEvent().Find(pEvent); }
+	evt_list_t::iterator_t FindEvent(IGuiEvent* pEvent) { return GetEvent().Find(pEvent); }
 
 	// 组合接口
 	virtual void AddEvent(IGuiEvent* pEvent)
@@ -314,7 +314,7 @@ public:
 	list_t& GetChildren() { return *m_Cldr; }
 
 	// 查找
-	list_t::iterator_t& FindComp(IGuiComp* pComp) { return GetChildren().Find(pComp); }
+	list_t::iterator_t FindComp(IGuiComp* pComp) { return GetChildren().Find(pComp); }
 
 	// 组合接口
 	virtual void AddComp(IGuiComp* pComp)

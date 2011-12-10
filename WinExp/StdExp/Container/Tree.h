@@ -234,30 +234,27 @@ public:
 	CTreeT& operator=(const CTreeT& tTree)
 	{ return SetTree(tTree); }
 
-	iterator_t& Head() const
+	iterator_t Head() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_pTree;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_pTree;
+		return ite;
 	}
-	iterator_t& Tail() const
+	iterator_t Tail() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = NULL;
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = NULL;
+		return ite;
 	}
-	iterator_t& Last() const
+	iterator_t Last() const
 	{
-		static iterator_t iter;
-		iter = node_t(this);
-		iter->nIndx = m_pTree->GetChdrLast();
-		return iter;
+		iterator_t ite(node_t(this));
+		ite->nIndx = m_pTree->GetChdrLast();
+		return ite;
 	}
-	type_t& HeadItem() const
+	type_t HeadItem() const
 	{ return m_pTree->Val; }
-	type_t& LastItem() const
+	type_t LastItem() const
 	{ return Last()->Val(); }
 
 	/*
@@ -402,19 +399,16 @@ struct _TreePolicyT
 		bool InThis(container_t* cnt) { return pCont == cnt; }
 		item_t* Index() { return nIndx; }
 
-		const iter_t& Parent()
+		const iter_t Parent()
 		{
-			static iter_t iter;
-			iter = node_t(pCont);
+			iter_t iter; iter = node_t(pCont);
 			iter->nIndx = nIndx ? nIndx->Pare : NULL;
 			return iter;
 		}
-		const iter_list_t& Children()
+		const iter_list_t Children()
 		{
-			static iter_list_t list;
-			static iter_t iter;
-			iter = node_t(pCont);
-			list.Clear();
+			iter_list_t list;
+			iter_t iter; iter = node_t(pCont);
 			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++ite)
 			{
 				if (!(*ite)) continue;

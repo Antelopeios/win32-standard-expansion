@@ -213,7 +213,7 @@ protected:
 
 		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
 		GUI_CTL(list)->SetState(_T("image"), GUI_IMG(list));
-		//GUI_CTL(list)->SetState(_T("align_top"), (void*)false);
+		//GUI_CTL(list)->SetState(_T("align_top"), (void*)FALSE);
 		CImage img_btn[9];
 		img_btn[0] = GUI_IMG(list_cor_lt)->Get();
 		img_btn[1] = GUI_IMG(list_item_top)->Get();
@@ -257,10 +257,10 @@ protected:
 		if (!items_list.Empty()) items_list.HeadItem()->SetFocus();
 
 		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
-		GUI_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)true);
-		GUI_CTL(scr_h)->SetState(_T("up_thr_sta"), (void*)true);
-		GUI_CTL(scr_h)->SetState(_T("dn_thr_sta"), (void*)true);
-		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)true);
+		GUI_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
+		GUI_CTL(scr_h)->SetState(_T("up_thr_sta"), (void*)TRUE);
+		GUI_CTL(scr_h)->SetState(_T("dn_thr_sta"), (void*)TRUE);
+		GUI_CTL(scr_h)->SetState(_T("sli_ori"), (void*)TRUE);
 		if (!GUI_IMG(scr_h) || GUI_IMG(scr_h)->IsNull())
 		{
 			pixel_t pix[8] = {0};
@@ -337,7 +337,7 @@ protected:
 		items_topbar_btn[0]->SetState(_T("status"), (void*)3);
 		GUI_CTL(topbar_btn)->SetState(_T("items"), &items_topbar_btn);
 		GUI_CTL(topbar_btn)->SetState(_T("sta_cnt"), (void*)4);
-		GUI_CTL(topbar_btn)->SetState(_T("sty_box"), (void*)false);
+		GUI_CTL(topbar_btn)->SetState(_T("sty_box"), (void*)FALSE);
 		GUI_CTL(topbar_btn)->SetState(_T("image"), GUI_IMG(topbar_btn));
 		GUI_CTL(topbar_btn)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_topbar_btn"), &gc)));
 
@@ -377,7 +377,7 @@ protected:
 		GUI_WND(main)->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 		GUI_WND(main)->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 		GUI_WND(main)->CenterWindow();
-		GUI_WND(main)->SetLayered(false);
+		GUI_WND(main)->SetLayered(FALSE);
 		GUI_WND(main)->GetClientRect(rc_wnd);
 		GUI_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
 	}

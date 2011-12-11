@@ -54,12 +54,12 @@ interface IGuiThunk : public IGuiBoardBase
 
 protected:
 	WNDPROC m_WndProc;	// 原始的窗口过程
-	bool	m_bHook;	// Hook 标记
+	BOOL	m_bHook;	// Hook 标记
 
 public:
 	IGuiThunk(void)
 		: m_WndProc(NULL)
-		, m_bHook(false)
+		, m_bHook(FALSE)
 	{}
 	virtual ~IGuiThunk(void)
 	{}
@@ -86,13 +86,13 @@ public:
 	{ return m_WndProc ? (*m_WndProc)(Get(), nMessage, wParam, lParam) : 0; }
 
 	// 关联窗口句柄
-	bool Attach(wnd_t hWnd)
+	BOOL Attach(wnd_t hWnd)
 	{
 		ExAssert(hWnd != NULL);
 
 		DWORD pid_cur = ::GetCurrentProcessId(), pid_wnd = NULL;
 		::GetWindowThreadProcessId(hWnd, &pid_wnd);
-		bool bHook = ( pid_cur != pid_wnd );
+		BOOL bHook = ( pid_cur != pid_wnd );
 		if( bHook )
 		{
 			IGuiBoardBase::Attach(hWnd);
@@ -104,10 +104,10 @@ public:
 			IGuiBoardBase::Attach(hWnd);
 			m_bHook = bHook;
 			m_WndProc = (WNDPROC)SetWindowLong(GWL_WNDPROC, (LONG)ThunkWndProc);
-			if (!m_WndProc) return false;
+			if (!m_WndProc) return FALSE;
 			SetWindowLong(GWL_USERDATA, (LONG)this);
 		}
-		return true;
+		return TRUE;
 	}
 	// 释放窗口句柄
 	wnd_t Detach()
@@ -121,7 +121,7 @@ public:
 			SetWindowLong(GWL_USERDATA, 0);
 			ret = IGuiBoardBase::Detach();
 		}
-		m_bHook = false;
+		m_bHook = FALSE;
 		return ret;
 	}
 };

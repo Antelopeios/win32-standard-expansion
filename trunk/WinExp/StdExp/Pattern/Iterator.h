@@ -83,13 +83,13 @@ public:
 	EXP_INLINE CIteratorT& operator=(const node_t& rNode)
 	{ m_Node = rNode; return (*this); }
 
-	EXP_INLINE bool operator==(const CIteratorT& rIte)
+	EXP_INLINE BOOL operator==(const CIteratorT& rIte)
 	{ return m_Node == rIte.m_Node; }
-	EXP_INLINE bool operator==(const node_t& rNode)
+	EXP_INLINE BOOL operator==(const node_t& rNode)
 	{ return m_Node == rNode; }
-	EXP_INLINE bool operator!=(const CIteratorT& rIte)
+	EXP_INLINE BOOL operator!=(const CIteratorT& rIte)
 	{ return m_Node != rIte.m_Node; }
-	EXP_INLINE bool operator!=(const node_t& rNode)
+	EXP_INLINE BOOL operator!=(const node_t& rNode)
 	{ return m_Node != rNode; }
 
 	EXP_INLINE CIteratorT& operator++()

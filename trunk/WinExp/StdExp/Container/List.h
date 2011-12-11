@@ -111,9 +111,9 @@ public:
 	DWORD GetCount() const
 	{ return m_nCont; }
 
-	bool IsNull() const
+	BOOL IsNull() const
 	{ return (m_pHead == NULL); }
-	bool Empty() const
+	BOOL Empty() const
 	{ return (m_nCont == 0); }
 	void Clear()
 	{
@@ -192,10 +192,10 @@ public:
 	type_t& LastItem() const
 	{ return m_pLast->Buff; }
 
-	bool AddList(block_t* pList, iterator_t Iter)
+	BOOL AddList(block_t* pList, iterator_t Iter)
 	{
-		if (!pList) return true;
-		if (!(Iter->InThis(this))) return false;
+		if (!pList) return TRUE;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 构造临时链表
 		block_t* pTempH = NULL;
 		block_t* pTempL = NULL;
@@ -238,18 +238,18 @@ public:
 				m_pLast = pTempL;
 			}
 		}
-		return true;
+		return TRUE;
 	}
-	bool AddList(block_t* pList)
+	BOOL AddList(block_t* pList)
 	{ return AddList(pList, Tail()); }
-	bool AddList(const CListT& List, iterator_t Iter)
+	BOOL AddList(const CListT& List, iterator_t Iter)
 	{ return AddList(List.m_pHead, Iter); }
-	bool AddList(const CListT& List)
+	BOOL AddList(const CListT& List)
 	{ return AddList(List, Tail()); }
 
-	bool Add(const type_t& Item, iterator_t& Iter)
+	BOOL Add(const type_t& Item, iterator_t& Iter)
 	{
-		if (!(Iter->InThis(this))) return false;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 添加元素
 		block_t* pBlock = block_t::Alloc();
 		block_t* pIndex = Iter->Index();
@@ -273,17 +273,17 @@ public:
 		}
 		pBlock->Buff = Item;
 		++m_nCont;
-		return true;
+		return TRUE;
 	}
-	bool Add(const type_t& Item)
+	BOOL Add(const type_t& Item)
 	{ return Add(Item, Tail()); }
 
-	bool Del(iterator_t& iteStt, iterator_t& iteEnd)
+	BOOL Del(iterator_t& iteStt, iterator_t& iteEnd)
 	{
-		if (Empty()) return true;
-		if (!(iteStt->InThis(this))) return false;
-		if (!(iteEnd->InThis(this))) return false;
-		if (iteStt == Tail()) return false;
+		if (Empty()) return TRUE;
+		if (!(iteStt->InThis(this))) return FALSE;
+		if (!(iteEnd->InThis(this))) return FALSE;
+		if (iteStt == Tail()) return FALSE;
 		if (iteStt == iteEnd)
 		{
 			// 定位待删除结点
@@ -327,9 +327,9 @@ public:
 				}
 			}
 		}
-		return true;
+		return TRUE;
 	}
-	bool Del(iterator_t& ite)
+	BOOL Del(iterator_t& ite)
 	{ return Del(ite, ite); }
 };
 
@@ -361,12 +361,12 @@ struct _ListPolicyT
 
 		type_t& Val() { return nIndx->Buff; }
 
-		bool InThis(container_t* cnt) { return pCont == cnt; }
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
 		block_t* Index() { return nIndx; }
 
-		bool operator==(const node_t& node)
+		BOOL operator==(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		bool operator!=(const node_t& node)
+		BOOL operator!=(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
 
 		void Next(long nOff = 1)

@@ -60,9 +60,9 @@ IGuiCtrl* IGuiCtrl::m_Focus = NULL;
 EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
 
 IGuiCtrlBase::IGuiCtrlBase()
-	: m_bEnable(true)
-	, m_bVisible(true)
-	, m_Updated(true)
+	: m_bEnable(TRUE)
+	, m_bVisible(TRUE)
+	, m_Updated(TRUE)
 {}
 
 // 更新状态
@@ -70,90 +70,90 @@ void* IGuiCtrlBase::GetState(const CString& sType)
 {
 	return NULL;
 }
-bool IGuiCtrlBase::SetState(const CString& sType, void* pState)
+BOOL IGuiCtrlBase::SetState(const CString& sType, void* pState)
 {
 	UpdateState();
-	return true;
+	return TRUE;
 }
-void IGuiCtrlBase::UpdateState(bool bRefreshSelf/* = true*/)
+void IGuiCtrlBase::UpdateState(BOOL bRefreshSelf/* = TRUE*/)
 {
-	m_Updated = true;
+	m_Updated = TRUE;
 	Refresh(bRefreshSelf);
 }
-bool IGuiCtrlBase::IsUpdated()
+BOOL IGuiCtrlBase::IsUpdated()
 {
-	bool updt = m_Updated;
-	m_Updated = false; // 外部一旦获知当前状态,则更新状态自动复位
+	BOOL updt = m_Updated;
+	m_Updated = FALSE; // 外部一旦获知当前状态,则更新状态自动复位
 	return updt;
 }
 
 // 区域控制
-bool IGuiCtrlBase::P2C(CRect& rc)
+BOOL IGuiCtrlBase::P2C(CRect& rc)
 {
 	rc.Offset(-(m_Rect.pt1));
-	return true;
+	return TRUE;
 }
-bool IGuiCtrlBase::C2P(CRect& rc)
+BOOL IGuiCtrlBase::C2P(CRect& rc)
 {
 	rc.Offset(m_Rect.pt1);
-	return true;
+	return TRUE;
 }
-bool IGuiCtrlBase::B2C(CRect& rc)
+BOOL IGuiCtrlBase::B2C(CRect& rc)
 {
-	if (!m_Pare) return false;
-	if (!P2C(rc)) return false;
+	if (!m_Pare) return FALSE;
+	if (!P2C(rc)) return FALSE;
 	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
 	if (ctrl) return ctrl->B2C(rc);
-	return ExDynCast<IGuiBoard>(m_Pare) ? true : false;
+	return ExDynCast<IGuiBoard>(m_Pare) ? TRUE : FALSE;
 }
-bool IGuiCtrlBase::C2B(CRect& rc)
+BOOL IGuiCtrlBase::C2B(CRect& rc)
 {
-	if (!m_Pare) return false;
-	if (!C2P(rc)) return false;
+	if (!m_Pare) return FALSE;
+	if (!C2P(rc)) return FALSE;
 	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
 	if (ctrl) return ctrl->C2B(rc);
-	return ExDynCast<IGuiBoard>(m_Pare) ? true : false;
+	return ExDynCast<IGuiBoard>(m_Pare) ? TRUE : FALSE;
 }
-bool IGuiCtrlBase::SetWindowRect(const CRect& rc)
+BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 {
-	if (m_Rect == rc) return true;
+	if (m_Rect == rc) return TRUE;
 	m_Rect = rc;
 	if (GetParent())
 	{
 		Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
 			(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
-		Refresh(false);
+		Refresh(FALSE);
 	}
-	return true;
+	return TRUE;
 }
-bool IGuiCtrlBase::GetWindowRect(CRect& rc)
+BOOL IGuiCtrlBase::GetWindowRect(CRect& rc)
 {
 	rc = m_Rect;
-	return true;
+	return TRUE;
 }
-bool IGuiCtrlBase::SetRealRect(const CRect& rc)
+BOOL IGuiCtrlBase::SetRealRect(const CRect& rc)
 {
 	CRect rc_tmp(rc);
-	if (!B2C(rc_tmp)) return false;
+	if (!B2C(rc_tmp)) return FALSE;
 	return SetWindowRect(rc_tmp);
 }
-bool IGuiCtrlBase::GetRealRect(CRect& rc)
+BOOL IGuiCtrlBase::GetRealRect(CRect& rc)
 {
-	if (!m_Pare) return false;
-	if (!GetWindowRect(rc)) return false;
+	if (!m_Pare) return FALSE;
+	if (!GetWindowRect(rc)) return FALSE;
 	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
 	if (ctrl) return ctrl->C2B(rc);
-	return ExDynCast<IGuiBoard>(m_Pare) ? true : false;
+	return ExDynCast<IGuiBoard>(m_Pare) ? TRUE : FALSE;
 }
-bool IGuiCtrlBase::GetClientRect(CRect& rc)
+BOOL IGuiCtrlBase::GetClientRect(CRect& rc)
 {
-	if (!GetWindowRect(rc)) return false;
+	if (!GetWindowRect(rc)) return FALSE;
 	rc.MoveTo(CPoint());
-	return true;
+	return TRUE;
 }
 
 // 刷新绘图
-void IGuiCtrlBase::Refresh(bool bSelf/* = true*/)
+void IGuiCtrlBase::Refresh(BOOL bSelf/* = TRUE*/)
 {
 	IGuiBoard* board = GetBoard();
 	if (!board) return;
@@ -168,24 +168,24 @@ void IGuiCtrlBase::Refresh(bool bSelf/* = true*/)
 }
 
 // 设置可用性
-bool IGuiCtrlBase::SetEnable(bool bEnable/* = true*/)
+BOOL IGuiCtrlBase::SetEnable(BOOL bEnable/* = TRUE*/)
 {
 	if (m_bEnable == bEnable) return m_bEnable;
-	bool old = m_bEnable;
+	BOOL old = m_bEnable;
 	m_bEnable = bEnable;
 	UpdateState();
 	return old;
 }
-bool IGuiCtrlBase::IsEnabled() const
+BOOL IGuiCtrlBase::IsEnabled() const
 {
 	return m_bEnable;
 }
 
 // 设置可见性
-bool IGuiCtrlBase::SetVisible(bool bVisible/* = true*/)
+BOOL IGuiCtrlBase::SetVisible(BOOL bVisible/* = TRUE*/)
 {
 	if (m_bVisible == bVisible) return m_bVisible;
-	bool old = m_bVisible;
+	BOOL old = m_bVisible;
 	m_bVisible = bVisible;
 	if (GetParent())
 	{
@@ -194,7 +194,7 @@ bool IGuiCtrlBase::SetVisible(bool bVisible/* = true*/)
 	}
 	return old;
 }
-bool IGuiCtrlBase::IsVisible() const
+BOOL IGuiCtrlBase::IsVisible() const
 {
 	return m_bVisible;
 }

@@ -94,15 +94,15 @@ public:
 	{ Close(); }
 
 public:
-	bool Open(LPCTSTR sPath, UINT nOpenFlags = modeRead | shareCompat)
+	BOOL Open(LPCTSTR sPath, UINT nOpenFlags = modeRead | shareCompat)
 	{
-		if (!sPath) return false;
-		if (!Close()) return false;
+		if (!sPath) return FALSE;
+		if (!Close()) return FALSE;
 
 		nOpenFlags &= ~(UINT)typeBinary; // CIOFile 一直是二进制文本, CreateFile 并不需要这个标记
 		m_hFile = INVALID_HANDLE_VALUE;
-		if (FAILED(StringCchLength(sPath, MAX_PATH, NULL)) )
-			return false;
+		if (_tcslen(sPath) > MAX_PATH)
+			return FALSE;
 		m_strFileName = sPath;
 
 		// map read/write mode
@@ -119,7 +119,7 @@ public:
 			dwAccess = GENERIC_READ | GENERIC_WRITE;
 			break;
 		default:
-			ExAssert(false);  // 无效的共享模式
+			ExAssert(FALSE);  // 无效的共享模式
 		}
 
 		// map share mode
@@ -140,7 +140,7 @@ public:
 			dwShareMode = FILE_SHARE_WRITE | FILE_SHARE_READ;
 			break;
 		default:
-			ExAssert(false);  // 无效的共享模式
+			ExAssert(FALSE);  // 无效的共享模式
 		}
 
 		// map modeNoInherit flag
@@ -178,12 +178,12 @@ public:
 		m_hFile = ::CreateFile(m_strFileName, dwAccess, dwShareMode, &sa,
 			dwCreateFlag, dwFlags, NULL);
 		if (m_hFile == INVALID_HANDLE_VALUE)
-			return false;
-		return true;
+			return FALSE;
+		return TRUE;
 	}
-	virtual bool Close()
+	virtual BOOL Close()
 	{
-		bool ret = Error() ? true : CloseHandle(m_hFile);
+		BOOL ret = Error() ? TRUE : CloseHandle(m_hFile);
 		m_hFile = INVALID_HANDLE_VALUE;
 		m_strFileName.Clear();
 		return ret;
@@ -210,11 +210,11 @@ public:
 		return (len / nSize);
 	}
 
-	virtual bool Seek(int64_t nOffset, int iOrigin = current)
+	virtual BOOL Seek(int64_t nOffset, int iOrigin = current)
 	{
-		if (Error()) return false;
+		if (Error()) return FALSE;
 		if (iOrigin != begin && iOrigin != end && iOrigin != current)
-			return false;
+			return FALSE;
 
 		LARGE_INTEGER liOff;
 		liOff.QuadPart = nOffset;
@@ -245,28 +245,28 @@ public:
 
 		return liSize.QuadPart;
 	}
-	virtual bool SetSize(uint64_t nSize)
+	virtual BOOL SetSize(uint64_t nSize)
 	{
-		if (!Seek(nSize, begin)) return false;
-		return (bool)::SetEndOfFile(m_hFile);
+		if (!Seek(nSize, begin)) return FALSE;
+		return ::SetEndOfFile(m_hFile);
 	}
-	virtual bool Flush()
+	virtual BOOL Flush()
 	{
-		if (Error()) return false;
+		if (Error()) return FALSE;
 		return ::FlushFileBuffers(m_hFile);
 	}
-	virtual bool Eof()
+	virtual BOOL Eof()
 	{
-		if (Error()) return true;
+		if (Error()) return TRUE;
 
 		uint64_t tell = Tell();
-		if (tell == (uint64_t)-1) return true;
+		if (tell == (uint64_t)-1) return TRUE;
 		uint64_t size = Size();
-		if (size == (uint64_t)-1) return true;
+		if (size == (uint64_t)-1) return TRUE;
 
 		return (tell >= size);
 	}
-	virtual bool Error()
+	virtual BOOL Error()
 	{
 		return (!m_hFile || m_hFile == INVALID_HANDLE_VALUE);
 	}

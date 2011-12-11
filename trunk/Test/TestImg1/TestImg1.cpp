@@ -334,7 +334,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDM_GRAD:
 			Filter(hWnd, &CFilterGradient(
-				ExRGBA(255, 255, 255, 128), ExRGBA(0, 0, 0, 128), 0x9, false));
+				ExRGBA(255, 255, 255, 128), ExRGBA(0, 0, 0, 128), 0x9, FALSE));
 			break;
 		// ¹ØÓÚ
 		case IDM_ABOUT:

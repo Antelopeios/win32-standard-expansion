@@ -66,15 +66,15 @@ EXP_BEG
 interface IObjPool
 {
 public:
-	bool m_IsDest;
+	BOOL m_IsDest;
 
 public:
-	IObjPool() : m_IsDest(false) {}
-	virtual ~IObjPool() { m_IsDest = true; }
+	IObjPool() : m_IsDest(FALSE) {}
+	virtual ~IObjPool() { m_IsDest = TRUE; }
 
 public:
 	virtual DWORD GetObjSize() = 0;
-	virtual bool Valid(void* pPtr) = 0;
+	virtual BOOL Valid(void* pPtr) = 0;
 	virtual DWORD Size(void* pPtr) = 0;
 	virtual void* Alloc(DWORD nSize) = 0;
 	virtual void Free(void* pPtr) = 0;
@@ -109,15 +109,15 @@ protected:
 	struct block_t
 	{
 		block_t* pNext;	// 下一个结点
-		bool	 bFree;	// 是否已清理
+		BOOL	 bFree;	// 是否已清理
 
 		block_t()
 			: pNext(NULL)
-			, bFree(false)
+			, bFree(FALSE)
 		{}
 		~block_t()
 		{
-			bFree = true;
+			bFree = TRUE;
 			pNext = NULL;
 		}
 	};
@@ -147,14 +147,14 @@ public:
 	// 池大小设置
 	DWORD GetPoolSize()
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return m_nFreSize;
 	}
 	void SetPoolSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		DWORD diff_size = 0;
 		{
-			ExLock(m_Mutex, false, mutex_t);
+			ExLock(m_Mutex, FALSE, mutex_t);
 			if( nSize > m_nMaxSize )
 				nSize = m_nMaxSize;
 			if( m_nFreSize >= nSize ) return;
@@ -171,24 +171,24 @@ public:
 	}
 	DWORD GetMaxSize()
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return m_nMaxSize;
 	}
 	void SetMaxSize(DWORD nMaxSize)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		m_nMaxSize = nMaxSize;
 	}
 	DWORD GetObjSize()
 	{ return m_nObjSize; }
 	void SetObjSize(DWORD nObjSize)
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		m_nObjSize = nObjSize;
 	}
 
 	// 内存效验
-	bool Valid(void* pPtr)
+	BOOL Valid(void* pPtr)
 	{
 		block_t* block = (block_t*)((BYTE*)pPtr - sizeof(block_t));
 		return m_Alloc.Valid(block);
@@ -203,7 +203,7 @@ public:
 	void* Alloc(DWORD nSize)
 	{
 		if (nSize == 0) return NULL;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		block_t* block = NULL;
 		if (nSize <= m_nObjSize)
 		{
@@ -225,7 +225,7 @@ public:
 	void Free(void* pPtr)
 	{
 		if (!pPtr) return;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		block_t* block = (block_t*)((BYTE*)pPtr - sizeof(block_t));
 		ExAssert(!block->bFree);
 		if (block->bFree) return;
@@ -242,7 +242,7 @@ public:
 	// 清空内存
 	void Clear()
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		while (m_FreeList)
 		{
 			block_t* block = m_FreeList;
@@ -291,7 +291,7 @@ public:
 	// 清空内存
 	void Clear()
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		while (m_FreeList)
 		{
 			block_t* block = m_FreeList;

@@ -61,26 +61,26 @@ protected:
 	IFileObject* m_pFile;
 
 	template <DWORD SizeT>
-	EXP_INLINE static bool CheckFile(IFileObject* pFile, const BYTE (&chkHead)[SizeT])
+	EXP_INLINE static BOOL CheckFile(IFileObject* pFile, const BYTE (&chkHead)[SizeT])
 	{
-		if(!pFile) return false;
+		if(!pFile) return FALSE;
 		CFileSeeker seeker(pFile);
 		BYTE tmp_buff[SizeT] = {0};
 		// ÅÐ¶ÏÍ·²¿
 		if(!pFile->Seek(0, IFileObject::begin))
-			return false;
+			return FALSE;
 		if (pFile->Read(tmp_buff, _countof(tmp_buff), sizeof(BYTE)) != _countof(chkHead))
-			return false;
+			return FALSE;
 		if (memcmp(tmp_buff, chkHead, sizeof(chkHead)) != 0)
-			return false;
-		return true;
+			return FALSE;
+		return TRUE;
 	}
 
 	EXP_INLINE static image_t GetImageBuff(LONG nWidth, LONG nHeight, BYTE*& pBuff)
 	{
 		if (nWidth <= 0 || nHeight <= 0) return NULL;
 		CImage exp_image;
-		exp_image.SetTrust(false);
+		exp_image.SetTrust(FALSE);
 		pBuff = NULL;
 		exp_image.Create(nWidth, nHeight);
 		if (!exp_image.IsNull()) pBuff = (BYTE*)exp_image.GetPixels();
@@ -103,7 +103,7 @@ public:
 	virtual IFileObject* GetFile()
 	{ return m_pFile; }
 
-	virtual bool Encode(image_t Image) = 0;
+	virtual BOOL Encode(image_t Image) = 0;
 	virtual image_t Decode() = 0;
 
 	void Free() { ExMem::Free(this); }

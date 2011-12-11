@@ -207,9 +207,9 @@ public:
 	DWORD GetCount() const
 	{ return m_nCont; }
 
-	bool IsNull() const
+	BOOL IsNull() const
 	{ return (m_pTree == NULL); }
-	bool Empty() const
+	BOOL Empty() const
 	{ return (m_nCont == 0); }
 
 	void Clear()
@@ -261,10 +261,10 @@ public:
 		树连接算法,默认将新树连接到Iter的子节点上
 		若Iter为Tail,新树将挂接到老树的最后
 	*/
-	bool LinkTree(item_t* tTree, iterator_t& Iter)
+	BOOL LinkTree(item_t* tTree, iterator_t& Iter)
 	{	// 连接树
-		if (!tTree) return true;
-		if (!(Iter->InThis(this))) return false;
+		if (!tTree) return TRUE;
+		if (!(Iter->InThis(this))) return FALSE;
 		m_nCont += tTree->GetCount();
 		item_t* item = Iter->Index();
 		if (item)
@@ -277,36 +277,36 @@ public:
 				m_pTree = tTree;
 		}
 		Iter->nIndx = tTree;
-		return true;
+		return TRUE;
 	}
 
-	bool AddTree(item_t* tTree, iterator_t Iter)
+	BOOL AddTree(item_t* tTree, iterator_t Iter)
 	{
-		if (!tTree) return true;
-		if (!(Iter->InThis(this))) return false;
+		if (!tTree) return TRUE;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 构造临时树
 		item_t* temp = item_t::Alloc();
 		(*temp) = (*tTree);
 		// 添加树
 		return LinkTree(temp, Iter);
 	}
-	bool AddTree(item_t* tTree)
+	BOOL AddTree(item_t* tTree)
 	{ return AddTree(tTree, Tail()); }
-	bool AddTree(const CTreeT& tTree, iterator_t Iter)
+	BOOL AddTree(const CTreeT& tTree, iterator_t Iter)
 	{ return AddTree(tTree.m_pTree, Iter); }
-	bool AddTree(const CTreeT& tTree)
+	BOOL AddTree(const CTreeT& tTree)
 	{ return AddTree(tTree, Tail()); }
 
-	bool Add(const type_t& Item, iterator_t& Iter)
+	BOOL Add(const type_t& Item, iterator_t& Iter)
 	{
-		if (!(Iter->InThis(this))) return false;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 构造临时元素
 		item_t* temp = item_t::Alloc();
 		temp->Val = Item;
 		// 添加元素
 		return LinkTree(temp, Iter);
 	}
-	bool Add(const type_t& Item)
+	BOOL Add(const type_t& Item)
 	{ return Add(Item, Tail()); }
 
 	/*
@@ -320,12 +320,12 @@ public:
 		tree_t::iterator_t ite_newh = ite_head->Children()[1];
 		tree.Del(ite_head, ite_newh);
 	*/
-	bool Del(iterator_t& iteStt, iterator_t& iteEnd)
+	BOOL Del(iterator_t& iteStt, iterator_t& iteEnd)
 	{
-		if (Empty()) return true;
-		if (!(iteStt->InThis(this))) return false;
-		if (!(iteEnd->InThis(this))) return false;
-		if (iteStt == Tail()) return false;
+		if (Empty()) return TRUE;
+		if (!(iteStt->InThis(this))) return FALSE;
+		if (!(iteEnd->InThis(this))) return FALSE;
+		if (iteStt == Tail()) return FALSE;
 		if (iteStt == iteEnd)
 		{
 			item_t* stt_inx = iteStt->Index();
@@ -355,9 +355,9 @@ public:
 			}
 			end_inx->GetChdrLast()->AddChdr(stt_inx);
 		}
-		return true;
+		return TRUE;
 	}
-	bool Del(iterator_t& ite)
+	BOOL Del(iterator_t& ite)
 	{ return Del(ite, ite); }
 };
 
@@ -396,7 +396,7 @@ struct _TreePolicyT
 
 		type_t& Val() { return nIndx->Val; }
 
-		bool InThis(container_t* cnt) { return pCont == cnt; }
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
 		item_t* Index() { return nIndx; }
 
 		const iter_t Parent()
@@ -418,9 +418,9 @@ struct _TreePolicyT
 			return list;
 		}
 
-		bool operator==(const node_t& node)
+		BOOL operator==(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		bool operator!=(const node_t& node)
+		BOOL operator!=(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
 
 		// 深度优先遍历

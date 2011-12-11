@@ -93,12 +93,12 @@ public:
 		if (base_obj_t::IsNull()) return;
 		::GetObject(Get(), sizeof(m_Bitmap), &m_Bitmap);
 	}
-	bool IsNull()
+	BOOL IsNull()
 	{
 		if (base_obj_t::IsNull())
-			return true;
+			return TRUE;
 		else
-			return (!(bool)(GetPixels()));
+			return (!(BOOL)(GetPixels()));
 	}
 
 	image_t operator=(image_t tType)

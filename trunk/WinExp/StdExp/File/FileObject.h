@@ -67,20 +67,20 @@ public:
 	virtual ~IFileObject() {}
 
 public:
-	virtual bool Close() = 0;
+	virtual BOOL Close() = 0;
 
 	virtual DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR)) = 0;
 	virtual DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR)) = 0;
 
-	virtual bool Seek(int64_t nOffset, int iOrigin = current) = 0;
+	virtual BOOL Seek(int64_t nOffset, int iOrigin = current) = 0;
 	virtual uint64_t Tell() = 0;
 	virtual uint64_t Size() = 0;
-	virtual bool SetSize(uint64_t nSize) = 0;
-	virtual bool Flush() = 0;
-	virtual bool Eof() = 0;
-	virtual bool Error() = 0;
+	virtual BOOL SetSize(uint64_t nSize) = 0;
+	virtual BOOL Flush() = 0;
+	virtual BOOL Eof() = 0;
+	virtual BOOL Error() = 0;
 
-	virtual bool PutC(TCHAR cChar)
+	virtual BOOL PutC(TCHAR cChar)
 	{
 		return (Write(&cChar, 1) == 1);
 	}
@@ -93,7 +93,7 @@ public:
 		else
 			return _TEOF;
 	}
-	virtual bool PutS(LPCTSTR sString)
+	virtual BOOL PutS(LPCTSTR sString)
 	{
 		DWORD len = _tcslen(sString);
 		return (Write(sString, len) == len);

@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-11-27
-// Version:	1.2.0006.1325
+// Date:	2011-12-11
+// Version:	1.2.0007.2310
 //
 // History:
 //	- 1.2.0005.1714(2011-08-11)	+ #include <conio.h>,避免一些在ANSI字符集下的编译错误
 //	- 1.2.0006.1325(2011-11-27)	+ #include <stdlib.h>(_countof宏)
+//	- 1.2.0007.2310(2011-12-11)	- 移除strsafe.h,避免同时使用stl时出现的编译警告
 //////////////////////////////////////////////////////////////////
 
 #ifndef __LibStd_h__
@@ -57,11 +58,8 @@
 #include <conio.h>
 #include <tchar.h>
 #include <time.h>
-
-#include <windows.h>
-
 #include <process.h>
-#include <strsafe.h>
+#include <windows.h>
 
 //////////////////////////////////////////////////////////////////
 

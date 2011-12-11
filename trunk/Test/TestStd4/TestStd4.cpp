@@ -13,7 +13,7 @@ volatile LONG g_inx, g_cnt;
 typedef CNonLockT<CString> nl_string_t;
 nl_string_t g_non;
 
-CEvent g_start(true), g_end(false);
+CEvent g_start(TRUE), g_end(FALSE);
 
 DWORD WINAPI Proc(LPVOID lpParam)
 {
@@ -24,7 +24,7 @@ DWORD WINAPI Proc(LPVOID lpParam)
 		while(i++ < 1000)
 		{
 			{
-				ExLock(g_mutex, true);
+				ExLock(g_mutex, TRUE);
 				ExCPrintf(g_str);
 				//CNonLockerT<nl_string_t> noner(g_non);
 				//ExCPrintf(*noner);
@@ -37,7 +37,7 @@ DWORD WINAPI Proc(LPVOID lpParam)
 		while(i++ < 1000)
 		{
 			{
-				ExLock(g_mutex, false);
+				ExLock(g_mutex, FALSE);
 				g_str.Format(_T("%d\n"), g_inx++);
 				//CString str;
 				//str.Format(_T("%d\n"), EXP_THREAD_MODEL::Inc(&g_inx));
@@ -45,7 +45,7 @@ DWORD WINAPI Proc(LPVOID lpParam)
 			}
 			Sleep(5);
 		}
-		ExLock(g_mutex, true);
+		ExLock(g_mutex, TRUE);
 		ExCPrintf(g_str);
 	}
 

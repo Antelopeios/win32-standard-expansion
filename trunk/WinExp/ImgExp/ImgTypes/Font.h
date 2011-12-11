@@ -92,14 +92,14 @@ public:
 		return ::GetObject(Get(), sizeof(LOGFONT), pLogFont);
 	}
 
-	friend bool operator==(const CFont& fnt1, const CFont& fnt2)
+	friend BOOL operator==(const CFont& fnt1, const CFont& fnt2)
 	{
 		LOGFONT lf1 = {0}, lf2 = {0};
 		fnt1.GetLogFont(&lf1);
 		fnt2.GetLogFont(&lf2);
 		return (memcmp(&lf1, &lf2, sizeof(LOGFONT)) == 0);
 	}
-	friend bool operator!=(const CFont& fnt1, const CFont& fnt2)
+	friend BOOL operator!=(const CFont& fnt1, const CFont& fnt2)
 	{
 		return !(fnt1 == fnt2);
 	}

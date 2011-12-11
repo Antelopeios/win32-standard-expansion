@@ -73,9 +73,9 @@ public:
 	~CLockT()
 	{ PolicyT::DelLock(m_Lock); }
 
-	EXP_INLINE void Lock(bool bRead = false)
+	EXP_INLINE void Lock(BOOL bRead = FALSE)
 	{ PolicyT::Lock(m_Lock, bRead); }
-	EXP_INLINE void Unlock(bool bRead = false)
+	EXP_INLINE void Unlock(BOOL bRead = FALSE)
 	{ PolicyT::Unlock(m_Lock, bRead); }
 };
 
@@ -95,10 +95,10 @@ public:
 
 private:
 	mutex_t& m_Lock;
-	bool m_bRead;
+	BOOL m_bRead;
 
 public:
-	CLockerT(mutex_t& lock, bool bRead = false)
+	CLockerT(mutex_t& lock, BOOL bRead = FALSE)
 		: m_Lock(lock), m_bRead(bRead)
 	{ m_Lock.Lock(m_bRead); }
 	~CLockerT()
@@ -115,7 +115,7 @@ typedef CLockerT<> CLocker;
 #define ExLockThis(policy_t)			\
 	static CLockT<policy_t>::lock_t lc;	\
 	static CLockT<policy_t> mutex(lc);	\
-	ExLock(mutex, false, CLockT<policy_t>)
+	ExLock(mutex, FALSE, CLockT<policy_t>)
 
 //////////////////////////////////////////////////////////////////
 

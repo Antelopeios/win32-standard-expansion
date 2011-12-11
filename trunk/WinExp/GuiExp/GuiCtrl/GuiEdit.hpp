@@ -122,7 +122,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("edit"))
 		{

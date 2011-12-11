@@ -143,7 +143,7 @@ public:
 	}
 
 public:
-	EXP_INLINE bool Valid(void* pPtr)
+	EXP_INLINE BOOL Valid(void* pPtr)
 	{
 		return m_Alloc.Valid(RealPtr(pPtr));
 	}

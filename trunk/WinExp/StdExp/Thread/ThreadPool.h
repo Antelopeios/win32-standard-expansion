@@ -79,7 +79,7 @@ struct _ThreadPoolPolicyT
 	EXP_INLINE static DWORD MaxSize()
 	{ return DefSize(); }
 
-	static const bool LIMIT_MAX = true;
+	static const BOOL LIMIT_MAX = TRUE;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -172,12 +172,12 @@ protected:
 		// 无限的任务等待循环
 		for(;;)
 		{
-			DWORD wr = ISyncObject::Wait(sync, false);
+			DWORD wr = ISyncObject::Wait(sync, FALSE);
 			// 响应线程清空事件
 			if (wr == WAIT_OBJECT_0 + 1)
 				break;
 			// 响应用户调用事件
-			ExLock(ths->m_Mutex, false, mutex_t);
+			ExLock(ths->m_Mutex, FALSE, mutex_t);
 			if(!ths->m_TskList.Empty())
 			{
 				tsk_t tsk = ths->m_TskList.HeadItem();
@@ -185,10 +185,10 @@ protected:
 				++(ths->m_nUseSize);
 				if (tsk.hdlR) (*(tsk.hdlR)) = hdl;
 				if (tsk.tidR) (*(tsk.tidR)) = GetCurrentThreadId();
-				ths->m_Mutex.Unlock(false);	// 解写锁
+				ths->m_Mutex.Unlock(FALSE);	// 解写锁
 				if (tsk.evtR) tsk.evtR->Set();
 				tsk.pCal(tsk.pPar);			// 用户调用
-				ths->m_Mutex.Lock(false);	// 加写锁
+				ths->m_Mutex.Lock(FALSE);	// 加写锁
 				--(ths->m_nUseSize);
 			}
 			// 检查是否超出线程池大小
@@ -198,16 +198,16 @@ protected:
 
 		// 清理自身
 		ths->m_Creator.Close(hdl);
-		ths->m_Mutex.Lock(false);		// 加写锁
+		ths->m_Mutex.Lock(FALSE);		// 加写锁
 		ths->m_TrdList.Del(par->tIte);
 		if (ths->m_TrdList.GetCount() == 0)
 		{
-			ths->m_Mutex.Unlock(false);	// 解写锁
+			ths->m_Mutex.Unlock(FALSE);	// 解写锁
 			ths->m_ComplEvt.Set();
 			ths->m_ClearEvt.Reset();
 		}
 		else
-			ths->m_Mutex.Unlock(false);	// 解写锁
+			ths->m_Mutex.Unlock(FALSE);	// 解写锁
 		alloc_t::Free(par);
 		return 0;
 	}
@@ -226,8 +226,8 @@ public:
 		: m_nMaxSize(PolicyT::MaxSize())
 		, m_nUseSize(0)
 		, m_TaskSmph(0, 0x7FFFFFFF)
-		, m_ComplEvt(false)
-		, m_ClearEvt(true)
+		, m_ComplEvt(FALSE)
+		, m_ClearEvt(TRUE)
 	{ SetPoolSize(nSize); }
 	~CThreadPoolT()
 	{ Clear(); }
@@ -236,12 +236,12 @@ public:
 	// 池大小设置
 	DWORD GetPoolSize()
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return m_TrdList.GetCount();
 	}
 	void SetPoolSize(DWORD nSize = PolicyT::DefSize())
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		if( nSize > m_nMaxSize )
 			nSize = m_nMaxSize;
 		if( m_TrdList.GetCount() >= nSize ) return;
@@ -251,17 +251,17 @@ public:
 	}
 	DWORD GetUsedSize()
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return m_nUseSize;
 	}
 	DWORD GetMaxSize()
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return m_nMaxSize;
 	}
 	void SetMaxSize(DWORD nMaxSize)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		m_nMaxSize = nMaxSize;
 	}
 
@@ -275,8 +275,8 @@ public:
 		HANDLE hdl = NULL;
 		if (lpStartAddr)
 		{	// 给用户分配线程
-			m_Mutex.Lock(false);
-			bool is_limited = false;
+			m_Mutex.Lock(FALSE);
+			BOOL is_limited = FALSE;
 			if (m_nUseSize >= m_TrdList.GetCount())
 			{
 				if (m_nMaxSize <= m_TrdList.GetCount())
@@ -301,20 +301,20 @@ public:
 			{	// 等待线程响应
 				if (hdl == NULL && dwWaitTime)
 				{
-					m_Mutex.Unlock(false);
+					m_Mutex.Unlock(FALSE);
 					ExAssert(tsk.evtR);
 					tsk.evtR->Wait(dwWaitTime);
 					alloc_t::Free(tsk.evtR);
 				}
 				else
-					m_Mutex.Unlock(false);
+					m_Mutex.Unlock(FALSE);
 			}
 			else
-				m_Mutex.Unlock(false);
+				m_Mutex.Unlock(FALSE);
 		}
 		else
 		{	// 为池增加线程
-			ExLock(m_Mutex, false, mutex_t);
+			ExLock(m_Mutex, FALSE, mutex_t);
 			if (m_TrdList.GetCount() >= m_nMaxSize)
 				return NULL;
 			hdl = AddTrd(dwFlag, lpIDThread);
@@ -322,9 +322,9 @@ public:
 		return hdl;
 	}
 	// 清空池
-	bool Clear(DWORD dwWaitTime = INFINITE)
+	BOOL Clear(DWORD dwWaitTime = INFINITE)
 	{
-		if (GetPoolSize() == 0) return true;
+		if (GetPoolSize() == 0) return TRUE;
 		m_ClearEvt.Set();
 		return (m_ComplEvt.Wait(dwWaitTime) == WAIT_OBJECT_0);
 	}
@@ -363,7 +363,7 @@ public:
 					     _IN_ DWORD dwFlag = 0, 
 					     _OT_ LPDWORD lpIDThread = NULL)
 	{ return GetPool().Create(lpStartAddr, lpParam, dwFlag, lpIDThread); }
-	static bool Close(HANDLE hTrd)
+	static BOOL Close(HANDLE hTrd)
 	{ return heap_creator_t::Close(hTrd); }
 
 	static DWORD Suspend(HANDLE hTrd)
@@ -371,7 +371,7 @@ public:
 	static DWORD Resume(HANDLE hTrd)
 	{ return heap_creator_t::Resume(hTrd); }
 
-	static bool Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
+	static BOOL Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
 	{ return heap_creator_t::Terminate(hTrd, dwExitCode); }
 };
 

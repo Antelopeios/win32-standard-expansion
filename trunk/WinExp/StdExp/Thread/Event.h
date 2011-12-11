@@ -56,33 +56,33 @@ public:
 	CEvent()
 		: ISyncObject()
 	{}
-	CEvent(bool bManualReset, bool bInitialState = false)
+	CEvent(BOOL bManualReset, BOOL bInitialState = FALSE)
 		: ISyncObject()
 	{ Create(bManualReset, bInitialState); }
 	~CEvent()
 	{}
 
 public:
-	bool Create(bool bManualReset = false, bool bInitialState = false)
+	BOOL Create(BOOL bManualReset = FALSE, BOOL bInitialState = FALSE)
 	{
 		Close();
 		m_hSync = CreateEvent(0, bManualReset, bInitialState, NULL);
 		if (m_hSync == NULL) m_hSync = INVALID_HANDLE_VALUE;
-		if (m_hSync == INVALID_HANDLE_VALUE) return false;
-		return true;
+		if (m_hSync == INVALID_HANDLE_VALUE) return FALSE;
+		return TRUE;
 	}
 
-	bool Set()
+	BOOL Set()
 	{
-		if (IsClosed()) return false;
+		if (IsClosed()) return FALSE;
 		return SetEvent(m_hSync);
 	}
-	bool Reset()
+	BOOL Reset()
 	{
-		if (IsClosed()) return false;
+		if (IsClosed()) return FALSE;
 		return ResetEvent(m_hSync);
 	}
-	bool IsSetted()
+	BOOL IsSetted()
 	{ return (Wait(0) != WAIT_TIMEOUT); }
 };
 

@@ -61,7 +61,7 @@ public:
 	typedef CMemHeapAlloc alloc_t;
 
 public:
-	EXP_INLINE static bool Valid(void* pPtr)
+	EXP_INLINE static BOOL Valid(void* pPtr)
 	{ return HeapValidate(GetProcessHeap(), 0, pPtr); }
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return HeapSize(GetProcessHeap(), 0, pPtr); }

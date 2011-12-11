@@ -108,14 +108,14 @@ public:
 		return (*this);
 	}
 
-	friend bool operator==(const CText& txt1, const CText& txt2)
+	friend BOOL operator==(const CText& txt1, const CText& txt2)
 	{
-		if ((CString)txt1 != (CString)txt2) return false;
-		if ((CFont)txt1 != (CFont)txt2) return false;
-		if (txt1.m_Color != txt2.m_Color) return false;
-		return true;
+		if ((CString)txt1 != (CString)txt2) return FALSE;
+		if ((CFont)txt1 != (CFont)txt2) return FALSE;
+		if (txt1.m_Color != txt2.m_Color) return FALSE;
+		return TRUE;
 	}
-	friend bool operator!=(const CText& txt1, const CText& txt2)
+	friend BOOL operator!=(const CText& txt1, const CText& txt2)
 	{
 		return !(txt1 == txt2);
 	}
@@ -172,7 +172,7 @@ public:
 						ExGetR(m_Color), 
 						ExGetA(m_Color)
 						), 
-					0xf, true
+					0xf, TRUE
 					)
 				);
 		// 清理内存并返回

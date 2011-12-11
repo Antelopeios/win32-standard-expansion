@@ -104,21 +104,21 @@ public:
 	// 成员变量
 protected:
 	type_t m_Ptr;
-	bool m_bTru;
+	BOOL m_bTru;
 
 	// 构造/析构
 public:
 	CSmartPtrT(void)
 		: m_Ptr(NULL)
-		, m_bTru(true)
+		, m_bTru(TRUE)
 	{}
 	CSmartPtrT(type_t ptr)
 		: m_Ptr(NULL)
-		, m_bTru(true)
+		, m_bTru(TRUE)
 	{ (*this) = ptr; }
 	CSmartPtrT(const CSmartPtrT& ptr)
 		: m_Ptr(NULL)
-		, m_bTru(true)
+		, m_bTru(TRUE)
 	{ (*this) = ptr; }
 
 	//////////////////////////////////
@@ -126,12 +126,12 @@ public:
 	template <typename Type2T>
 	CSmartPtrT(Type2T ptr)
 		: m_Ptr(NULL)
-		, m_bTru(true)
+		, m_bTru(TRUE)
 	{ (*this) = ptr; }
 	template <typename Type2T>
 	CSmartPtrT(const CSmartPtrT<Type2T>& ptr)
 		: m_Ptr(NULL)
-		, m_bTru(true)
+		, m_bTru(TRUE)
 	{ (*this) = ptr; }
 
 	//////////////////////////////////
@@ -145,8 +145,8 @@ public:
 	{ return EXP_PTR_MANAGER.Get(m_Ptr); }
 
 	// 是否做托管
-	void SetTrust(bool bTru = true) { m_bTru = bTru; }
-	bool IsTrust() { return m_bTru; }
+	void SetTrust(BOOL bTru = TRUE) { m_bTru = bTru; }
+	BOOL IsTrust() { return m_bTru; }
 
 	void Inc()
 	{ if (m_bTru) EXP_PTR_MANAGER.Add<alloc_t, model_t>(m_Ptr); }
@@ -155,7 +155,7 @@ public:
 
 	void Release()
 	{
-		EXP_PTR_MANAGER.Del(m_Ptr, true);
+		EXP_PTR_MANAGER.Del(m_Ptr, TRUE);
 		m_Ptr = NULL;
 	}
 
@@ -172,27 +172,27 @@ public:
 	CSmartPtrT& operator=(const CSmartPtrT& ptr)
 	{ return ((*this) = ptr.m_Ptr); }
 
-	bool operator==(type_t ptr) const
+	BOOL operator==(type_t ptr) const
 	{
 		if( m_Ptr )
 			return (m_Ptr == ptr);
 		else if( !ptr )
-			return true;
+			return TRUE;
 		else
-			return false;
+			return FALSE;
 	}
-	bool operator==(const CSmartPtrT& ptr) const
+	BOOL operator==(const CSmartPtrT& ptr) const
 	{ return (m_Ptr == ptr.m_Ptr); }
-	bool operator!=(type_t ptr) const
+	BOOL operator!=(type_t ptr) const
 	{
 		if( m_Ptr )
 			return (m_Ptr != ptr);
 		else if( ptr )
-			return true;
+			return TRUE;
 		else
-			return false;
+			return FALSE;
 	}
-	bool operator!=(const CSmartPtrT& ptr) const
+	BOOL operator!=(const CSmartPtrT& ptr) const
 	{ return (m_Ptr != ptr.m_Ptr); }
 
 	type_t operator+(DWORD offset) const
@@ -200,7 +200,7 @@ public:
 	type_t operator-(DWORD offset) const
 	{ return (m_Ptr - offset); }
 
-	bool operator!() const
+	BOOL operator!() const
 	{ return !m_Ptr; }
 
 	type_t operator->() const
@@ -224,16 +224,16 @@ public:
 	{ return ((*this) = ptr.m_Ptr); }
 
 	template <typename Type2T>
-	bool operator==(Type2T ptr) const
+	BOOL operator==(Type2T ptr) const
 	{ return ((*this) == (type_t)ptr); }
 	template <typename Type2T>
-	bool operator==(const CSmartPtrT<Type2T>& ptr) const
+	BOOL operator==(const CSmartPtrT<Type2T>& ptr) const
 	{ return (m_Ptr == (type_t)ptr.m_Ptr); }
 	template <typename Type2T>
-	bool operator!=(Type2T ptr) const
+	BOOL operator!=(Type2T ptr) const
 	{ return ((*this) != (type_t)ptr); }
 	template <typename Type2T>
-	bool operator!=(const CSmartPtrT<Type2T>& ptr) const
+	BOOL operator!=(const CSmartPtrT<Type2T>& ptr) const
 	{ return (m_Ptr != (type_t)ptr.m_Ptr); }
 
 	template <typename Type2T>

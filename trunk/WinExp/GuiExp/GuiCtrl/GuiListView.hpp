@@ -86,14 +86,14 @@ protected:
 	LONG m_Space;	// 项间距
 	LONG m_AllLine, m_FraLine;
 	CGuiButton m_FocPic;
-	bool m_AlignTop;
+	BOOL m_AlignTop;
 
 public:
 	CGuiListView()
 		: m_Space(0)
 		, m_AllLine(0)
 		, m_FraLine(0)
-		, m_AlignTop(true)
+		, m_AlignTop(TRUE)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
@@ -137,7 +137,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		CString type(sType);
 		if (type.Left(4) == _T("foc_"))
@@ -149,7 +149,7 @@ public:
 		if (sType == _T("items"))
 		{
 			items_t* new_sta = (items_t*)pState;
-			if (new_sta == NULL) return false;
+			if (new_sta == NULL) return FALSE;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
 				IGuiCtrl* item = *ite;
@@ -175,7 +175,7 @@ public:
 			if (old_sta != m_Space)
 				return IGuiCtrlBase::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("all_line"))
@@ -184,7 +184,7 @@ public:
 			m_AllLine = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_AllLine && GetScroll())
 				GetScroll()->SetState(_T("sli_all"), (void*)m_AllLine);
-			return true;
+			return TRUE;
 		}
 		else
 		if (sType == _T("fra_line"))
@@ -193,20 +193,20 @@ public:
 			m_FraLine = (LONG)(LONG_PTR)pState;
 			if (old_sta != m_FraLine && GetScroll())
 				GetScroll()->SetState(_T("sli_fra"), (void*)m_FraLine);
-			return true;
+			return TRUE;
 		}
 		else
 		if (sType == _T("align_top"))
 		{
-			bool old_sta = m_AlignTop;
-			m_AlignTop = (bool)(LONG_PTR)pState;
+			BOOL old_sta = m_AlignTop;
+			m_AlignTop = (BOOL)(LONG_PTR)pState;
 			if (old_sta != m_AlignTop)
 			{
 				Send(ExDynCast<IGuiObject>(this), WM_SIZE);
 				return IGuiCtrlBase::SetState(sType, pState);
 			}
 			else
-				return true;
+				return TRUE;
 		}
 		else
 			return EXP_BASE::SetState(sType, pState);

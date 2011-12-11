@@ -157,11 +157,11 @@ class CFilterFill : public IFilterObject
 public:
 	BYTE m_Mask;
 	pixel_t m_Const;
-	bool m_bClrMask;
+	BOOL m_bClrMask;
 	pixel_t m_ClrMask;
 
 public:
-	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, bool bClrMask = false, pixel_t cMask = 0)
+	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, BOOL bClrMask = FALSE, pixel_t cMask = 0)
 		: m_Const(cConst)
 		, m_Mask(bMask)
 		, m_bClrMask(bClrMask)
@@ -367,12 +367,12 @@ public:
 	enum mode_t { normal, less, more };
 	BYTE m_Mask;
 	pixel_t m_Grad[2];
-	bool m_Vert;
+	BOOL m_Vert;
 	mode_t m_Mode;
 
 public:
 	CFilterGradient(pixel_t cStt = ExRGBA(255, 255, 255, 255), pixel_t cEnd = ExRGBA(0, 0, 0, 0), 
-					BYTE bMask = 0x1, bool bVert = true, mode_t eMode = normal)
+					BYTE bMask = 0x1, BOOL bVert = TRUE, mode_t eMode = normal)
 	{
 		m_Grad[0] = cStt;
 		m_Grad[1] = cEnd;
@@ -460,13 +460,13 @@ public:
 class CImgFilter
 {
 public:
-	EXP_INLINE static bool Filter(image_t imgDes, const CRect& rcDes, IFilterObject* pFilter)
+	EXP_INLINE static BOOL Filter(image_t imgDes, const CRect& rcDes, IFilterObject* pFilter)
 	{
-		if (!pFilter) return false;
+		if (!pFilter) return FALSE;
 		CImage exp_des;
-		exp_des.SetTrust(false);
+		exp_des.SetTrust(FALSE);
 		exp_des = imgDes;
-		if (exp_des.IsNull()) return false;
+		if (exp_des.IsNull()) return FALSE;
 
 		// 格式化区域
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
@@ -483,16 +483,16 @@ public:
 
 		// 获得合适的宽与高
 		LONG w = rc_des.Width(), h = rc_des.Height();
-		if (w <= 0 || h <= 0) return true;
+		if (w <= 0 || h <= 0) return TRUE;
 		// 计算坐标起点
 		LONG inx_des = (sz_des.cy - rc_des.Top() - 1) * sz_des.cx + rc_des.Left();
 
 		// 遍历像素绘图
 		pixel_t* pix_des = exp_des.GetPixels();
 		pFilter->Filter(pix_des, sz_des, rc_des, w, h, inx_des);
-		return true;
+		return TRUE;
 	}
-	EXP_INLINE static bool Filter(image_t imgDes, IFilterObject* pFilter)
+	EXP_INLINE static BOOL Filter(image_t imgDes, IFilterObject* pFilter)
 	{
 		return Filter(imgDes, CRect(), pFilter);
 	}

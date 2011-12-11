@@ -64,13 +64,13 @@ public:
 protected:
 	items_t m_ItemList;
 	DWORD m_StatusCount;
-	bool m_StyleBox;
+	BOOL m_StyleBox;
 
 public:
 	CGuiGroup()
 		: m_ItemList(NULL)
 		, m_StatusCount(3)
-		, m_StyleBox(true)
+		, m_StyleBox(TRUE)
 	{}
 	~CGuiGroup()
 	{
@@ -86,12 +86,12 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("items"))
 		{
 			items_t* new_sta = (items_t*)pState;
-			if (new_sta == NULL) return false;
+			if (new_sta == NULL) return FALSE;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
 				IGuiCtrl* item = *ite;
@@ -112,20 +112,20 @@ public:
 		if (sType == _T("sta_cnt"))
 		{
 			m_StatusCount = (DWORD)(LONG_PTR)pState;
-			return true;
+			return TRUE;
 		}
 		else
 		if (sType == _T("sty_box"))
 		{
-			m_StyleBox = (bool)(LONG_PTR)pState;
-			return true;
+			m_StyleBox = (BOOL)(LONG_PTR)pState;
+			return TRUE;
 		}
 		else
 		if (sType == _T("image"))
 		{
 			CImage* img = (CImage*)pState;
-			if (!img || img->IsNull()) return false;
-			if (m_ItemList.Empty()) return false;
+			if (!img || img->IsNull()) return FALSE;
+			if (m_ItemList.Empty()) return FALSE;
 			DWORD count = m_ItemList.GetCount();
 			LONG offset = img->GetWidth() / count;
 			CRect rc_img(0, 0, offset, img->GetHeight());
@@ -157,7 +157,7 @@ public:
 			}
 			return EXP_BASE::SetState(sType, pState);
 		}
-		return false;
+		return FALSE;
 	}
 };
 

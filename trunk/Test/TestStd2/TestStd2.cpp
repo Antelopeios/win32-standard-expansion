@@ -3,9 +3,59 @@
 
 #include "stdafx.h"
 
+#include <list>
+#include <vector>
+#include <map>
+using namespace std;
+
+#include "mmsystem.h"
+#pragma comment(lib, "winmm.lib")
+
 int _tmain(int argc, _TCHAR* argv[])
 {
-	CString s(_T("我在马abcd路边捡EFGH到一分钱")), t;
+#ifdef	_DEBUG
+	const int TestCont = 100;
+	const int TestLast = 1000;
+#else /*_DEBUG*/
+	const int TestCont = 1000;
+	const int TestLast = 10000;
+#endif/*_DEBUG*/
+	unsigned int tStart = 0, tEnd = 0;
+
+#define TEST_CON(name, init, fst, sec) \
+	ExCPrintf(_T(#name)); \
+	{ \
+		init; \
+		timeBeginPeriod(1); \
+		tStart = timeGetTime(); \
+		for(int i = 0; i < TestCont; ++i) \
+		{ \
+			for(int j = 0; j < TestLast; ++j) { fst; }\
+			sec; \
+		} \
+		tEnd = timeGetTime(); \
+		timeEndPeriod(1); \
+	} \
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+//#define TEST_CON(name, con, fst, sec)
+
+	TEST_CON(\nStart for list...\t\t, list<int> int_list, int_list.push_back(i), int_list.clear())
+	TEST_CON(Start for CListT...\t\t, CListT<int> int_list, int_list.Add(i), int_list.Clear())
+
+	TEST_CON(\nStart for vector...\t\t, vector<int> int_list, int_list.push_back(i), int_list.clear())
+	TEST_CON(Start for CArrayT...\t\t, CArrayT<int> int_list, int_list.Add(i), int_list.Clear())
+
+	/*
+		stl::map是红黑树;CMapT是哈希表
+		这两个map测试添加及清空效率其实没有可比性
+		以下数值仅供参考
+	*/
+	typedef map<int, int> map_t;
+	TEST_CON(\nStart for map...\t\t, map_t int_list, int_list[i] = i, int_list.clear())
+	typedef CMapT<int, int> mapt_t;
+	TEST_CON(\nStart for CMapT...\t\t, mapt_t int_list(10007), int_list[i] = i, int_list.Clear())
+
+/*	CString s(_T("我在马abcd路边捡EFGH到一分钱")), t;
 	t = s.Left(4);
 	s.Upper();
 	s.Lower();
@@ -18,11 +68,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	CStringT<char> c(s);
 
 	CArrayT<TCHAR> str(_T("1234")), str2(_T("123"));
-	TCHAR* a = NULL, b[MAX_PATH] = {0};
-	if (str/* == *//*a*//*b*//*str2*//*_T("123")*/)
-		int i = 0;
+	TCHAR* a = NULL, b[MAX_PATH] = {0};*/
+	//if (str/* == *//*a*//*b*//*str2*//*_T("123")*/)
+	//	int i = 0;
 
-	CArrayT<CString> as1;
+/*	CArrayT<CString> as1;
 	as1.Add(_T("123"), as1.Head());
 	as1.Add(_T("321"), as1.Head());
 	as1.Add(_T("312"), as1.Head());
@@ -61,7 +111,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	as3.Del(_T("3"));
 
 	for(CMapT<CString, DWORD>::iterator_t ite = as3.Head(); ite != as3.Tail(); ++ite)
-		ExCPrintf(_T("%s <=> %d\n"), (LPCTSTR)ite->Key(), ite->Val());
+		ExCPrintf(_T("%s <=> %d\n"), (LPCTSTR)ite->Key(), ite->Val());*/
 
 	_tsystem(_T("pause"));
 	return 0;

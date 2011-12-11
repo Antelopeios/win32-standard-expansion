@@ -64,7 +64,7 @@ interface IGuiEffectBase : public IGuiEffect
 
 protected:
 	CImage m_imgCac;
-	bool m_IsRunning;
+	BOOL m_IsRunning;
 	typedef CMapT<HWND, UINT> map_t;
 	static map_t s_TimerMap;
 
@@ -78,18 +78,18 @@ protected:
 
 public:
 	IGuiEffectBase()
-		: m_IsRunning(false)
+		: m_IsRunning(FALSE)
 	{}
 
 protected:
-	virtual bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
+	virtual BOOL Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
 
 public:
 	void Init(CImage& tImg)
 	{
 		m_imgCac.Set(tImg.Clone());
 	}
-	bool IsInit()
+	BOOL IsInit()
 	{
 		return !(m_imgCac.IsNull());
 	}
@@ -126,14 +126,14 @@ public:
 		if (ite->Val() == 0)
 			::SetTimer(hWnd, 1, 40, TimerProc);
 		++(ite->Val());
-		m_IsRunning = true;
+		m_IsRunning = TRUE;
 	}
 
 	void KillTimer(wnd_t hWnd)
 	{
 		map_t::iterator_t ite = s_TimerMap.Locate(hWnd);
 		if (ite == s_TimerMap.Tail()) return;
-		m_IsRunning = false;
+		m_IsRunning = FALSE;
 		if ((--(ite->Val())) != 0) return;
 		::KillTimer(hWnd, 1);
 		s_TimerMap.Del(hWnd);

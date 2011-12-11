@@ -95,14 +95,14 @@ public:
 
 	virtual CGC* GetGC() { return m_GC; }
 
-	virtual bool GetRealRect(CRect& rc) = 0;
+	virtual BOOL GetRealRect(CRect& rc) = 0;
 
 	void SetClipBox(const CRect& rc)
 	{ m_rcClip = rc; }
 	void GetClipBox(CRect& rc)
 	{ rc = m_rcClip; }
 
-	virtual bool IsVisible() const = 0;
+	virtual BOOL IsVisible() const = 0;
 
 	IGuiBase* GetPtCtrl(const CPoint& pt)
 	{

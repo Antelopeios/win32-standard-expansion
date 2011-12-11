@@ -3,17 +3,27 @@
 
 #include "stdafx.h"
 
+#include "mmsystem.h"
+#pragma comment(lib, "winmm.lib")
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	unsigned int tStart = 0, tEnd = 0;
+
 	CIOFile file(_T("test.xml"));
 	if (file.Error() || file.Size() == 0) return 0;
 
 	CGuiXML xml;
 	xml.SetFile(&file);
-	if (!xml.Decode()) return 0;
 
-	CGuiXML::iterator_t ite;
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	if (!xml.Decode()) return 0;
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+
+/*	CGuiXML::iterator_t ite;
 	xml.GetNode(_T("skin"), ite = xml.GetRoot());		// 定位skin结点
 	xml.AddNode(_T("test"), ite);						// 添加test结点
 	xml.AddAttr(_T("key"), _T("val_test"), ite);		// 添加test结点的key属性
@@ -27,6 +37,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	file.Open(_T("test_encode.xml"), CIOFile::modeWrite | CIOFile::modeCreate);
 	if (!xml.Encode()) return 0;
-
+*/
+	_tsystem(_T("pause"));
 	return 0;
 }

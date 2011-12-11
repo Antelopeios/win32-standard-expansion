@@ -51,7 +51,7 @@ image_t CImage::Clone(const CRect& tRect/* = CRect()*/) const
 	if (rc_tmp.IsEmpty()) rc_tmp = rect;
 	// 创建临时对象
 	CImage exp_img;
-	exp_img.SetTrust(false);
+	exp_img.SetTrust(FALSE);
 	if(!exp_img.Create(rc_tmp.Width(), rc_tmp.Height()))
 		return NULL;
 	// 拷贝图像

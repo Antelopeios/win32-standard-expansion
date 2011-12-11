@@ -107,13 +107,13 @@ public:
 
 protected:
 	// 正常
-	bool Nor(state_t& eSta, iterator_t& ite)
+	BOOL Nor(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
 		{
 			eSta = sta_end;
-			return true;
+			return TRUE;
 		}
 		switch (buf)
 		{
@@ -123,14 +123,14 @@ protected:
 		default:		// 正常
 			eSta = sta_nor;
 		}
-		return true;
+		return TRUE;
 	}
 	// 判断
-	bool Jud(state_t& eSta, iterator_t& ite)
+	BOOL Jud(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
+			return FALSE;
 		// 注释判断
 		if (sta_jud == eSta)
 		{
@@ -168,24 +168,24 @@ protected:
 				eSta = sta_tag;
 			}
 		}
-		return true;
+		return TRUE;
 	}
 	// XML声明
-	bool Xml(state_t& eSta, iterator_t& ite)
+	BOOL Xml(state_t& eSta, iterator_t& ite)
 	{
 		m_xData.Add(ExMem::Alloc<node_t>(&m_GC), ite);
 		node_t* node = *ite;
 		node->nam += m_sTemp;
 		m_sTemp = _T("");
 		eSta = sta_tag;
-		return true;
+		return TRUE;
 	}
 	// 注释
-	bool Not(state_t& eSta, iterator_t& ite)
+	BOOL Not(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
+			return FALSE;
 		switch (buf)
 		{
 		case _T('-'):
@@ -211,16 +211,16 @@ protected:
 			m_sTemp = buf;
 			eSta = sta_not;
 		}
-		return true;
+		return TRUE;
 	}
 	// 标签
-	bool Tag(state_t& eSta, iterator_t& ite)
+	BOOL Tag(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_sTemp == _T(""))
 		{
 			if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-				return false;
+				return FALSE;
 		}
 		else
 		{
@@ -257,15 +257,15 @@ protected:
 			}
 			eSta = sta_tag;
 		}
-		return true;
+		return TRUE;
 	}
 	// 标签内容
-	bool Tco(state_t& eSta, iterator_t& ite)
+	BOOL Tco(state_t& eSta, iterator_t& ite)
 	{
-		if (ite == m_xData.Head()) return false;
+		if (ite == m_xData.Head()) return FALSE;
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
+			return FALSE;
 		switch (buf)
 		{
 		case _T('<'):
@@ -280,21 +280,21 @@ protected:
 			eSta = sta_tco;
 			break;
 		}
-		return true;
+		return TRUE;
 	}
 	// 标签内容完毕
-	bool Tce(state_t& eSta, iterator_t& ite)
+	BOOL Tce(state_t& eSta, iterator_t& ite)
 	{
 		ite = ite->Parent();
 		eSta = sta_nor;
-		return true;
+		return TRUE;
 	}
 	// 等待属性
-	bool Wat(state_t& eSta, iterator_t& ite)
+	BOOL Wat(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
+			return FALSE;
 		switch (buf)
 		{
 		case _T('<'):
@@ -316,7 +316,7 @@ protected:
 			{
 				node_t* node = *ite;
 				if (node->tmp.Empty())
-					return false;
+					return FALSE;
 				else
 					node->att[node->tmp] = _T("");
 			}
@@ -330,14 +330,14 @@ protected:
 			eSta = sta_wat;
 			break;
 		}
-		return true;
+		return TRUE;
 	}
 	// 属性赋值
-	bool Avl(state_t& eSta, iterator_t& ite)
+	BOOL Avl(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
+			return FALSE;
 		switch (buf)
 		{
 		case _T('\"'):
@@ -347,14 +347,14 @@ protected:
 			eSta = sta_avl;
 			break;
 		}
-		return true;
+		return TRUE;
 	}
 	// 属性内容
-	bool Aco(state_t& eSta, iterator_t& ite)
+	BOOL Aco(state_t& eSta, iterator_t& ite)
 	{
 		TCHAR buf = _T('\0');
 		if (m_mFile.Read(&buf, 1, sizeof(TCHAR)) != 1)
-			return false;
+			return FALSE;
 		switch (buf)
 		{
 		case _T('\"'):
@@ -368,15 +368,15 @@ protected:
 			eSta = sta_aco;
 			break;
 		}
-		return true;
+		return TRUE;
 	}
 	// 属性内容完毕
-	bool Ace(state_t& eSta, iterator_t& ite)
+	BOOL Ace(state_t& eSta, iterator_t& ite)
 	{
 		node_t* node = *ite;
 		node->tmp.Clear();
 		eSta = sta_wat;
-		return true;
+		return TRUE;
 	}
 
 	void Encode(iterator_t& ite)
@@ -480,25 +480,25 @@ public:
 	}
 
 	// 编码
-	bool Encode()
+	BOOL Encode()
 	{
-		if (!m_pFile) return false;
+		if (!m_pFile) return FALSE;
 		if (!m_pFile->SetSize(0))
-			return false;
+			return FALSE;
 		// 开始编码
 		Encode(m_xData.Head());
-		return true;
+		return TRUE;
 	}
 	// 解码
-	bool Decode()
+	BOOL Decode()
 	{
-		if (!m_pFile) return false;
+		if (!m_pFile) return FALSE;
 		if (!m_pFile->Seek(0, IFileObject::begin))
-			return false;
+			return FALSE;
 		Clear();
 		// 编码转换
 		uint64_t len64 = m_pFile->Size();
-		if (len64 > (1 << 30)) return false;		// 忽略大于1G的文件
+		if (len64 > (1 << 30)) return FALSE;		// 忽略大于1G的文件
 		{
 			CStringT<char> buf; buf.GetCStr(1 << 19);	// 1M的缓存区(CStringT默认会将传入大小翻倍拓展)
 			while(m_pFile->Read(buf.GetCStr(), buf.GetSize(), sizeof(char)) != 0)
@@ -524,9 +524,9 @@ public:
 			}
 		}
 		if(!m_mFile.Seek(0, IFileObject::begin))
-			return false;
+			return FALSE;
 		// 开始解析
-		bool ret = false;
+		BOOL ret = FALSE;
 		state_t cur_sta = sta_nor, old_sta = sta_nor;
 		iterator_t ite = m_xData.Head();
 		while(1)
@@ -580,7 +580,7 @@ public:
 					goto Return;
 				break;
 			case sta_end:
-				ret = true;
+				ret = TRUE;
 			default:
 				goto Return;
 			}
@@ -594,9 +594,9 @@ public:
 	{
 		return m_xData.Head();
 	}
-	bool GetNode(_IN_ LPCTSTR sName, _IN_OT_ iterator_t& rIte)
+	BOOL GetNode(_IN_ LPCTSTR sName, _IN_OT_ iterator_t& rIte)
 	{
-		if (!sName) return false;
+		if (!sName) return FALSE;
 		if (rIte == iterator_t())
 			rIte = m_xData.Head();
 		++rIte;
@@ -604,9 +604,9 @@ public:
 		{
 			if (!(*rIte)) continue;
 			if ((*rIte)->nam == sName)
-				return true;
+				return TRUE;
 		}
-		return false;
+		return FALSE;
 	}
 	CString GetAttr(_IN_ LPCTSTR sAttr, _IN_ iterator_t& rIte)
 	{
@@ -618,36 +618,36 @@ public:
 		return ite_att->Val();
 	}
 
-	bool AddNode(const node_t& node, iterator_t& ite)
+	BOOL AddNode(const node_t& node, iterator_t& ite)
 	{
 		node_t* p = ExMem::Alloc<node_t>(&m_GC);
 		(*p) = node;
 		return m_xData.Add(p, ite);
 	}
-	bool AddNode(LPCTSTR sName, iterator_t& ite)
+	BOOL AddNode(LPCTSTR sName, iterator_t& ite)
 	{
 		node_t* p = ExMem::Alloc<node_t>(&m_GC);
 		p->nam = sName;
 		return m_xData.Add(p, ite);
 	}
-	bool DelNode(iterator_t& ite)
+	BOOL DelNode(iterator_t& ite)
 	{
 		return m_xData.Del(ite);
 	}
 
-	bool AddAttr(LPCTSTR key, LPCTSTR val, iterator_t& ite)
+	BOOL AddAttr(LPCTSTR key, LPCTSTR val, iterator_t& ite)
 	{
-		if (!key) return false;
+		if (!key) return FALSE;
 		if (ite == m_xData.Head() || 
-			ite == m_xData.Tail()) return false;
+			ite == m_xData.Tail()) return FALSE;
 		(*ite)->att[key] = val;
-		return true;
+		return TRUE;
 	}
-	bool DelAttr(LPCTSTR key, iterator_t& ite)
+	BOOL DelAttr(LPCTSTR key, iterator_t& ite)
 	{
-		if (!key) return false;
+		if (!key) return FALSE;
 		if (ite == m_xData.Head() || 
-			ite == m_xData.Tail()) return false;
+			ite == m_xData.Tail()) return FALSE;
 		return (*ite)->att.Del(key);
 	}
 };

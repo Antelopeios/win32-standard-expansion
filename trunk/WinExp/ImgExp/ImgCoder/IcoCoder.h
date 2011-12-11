@@ -83,9 +83,9 @@ public:
 #pragma pack()
 
 public:
-	EXP_INLINE static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static BOOL CheckFile(IFileObject* pFile)
 	{
-		if(!pFile) return false;
+		if(!pFile) return FALSE;
 		BYTE chk_head[6] = { 0, 0, 1, 0, 1, 0 };
 		return ICoderObject::CheckFile(pFile, chk_head);
 	}
@@ -99,14 +99,14 @@ public:
 	{}
 
 public:
-	bool Encode(image_t Image)
+	BOOL Encode(image_t Image)
 	{
 		IFileObject* file = GetFile();
-		if(!file) return false;
+		if(!file) return FALSE;
 		CImage exp_image;
-		exp_image.SetTrust(false);
+		exp_image.SetTrust(FALSE);
 		exp_image = Image;
-		if (exp_image.IsNull()) return false;
+		if (exp_image.IsNull()) return FALSE;
 		// Ìî³äÍ¼ÏñÐÅÏ¢
 		ICONDIR file_head = {0};
 		file_head.idType = 1;
@@ -143,7 +143,7 @@ public:
 		file->Write(mkbf, clr_size, sizeof(BYTE));
 		ExMem::Free(mkbf);
 		file->Seek(0, IFileObject::begin);
-		return true;
+		return TRUE;
 	}
 	image_t Decode()
 	{

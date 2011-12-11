@@ -27,9 +27,9 @@ public:
 			if (wParam == VK_ESCAPE || 
 				wParam == VK_DELETE)
 			{
-				GET_CTL(files)->SetVisible(false);
-				GET_CTL(scr_files)->SetVisible(false);
-				GET_CTL(cloud)->SetVisible(true);
+				GET_CTL(files)->SetVisible(FALSE);
+				GET_CTL(scr_files)->SetVisible(FALSE);
+				GET_CTL(cloud)->SetVisible(TRUE);
 			}
 			break;
 		case WM_CLOSE:
@@ -166,7 +166,7 @@ public:
 			{
 				CString* edit = (CString*)ctrl->GetState(_T("edit"));
 				if (edit->Empty())
-					GET_CTL(cover)->SetVisible(true);
+					GET_CTL(cover)->SetVisible(TRUE);
 			}
 			break;
 		}
@@ -191,7 +191,7 @@ public:
 		{
 		case WM_SETFOCUS:
 			{
-				ctrl->SetVisible(false);
+				ctrl->SetVisible(FALSE);
 				GET_CTL(search)->SetFocus();
 			}
 			break;
@@ -246,7 +246,7 @@ public:
 				{
 					if(!GET_CTL(scr_cloud)->IsVisible())
 					{
-						GET_CTL(scr_cloud)->SetVisible(true);
+						GET_CTL(scr_cloud)->SetVisible(TRUE);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.Right(rc_wnd.Right() - GUI()->ScrWidth());
@@ -257,7 +257,7 @@ public:
 				{
 					if (GET_CTL(scr_cloud)->IsVisible())
 					{
-						GET_CTL(scr_cloud)->SetVisible(false);
+						GET_CTL(scr_cloud)->SetVisible(FALSE);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.Right(rc_wnd.Right());
@@ -272,9 +272,9 @@ public:
 		case WM_COMMAND:
 			if (wParam == BN_CLICKED)
 			{
-				GET_CTL(cloud)->SetVisible(false);
-				GET_CTL(scr_cloud)->SetVisible(false);
-				GET_CTL(files)->SetVisible(true);
+				GET_CTL(cloud)->SetVisible(FALSE);
+				GET_CTL(scr_cloud)->SetVisible(FALSE);
+				GET_CTL(files)->SetVisible(TRUE);
 			}
 			break;
 		}
@@ -358,7 +358,7 @@ public:
 				{
 					if(!GET_CTL(scr_files)->IsVisible())
 					{
-						GET_CTL(scr_files)->SetVisible(true);
+						GET_CTL(scr_files)->SetVisible(TRUE);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.Right(rc_wnd.Right() - GUI()->ScrWidth());
@@ -369,7 +369,7 @@ public:
 				{
 					if (GET_CTL(scr_files)->IsVisible())
 					{
-						GET_CTL(scr_files)->SetVisible(false);
+						GET_CTL(scr_files)->SetVisible(FALSE);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.Right(rc_wnd.Right());

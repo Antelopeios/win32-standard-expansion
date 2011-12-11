@@ -76,18 +76,18 @@ public:
 	{}
 
 protected:
-	bool CreateUI()
+	BOOL CreateUI()
 	{
 	}
 
 public:
-	bool Load(IFileObject* pFile)
+	BOOL Load(IFileObject* pFile)
 	{
-		if (!pFile) return false;
+		if (!pFile) return FALSE;
 		m_XML.SetFile(pFile);
-		if (!m_XML.Decode()) return false;
+		if (!m_XML.Decode()) return FALSE;
 		CGuiXML::iterator_t ite;
-		if (!m_XML.GetNode(_T("detail"), ite)) return false;
+		if (!m_XML.GetNode(_T("detail"), ite)) return FALSE;
 		// 开始读取配置文件内容
 		m_Detail.name	 = m_XML.GetAttr(_T("name"),	ite);
 		m_Detail.author	 = m_XML.GetAttr(_T("author"),	ite);
@@ -96,7 +96,7 @@ public:
 		m_Detail.version = m_XML.GetAttr(_T("version"),	ite);
 		m_Detail.date	 = m_XML.GetAttr(_T("date"),	ite);
 		// 开始创建界面对象
-		return true;
+		return TRUE;
 	}
 
 	const detail_t& GetDetail() { return m_Detail; }

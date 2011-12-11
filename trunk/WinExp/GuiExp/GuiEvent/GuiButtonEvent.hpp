@@ -276,7 +276,7 @@ public:
 				pixel_t pixel = ((pixel_t*)ctrl->GetState(_T("color")))[status];
 				CText* text = (CText*)ctrl->GetState(_T("text")) + status;
 				CImage* icon = (CImage*)ctrl->GetState(_T("icon"));
-				bool glow = (bool)(LONG_PTR)ctrl->GetState(_T("glow"));
+				BOOL glow = (BOOL)(LONG_PTR)ctrl->GetState(_T("glow"));
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;

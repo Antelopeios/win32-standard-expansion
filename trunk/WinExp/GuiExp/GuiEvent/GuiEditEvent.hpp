@@ -64,7 +64,7 @@ class CGuiEditEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiEditEvent, IGuiEvent)
 
 protected:
-	bool m_ShiftDown, m_CtrlDown, m_MouseDown, m_bFlicker;
+	BOOL m_ShiftDown, m_CtrlDown, m_MouseDown, m_bFlicker;
 	UINT_PTR m_uFlicker;
 	IGuiCtrl* m_Ctrl;
 	CString::iterator_t m_iteFlicker, m_iteSelect, m_iteOffset;
@@ -83,15 +83,15 @@ protected:
 
 public:
 	CGuiEditEvent()
-		: m_ShiftDown(false)
-		, m_CtrlDown(false)
-		, m_MouseDown(false)
-		, m_bFlicker(false)
+		: m_ShiftDown(FALSE)
+		, m_CtrlDown(FALSE)
+		, m_MouseDown(FALSE)
+		, m_bFlicker(FALSE)
 		, m_uFlicker(0)
 		, m_Ctrl(NULL)
 	{}
 	~CGuiEditEvent()
-	{ ShowFlicker(false); }
+	{ ShowFlicker(FALSE); }
 
 public:
 	// 获得属性
@@ -177,7 +177,7 @@ public:
 			} while (1);
 
 			// 刷新界面
-			m_bFlicker = true;
+			m_bFlicker = TRUE;
 			m_Ctrl->Refresh();
 		}
 		else
@@ -186,25 +186,25 @@ public:
 			m_iteOffset = m_iteFlicker;
 
 			// 刷新界面
-			m_bFlicker = true;
+			m_bFlicker = TRUE;
 			m_Ctrl->Refresh();
 		}
 	}
 
 	// 光标显示
-	void ShowFlicker(bool bShow)
+	void ShowFlicker(BOOL bShow)
 	{
 		if (bShow)
 		{
 			if (m_uFlicker != 0) return;
 			m_uFlicker = ::SetTimer(NULL, 0, 500, FlickerTimer);
 			s_TimerToEvent[m_uFlicker] = this;
-			m_bFlicker = true;
+			m_bFlicker = TRUE;
 		}
 		else
 		{
 			if (m_uFlicker == 0) return;
-			m_bFlicker = false;
+			m_bFlicker = FALSE;
 			::KillTimer(NULL, m_uFlicker);
 			s_TimerToEvent.Del(m_uFlicker);
 			m_uFlicker = 0;
@@ -314,10 +314,10 @@ public:
 		ExAssert(m_Ctrl);
 
 		if (cInput == VK_SHIFT)
-			m_ShiftDown = true;
+			m_ShiftDown = TRUE;
 		else
 		if (cInput == VK_CONTROL)
-			m_CtrlDown = true;
+			m_CtrlDown = TRUE;
 		else
 		{
 			// 获得属性
@@ -402,7 +402,7 @@ public:
 					SIZE_T siz_buf = (temp.GetLength() + 1) * sizeof(TCHAR);
 					HGLOBAL clp_buf = ::GlobalAlloc(GMEM_DDESHARE, siz_buf);
 					TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
-					StringCchCopy(buff, temp.GetLength() + 1, (LPCTSTR)temp);
+					_tcscpy_s(buff, temp.GetLength() + 1, (LPCTSTR)temp);
 					::GlobalUnlock(clp_buf);
 					::SetClipboardData(CF_UNICODETEXT, clp_buf);
 					::CloseClipboard();
@@ -447,7 +447,7 @@ public:
 					SIZE_T siz_buf = (temp.GetLength() + 1) * sizeof(TCHAR);
 					HGLOBAL clp_buf = ::GlobalAlloc(GMEM_DDESHARE, siz_buf);
 					TCHAR* buff = (TCHAR*)::GlobalLock(clp_buf);
-					StringCchCopy(buff, temp.GetLength() + 1, (LPCTSTR)temp);
+					_tcscpy_s(buff, temp.GetLength() + 1, (LPCTSTR)temp);
 					::GlobalUnlock(clp_buf);
 					::SetClipboardData(CF_UNICODETEXT, clp_buf);
 					::CloseClipboard();
@@ -575,7 +575,7 @@ public:
 				CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
 				if (!sel_rc.IsEmpty())
 				{
-					CFilterFill filter(ExRevColor(txt_sel_color), 0xf, true);
+					CFilterFill filter(ExRevColor(txt_sel_color), 0xf, TRUE);
 					CImgFilter::Filter(txt_img, sel_rc, &filter);
 					filter.m_Const = ExRevColor(bkg_sel_color);
 					filter.m_ClrMask = txt_sel_color;
@@ -630,11 +630,11 @@ public:
 				CPoint point(ExLoWord(lParam), ExHiWord(lParam));
 				PosFlicker(point);
 			}
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_IBEAM));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			m_Ctrl->ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
@@ -659,10 +659,10 @@ public:
 			break;
 		case WM_KEYUP:
 			if (wParam == VK_SHIFT)
-				m_ShiftDown = false;
+				m_ShiftDown = FALSE;
 			else
 			if (wParam == VK_CONTROL)
-				m_CtrlDown = false;
+				m_CtrlDown = FALSE;
 			break;
 		case WM_KEYDOWN:
 			// 按键输入
@@ -674,15 +674,15 @@ public:
 			break;
 		//case WM_SETFOCUS:
 		//	// 获得焦点时显示光标
-		//	ShowFlicker(true);
+		//	ShowFlicker(TRUE);
 		//	break;
 		case WM_KILLFOCUS:
-			m_ShiftDown = false;
-			m_CtrlDown = false;
-			m_MouseDown = false;
+			m_ShiftDown = FALSE;
+			m_CtrlDown = FALSE;
+			m_MouseDown = FALSE;
 			m_Ctrl->ReleaseCapture();
 		//	// 失去焦点时隐藏光标
-		//	ShowFlicker(false);
+		//	ShowFlicker(FALSE);
 			break;
 		case WM_PAINT:
 			ShowFlicker(m_Ctrl->IsFocus());

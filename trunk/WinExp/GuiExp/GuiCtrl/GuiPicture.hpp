@@ -91,7 +91,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("color"))
 		{
@@ -110,7 +110,7 @@ public:
 			m_Text = *(CText*)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
-		return false;
+		return FALSE;
 	}
 };
 

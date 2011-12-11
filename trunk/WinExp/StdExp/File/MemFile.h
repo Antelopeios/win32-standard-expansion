@@ -78,21 +78,21 @@ public:
 	{ Close(); }
 
 public:
-	bool Open(BYTE* pBuff = NULL, DWORD nSize = 1)
+	BOOL Open(BYTE* pBuff = NULL, DWORD nSize = 1)
 	{
-		if (nSize == 0) return false;
-		if (!Close()) return false;
+		if (nSize == 0) return FALSE;
+		if (!Close()) return FALSE;
 		if (pBuff)
 			m_MemBuff.SetArray(pBuff, nSize);
 		else
 			m_MemBuff.SetSize(nSize);
-		return true;
+		return TRUE;
 	}
-	virtual bool Close()
+	virtual BOOL Close()
 	{
 		m_MemBuff.Clear();
 		m_Position = m_MemBuff.Head();
-		return true;
+		return TRUE;
 	}
 
 	virtual DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
@@ -131,9 +131,9 @@ public:
 		return (len / nSize);
 	}
 
-	virtual bool Seek(int64_t nOffset, int iOrigin = current)
+	virtual BOOL Seek(int64_t nOffset, int iOrigin = current)
 	{
-		if (Error()) return false;
+		if (Error()) return FALSE;
 		long new_pos = m_Position->Index();
 
 		if (iOrigin == begin)	new_pos = (long)nOffset;
@@ -141,11 +141,11 @@ public:
 		if (iOrigin == current) new_pos += (long)nOffset;
 		else
 		if (iOrigin == end)		new_pos = m_MemBuff.GetCount() + (long)nOffset;
-		else return false;
+		else return FALSE;
 		if (new_pos < 0)		new_pos = 0;
 
 		m_Position->nIndx = new_pos;
-		return true;
+		return TRUE;
 	}
 	virtual uint64_t Tell()
 	{
@@ -157,9 +157,9 @@ public:
 		if (Error()) return -1;
 		return m_MemBuff.GetCount();
 	}
-	virtual bool SetSize(uint64_t nSize)
+	virtual BOOL SetSize(uint64_t nSize)
 	{
-		if (!Seek(nSize, begin)) return false;
+		if (!Seek(nSize, begin)) return FALSE;
 		if (nSize < Size())
 			return m_MemBuff.Del(m_Position + 1, -1);
 		else
@@ -167,23 +167,23 @@ public:
 		{	// Ìî³ä¿Õ°×¿Õ¼ä
 			DWORD fill = m_Position->Index() - m_MemBuff.GetCount();
 			BYTE* buff = alloc_t::Alloc<BYTE>(fill);
-			bool r = m_MemBuff.AddArray(buff, fill);
+			BOOL r = m_MemBuff.AddArray(buff, fill);
 			alloc_t::Free(buff);
 			return r;
 		}
-		return true;
+		return TRUE;
 	}
-	virtual bool Flush()
+	virtual BOOL Flush()
 	{
-		if (Error()) return false;
-		return true;
+		if (Error()) return FALSE;
+		return TRUE;
 	}
-	virtual bool Eof()
+	virtual BOOL Eof()
 	{
-		if (Error()) return true;
+		if (Error()) return TRUE;
 		return (m_Position->Index() >= m_MemBuff.GetCount());
 	}
-	virtual bool Error()
+	virtual BOOL Error()
 	{
 		return m_MemBuff.IsNull();
 	}

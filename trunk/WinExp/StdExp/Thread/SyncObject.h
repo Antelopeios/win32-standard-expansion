@@ -66,11 +66,11 @@ public:
 	{ Close(); }
 
 public:
-	bool IsClosed()
+	BOOL IsClosed()
 	{ return (!m_hSync || m_hSync == INVALID_HANDLE_VALUE); }
-	bool Close()
+	BOOL Close()
 	{
-		bool ret = true;
+		BOOL ret = TRUE;
 		if(!IsClosed())
 			ret = CloseHandle(m_hSync);
 		m_hSync = INVALID_HANDLE_VALUE;
@@ -87,12 +87,12 @@ public:
 		if (hSync == NULL) return WAIT_FAILED;
 		return WaitForSingleObject(hSync, dwWaitTime);
 	}
-	static DWORD Wait(HANDLE* Syncs, DWORD nCount, bool bWaitAll, DWORD dwWaitTime = INFINITE)
+	static DWORD Wait(HANDLE* Syncs, DWORD nCount, BOOL bWaitAll, DWORD dwWaitTime = INFINITE)
 	{
 		if (Syncs == NULL || nCount == 0) return WAIT_FAILED;
 		return WaitForMultipleObjects(nCount, Syncs, bWaitAll, dwWaitTime);
 	}
-	static DWORD Wait(ISyncObject* Syncs, DWORD nCount, bool bWaitAll, DWORD dwWaitTime = INFINITE)
+	static DWORD Wait(ISyncObject* Syncs, DWORD nCount, BOOL bWaitAll, DWORD dwWaitTime = INFINITE)
 	{
 		HANDLE syncs[MAXIMUM_WAIT_OBJECTS];
 		DWORD limit = min(MAXIMUM_WAIT_OBJECTS, nCount);
@@ -100,10 +100,10 @@ public:
 		return Wait(syncs, limit, bWaitAll, dwWaitTime);
 	}
 	template <DWORD SizeT>
-	static DWORD Wait(HANDLE (&Syncs)[SizeT], bool bWaitAll, DWORD dwWaitTime = INFINITE)
+	static DWORD Wait(HANDLE (&Syncs)[SizeT], BOOL bWaitAll, DWORD dwWaitTime = INFINITE)
 	{ return Wait(Syncs, SizeT, bWaitAll, dwWaitTime); }
 	template <DWORD SizeT>
-	static DWORD Wait(ISyncObject (&Syncs)[SizeT], bool bWaitAll, DWORD dwWaitTime = INFINITE)
+	static DWORD Wait(ISyncObject (&Syncs)[SizeT], BOOL bWaitAll, DWORD dwWaitTime = INFINITE)
 	{ return Wait(Syncs, SizeT, bWaitAll, dwWaitTime); }
 
 	HANDLE GetHandle() { return m_hSync; }

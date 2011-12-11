@@ -83,9 +83,9 @@ protected:
 	}
 
 public:
-	EXP_INLINE static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static BOOL CheckFile(IFileObject* pFile)
 	{
-		if(!pFile) return false;
+		if(!pFile) return FALSE;
 		BYTE chk_head[2] = { 0x42, 0x4D };
 		return ICoderObject::CheckFile(pFile, chk_head);
 	}
@@ -329,14 +329,14 @@ protected:
 	}
 
 public:
-	bool Encode(image_t Image)
+	BOOL Encode(image_t Image)
 	{
 		IFileObject* file = GetFile();
-		if(!file) return false;
+		if(!file) return FALSE;
 		CImage exp_image;
-		exp_image.SetTrust(false);
+		exp_image.SetTrust(FALSE);
 		exp_image = Image;
-		if (exp_image.IsNull()) return false;
+		if (exp_image.IsNull()) return FALSE;
 		// Ìî³äÍ¼ÏñÐÅÏ¢
 		BITMAPFILEHEADER file_head = {0};
 		file_head.bfType = 0x4D42;
@@ -355,7 +355,7 @@ public:
 		file->Write(&file_info, sizeof(file_info), 1);
 		file->Write(exp_image.GetPixels(), exp_image.GetSize(), 1);
 		file->Seek(0, IFileObject::begin);
-		return true;
+		return TRUE;
 	}
 	image_t Decode()
 	{

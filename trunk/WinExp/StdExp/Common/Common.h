@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-05
-// Version:	1.2.0008.1000
+// Date:	2011-12-11
+// Version:	1.2.0009.2350
 //
 // History:
 //	- 1.2.0006.1150(2011-03-02)	= 调整部分宏定义,定义并使用EXP_INLINE宏
 //	- 1.2.0007.2000(2011-04-03)	+ 添加interface宏定义
 //	- 1.2.0008.1000(2011-05-05)	= 将EXP宏定义由StdExp调整为win_exp
+//	- 1.2.0009.2350(2011-12-11)	- 移除bool的宏定义,避免与stl发生冲突
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Common_h__
@@ -71,12 +72,6 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // 数据类型定义
-
-#if !defined(bool) && !defined(true) && !defined(false)
-#define bool				int
-#define true				1
-#define false				0
-#endif
 
 typedef unsigned __int8		uint8_t;
 typedef unsigned __int16	uint16_t;

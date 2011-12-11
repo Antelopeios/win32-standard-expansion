@@ -65,9 +65,9 @@ public:
 	{}
 
 protected:
-	bool Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld)
+	BOOL Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld)
 	{
-		if (!pCtrl) return false;
+		if (!pCtrl) return FALSE;
 		if (m_Alpha >= EXP_CM) m_Alpha = 0;
 		if (m_Alpha > EXP_CM - 25) m_Alpha = EXP_CM;
 		//ExTrace(_T("0x%08X fade alpha: %d\n"), pCtrl, m_Alpha);

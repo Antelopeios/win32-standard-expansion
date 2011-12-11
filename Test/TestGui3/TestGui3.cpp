@@ -63,7 +63,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
-	//wnd->SetLayered(true);
+	//wnd->SetLayered(TRUE);
 	wnd->ShowWindow(SW_SHOW);
 	wnd->GetClientRect(rc_wnd);
 

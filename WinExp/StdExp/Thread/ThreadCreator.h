@@ -74,23 +74,23 @@ public:
 	typedef CreatorT creator_t;
 
 protected:
-	bool m_bUIThread;
+	BOOL m_bUIThread;
 	LPVOID m_lpParam;
 	DWORD m_nIDThread;
 
 public:
 	IThreadT()
 		: ISyncObject()
-		, m_bUIThread(false)
+		, m_bUIThread(FALSE)
 		, m_lpParam(NULL)
 		, m_nIDThread(0)
 	{}
-	IThreadT(_IN_ bool bUIThread, 
+	IThreadT(_IN_ BOOL bUIThread, 
 			 _IN_ LPVOID lpParam = NULL, 
 			 _IN_ DWORD dwFlag = 0, 
 			 _OT_ LPDWORD lpIDThread = NULL)
 		: ISyncObject()
-		, m_bUIThread(false)
+		, m_bUIThread(FALSE)
 		, m_lpParam(NULL)
 		, m_nIDThread(0)
 	{ Create(lpParam, dwFlag, lpIDThread); }
@@ -124,34 +124,34 @@ protected:
 			return _this->OnThread(_this->GetParam());
 	}
 	virtual DWORD OnThread(LPVOID lpParam) { return 0; }
-	virtual bool OnMessage(const MSG* lpMsg) { return false; }
+	virtual BOOL OnMessage(const MSG* lpMsg) { return FALSE; }
 
 public:
-	bool Create(_IN_ bool bUIThread = false, 
+	BOOL Create(_IN_ BOOL bUIThread = FALSE, 
 				_IN_ LPVOID lpParam = NULL, 
 				_IN_ DWORD dwFlag = 0, 
 				_OT_ LPDWORD lpIDThread = NULL)
 	{
-		if (!IsClosed()) return false;
+		if (!IsClosed()) return FALSE;
 		m_bUIThread = bUIThread;
 		m_lpParam = lpParam;
 		m_hSync = creator_t::Create(ProxyProc, this, dwFlag, &m_nIDThread);
 		if (lpIDThread) (*lpIDThread) = m_nIDThread;
 		if (m_hSync == NULL) m_hSync = INVALID_HANDLE_VALUE;
-		if (m_hSync == INVALID_HANDLE_VALUE) return false;
-		return true;
+		if (m_hSync == INVALID_HANDLE_VALUE) return FALSE;
+		return TRUE;
 	}
 
-	bool IsUIThread()
+	BOOL IsUIThread()
 	{ return m_bUIThread; }
 	LPVOID GetParam()
 	{ return m_lpParam; }
 	DWORD GetID()
 	{ return m_nIDThread; }
 
-	bool PostMessage(UINT nMsg, WPARAM wParam = 0, LPARAM lParam = NULL)
+	BOOL PostMessage(UINT nMsg, WPARAM wParam = 0, LPARAM lParam = NULL)
 	{
-		if (!IsUIThread()) return false;
+		if (!IsUIThread()) return FALSE;
 		return ::PostThreadMessage(GetID(), nMsg, wParam, lParam);
 	}
 
@@ -160,9 +160,9 @@ public:
 	DWORD Resume()
 	{ return creator_t::Resume(m_hSync); }
 
-	bool Terminate(DWORD dwExitCode = 0)
+	BOOL Terminate(DWORD dwExitCode = 0)
 	{
-		if (!creator_t::Terminate(m_hSync, dwExitCode)) return false;
+		if (!creator_t::Terminate(m_hSync, dwExitCode)) return FALSE;
 		return Close();
 	}
 };

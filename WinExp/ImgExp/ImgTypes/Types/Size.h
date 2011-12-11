@@ -102,13 +102,13 @@ public:
 		return (*this);
 	}
 
-	EXP_INLINE bool operator==(const CSizeT& tSize)
+	EXP_INLINE BOOL operator==(const CSizeT& tSize)
 	{ return ((cx == tSize.cx) && (cy == tSize.cy)); }
-	EXP_INLINE bool operator==(SIZE& tSize)
+	EXP_INLINE BOOL operator==(SIZE& tSize)
 	{ return ((cx == tSize.cx) && (cy == tSize.cy)); }
-	EXP_INLINE bool operator!=(const CSizeT& tSize)
+	EXP_INLINE BOOL operator!=(const CSizeT& tSize)
 	{ return !((*this) == tSize); }
-	EXP_INLINE bool operator!=(SIZE& tSize)
+	EXP_INLINE BOOL operator!=(SIZE& tSize)
 	{ return !((*this) == tSize); }
 
 	EXP_INLINE CSizeT& operator+=(const CSizeT& tSize)

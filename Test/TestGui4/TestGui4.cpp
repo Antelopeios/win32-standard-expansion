@@ -43,7 +43,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	scroll1->SetState(_T("sli_blk_color"), pix);
 	scroll1->SetState(_T("sli_all"), (void*)100);
 	scroll1->SetState(_T("sli_fra"), (void*)10);
-	//scroll1->SetState(_T("sli_ori"), (void*)true);
+	//scroll1->SetState(_T("sli_ori"), (void*)TRUE);
 	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
 	scroll1->SetState(_T("up_color"), pix);
 	scroll1->SetState(_T("dn_color"), pix);
@@ -55,7 +55,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	scroll2->SetState(_T("sli_blk_color"), pix);
 	scroll2->SetState(_T("sli_all"), (void*)100);
 	scroll2->SetState(_T("sli_fra"), (void*)20);
-	scroll2->SetState(_T("sli_ori"), (void*)true);
+	scroll2->SetState(_T("sli_ori"), (void*)TRUE);
 	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
 	scroll2->SetState(_T("up_color"), pix);
 	scroll2->SetState(_T("dn_color"), pix);

@@ -81,21 +81,21 @@ struct _TypeInfo
 		if (!m_Creator) return NULL;
 		return (*m_Creator)(gc);
 	}
-	EXP_INLINE bool IsKindOf(_TypeInfo& cls)
+	EXP_INLINE BOOL IsKindOf(_TypeInfo& cls)
 	{
 		if( type_id == cls.type_id )
-			return true;
+			return TRUE;
 		for(int i = 0; i < 3; i++)
 		{
 			if(!pBaseClass[i]) break;
 			if( pBaseClass[i]->IsKindOf(cls))
-				return true;
+				return TRUE;
 		}
-		return false;
+		return FALSE;
 	}
-	EXP_INLINE bool operator==(const _TypeInfo& info)
+	EXP_INLINE BOOL operator==(const _TypeInfo& info)
 	{ return this == &info; }
-	EXP_INLINE bool operator!=(const _TypeInfo& info)
+	EXP_INLINE BOOL operator!=(const _TypeInfo& info)
 	{ return this != &info; }
 };
 
@@ -115,22 +115,22 @@ private:
 
 public:
 	// 向工厂注册一个类名
-	bool RegTypeInfo(LPCTSTR c_key, _TypeInfo* inf)
+	BOOL RegTypeInfo(LPCTSTR c_key, _TypeInfo* inf)
 	{
-		if (!c_key) return false;
+		if (!c_key) return FALSE;
 		CString key(c_key);
 		if (dc_funcs.Locate(key) == dc_funcs.Tail())
 		{
 			dc_funcs.Add(key, inf);
-			return true;
+			return TRUE;
 		}
 		else
-			return false;
+			return FALSE;
 	}
 	// 从工厂获得一个 _TypeInfo
 	_TypeInfo* GetTypeInfo(LPCTSTR c_key)
 	{
-		if (!c_key) return false;
+		if (!c_key) return FALSE;
 		CString key(c_key);
 		key_map_t::iterator_t ite = dc_funcs.Locate(key);
 		if (ite == dc_funcs.Tail())
@@ -218,7 +218,7 @@ private:																					\
 	EXP_DEF_MULTTYPE(cls_name)																\
 	EXP_DECLARE_TYPEINFO(cls_name)															\
 public:																						\
-	bool IsKindOf(_TypeInfo& cls);
+	BOOL IsKindOf(_TypeInfo& cls);
 
 // dynamically typeinfo
 
@@ -243,7 +243,7 @@ public:																						\
 public:																						\
 	static IBaseObject* CreateObject(CGC* gc = NULL);										\
 private:																					\
-	static bool m_bRegSuccess;
+	static BOOL m_bRegSuccess;
 
 #define EXP_DECLARE_DYNCREATE_CLS(cls_name, base_name)										\
 	EXP_DECLARE_DYNAMIC_CLS(cls_name, base_name)											\
@@ -310,10 +310,10 @@ private:																					\
 		pfn_new																				\
 	};																						\
 	tmp																						\
-	bool cls_name::IsKindOf(_TypeInfo& cls)													\
+	BOOL cls_name::IsKindOf(_TypeInfo& cls)													\
 	{																						\
 		_TypeInfo* p = &(this->GetTypeInfo());												\
-		return (p ? p->IsKindOf(cls) : false);												\
+		return (p ? p->IsKindOf(cls) : FALSE);												\
 	}
 
 // dynamically typeinfo
@@ -340,7 +340,7 @@ private:																					\
 	IBaseObject* cls_name::CreateObject(CGC* gc/* = NULL*/)									\
 	{ return (base_name*)ExMem::Alloc<cls_name>(gc); }										\
 	tmp																						\
-	bool cls_name::m_bRegSuccess =															\
+	BOOL cls_name::m_bRegSuccess =															\
 		ExRegTypeInfo( _T(#cls_name), &(cls_name::EXP_TYPEINFO_MEMBER) );
 
 #define EXP_IMPLEMENT_DYNCREATE_CLS(cls_name, base_name, tmp)								\
@@ -378,7 +378,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // 动态指针效验函数
-EXP_INLINE bool ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
+EXP_INLINE BOOL ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
 {
 	if( ptr )
 	{
@@ -386,10 +386,10 @@ EXP_INLINE bool ExDynCheck(LPCTSTR c_key, IBaseObject* ptr)
 		if( inf )
 			return ptr->IsKindOf(*inf);
 		else
-			return false;
+			return FALSE;
 	}
 	else
-		return false;
+		return FALSE;
 }
 
 // 动态指针转换函数模板

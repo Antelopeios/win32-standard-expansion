@@ -146,7 +146,7 @@ protected:
 										_IN_ const double (&mtxTans)[4], inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
-		exp_src.SetTrust(false);
+		exp_src.SetTrust(FALSE);
 		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
@@ -178,7 +178,7 @@ protected:
 		};
 		// 创建目标图像
 		CImage exp_des;
-		exp_des.SetTrust(false);
+		exp_des.SetTrust(FALSE);
 		exp_des.Create(w_des, h_des);
 		if (exp_des.IsNull()) return NULL;
 		// 映射坐标点
@@ -212,7 +212,7 @@ public:
 	EXP_INLINE static image_t MtxDeform(_IN_ image_t imgSrc, _IN_ const double (&mtxTans)[4], inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
-		exp_src.SetTrust(false);
+		exp_src.SetTrust(FALSE);
 		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
@@ -234,7 +234,7 @@ public:
 	EXP_INLINE static image_t PlgDeform(_IN_ image_t imgSrc, _IN_ const CPoint (&ptVer)[2], inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
-		exp_src.SetTrust(false);
+		exp_src.SetTrust(FALSE);
 		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 拿到顶点坐标
@@ -258,7 +258,7 @@ public:
 	EXP_INLINE static image_t WhlDeform(_IN_ image_t imgSrc, _IN_ int16_t nDegree, inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
-		exp_src.SetTrust(false);
+		exp_src.SetTrust(FALSE);
 		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 角度换算弧度
@@ -278,7 +278,7 @@ public:
 	EXP_INLINE static image_t ZomDeform(_IN_ image_t imgSrc, _IN_ LONG nW, _IN_ LONG nH, inter_proc_t interProc = EXP_IMG_INTER)
 	{
 		CImage exp_src;
-		exp_src.SetTrust(false);
+		exp_src.SetTrust(FALSE);
 		exp_src = imgSrc;
 		if (exp_src.IsNull()) return NULL;
 		// 计算形变矩阵

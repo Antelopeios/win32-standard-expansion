@@ -60,27 +60,27 @@ class CImgDrawer
 {
 public:
 	// 画点
-	EXP_INLINE static bool Point(image_t imgDes, CPoint& ptDes, pixel_t pixSrc)
+	EXP_INLINE static BOOL Point(image_t imgDes, CPoint& ptDes, pixel_t pixSrc)
 	{
 		CImage exp_des;
-		exp_des.SetTrust(false);
+		exp_des.SetTrust(FALSE);
 		exp_des = imgDes;
-		if (exp_des.IsNull()) return false;
+		if (exp_des.IsNull()) return FALSE;
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		pixel_t* pix_des = exp_des.GetPixels();
-		if (ptDes.x >= sz_des.cx || ptDes.y >= sz_des.cy) return true;
+		if (ptDes.x >= sz_des.cx || ptDes.y >= sz_des.cy) return TRUE;
 		LONG i_d = (sz_des.cy - ptDes.y - 1) * sz_des.cx + ptDes.x;
 		pix_des[i_d] = pixSrc;
-		return true;
+		return TRUE;
 	}
 
 	// 填充
-	EXP_INLINE static bool Fill(image_t imgDes, const CRect& rcDes, const pixel_t pixSrc)
+	EXP_INLINE static BOOL Fill(image_t imgDes, const CRect& rcDes, const pixel_t pixSrc)
 	{
 		CImage exp_des;
-		exp_des.SetTrust(false);
+		exp_des.SetTrust(FALSE);
 		exp_des = imgDes;
-		if (exp_des.IsNull()) return false;
+		if (exp_des.IsNull()) return FALSE;
 
 		// 格式化区域
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
@@ -97,7 +97,7 @@ public:
 
 		// 获得合适的宽与高
 		LONG w = rc_des.Width(), h = rc_des.Height();
-		if (w <= 0 || h <= 0) return true;
+		if (w <= 0 || h <= 0) return TRUE;
 		// 计算坐标起点
 		LONG inx_des = (sz_des.cy - rc_des.Top() - 1) * sz_des.cx + rc_des.Left();
 
@@ -106,9 +106,9 @@ public:
 		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
 			for(LONG x = 0, i_d = inx_des; x < w; ++x, ++i_d)
 				pix_des[i_d] = pixSrc;
-		return true;
+		return TRUE;
 	}
-	EXP_INLINE static bool Fill(image_t imgDes, const pixel_t pixSrc)
+	EXP_INLINE static BOOL Fill(image_t imgDes, const pixel_t pixSrc)
 	{
 		return Fill(imgDes, CRect(), pixSrc);
 	}
@@ -117,9 +117,9 @@ public:
 #undef PreDraw
 #define PreDraw() \
 	CImage exp_des; \
-	exp_des.SetTrust(false); \
+	exp_des.SetTrust(FALSE); \
 	exp_des = imgDes; \
-	if (exp_des.IsNull()) return false; \
+	if (exp_des.IsNull()) return FALSE; \
 	CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight()); \
 	CImage img; \
 	img.Create(sz_des.cx, sz_des.cy); \
@@ -146,13 +146,13 @@ public:
 //#define EndDraw
 
 	// 画线
-	EXP_INLINE static bool Line(image_t imgDes, const CLine& lnDes, const pixel_t pixSrc)
+	EXP_INLINE static BOOL Line(image_t imgDes, const CLine& lnDes, const pixel_t pixSrc)
 	{
 		PreDraw();
 		MoveToEx(grp, lnDes.pt1.x, lnDes.pt1.y, &POINT());
 		LineTo(grp, lnDes.pt2.x, lnDes.pt2.y);
 		EndDraw()
-		return true;
+		return TRUE;
 	}
 
 #pragma pop_macro("EndDraw")

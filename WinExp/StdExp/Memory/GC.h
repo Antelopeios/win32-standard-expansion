@@ -108,24 +108,24 @@ public:
 	template <typename TypeT>
 	EXP_INLINE TypeT* Construct(void* pPtr)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		return alloc_t::Construct<TypeT>(pPtr);
 	}
 	EXP_INLINE void* Destruct(void* pPtr)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		return alloc_t::Destruct(pPtr);
 	}
 
 public:
 	DWORD GetGCSize()
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return m_nSize;
 	}
 	void SetGCSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		if( GetGCSize() >= nSize ) return;
 		void** pArray = alloc_t::Alloc<void*>(nSize);
 		if (m_BlockArray)
@@ -139,21 +139,21 @@ public:
 	}
 
 	// 内存效验
-	bool Valid(void* pPtr)
+	BOOL Valid(void* pPtr)
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return alloc_t::Valid(pPtr);
 	}
 	// 内存大小
 	DWORD Size(void* pPtr)
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		return alloc_t::Size(pPtr);
 	}
 	// 注册内存
 	void* Regist(void* pPtr)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		if (GetGCSize() == m_nIndx)
 			SetGCSize(PolicyT::Expan(GetGCSize()));
 		m_BlockArray[m_nIndx] = pPtr;
@@ -165,7 +165,7 @@ public:
 	TypeT* Alloc(DWORD nCount = 1)
 	{
 		if (nCount == 0) return NULL;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		return (TypeT*)Regist(CheckAlloc<TypeT>(nCount));
 	}
 	void* Alloc(DWORD nSize)
@@ -177,7 +177,7 @@ public:
 	void Free(void* pPtr)
 	{
 		if (!pPtr) return;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		DWORD i = 0;
 		for(; i < m_nIndx; ++i)
 		{
@@ -193,7 +193,7 @@ public:
 	// 清空GC
 	void Clear()
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		if (!m_nIndx) return;
 		// 后进先出
 		for(DWORD i = (m_nIndx - 1); i > 0; --i)
@@ -216,7 +216,7 @@ public:
 
 public:
 	// alloc_t
-	EXP_INLINE static bool Valid(void* pPtr)
+	EXP_INLINE static BOOL Valid(void* pPtr)
 	{ return alloc_t::Valid(pPtr); }
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return alloc_t::Size(pPtr); }
@@ -228,7 +228,7 @@ public:
 	EXP_INLINE static void Free(void* pPtr)
 	{ gc_alloc_t::CheckFree(pPtr); }
 	// gc_alloc_t
-	EXP_INLINE static bool Valid(gc_alloc_t* alloc, void* pPtr)
+	EXP_INLINE static BOOL Valid(gc_alloc_t* alloc, void* pPtr)
 	{ return alloc ? alloc->Valid(pPtr) : Valid(pPtr); }
 	EXP_INLINE static DWORD Size(gc_alloc_t* alloc, void* pPtr)
 	{ return alloc ? alloc->Size(pPtr) : Size(pPtr); }

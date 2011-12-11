@@ -107,9 +107,9 @@ public:
 		pt2 = pt1 + pt;
 	}
 
-	EXP_INLINE bool IsEmpty()
+	EXP_INLINE BOOL IsEmpty()
 	{ return (pt1.x == pt2.x || pt1.y == pt2.y); }
-	EXP_INLINE bool IsNull()
+	EXP_INLINE BOOL IsNull()
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
 	// 求两点距离
@@ -120,12 +120,12 @@ public:
 	}
 
 	// 求斜率
-	EXP_INLINE bool K(_OT_ TypeT& k)
+	EXP_INLINE BOOL K(_OT_ TypeT& k)
 	{
 		TypeT div = pt2.x - pt1.x;
-		if (ExIsZero(div)) return false;
+		if (ExIsZero(div)) return FALSE;
 		k = (pt2.y - pt1.y) / (pt2.x - pt1.x);
-		return true;
+		return TRUE;
 	}
 
 	// 点与直线的关系
@@ -145,58 +145,58 @@ public:
 	}
 
 	// 求交点
-	EXP_INLINE bool InterLine(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
+	EXP_INLINE BOOL InterLine(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
 	{
 		TypeT b1 = pt1.x - pt2.x, b2 = tLine.pt1.x - tLine.pt2.x;
-		if (ExIsZero(b1) && ExIsZero(b2)) return false;
+		if (ExIsZero(b1) && ExIsZero(b2)) return FALSE;
 		TypeT a1 = pt2.y - pt1.y, a2 = tLine.pt2.y - tLine.pt1.y;
-		if (ExIsEqual(a1 / b1, a2 / b2)) return false;
+		if (ExIsEqual(a1 / b1, a2 / b2)) return FALSE;
 		TypeT c1 = a1 * pt1.x + b1 * pt1.y, c2 = a2 * tLine.pt1.x + b2 * tLine.pt1.y;
 		TypeT div = a1 * b2 - b1 * a2;
 		Pt.x = (b2 * c1 - b1 * c2) / div;
 		Pt.y = (a1 * c2 - a2 * c1) / div;
-		return true;
+		return TRUE;
 	}
-	EXP_INLINE bool InterSect(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
+	EXP_INLINE BOOL InterSect(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
 	{
 		CPointT<TypeT> pt;
-		if(!InterLine(tLine, pt)) return false;
+		if(!InterLine(tLine, pt)) return FALSE;
 		// 判断x
 		if (ExIsEqual(pt1.x, pt2.x))
 		{
 			if (!ExIsEqual(pt.x, pt1.x))
-				return false;
+				return FALSE;
 		}
 		else
 		if (pt1.x < pt2.x)
 		{
 			if (pt.x < pt1.x || pt.x > pt2.x)
-				return false;
+				return FALSE;
 		}
 		else
 		{
 			if (pt.x > pt1.x || pt.x < pt2.x)
-				return false;
+				return FALSE;
 		}
 		// 判断y
 		if (ExIsEqual(pt1.y, pt2.y))
 		{
 			if (!ExIsEqual(pt.y, pt1.y))
-				return false;
+				return FALSE;
 		}
 		else
 		if (pt1.y < pt2.y)
 		{
 			if (pt.y < pt1.y || pt.y > pt2.y)
-				return false;
+				return FALSE;
 		}
 		else
 		{
 			if (pt.y > pt1.y || pt.y < pt2.y)
-				return false;
+				return FALSE;
 		}
 		Pt = pt;
-		return true;
+		return TRUE;
 	}
 
 	EXP_INLINE CLineT& operator=(const CRectT<TypeT>& tRect)
@@ -209,7 +209,7 @@ public:
 		Set(tLine.pt1, tLine.pt2);
 		return (*this);
 	}
-	EXP_INLINE bool operator==(const CLineT& tLine)
+	EXP_INLINE BOOL operator==(const CLineT& tLine)
 	{ return ((pt1 == tLine.pt1) && (pt2 == tLine.pt2)); }
 
 	EXP_INLINE CLineT& operator+=(const CPointT<TypeT>& Pt)

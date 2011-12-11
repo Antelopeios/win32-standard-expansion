@@ -60,14 +60,14 @@ class CGuiSlider : public CGuiPicture /*滚动条滑槽*/
 protected:
 	CGuiButton m_Slider;
 	LONG m_All/*全部内容长度*/, m_Fra/*片段长度*/, m_Pos/*位置*/;
-	bool m_Ori; // 方向
+	BOOL m_Ori; // 方向
 
 public:
 	CGuiSlider()
 		: m_All(0)
 		, m_Fra(0)
 		, m_Pos(0)
-		, m_Ori(false)
+		, m_Ori(FALSE)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiSliderEvent"), GetGC())); /*先让基类绘图*/
@@ -77,7 +77,7 @@ public:
 	}
 	~CGuiSlider()
 	{
-		DelComp(&m_Slider, false);
+		DelComp(&m_Slider, FALSE);
 	}
 
 public:
@@ -115,7 +115,7 @@ public:
 		else
 			return CGuiPicture::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("all"))
 		{
@@ -149,7 +149,7 @@ public:
 		else
 		if (sType == _T("ori"))
 		{
-			m_Ori = (bool)(LONG_PTR)pState;
+			m_Ori = (BOOL)(LONG_PTR)pState;
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
@@ -192,9 +192,9 @@ public:
 	}
 	~CGuiScroll()
 	{
-		DelComp(&m_Slider, false);
-		DelComp(&m_Up, false);
-		DelComp(&m_Down, false);
+		DelComp(&m_Slider, FALSE);
+		DelComp(&m_Up, FALSE);
+		DelComp(&m_Down, FALSE);
 	}
 
 public:
@@ -233,7 +233,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		CString type(sType);
 		if (sType == _T("main"))
@@ -243,7 +243,7 @@ public:
 			if (old_sta != m_Main)
 				return IGuiCtrlBase::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (type.Left(4) == _T("sli_"))
@@ -263,7 +263,7 @@ public:
 			type.TrimLeft(_T("dn_"));
 			return m_Down.SetState(type, pState);
 		}
-		return false;
+		return FALSE;
 	}
 };
 

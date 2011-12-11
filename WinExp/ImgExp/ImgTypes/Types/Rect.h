@@ -48,7 +48,7 @@
 //	- 1.0.0007.1546(2011-05-18)	+ 添加CRectT::operator!=()与CRectT::operator RECT()
 //	- 1.0.0008.2229(2011-08-30)	+ 添加可以方便直观的修改CRectT中Left;Right等属性的接口
 //								+ 添加直接获取及修改顶点的接口
-//	- 1.0.0009.1308(2011-08-31)	= 调整CRectT::IsEmpty()接口,当区域大小为负数时也判定为true
+//	- 1.0.0009.1308(2011-08-31)	= 调整CRectT::IsEmpty()接口,当区域大小为负数时也判定为TRUE
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -136,12 +136,12 @@ public:
 		pt2 -= tRect.pt2;
 	}
 
-	EXP_INLINE bool IsEmpty()
+	EXP_INLINE BOOL IsEmpty()
 	{ return (pt1.x >= pt2.x || pt1.y >= pt2.y); }
-	EXP_INLINE bool IsNull()
+	EXP_INLINE BOOL IsNull()
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
-	EXP_INLINE bool PtInRect(const CPointT<TypeT>& Pt, bool bEgSide = true)
+	EXP_INLINE BOOL PtInRect(const CPointT<TypeT>& Pt, BOOL bEgSide = TRUE)
 	{
 		if (bEgSide)
 			return (Pt.x >= pt1.x && Pt.x < pt2.x && 
@@ -162,16 +162,16 @@ public:
 			CPointT<TypeT>(tRect.right, tRect.bottom));
 		return (*this);
 	}
-	EXP_INLINE bool operator==(const CRectT& tRect)
+	EXP_INLINE BOOL operator==(const CRectT& tRect)
 	{ return ((pt1 == tRect.pt1) && (pt2 == tRect.pt2)); }
-	EXP_INLINE bool operator==(RECT& tRect)
+	EXP_INLINE BOOL operator==(RECT& tRect)
 	{
 		return ((pt1 == CPointT<TypeT>(tRect.left, tRect.top)) && 
 				(pt2 == CPointT<TypeT>(tRect.right, tRect.bottom)));
 	}
-	EXP_INLINE bool operator!=(const CRectT& tRect)
+	EXP_INLINE BOOL operator!=(const CRectT& tRect)
 	{ return !((*this) == tRect); }
-	EXP_INLINE bool operator!=(RECT& tRect)
+	EXP_INLINE BOOL operator!=(RECT& tRect)
 	{ return !((*this) == tRect); }
 
 	EXP_INLINE CRectT& operator+=(const CPointT<TypeT>& Pt)

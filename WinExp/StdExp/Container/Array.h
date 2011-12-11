@@ -132,9 +132,9 @@ public:
 	DWORD GetCount() const
 	{ return m_nCont; }
 
-	bool IsNull() const
+	BOOL IsNull() const
 	{ return (m_Array == NULL); }
-	bool Empty() const
+	BOOL Empty() const
 	{ return (m_nCont == 0); }
 	void Clear()
 	{
@@ -203,22 +203,22 @@ public:
 	{ return SetArray(Array); }
 
 	template <DWORD SizeT>
-	bool operator==(const TypeT (&aArray)[SizeT]) const
+	BOOL operator==(const TypeT (&aArray)[SizeT]) const
 	{ return (*this == CArrayT(aArray)); }
-	bool operator==(const CArrayT& Array) const
+	BOOL operator==(const CArrayT& Array) const
 	{
 		if (m_Array == Array.m_Array)
-			return true;
+			return TRUE;
 		if (m_Array == NULL || Array.m_Array == NULL)
-			return false;
+			return FALSE;
 		if (m_nCont != Array.m_nCont)
-			return false;
+			return FALSE;
 		return (memcmp(m_Array, Array.m_Array, m_nCont * sizeof(type_t)) == 0);
 	}
 	template <DWORD SizeT>
-	bool operator!=(const TypeT (&aArray)[SizeT]) const
+	BOOL operator!=(const TypeT (&aArray)[SizeT]) const
 	{ return !(*this == aArray); }
-	bool operator!=(const CArrayT& Array) const
+	BOOL operator!=(const CArrayT& Array) const
 	{ return !(*this == Array); }
 
 	type_t* operator->()
@@ -253,11 +253,11 @@ public:
 	type_t& LastItem() const
 	{ return GetAt(m_nCont - 1); }
 
-	bool AddArray(const type_t* pArray, DWORD nSize, iterator_t& Iter)
+	BOOL AddArray(const type_t* pArray, DWORD nSize, iterator_t& Iter)
 	{
-		if (!pArray || nSize == 0) return true;
-		if (Iter->Index() > Tail()->Index()) return false;
-		if (!(Iter->InThis(this))) return false;
+		if (!pArray || nSize == 0) return TRUE;
+		if (Iter->Index() > Tail()->Index()) return FALSE;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 检查大小
 		DWORD arr_size = (GetCount() + nSize);
 		if (GetSize() < arr_size) SetSizeExpan(arr_size);
@@ -276,32 +276,32 @@ public:
 		ExAssert(ptr_array);
 		CopyElements(ptr_array, pArray, nSize);
 		m_nCont = arr_size;
-		return true;
+		return TRUE;
 	}
-	bool AddArray(const type_t* pArray, DWORD nSize)
+	BOOL AddArray(const type_t* pArray, DWORD nSize)
 	{ return AddArray(pArray, nSize, Tail()); }
 	template <DWORD SizeT>
-	bool AddArray(const TypeT (&aArray)[SizeT], iterator_t& Iter)
+	BOOL AddArray(const TypeT (&aArray)[SizeT], iterator_t& Iter)
 	{ return AddArray(aArray, SizeT, Iter); }
 	template <DWORD SizeT>
-	bool AddArray(const TypeT (&aArray)[SizeT])
+	BOOL AddArray(const TypeT (&aArray)[SizeT])
 	{ return AddArray<SizeT>(aArray, Tail()); }
-	bool AddArray(const CArrayT& Array, iterator_t& Iter)
+	BOOL AddArray(const CArrayT& Array, iterator_t& Iter)
 	{ return AddArray(Array, Array.GetCount(), Iter); }
-	bool AddArray(const CArrayT& Array)
+	BOOL AddArray(const CArrayT& Array)
 	{ return AddArray(Array, Tail()); }
 
-	bool Add(const type_t& Item, iterator_t& Iter)
+	BOOL Add(const type_t& Item, iterator_t& Iter)
 	{ return AddArray(&Item, 1, Iter); }
-	bool Add(const type_t& Item)
+	BOOL Add(const type_t& Item)
 	{ return Add(Item, Tail()); }
 
-	bool Del(iterator_t& Iter, DWORD nLen = 1)
+	BOOL Del(iterator_t& Iter, DWORD nLen = 1)
 	{
-		if (Iter->Index() >= Tail()->Index()) return true;
-		if (nLen == 0) return true;
-		if (Empty()) return true;
-		if (!(Iter->InThis(this))) return false;
+		if (Iter->Index() >= Tail()->Index()) return TRUE;
+		if (nLen == 0) return TRUE;
+		if (Empty()) return TRUE;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 定位区域
 		if (Iter->Index() + nLen > GetCount())
 			nLen = GetCount() - Iter->Index();
@@ -315,7 +315,7 @@ public:
 		// 移动元素
 		if (inx_size)
 			memmove(ptr_array - nLen, ptr_array, sizeof(type_t) * inx_size);
-		return true;
+		return TRUE;
 	}
 };
 
@@ -346,12 +346,12 @@ struct _ArrayPolicyT
 
 		type_t& Val() { return pCont->GetAt(nIndx); }
 
-		bool InThis(container_t* cnt) { return pCont == cnt; }
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
 		DWORD Index() { return nIndx; }
 
-		bool operator==(const node_t& node)
+		BOOL operator==(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		bool operator!=(const node_t& node)
+		BOOL operator!=(const node_t& node)
 		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
 
 		void Next(long nOff = 1) { if (nIndx < pCont->Tail()->Index()) nIndx += nOff; }

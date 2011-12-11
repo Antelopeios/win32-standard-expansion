@@ -94,13 +94,13 @@ public:
 		Set(tPoint.x, tPoint.y);
 		return (*this);
 	}
-	EXP_INLINE bool operator==(const CPointT& tPoint)
+	EXP_INLINE BOOL operator==(const CPointT& tPoint)
 	{ return ((x == tPoint.x) && (y == tPoint.y)); }
-	EXP_INLINE bool operator==(POINT& tPoint)
+	EXP_INLINE BOOL operator==(POINT& tPoint)
 	{ return ((x == tPoint.x) && (y == tPoint.y)); }
-	EXP_INLINE bool operator!=(const CPointT& tPoint)
+	EXP_INLINE BOOL operator!=(const CPointT& tPoint)
 	{ return !((*this) == tPoint); }
-	EXP_INLINE bool operator!=(POINT& tPoint)
+	EXP_INLINE BOOL operator!=(POINT& tPoint)
 	{ return !((*this) == tPoint); }
 
 	EXP_INLINE CPointT& operator+=(const CPointT& tPoint)

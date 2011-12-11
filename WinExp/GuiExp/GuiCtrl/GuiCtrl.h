@@ -86,13 +86,13 @@ protected:
 	IGuiEffect* m_Effect;
 	CSize m_szScroll;
 	IGuiCtrl* m_Scroll;
-	bool m_bCache;
+	BOOL m_bCache;
 
 public:
 	IGuiCtrl()
 		: m_Effect(NULL)
 		, m_Scroll(NULL)
-		, m_bCache(false)
+		, m_bCache(FALSE)
 	{}
 
 protected:
@@ -114,13 +114,13 @@ protected:
 	}
 
 public:
-	bool SetCache(bool bCache)
+	BOOL SetCache(BOOL bCache)
 	{
-		bool cache = m_bCache;
+		BOOL cache = m_bCache;
 		m_bCache = bCache;
 		return cache;
 	}
-	bool IsCache()
+	BOOL IsCache()
 	{
 		return m_bCache;
 	}
@@ -133,15 +133,15 @@ public:
 
 	// 获得控件状态
 	virtual void* GetState(const CString& sType) = 0;
-	virtual bool SetState(const CString& sType, void* pState) = 0;
-	virtual void UpdateState(bool bRefreshSelf = true) = 0;
-	virtual bool IsUpdated() = 0;
+	virtual BOOL SetState(const CString& sType, void* pState) = 0;
+	virtual void UpdateState(BOOL bRefreshSelf = TRUE) = 0;
+	virtual BOOL IsUpdated() = 0;
 
 	// 设置效果对象
 	void SetEffect(IGuiEffect* pEff)
 	{
 		m_Effect = pEff;
-		Refresh(false);
+		Refresh(FALSE);
 	}
 	IGuiEffect* GetEffect()
 	{
@@ -167,29 +167,29 @@ public:
 	}
 
 	// 区域控制
-	virtual bool P2C(CRect& rc) = 0;
-	virtual bool C2P(CRect& rc) = 0;
-	virtual bool B2C(CRect& rc) = 0;
-	virtual bool C2B(CRect& rc) = 0;
-	virtual bool SetWindowRect(const CRect& rc) = 0;
-	virtual bool GetWindowRect(CRect& rc) = 0;
-	virtual bool SetRealRect(const CRect& rc) = 0;
-	virtual bool GetRealRect(CRect& rc) = 0;
-	virtual bool GetClientRect(CRect& rc) = 0;
-	bool GetClipRect(CRect& rc)
+	virtual BOOL P2C(CRect& rc) = 0;
+	virtual BOOL C2P(CRect& rc) = 0;
+	virtual BOOL B2C(CRect& rc) = 0;
+	virtual BOOL C2B(CRect& rc) = 0;
+	virtual BOOL SetWindowRect(const CRect& rc) = 0;
+	virtual BOOL GetWindowRect(CRect& rc) = 0;
+	virtual BOOL SetRealRect(const CRect& rc) = 0;
+	virtual BOOL GetRealRect(CRect& rc) = 0;
+	virtual BOOL GetClientRect(CRect& rc) = 0;
+	BOOL GetClipRect(CRect& rc)
 	{
 		CRect rc_clp;
 		GetClipBox(rc_clp);
-		if (!GetClientRect(rc)) return false;
+		if (!GetClientRect(rc)) return FALSE;
 		rc.Offset(-rc_clp.pt1);
-		return true;
+		return TRUE;
 	}
-	bool GetScrollSize(CSize& sz) const
+	BOOL GetScrollSize(CSize& sz) const
 	{
 		sz = m_szScroll;
-		return true;
+		return TRUE;
 	}
-	bool SetScrollSize(const CSize& sz, bool bWheel = false)
+	BOOL SetScrollSize(const CSize& sz, BOOL bWheel = FALSE)
 	{
 		if (m_Scroll && bWheel)
 		{
@@ -200,15 +200,15 @@ public:
 		}
 		else
 		{
-			if (m_szScroll == sz) return true;
+			if (m_szScroll == sz) return TRUE;
 			m_szScroll = sz;
 			CRect rc;
 			GetWindowRect(rc);
 			Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
 				(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
-			Refresh(false);
+			Refresh(FALSE);
 		}
-		return true;
+		return TRUE;
 	}
 	IGuiCtrl* GetScroll() const
 	{
@@ -221,23 +221,23 @@ public:
 		if (m_Scroll && old_scr != m_Scroll)
 		{
 			m_Scroll->SetState(_T("main"), this);
-			SetScrollSize(m_szScroll, true);
+			SetScrollSize(m_szScroll, TRUE);
 		}
 	}
 
 	// 刷新绘图
-	virtual void Refresh(bool bSelf = true) = 0;
+	virtual void Refresh(BOOL bSelf = TRUE) = 0;
 
 	// 设置可用性
-	virtual bool SetEnable(bool bEnable = true) = 0;
-	virtual bool IsEnabled() const = 0;
+	virtual BOOL SetEnable(BOOL bEnable = TRUE) = 0;
+	virtual BOOL IsEnabled() const = 0;
 
 	// 设置可见性
-	virtual bool SetVisible(bool bVisible = true) = 0;
-	virtual bool IsVisible() const = 0;
+	virtual BOOL SetVisible(BOOL bVisible = TRUE) = 0;
+	virtual BOOL IsVisible() const = 0;
 
 	// 判断有效性
-	static bool IsEffect(IGuiCtrl* pCtrl)
+	static BOOL IsEffect(IGuiCtrl* pCtrl)
 	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
 
 	static IGuiCtrl* SetFocus(IGuiCtrl* pFoc)
@@ -274,12 +274,12 @@ public:
 	{
 		return m_Focus;
 	}
-	virtual bool IsFocus()
+	virtual BOOL IsFocus()
 	{
 		IGuiBoard* board = GetBoard();
 		if (board && !board->IsFocus())
-			return false;
-		if (!m_Focus) return false;
+			return FALSE;
+		if (!m_Focus) return FALSE;
 		IGuiCtrl* foc = m_Focus;
 		if (foc == this)
 			return IsEffect(this);
@@ -287,9 +287,9 @@ public:
 		{
 			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
 			if (!ctrl) continue;
-			if (ctrl->IsFocus()) return true;
+			if (ctrl->IsFocus()) return TRUE;
 		}
-		return false;
+		return FALSE;
 	}
 };
 
@@ -301,12 +301,12 @@ EXP_INTERFACE IGuiCtrlBase : public IGuiCtrl
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
 
 protected:
-	bool m_bEnable;		// 是否可用
-	bool m_bVisible;	// 是否可见
+	BOOL m_bEnable;		// 是否可用
+	BOOL m_bVisible;	// 是否可见
 
 	CRect m_Rect;		// 控件区域
 
-	bool m_Updated;
+	BOOL m_Updated;
 
 public:
 	IGuiCtrlBase();
@@ -314,31 +314,31 @@ public:
 public:
 	// 更新状态
 	void* GetState(const CString& sType);
-	bool SetState(const CString& sType, void* pState);
-	void UpdateState(bool bRefreshSelf = true);
-	bool IsUpdated();
+	BOOL SetState(const CString& sType, void* pState);
+	void UpdateState(BOOL bRefreshSelf = TRUE);
+	BOOL IsUpdated();
 
 	// 区域控制
-	bool P2C(CRect& rc);
-	bool C2P(CRect& rc);
-	bool B2C(CRect& rc);
-	bool C2B(CRect& rc);
-	bool SetWindowRect(const CRect& rc);
-	bool GetWindowRect(CRect& rc);
-	bool SetRealRect(const CRect& rc);
-	bool GetRealRect(CRect& rc);
-	bool GetClientRect(CRect& rc);
+	BOOL P2C(CRect& rc);
+	BOOL C2P(CRect& rc);
+	BOOL B2C(CRect& rc);
+	BOOL C2B(CRect& rc);
+	BOOL SetWindowRect(const CRect& rc);
+	BOOL GetWindowRect(CRect& rc);
+	BOOL SetRealRect(const CRect& rc);
+	BOOL GetRealRect(CRect& rc);
+	BOOL GetClientRect(CRect& rc);
 
 	// 刷新绘图
-	void Refresh(bool bSelf = true);
+	void Refresh(BOOL bSelf = TRUE);
 
 	// 设置可用性
-	bool SetEnable(bool bEnable = true);
-	bool IsEnabled() const;
+	BOOL SetEnable(BOOL bEnable = TRUE);
+	BOOL IsEnabled() const;
 
 	// 设置可见性
-	bool SetVisible(bool bVisible = true);
-	bool IsVisible() const;
+	BOOL SetVisible(BOOL bVisible = TRUE);
+	BOOL IsVisible() const;
 };
 
 //////////////////////////////////////////////////////////////////

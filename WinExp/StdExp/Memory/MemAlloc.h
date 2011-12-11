@@ -77,7 +77,7 @@ public:
 	{ return GetPolicy().Destruct(pPtr); }
 
 public:
-	EXP_INLINE static bool Valid(void* pPtr)
+	EXP_INLINE static BOOL Valid(void* pPtr)
 	{ return GetPolicy().Valid(pPtr); }
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return GetPolicy().Size(pPtr); }

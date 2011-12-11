@@ -60,10 +60,10 @@ protected:
 	int m_EncdCntr;
 
 protected:
-	bool GetRet(tsk_t& task);	// 获取
-	bool AddRet(tsk_t& task);	// 添加/修改
-	bool DelRet(tsk_t& task);	// 删除
-	bool SetRet(tsk_t& task);	// 改名
+	BOOL GetRet(tsk_t& task);	// 获取
+	BOOL AddRet(tsk_t& task);	// 添加/修改
+	BOOL DelRet(tsk_t& task);	// 删除
+	BOOL SetRet(tsk_t& task);	// 改名
 	DWORD ThreadProc(LPVOID lpParam);
 
 public:

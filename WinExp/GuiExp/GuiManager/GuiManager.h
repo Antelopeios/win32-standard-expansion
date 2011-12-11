@@ -87,7 +87,7 @@ public:
 	}
 	static TypeT* Get(LPCTSTR c_key)
 	{
-		if (!c_key) return false;
+		if (!c_key) return FALSE;
 		key_map_t& types = Instance();
 		CString key(c_key);
 		key_map_t::iterator_t ite = types.Locate(key);

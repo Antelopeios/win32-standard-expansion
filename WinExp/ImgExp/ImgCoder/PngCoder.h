@@ -85,9 +85,9 @@ protected:
 	}
 
 public:
-	EXP_INLINE static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static BOOL CheckFile(IFileObject* pFile)
 	{
-		if(!pFile) return false;
+		if(!pFile) return FALSE;
 		BYTE chk_head[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 		return ICoderObject::CheckFile(pFile, chk_head);
 	}
@@ -101,14 +101,14 @@ public:
 	{}
 
 public:
-	bool Encode(image_t Image)
+	BOOL Encode(image_t Image)
 	{
 		IFileObject* file = GetFile();
-		if(!file) return false;
+		if(!file) return FALSE;
 		CImage exp_image;
-		exp_image.SetTrust(false);
+		exp_image.SetTrust(FALSE);
 		exp_image = Image;
-		if (exp_image.IsNull()) return false;
+		if (exp_image.IsNull()) return FALSE;
 		// 声明并初始化压缩对象
 		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 		png_infop info_ptr = png_create_info_struct(png_ptr);
@@ -149,7 +149,7 @@ public:
 		// 释放资源
 		png_free(png_ptr, palette);
 		png_destroy_write_struct(&png_ptr, &info_ptr);
-		return true;
+		return TRUE;
 	}
 	image_t Decode()
 	{

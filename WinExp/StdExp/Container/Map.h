@@ -78,9 +78,9 @@ public:
 	typedef struct _Assoc : public pair_t
 	{
 		DWORD	nHash;
-		bool	bSet;
+		BOOL	bSet;
 
-		_Assoc(bool s = true)
+		_Assoc(BOOL s = TRUE)
 			: nHash(0)
 			, bSet(s)
 		{}
@@ -100,11 +100,11 @@ protected:
 	table_t m_Table;
 
 	// ¶¨Î»
-	bool Locate(_IN_ const key_t& Key, _OT_ ite_t& Iter, _OT_ DWORD* pHash = NULL)
+	BOOL Locate(_IN_ const key_t& Key, _OT_ ite_t& Iter, _OT_ DWORD* pHash = NULL)
 	{
 		DWORD hash = hash_t::HashKey<key_t>(Key);
 		DWORD indx = hash % GetSize();
-		bool ret = false;
+		BOOL ret = FALSE;
 		ite_t ite = (m_Table[indx] + 1);
 		ite_t end = (indx == GetSize() - 1) ? m_Assoc.Tail() : m_Table[indx + 1];
 		for(; ite != end; ++ite)
@@ -112,7 +112,7 @@ protected:
 				ite->Val()->nHash == hash && 
 				ite->Val()->Key == Key)
 			{
-				ret = true;
+				ret = TRUE;
 				break;
 			}
 		Iter = ite;
@@ -144,7 +144,7 @@ public:
 	DWORD GetCount() const
 	{ return m_Assoc.GetCount() - GetSize(); }
 
-	bool Empty() const
+	BOOL Empty() const
 	{ return m_Assoc.Empty(); }
 	void Clear()
 	{
@@ -220,15 +220,15 @@ public:
 	type_t LastItem() const
 	{ return Last()->Val()->Val; }
 
-	bool Add(const key_t& Key, const type_t& Val)
+	BOOL Add(const key_t& Key, const type_t& Val)
 	{
 		GetAt(Key) = Val;
-		return true;
+		return TRUE;
 	}
-	bool Add(const pair_t& Pair)
+	BOOL Add(const pair_t& Pair)
 	{ return Add(Pair.Key, Pair.Val); }
 
-	bool Del(const key_t& Key)
+	BOOL Del(const key_t& Key)
 	{
 		ite_t ite;
 		if (Locate(Key, ite))
@@ -237,13 +237,13 @@ public:
 			return m_Assoc.Del(ite);
 		}
 		else
-			return false;
+			return FALSE;
 	}
-	bool Del(iterator_t& Iter)
+	BOOL Del(iterator_t& Iter)
 	{
-		if (Empty()) return true;
-		if (!(Iter->InThis(this))) return false;
-		if (!(Iter->Index())) return false;
+		if (Empty()) return TRUE;
+		if (!(Iter->InThis(this))) return FALSE;
+		if (!(Iter->Index())) return FALSE;
 		Iter->nIndx->Val()->Free();
 		return m_Assoc.Del(Iter->nIndx);
 	}
@@ -279,12 +279,12 @@ struct _MapPolicyT
 		key_t& Key() { return nIndx->Val()->Key; }
 		type_t& Val() { return nIndx->Val()->Val; }
 
-		bool InThis(container_t* cnt) { return pCont == cnt; }
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
 		pair_t* Index() { return (pair_t*)(nIndx->Val()); }
 
-		bool operator==(const node_t& node)
+		BOOL operator==(const node_t& node)
 		{ return (pCont == node.pCont && (nIndx == node.nIndx)); }
-		bool operator!=(const node_t& node)
+		BOOL operator!=(const node_t& node)
 		{ return (pCont != node.pCont || (nIndx != node.nIndx)); }
 
 		void Next(long nOff = 1)

@@ -86,8 +86,8 @@ public:
 
 public:
 	// ÊÇ·ñ×öÍÐ¹Ü
-	void SetTrust(bool bTru = true) { m_Type.SetTrust(bTru); }
-	bool IsTrust() { return m_Type.IsTrust(); }
+	void SetTrust(BOOL bTru = TRUE) { m_Type.SetTrust(bTru); }
+	BOOL IsTrust() { return m_Type.IsTrust(); }
 
 	virtual void Set(type_t tType)
 	{ m_Type = tType; }
@@ -108,13 +108,13 @@ public:
 	operator type_t() const
 	{ return Get(); }
 
-	virtual bool IsNull() const
+	virtual BOOL IsNull() const
 	{ return (m_Type == NULL); }
 
-	virtual bool Delete()
+	virtual BOOL Delete()
 	{
 		Set(NULL);
-		return true;
+		return TRUE;
 	}
 };
 

@@ -155,7 +155,7 @@ protected:
 		{	// 直接置空,不做任何清理动作
 			m_pList = NULL;
 		}
-		EXP_INLINE bool Empty()
+		EXP_INLINE BOOL Empty()
 		{ return (m_pList == NULL); }
 
 		EXP_INLINE block_t* Head()
@@ -193,7 +193,7 @@ protected:
 
 	public:
 		DWORD GetObjSize()			{ return 0; }
-		bool Valid(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
+		BOOL Valid(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
 		DWORD Size(void* pPtr)		{ return m_Alloc.Size(pPtr); }
 		void* Alloc(DWORD nSize)	{ return ZeroMemory(m_Alloc.Alloc(nSize), nSize); }
 		void Free(void* pPtr)		{ m_Alloc.Free(pPtr); }
@@ -275,19 +275,19 @@ public:
 
 public:
 	// 内存效验
-	bool Valid(void* pPtr)
+	BOOL Valid(void* pPtr)
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		block_t* block = BlockPtr(pPtr);
-		if (!block) return false;
+		if (!block) return FALSE;
 		IObjPool* pool = block->pPool;
-		if (!pool) return false;
+		if (!pool) return FALSE;
 		return pool->Valid(block);
 	}
 	// 内存大小
 	DWORD Size(void* pPtr)
 	{
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		block_t* block = BlockPtr(pPtr);
 		if (!block) return 0;
 		IObjPool* pool = block->pPool;
@@ -298,7 +298,7 @@ public:
 	void* Alloc(DWORD nSize)
 	{
 		if (nSize == 0) return NULL;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		// 定位ObjPool
 		nSize += sizeof(block_t);
 		block_t* block = NULL;
@@ -346,7 +346,7 @@ public:
 	void Free(void* pPtr)
 	{
 		if (!pPtr) return;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		// 获得标记块
 		block_t* block = BlockPtr(pPtr);
 		// 弹出标记块
@@ -365,9 +365,9 @@ public:
 #endif/*_DEBUG*/
 
 	// 清空内存池
-	void Clear(bool bDump = true)
+	void Clear(BOOL bDump = TRUE)
 	{
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		// 清理内存记录链表
 #ifdef	EXP_DUMPING_MEMLEAKS
 		DWORD dump_counter = 0;
@@ -442,7 +442,7 @@ struct _MemPoolPolicy
 	typedef _ObjPoolPolicyT<alloc_t, _SingleModel> pool_policy_t;
 	typedef DWORD byte;
 
-	static const bool DUMP_MEM_LEAKS = true;
+	static const BOOL DUMP_MEM_LEAKS = TRUE;
 };
 
 //////////////////////////////////////////////////////////////////

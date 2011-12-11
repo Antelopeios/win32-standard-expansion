@@ -86,7 +86,7 @@ public:
 public:
 	DWORD GetCount() const
 	{ return This()->container_t::GetCount(); }
-	bool Empty() const
+	BOOL Empty() const
 	{ return This()->container_t::Empty(); }
 	void Clear()
 	{ return This()->container_t::Clear(); }
@@ -102,7 +102,7 @@ public:
 	type_t LastItem() const
 	{ return This()->container_t::LastItem(); }
 
-	bool Replace(type_t& Type)
+	BOOL Replace(type_t& Type)
 	{ return This()->container_t::Del(Find(Type)); }
 
 	iterator_t Find(iterator_t& iHead, iterator_t& iTail, const type_t& tItem) const

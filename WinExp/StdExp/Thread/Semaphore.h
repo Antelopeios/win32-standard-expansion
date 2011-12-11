@@ -60,18 +60,18 @@ public:
 	{}
 
 public:
-	bool Create(LONG lInitialCount = 1, LONG lMaxCount = 1, LPCTSTR pstrName = NULL, LPSECURITY_ATTRIBUTES lpsaAttributes = NULL)
+	BOOL Create(LONG lInitialCount = 1, LONG lMaxCount = 1, LPCTSTR pstrName = NULL, LPSECURITY_ATTRIBUTES lpsaAttributes = NULL)
 	{
 		Close();
 		m_hSync = CreateSemaphore(lpsaAttributes, lInitialCount, lMaxCount, pstrName);
 		if (m_hSync == NULL) m_hSync = INVALID_HANDLE_VALUE;
-		if (m_hSync == INVALID_HANDLE_VALUE) return false;
-		return true;
+		if (m_hSync == INVALID_HANDLE_VALUE) return FALSE;
+		return TRUE;
 	}
 
-	bool Release(LONG lReleaseCount = 1, LPLONG lpPreviousCount = NULL)
+	BOOL Release(LONG lReleaseCount = 1, LPLONG lpPreviousCount = NULL)
 	{
-		if (IsClosed()) return false;
+		if (IsClosed()) return FALSE;
 		return ReleaseSemaphore(m_hSync, lReleaseCount, lpPreviousCount);
 	}
 };

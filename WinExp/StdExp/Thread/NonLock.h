@@ -71,12 +71,12 @@ public:
 protected:
 	ret_t m_Ret;
 	type_t m_New;
-	bool m_Has;
+	BOOL m_Has;
 	mutex_t m_LckRef;
 
 public:
 	CNonLockT()
-		: m_Has(false)
+		: m_Has(FALSE)
 	{}
 	virtual ~CNonLockT()
 	{}
@@ -84,23 +84,23 @@ public:
 public:
 	void Set(const type_t& tNew)
 	{
-		ExLock(m_LckRef, false, mutex_t);
+		ExLock(m_LckRef, FALSE, mutex_t);
 		m_New = tNew;
-		m_Has = true;
+		m_Has = TRUE;
 	}
 	type_t& Get()
 	{
-		ExLock(m_LckRef, false, mutex_t);
+		ExLock(m_LckRef, FALSE, mutex_t);
 		if (++(m_Ret.ret) <= 1 && m_Has)
 		{
 			m_Ret.type = m_New;
-			m_Has = false;
+			m_Has = FALSE;
 		}
 		return m_Ret.type;
 	}
 	void Release()
 	{
-		ExLock(m_LckRef, false, mutex_t);
+		ExLock(m_LckRef, FALSE, mutex_t);
 		--(m_Ret.ret);
 	}
 };

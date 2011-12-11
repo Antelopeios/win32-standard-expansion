@@ -57,12 +57,12 @@ class CGuiSliBlkEvent : public IGuiEvent /*¹ö¶¯Ìõ»¬¿é*/
 	EXP_DECLARE_DYNCREATE_CLS(CGuiSliBlkEvent, IGuiEvent)
 
 protected:
-	bool m_MDown;
+	BOOL m_MDown;
 	CPoint m_MPoint;
 
 public:
 	CGuiSliBlkEvent()
-		: m_MDown(false)
+		: m_MDown(FALSE)
 	{}
 
 public:
@@ -89,7 +89,7 @@ public:
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 			ctrl->SetCapture();
-			m_MDown = true;
+			m_MDown = TRUE;
 			::GetCursorPos((LPPOINT)&m_MPoint);
 			{
 				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
@@ -102,7 +102,7 @@ public:
 				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
 				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_ENDSCROLL);
 			}
-			m_MDown = false;
+			m_MDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		case WM_MOUSEWHEEL:
@@ -135,9 +135,9 @@ public:
 	{
 		return (IGuiCtrl*)m_Ctrl->GetState(_T("slider"));
 	}
-	bool GetOri()
+	BOOL GetOri()
 	{
-		return (bool)(LONG_PTR)m_Ctrl->GetState(_T("ori"));
+		return (BOOL)(LONG_PTR)m_Ctrl->GetState(_T("ori"));
 	}
 	LONG GetAll()
 	{
@@ -159,7 +159,7 @@ public:
 		IGuiCtrl* sli = GetSlider();
 		if (!sli) return;
 
-		bool ori = GetOri();
+		BOOL ori = GetOri();
 		LONG all = GetAll();
 		LONG fra = GetFra();
 		LONG pos = GetPos();
@@ -207,7 +207,7 @@ public:
 				if (!pt) break;
 				CRect rect;
 				m_Ctrl->GetClientRect(rect);
-				bool ori = GetOri();
+				BOOL ori = GetOri();
 				if (ori)
 				{
 					if (pt->y == 0) break;
@@ -252,7 +252,7 @@ public:
 				rc_pt.pt1 -= CPoint((rect.Left() + rect.Right()) >> 1, (rect.Top() + rect.Bottom()) >> 1);
 				m_Ctrl->GetClientRect(rect);
 				LONG all = GetAll();
-				bool ori = GetOri();
+				BOOL ori = GetOri();
 				if (ori)
 				{
 					LONG off = rc_pt.pt1.y * all / rect.Height();
@@ -419,9 +419,9 @@ public:
 	{
 		return (IGuiCtrl*)m_Ctrl->GetState(_T("down"));
 	}
-	bool GetOri()
+	BOOL GetOri()
 	{
-		return (bool)(LONG_PTR)m_Ctrl->GetState(_T("sli_ori"));
+		return (BOOL)(LONG_PTR)m_Ctrl->GetState(_T("sli_ori"));
 	}
 	LONG GetPos()
 	{
@@ -438,7 +438,7 @@ public:
 		if (!sli) return;
 		IGuiCtrl* dn = GetDn();
 		if (!sli) return;
-		bool ori = GetOri();
+		BOOL ori = GetOri();
 
 		CRect rc_scr, rc_sli, rc_up, rc_dn;
 		m_Ctrl->GetClientRect(rc_scr);
@@ -493,7 +493,7 @@ public:
 				LONG pos = GetPos();
 				CSize scr_sz;
 				main->GetScrollSize(scr_sz);
-				bool ori = GetOri();
+				BOOL ori = GetOri();
 				if (ori)
 					scr_sz.cy = pos;
 				else

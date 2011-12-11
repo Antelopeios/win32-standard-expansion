@@ -100,7 +100,7 @@ protected:
 	}
 
 	// 消息转发
-	bool m_ShiftDown;
+	BOOL m_ShiftDown;
 	IGuiCtrl* m_pOldFoc;
 	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
@@ -213,12 +213,12 @@ protected:
 				}
 				else
 				if (wParam == VK_SHIFT)
-					m_ShiftDown = true;
+					m_ShiftDown = TRUE;
 			}
 			else
 			if (WM_KEYUP == nMessage)
 				if (wParam == VK_SHIFT)
-					m_ShiftDown = false;
+					m_ShiftDown = FALSE;
 		}
 		else
 		if (nMessage == WM_SETFOCUS)
@@ -229,7 +229,7 @@ protected:
 		else
 		if (nMessage == WM_KILLFOCUS)
 		{
-			m_ShiftDown = false;
+			m_ShiftDown = FALSE;
 			m_pOldFoc = IGuiCtrl::SetFocus(NULL);
 			pGui->Invalidate();
 		}
@@ -355,7 +355,7 @@ protected:
 
 public:
 	CGuiWndEvent()
-		: m_ShiftDown(false)
+		: m_ShiftDown(FALSE)
 		, m_pOldFoc(NULL)
 	{}
 	~CGuiWndEvent()

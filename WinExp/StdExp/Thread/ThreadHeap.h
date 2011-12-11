@@ -64,7 +64,7 @@ public:
 					     _IN_ DWORD dwFlag = 0, 
 					     _OT_ LPDWORD lpIDThread = NULL)
 	{ return CreateThread(NULL, 0, lpStartAddr, lpParam, dwFlag, lpIDThread); }
-	static bool Close(HANDLE hTrd)
+	static BOOL Close(HANDLE hTrd)
 	{ return CloseHandle(hTrd); }
 
 	static DWORD Suspend(HANDLE hTrd)
@@ -72,7 +72,7 @@ public:
 	static DWORD Resume(HANDLE hTrd)
 	{ return ResumeThread(hTrd); }
 
-	static bool Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
+	static BOOL Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
 	{ return TerminateThread(hTrd, dwExitCode); }
 };
 

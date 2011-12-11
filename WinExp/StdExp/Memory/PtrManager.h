@@ -86,13 +86,13 @@ protected:
 		EXP_INLINE void* GetPtr()
 		{ return p_ptr; }
 
-		EXP_INLINE bool operator==(void* pt) const
+		EXP_INLINE BOOL operator==(void* pt) const
 		{ return (p_ptr == pt); }
-		EXP_INLINE bool operator!=(void* pt) const
+		EXP_INLINE BOOL operator!=(void* pt) const
 		{ return (p_ptr != pt); }
 
 		virtual void Inc() = 0;
-		virtual bool Dec() = 0;
+		virtual BOOL Dec() = 0;
 
 		virtual void Free() = 0;
 	};
@@ -112,15 +112,15 @@ protected:
 		{
 			RefModelT::Inc(&n_ref);
 		}
-		bool Dec()
+		BOOL Dec()
 		{
 			if (RefModelT::Dec(&n_ref) == 0)
 			{
 				Free();
-				return true;
+				return TRUE;
 			}
 			else
-				return false;
+				return FALSE;
 		}
 
 		EXP_INLINE static CReferPtrT* Alloc()
@@ -139,17 +139,17 @@ public:
 protected:
 	mutex_t		m_Mutex;
 	ptr_map_t	m_ReferPtrs;
-	bool		m_IsDest;
+	BOOL		m_IsDest;
 
 public:
 	CPtrManagerT()
 		: m_ReferPtrs(1021)
-		, m_IsDest(false)
+		, m_IsDest(FALSE)
 	{}
 	~CPtrManagerT()
 	{
-		/*Clear(true);*//*单例情况下,内部对象会被内存池自动回收*/
-		m_IsDest = true;
+		/*Clear(TRUE);*//*单例情况下,内部对象会被内存池自动回收*/
+		m_IsDest = TRUE;
 	}
 
 public:
@@ -158,7 +158,7 @@ public:
 	{
 		if (!pPtr) return 0;
 		if (m_IsDest) return 0;
-		ExLock(m_Mutex, true, mutex_t);
+		ExLock(m_Mutex, TRUE, mutex_t);
 		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail()) return 0;
 		IReferPtr* ref_ptr = ite->Val();
@@ -174,7 +174,7 @@ public:
 		if (!pPtr) return;
 		IReferPtr* ref_ptr = NULL;
 		if (m_IsDest) return;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail())
 		{
@@ -195,11 +195,11 @@ public:
 		}
 	}
 	// 删除指针引用计数
-	EXP_INLINE void Del(void* pPtr, bool bRelease = false)
+	EXP_INLINE void Del(void* pPtr, BOOL bRelease = FALSE)
 	{
 		if (!pPtr) return;
 		if (m_IsDest) return;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail()) return;
 		IReferPtr* ref_ptr = ite->Val();
@@ -215,10 +215,10 @@ public:
 		}
 	}
 	// 清空指针记录表
-	EXP_INLINE void Clear(bool bNull = false)
+	EXP_INLINE void Clear(BOOL bNull = FALSE)
 	{
 		if (m_IsDest) return;
-		ExLock(m_Mutex, false, mutex_t);
+		ExLock(m_Mutex, FALSE, mutex_t);
 		for(ptr_map_t::iterator_t ite = m_ReferPtrs.Head(); ite != m_ReferPtrs.Tail(); ++ite)
 		{
 			IReferPtr* ref_ptr = ite->Val();

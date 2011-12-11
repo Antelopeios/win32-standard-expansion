@@ -67,17 +67,17 @@ const LPCTSTR IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
 
 IGuiBoardBase::IGuiBoardBase(void)
 	: m_hIns(::GetModuleHandle(NULL))
-	, m_bPaint(true)
-	, m_bLayered(false)
-	, m_bColorKey(false)
+	, m_bPaint(TRUE)
+	, m_bLayered(FALSE)
+	, m_bColorKey(FALSE)
 	, m_crKey(ExRGB(255, 0, 255))
 {}
 IGuiBoardBase::IGuiBoardBase(wnd_t hWnd)
 	: m_hIns(::GetModuleHandle(NULL))
 	, type_base_t(hWnd)
-	, m_bPaint(true)
-	, m_bLayered(false)
-	, m_bColorKey(false)
+	, m_bPaint(TRUE)
+	, m_bLayered(FALSE)
+	, m_bColorKey(FALSE)
 	, m_crKey(ExRGB(255, 0, 255))
 {}
 IGuiBoardBase::~IGuiBoardBase(void)
@@ -105,7 +105,7 @@ ATOM IGuiBoardBase::RegisterWndClass(LPCTSTR sClassName, UINT uStyle)
 	return ::RegisterClassEx(&wcex);
 }
 
-bool IGuiBoardBase::Create(LPCTSTR sWndName, CRect& rcWnd, 
+BOOL IGuiBoardBase::Create(LPCTSTR sWndName, CRect& rcWnd, 
 			int nCmdShow/* = SW_SHOWNORMAL*/, DWORD dwStyle/* = WS_POPUP*/, DWORD dwExStyle/* = NULL*/, 
 			wnd_t wndParent/* = NULL*/, UINT uStyle/* = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW*/)
 {
@@ -119,15 +119,15 @@ bool IGuiBoardBase::Create(LPCTSTR sWndName, CRect& rcWnd,
 			wndParent, NULL, m_hIns, NULL
 			)
 		);
-	if( IsNull() ) return false;
+	if( IsNull() ) return FALSE;
 
 	ShowWindow(nCmdShow);
 	UpdateWindow();
 
-	return true;
+	return TRUE;
 }
 
-bool IGuiBoardBase::IsNull() const
+BOOL IGuiBoardBase::IsNull() const
 {
 	return type_base_t::IsNull();
 }
@@ -138,10 +138,10 @@ wnd_t IGuiBoardBase::operator=(wnd_t tType)
 	return Get();
 }
 
-bool IGuiBoardBase::Attach(wnd_t hWnd)
+BOOL IGuiBoardBase::Attach(wnd_t hWnd)
 {
 	Set(hWnd);
-	return true;
+	return TRUE;
 }
 wnd_t IGuiBoardBase::Detach()
 {
@@ -159,17 +159,17 @@ LRESULT IGuiBoardBase::SendMessage(UINT nMessage, WPARAM wParam/* = 0*/, LPARAM 
 {
 	return ::SendMessage(Get(), nMessage, wParam, lParam);
 }
-bool IGuiBoardBase::PostMessage(UINT nMessage, WPARAM wParam/* = 0*/, LPARAM lParam/* = 0*/)
+BOOL IGuiBoardBase::PostMessage(UINT nMessage, WPARAM wParam/* = 0*/, LPARAM lParam/* = 0*/)
 {
 	return ::PostMessage(Get(), nMessage, wParam, lParam);
 }
 
 // 是否绘图
-void IGuiBoardBase::SetCusPaint(bool bPaint)
+void IGuiBoardBase::SetCusPaint(BOOL bPaint)
 {
 	m_bPaint = bPaint;
 }
-bool IGuiBoardBase::IsCusPaint() const
+BOOL IGuiBoardBase::IsCusPaint() const
 {
 	return m_bPaint;
 }
@@ -183,24 +183,24 @@ DWORD IGuiBoardBase::GetExStyle()
 {
 	return (DWORD)GetWindowLong(GWL_EXSTYLE);
 }
-bool IGuiBoardBase::ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags/* = 0*/)
+BOOL IGuiBoardBase::ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags/* = 0*/)
 {
 	return ModifyStyleEx(dwRemove, dwAdd, nFlags, GWL_STYLE);
 }
-bool IGuiBoardBase::ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags/* = 0*/, int nStyleOffset/* = GWL_EXSTYLE*/)
+BOOL IGuiBoardBase::ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags/* = 0*/, int nStyleOffset/* = GWL_EXSTYLE*/)
 {
 	if (IsNull()) return 0;
 	DWORD style = GetWindowLong(nStyleOffset);
 	DWORD new_style = (style & ~dwRemove) | dwAdd;
 	if (style == new_style)
-		return false;
+		return FALSE;
 	SetWindowLong(nStyleOffset, new_style);
 	if (nFlags != 0)
 	{
 		::SetWindowPos(Get(), NULL, 0, 0, 0, 0,
 			SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | nFlags);
 	}
-	return true;
+	return TRUE;
 }
 LONG IGuiBoardBase::SetWindowLong(int nIndex, LONG dwNewLong)
 {
@@ -214,12 +214,12 @@ LONG IGuiBoardBase::GetWindowLong(int nIndex)
 }
 
 // 窗口移动
-void IGuiBoardBase::MoveWindow(int x, int y, int nWidth, int nHeight, bool bRepaint/* = true*/)
+void IGuiBoardBase::MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint/* = TRUE*/)
 {
 	if (IsNull()) return;
 	::MoveWindow(Get(), x, y, nWidth, nHeight, bRepaint);
 }
-void IGuiBoardBase::MoveWindow(CRect& lpRect, bool bRepaint/* = true*/)
+void IGuiBoardBase::MoveWindow(CRect& lpRect, BOOL bRepaint/* = TRUE*/)
 {
 	if (IsNull()) return;
 	::MoveWindow
@@ -379,19 +379,19 @@ void IGuiBoardBase::InvalidateRgn(HRGN hRgn)
 	if (IsNull()) return ;
 	::InvalidateRgn(Get(), hRgn, TRUE);
 }
-bool IGuiBoardBase::ShowWindow(int nCmdShow)
+BOOL IGuiBoardBase::ShowWindow(int nCmdShow)
 {
-	if(IsNull()) return false;
-	return (bool)::ShowWindow(Get(), nCmdShow);
+	if(IsNull()) return FALSE;
+	return ::ShowWindow(Get(), nCmdShow);
 }
-bool IGuiBoardBase::UpdateWindow()
+BOOL IGuiBoardBase::UpdateWindow()
 {
-	if (IsNull()) return false;
-	return (bool)::UpdateWindow(Get());
+	if (IsNull()) return FALSE;
+	return ::UpdateWindow(Get());
 }
-bool IGuiBoardBase::IsVisible() const
+BOOL IGuiBoardBase::IsVisible() const
 {
-	if (IsNull()) return false;
+	if (IsNull()) return FALSE;
 	return ::IsWindowVisible(Get());
 }
 
@@ -401,22 +401,22 @@ graph_t IGuiBoardBase::GetDC()
 	if(IsNull()) return NULL;
 	return (graph_t)::GetDC(Get());
 }
-bool IGuiBoardBase::ReleaseDC(graph_t hdc)
+BOOL IGuiBoardBase::ReleaseDC(graph_t hdc)
 {
 	if(IsNull()) return NULL;
 	return ::ReleaseDC(Get(), (HDC)hdc);
 }
 
 // 获得窗口大小
-bool IGuiBoardBase::GetWindowRect(CRect& lpRect)
+BOOL IGuiBoardBase::GetWindowRect(CRect& lpRect)
 {
-	if (IsNull()) return false;
-	return (bool)::GetWindowRect(Get(), (LPRECT)&lpRect);
+	if (IsNull()) return FALSE;
+	return ::GetWindowRect(Get(), (LPRECT)&lpRect);
 }
-bool IGuiBoardBase::GetClientRect(CRect& lpRect)
+BOOL IGuiBoardBase::GetClientRect(CRect& lpRect)
 {
-	if (IsNull()) return false;
-	return (bool)::GetClientRect(Get(), (LPRECT)&lpRect);
+	if (IsNull()) return FALSE;
+	return ::GetClientRect(Get(), (LPRECT)&lpRect);
 }
 
 // 窗口关系控制
@@ -431,29 +431,29 @@ wnd_t IGuiBoardBase::SetFocus()
 {
 	return (wnd_t)::SetFocus(Get());
 }
-bool IGuiBoardBase::IsFocus()
+BOOL IGuiBoardBase::IsFocus()
 {
 	wnd_t hwnd = Get();
-	if( !hwnd ) return false;
+	if( !hwnd ) return FALSE;
 	wnd_t hfocwnd = GetFocus();
-	if( !hfocwnd ) return false;
+	if( !hfocwnd ) return FALSE;
 	wnd_t hfoc = hfocwnd;
 	while (hfoc && hwnd != hfoc) hfoc = (wnd_t)::GetParent(hfoc);
 	if( hfoc )
-		return true;
+		return TRUE;
 	else
 	{
 		hfoc = hfocwnd;
 		while (hwnd && hwnd != hfoc) hwnd = (wnd_t)::GetParent(hwnd);
-		return hwnd ? true : false;
+		return hwnd ? TRUE : FALSE;
 	}
 }
 
 // 窗口图层化
-void IGuiBoardBase::SetLayered(bool bLayered/* = true*/, bool bColorKey/* = true*/, pixel_t crKey/* = ExRGB(255, 0, 255)*/)
+void IGuiBoardBase::SetLayered(BOOL bLayered/* = TRUE*/, BOOL bColorKey/* = TRUE*/, pixel_t crKey/* = ExRGB(255, 0, 255)*/)
 {
 	/*
-		在 m_bLayered == true 时设置 WS_EX_LAYERED
+		在 m_bLayered == TRUE 时设置 WS_EX_LAYERED
 		会导致第一次 UpdateLayeredWindow 时窗口不显示
 	*/
 	if (!(m_bLayered = bLayered))
@@ -473,11 +473,11 @@ void IGuiBoardBase::SetLayered(bool bLayered/* = true*/, bool bColorKey/* = true
 	}
 	Invalidate();
 }
-bool IGuiBoardBase::IsLayered()
+BOOL IGuiBoardBase::IsLayered()
 {
 	return m_bLayered;
 }
-bool IGuiBoardBase::IsColorKey()
+BOOL IGuiBoardBase::IsColorKey()
 {
 	return m_bColorKey;
 }

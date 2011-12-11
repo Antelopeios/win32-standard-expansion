@@ -151,13 +151,13 @@ public:
 	typedef CListT<IGuiEvent*> evt_list_t;
 
 protected:
-	bool m_bTru;		// 子容器链托管标记
+	BOOL m_bTru;		// 子容器链托管标记
 private:
 	evt_list_t* m_CldrEvt;
 
 public:
 	IGuiSender(void)
-		: m_bTru(false)
+		: m_bTru(FALSE)
 		, m_CldrEvt(ExMem::Alloc<evt_list_t>())
 	{}
 	virtual ~IGuiSender(void)
@@ -168,8 +168,8 @@ public:
 
 public:
 	// 是否对子容器做托管
-	void SetTrustEvent(bool bTruCldr = true) { m_bTru = bTruCldr; }
-	bool IsTrustEvent() { return m_bTru; }
+	void SetTrustEvent(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
+	BOOL IsTrustEvent() { return m_bTru; }
 	// 获得内部对象
 	evt_list_t& GetEvent() { return *m_CldrEvt; }
 
@@ -284,14 +284,14 @@ public:
 	typedef CListT<IGuiComp*> list_t;
 
 protected:
-	bool		m_bTru;		// 子容器链托管标记
+	BOOL		m_bTru;		// 子容器链托管标记
 	IGuiComp*	m_Pare;		// 父对象指针
 private:
 	list_t* m_Cldr;
 
 public:
 	IGuiComp(void)
-		: m_bTru(false)
+		: m_bTru(FALSE)
 		, m_Pare(NULL)
 		, m_Cldr(ExMem::Alloc<list_t>())
 	{}
@@ -307,8 +307,8 @@ protected:
 
 public:
 	// 是否对子容器做托管
-	void SetTrust(bool bTruCldr = true) { m_bTru = bTruCldr; }
-	bool IsTrust() { return m_bTru; }
+	void SetTrust(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
+	BOOL IsTrust() { return m_bTru; }
 	// 获得内部对象
 	IGuiComp* GetParent() { return m_Pare; }
 	list_t& GetChildren() { return *m_Cldr; }
@@ -341,7 +341,7 @@ public:
 		pComp->Init(this);
 		GetChildren().Add(pComp, GetChildren().Head());
 	}
-	virtual void DelComp(IGuiComp* pComp, bool bAutoTru = true)
+	virtual void DelComp(IGuiComp* pComp, BOOL bAutoTru = TRUE)
 	{
 		if (!pComp) return ;
 		// 定位对象
@@ -379,7 +379,7 @@ EXP_INTERFACE IGuiEffect : public IGuiObject
 public:
 	// 初始化
 	virtual void Init(CImage& tImg) = 0;
-	virtual bool IsInit() = 0;
+	virtual BOOL IsInit() = 0;
 	// 效果显示接口
 	virtual void Show(IGuiObject* pGui, CImage& tImg) = 0;
 	// 定时器

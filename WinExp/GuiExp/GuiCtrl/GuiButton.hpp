@@ -81,7 +81,7 @@ protected:
 	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
 
 	CImage m_Icon;
-	bool m_bGlow;		// 是否绘制图标外发光
+	BOOL m_bGlow;		// 是否绘制图标外发光
 	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
 	int m_ShakeIco;		// 图标点击摇晃
 
@@ -95,7 +95,7 @@ public:
 		: m_Status(nor)
 		, m_Locate(center)
 		, m_LocOff(5)
-		, m_bGlow(false)
+		, m_bGlow(FALSE)
 		, m_IcoOff(5)
 		, m_ShakeIco(0)
 		, m_ThreeSta(0)
@@ -146,7 +146,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("status"))
 		{
@@ -155,7 +155,7 @@ public:
 			if (old_sta != m_Status)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("locate"))
@@ -165,7 +165,7 @@ public:
 			if (old_sta != m_Locate)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("loc_off"))
@@ -175,7 +175,7 @@ public:
 			if (old_sta != m_LocOff)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("shake_ico"))
@@ -185,7 +185,7 @@ public:
 			if (old_sta != m_ShakeIco)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("thr_sta"))
@@ -195,7 +195,7 @@ public:
 			if (old_sta != m_ThreeSta)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("color"))
@@ -232,19 +232,19 @@ public:
 			if (old_sta != m_IcoOff)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("glow"))
 		{
-			bool old_sta = m_bGlow;
-			m_bGlow = (bool)(LONG_PTR)pState;
+			BOOL old_sta = m_bGlow;
+			m_bGlow = (BOOL)(LONG_PTR)pState;
 			if (old_sta != m_bGlow)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
-		return false;
+		return FALSE;
 	}
 };
 
@@ -310,7 +310,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	bool SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("status"))
 		{
@@ -319,7 +319,7 @@ public:
 			if (old_sta != m_Status)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("locate"))
@@ -329,7 +329,7 @@ public:
 			if (old_sta != m_Locate)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("loc_off"))
@@ -339,7 +339,7 @@ public:
 			if (old_sta != m_LocOff)
 				return EXP_BASE::SetState(sType, pState);
 			else
-				return true;
+				return TRUE;
 		}
 		else
 		if (sType == _T("color"))
@@ -361,7 +361,7 @@ public:
 				m_Text[i] = *((CText*)pState + i);
 			return EXP_BASE::SetState(sType, pState);
 		}
-		return false;
+		return FALSE;
 	}
 };
 

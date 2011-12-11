@@ -4,11 +4,11 @@
 //////////////////////////////////////////////////////////////////
 
 // 获取
-bool CData::GetRet(tsk_t& task)
+BOOL CData::GetRet(tsk_t& task)
 {
-	if (task.rest.type == err) return false;
+	if (task.rest.type == err) return FALSE;
 	task.rest.link.Clear();
-	bool retn = false;
+	BOOL retn = FALSE;
 /*	ret_list_t::iterator_t dun = m_RestList.Tail();
 	if(!m_RestList.Empty())
 	{	// 遍历缓存查找结果
@@ -30,7 +30,7 @@ bool CData::GetRet(tsk_t& task)
 			{	// 命中
 				++((*ite).cntr);
 				task.rest = *ite;
-				retn = true;
+				retn = TRUE;
 			}
 		}
 	}
@@ -46,7 +46,7 @@ bool CData::GetRet(tsk_t& task)
 				if (task.rest.name.Empty() || task.rest.name == name)
 				{
 					task.rest.link.Add(m_Data.GetAttr(_T("tag"), ite));
-					retn = true;
+					retn = TRUE;
 				}
 			}
 			break;
@@ -57,7 +57,7 @@ bool CData::GetRet(tsk_t& task)
 				if (task.rest.name.Empty() || task.rest.name == name)
 				{
 					task.rest.link.Add(m_Data.GetAttr(_T("file"), ite));
-					retn = true;
+					retn = TRUE;
 				}
 			}
 			break;
@@ -77,10 +77,10 @@ bool CData::GetRet(tsk_t& task)
 }
 
 // 添加/修改
-bool CData::AddRet(tsk_t& task)
+BOOL CData::AddRet(tsk_t& task)
 {
-	if (task.rest.type == err) return false;
-	if (task.rest.link.Empty()) return false;
+	if (task.rest.type == err) return FALSE;
+	if (task.rest.link.Empty()) return FALSE;
 	ret_t ret = task.rest;
 	ret_call_t call = task.call;
 	task.call = NULL;
@@ -170,9 +170,9 @@ bool CData::AddRet(tsk_t& task)
 }
 
 // 删除
-bool CData::DelRet(tsk_t& task)
+BOOL CData::DelRet(tsk_t& task)
 {
-	if (task.rest.type == err) return false;
+	if (task.rest.type == err) return FALSE;
 	CListT<CGuiXML::iterator_t> ite_list;
 	if (task.rest.link.Empty())
 	{	// 删除所有当前项
@@ -228,10 +228,10 @@ bool CData::DelRet(tsk_t& task)
 }
 
 // 改名
-bool CData::SetRet(tsk_t& task)
+BOOL CData::SetRet(tsk_t& task)
 {
-	if (task.rest.type == err) return false;
-	if (task.name == _T("")) return false;
+	if (task.rest.type == err) return FALSE;
+	if (task.name == _T("")) return FALSE;
 	// 修改所有当前项名称
 	CListT<CGuiXML::iterator_t> ite_list;
 	CGuiXML::iterator_t ite = m_Data.GetRoot();
@@ -289,14 +289,14 @@ DWORD CData::ThreadProc(LPVOID lpParam)
 	m_EncdCntr = 0;
 	for(;;)
 	{
-		DWORD wr = ISyncObject::Wait(sync, false);
+		DWORD wr = ISyncObject::Wait(sync, FALSE);
 		// 响应线程退出事件
 		if (wr == WAIT_OBJECT_0 + 1)
 			break;
 		// 获取任务
 		tsk_t task;
 		{
-			ExLock(m_TaskLock, false);
+			ExLock(m_TaskLock, FALSE);
 			if (m_TaskList.Empty()) continue;
 			task = m_TaskList.HeadItem();
 			m_TaskList.Del(m_TaskList.Head());
@@ -341,7 +341,7 @@ CData* CData::Instance()
 void CData::Init()
 {
 	m_TaskSmph.Create(0, 0x7FFFFFFF);
-	m_ComplEvt.Create(true);
+	m_ComplEvt.Create(TRUE);
 
 	m_File.Open(GLB()->AppPath() + _T("Data.dat"), 
 		CIOFile::modeReadWrite | CIOFile::modeCreate | CIOFile::modeNoTruncate);
@@ -370,7 +370,7 @@ void CData::Term()
 void CData::PostTask(tsk_t& task)
 {
 	{
-		ExLock(m_TaskLock, false);
+		ExLock(m_TaskLock, FALSE);
 		m_TaskList.Add(task);
 	}
 	m_TaskSmph.Release();

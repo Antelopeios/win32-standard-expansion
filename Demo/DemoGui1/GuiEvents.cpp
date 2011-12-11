@@ -47,11 +47,11 @@ class CEvent_banner : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_banner, IGuiEvent)
 
 protected:
-	bool m_bZoomed;
+	BOOL m_bZoomed;
 
 public:
 	CEvent_banner()
-		: m_bZoomed(false)
+		: m_bZoomed(FALSE)
 	{}
 
 public:
@@ -113,11 +113,11 @@ class CEvent_corner_lb : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_lb, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_corner_lb()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -169,11 +169,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -189,11 +189,11 @@ class CEvent_corner_rb : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_rb, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_corner_rb()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -245,11 +245,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -265,11 +265,11 @@ class CEvent_corner_rt : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_rt, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_corner_rt()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -321,11 +321,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -341,11 +341,11 @@ class CEvent_corner_lt : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_corner_lt, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_corner_lt()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -397,11 +397,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -417,11 +417,11 @@ class CEvent_line_bottom : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_bottom, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_line_bottom()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -470,11 +470,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -490,11 +490,11 @@ class CEvent_line_left : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_left, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_line_left()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -543,11 +543,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -563,11 +563,11 @@ class CEvent_line_right : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_right, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_line_right()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -616,11 +616,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -636,11 +636,11 @@ class CEvent_line_top : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_line_top, IGuiEvent)
 
 protected:
-	bool m_MouseDown;
+	BOOL m_MouseDown;
 
 public:
 	CEvent_line_top()
-		: m_MouseDown(false)
+		: m_MouseDown(FALSE)
 	{}
 
 public:
@@ -689,11 +689,11 @@ public:
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
 			ctrl->SetCapture();
-			m_MouseDown = true;
+			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
-			m_MouseDown = false;
+			m_MouseDown = FALSE;
 			ctrl->ReleaseCapture();
 			break;
 		}
@@ -827,7 +827,7 @@ public:
 				{
 					if (!GUI_CTL(scr_h)->IsVisible())
 					{
-						GUI_CTL(scr_h)->SetVisible(true);
+						GUI_CTL(scr_h)->SetVisible(TRUE);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.pt2.x -= (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());
@@ -838,7 +838,7 @@ public:
 				{
 					if (GUI_CTL(scr_h)->IsVisible())
 					{
-						GUI_CTL(scr_h)->SetVisible(false);
+						GUI_CTL(scr_h)->SetVisible(FALSE);
 						CRect rc;
 						ctrl->GetWindowRect(rc);
 						rc.pt2.x += (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());

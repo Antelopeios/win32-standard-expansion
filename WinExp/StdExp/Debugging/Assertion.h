@@ -86,7 +86,7 @@ EXP_INLINE void ExFail(PSTR csMsg)
 EXP_INLINE void ExAssertFail(PCSTR csFile, int iLine, PCSTR csExpr)
 {
 	char c_str[MAX_PATH];
-	StringCchPrintfA(c_str, _countof(c_str), "文件: %s\n行号: %d\n语句: %s", csFile, iLine, csExpr);
+	sprintf_s(c_str, _countof(c_str), "文件: %s\n行号: %d\n语句: %s", csFile, iLine, csExpr);
 	ExFail(c_str);
 }
 

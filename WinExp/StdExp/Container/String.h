@@ -146,9 +146,9 @@ public:
 		if (m_Array)
 		{
 			if (sizeof(type_t) == 1)
-				StringCchCopyA((char*)pArray, nSize, (char*)m_Array);
+				strcpy_s((char*)pArray, nSize, (char*)m_Array);
 			else
-				StringCchCopyW((wchar_t*)pArray, nSize, (wchar_t*)m_Array);
+				wcscpy_s((wchar_t*)pArray, nSize, (wchar_t*)m_Array);
 			alloc_t::Free(m_Array);
 		}
 		m_Array = pArray;
@@ -162,7 +162,7 @@ public:
 	DWORD GetCount() const
 	{ return GetLength() + 1; }
 
-	bool Empty() const
+	BOOL Empty() const
 	{ return (!m_Array) || (GetLength() == 0); }
 	void Clear()
 	{
@@ -183,9 +183,9 @@ public:
 			if (pArray)
 			{
 				if (sizeof(type_t) == 1)
-					StringCchCopyA((char*)pArray, count, (char*)m_Array);
+					strcpy_s((char*)pArray, count, (char*)m_Array);
 				else
-					StringCchCopyW((wchar_t*)pArray, count, (wchar_t*)m_Array);
+					wcscpy_s((wchar_t*)pArray, count, (wchar_t*)m_Array);
 			}
 			alloc_t::Free(m_Array);
 			m_Array = pArray;
@@ -220,13 +220,13 @@ public:
 		if (sizeof(type_t) == 1)
 		{
 			size_t len = _vscprintf((char*)lpFormat, args) + 1;
-			StringCchVPrintfA((char*)GetCStr(len), len, (char*)lpFormat, args);
+			vsprintf_s((char*)GetCStr(len), len, (char*)lpFormat, args);
 		}
 		else
 		{
 			CStringT fmt(lpFormat);
 			size_t len = _vscwprintf((wchar_t*)fmt.GetCStr(), args) + 1;
-			StringCchVPrintfW((wchar_t*)GetCStr(len), len, (wchar_t*)fmt.GetCStr(), args);
+			vswprintf_s((wchar_t*)GetCStr(len), len, (wchar_t*)fmt.GetCStr(), args);
 		}
 		va_end(args);
 	}
@@ -238,12 +238,12 @@ public:
 		{
 			CStringT fmt(lpFormat);
 			size_t len = _vscprintf((char*)fmt.GetCStr(), args) + 1;
-			StringCchVPrintfA((char*)GetCStr(len), len, (char*)fmt.GetCStr(), args);
+			vsprintf_s((char*)GetCStr(len), len, (char*)fmt.GetCStr(), args);
 		}
 		else
 		{
 			size_t len = _vscwprintf((wchar_t*)lpFormat, args) + 1;
-			StringCchVPrintfW((wchar_t*)GetCStr(len), len, (wchar_t*)lpFormat, args);
+			vswprintf_s((wchar_t*)GetCStr(len), len, (wchar_t*)lpFormat, args);
 		}
 		va_end(args);
 	}
@@ -254,14 +254,14 @@ public:
 		if (sizeof(type_t) == 1)
 		{
 			GetCStr(strlen((char*)pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
-			StringCchCopyA((char*)m_Array, GetSize(), (char*)pString);
+			strcpy_s((char*)m_Array, GetSize(), (char*)pString);
 		}
 		else
 		{
 			wchar_t* tmp_str = NULL; int len = 0;
 			MultiByteToWideChar(CP_ACP, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
-			StringCchCopyW((wchar_t*)m_Array, GetSize(), tmp_str);
+			wcscpy_s((wchar_t*)m_Array, GetSize(), tmp_str);
 			ExMem::Free(tmp_str);
 		}
 		return (*this);
@@ -274,13 +274,13 @@ public:
 			char* tmp_str = NULL; int len = 0;
 			WideCharToMultiByte(CP_OEMCP, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
-			StringCchCopyA((char*)m_Array, GetSize(), tmp_str);
+			strcpy_s((char*)m_Array, GetSize(), tmp_str);
 			ExMem::Free(tmp_str);
 		}
 		else
 		{
 			GetCStr(wcslen((wchar_t*)pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
-			StringCchCopyW((wchar_t*)m_Array, GetSize(), (wchar_t*)pString);
+			wcscpy_s((wchar_t*)m_Array, GetSize(), (wchar_t*)pString);
 		}
 		return (*this);
 	}
@@ -432,17 +432,17 @@ public:
 			return w_comp((wchar_t*)m_Array, (wchar_t*)pString);
 	}
 
-	friend bool operator==(const CStringT& str1, const CStringT& str2)
+	friend BOOL operator==(const CStringT& str1, const CStringT& str2)
 	{ return (str1.Compare(str2) == 0); }
-	friend bool operator==(const CStringT& str1, const type_t* str2)
+	friend BOOL operator==(const CStringT& str1, const type_t* str2)
 	{ return (str1.Compare(str2) == 0); }
-	friend bool operator==(const type_t* str1, const CStringT& str2)
+	friend BOOL operator==(const type_t* str1, const CStringT& str2)
 	{ return (str2.Compare(str1) == 0); }
-	friend bool operator!=(const CStringT& str1, const CStringT& str2)
+	friend BOOL operator!=(const CStringT& str1, const CStringT& str2)
 	{ return (str1.Compare(str2) != 0); }
-	friend bool operator!=(const CStringT& str1, const type_t* str2)
+	friend BOOL operator!=(const CStringT& str1, const type_t* str2)
 	{ return (str1.Compare(str2) != 0); }
-	friend bool operator!=(const type_t* str1, const CStringT& str2)
+	friend BOOL operator!=(const type_t* str1, const CStringT& str2)
 	{ return (str2.Compare(str1) != 0); }
 
 	CStringT& operator+=(const char* str)
@@ -451,13 +451,13 @@ public:
 		if (sizeof(type_t) == 1)
 		{
 			GetCStr(GetLength() + strlen((char*)str));
-			StringCchCatA((char*)m_Array, GetSize(), (char*)str);
+			strcat_s((char*)m_Array, GetSize(), (char*)str);
 		}
 		else
 		{
 			CStringT fmt(str);
 			GetCStr(GetLength() + fmt.GetLength());
-			StringCchCatW((wchar_t*)m_Array, GetSize(), (wchar_t*)fmt.GetCStr());
+			wcscat_s((wchar_t*)m_Array, GetSize(), (wchar_t*)fmt.GetCStr());
 		}
 		return (*this);
 	}
@@ -468,12 +468,12 @@ public:
 		{
 			CStringT fmt(str);
 			GetCStr(GetLength() + fmt.GetLength());
-			StringCchCatA((char*)m_Array, GetSize(), (char*)fmt.GetCStr());
+			strcat_s((char*)m_Array, GetSize(), (char*)fmt.GetCStr());
 		}
 		else
 		{
 			GetCStr(GetLength() + wcslen((wchar_t*)str));
-			StringCchCatW((wchar_t*)m_Array, GetSize(), (wchar_t*)str);
+			wcscat_s((wchar_t*)m_Array, GetSize(), (wchar_t*)str);
 		}
 		return (*this);
 	}
@@ -534,11 +534,11 @@ public:
 	type_t& LastItem() const
 	{ return m_Array[GetLength() - 1]; }
 
-	bool AddString(const type_t* pString, DWORD nSize, iterator_t& Iter)
+	BOOL AddString(const type_t* pString, DWORD nSize, iterator_t& Iter)
 	{
-		if (!pString || nSize == 0) return true;
-		if (Iter->Index() > Tail()->Index()) return false;
-		if (!(Iter->InThis(this))) return false;
+		if (!pString || nSize == 0) return TRUE;
+		if (Iter->Index() > Tail()->Index()) return FALSE;
+		if (!(Iter->InThis(this))) return FALSE;
 		// 检查大小
 		DWORD arr_size = (GetCount() + nSize);
 		if (GetSize() < arr_size) SetSizeExpan(arr_size);
@@ -553,31 +553,31 @@ public:
 		if (!ptr_array) ptr_array = m_Array;
 		ExAssert(ptr_array);
 		memcpy(ptr_array, pString, sizeof(type_t) * nSize);
-		return true;
+		return TRUE;
 	}
-	bool AddString(const type_t* pString, DWORD nSize)
+	BOOL AddString(const type_t* pString, DWORD nSize)
 	{ return AddString(pString, nSize, Tail()); }
 	template <DWORD SizeT>
-	bool AddString(const TypeT (&aString)[SizeT], iterator_t& Iter)
+	BOOL AddString(const TypeT (&aString)[SizeT], iterator_t& Iter)
 	{ return AddString(aString, SizeT, Iter); }
 	template <DWORD SizeT>
-	bool AddString(const TypeT (&aString)[SizeT])
+	BOOL AddString(const TypeT (&aString)[SizeT])
 	{ return AddString<SizeT>(aString, Tail()); }
-	bool AddString(const CStringT& String, iterator_t& Iter)
+	BOOL AddString(const CStringT& String, iterator_t& Iter)
 	{ return AddString(String, String.GetLength(), Iter); }
-	bool AddString(const CStringT& String)
+	BOOL AddString(const CStringT& String)
 	{ return AddString(String, Tail()); }
 
-	bool Add(const type_t& Item, iterator_t& Iter)
+	BOOL Add(const type_t& Item, iterator_t& Iter)
 	{ return AddString(&Item, 1, Iter); }
-	bool Add(const type_t& Item)
+	BOOL Add(const type_t& Item)
 	{ return Add(Item, Tail()); }
 
-	bool Del(iterator_t& Iter, DWORD nLen = 1)
+	BOOL Del(iterator_t& Iter, DWORD nLen = 1)
 	{
-		if (Iter->Index() >= Tail()->Index()) return false;
-		if (nLen == 0 || Empty()) return true;
-		if(!(Iter->InThis(this))) return false;
+		if (Iter->Index() >= Tail()->Index()) return FALSE;
+		if (nLen == 0 || Empty()) return TRUE;
+		if(!(Iter->InThis(this))) return FALSE;
 		// 定位区域
 		if (Iter->Index() + nLen > GetCount())
 			nLen = GetCount() - Iter->Index();
@@ -590,7 +590,7 @@ public:
 			ExAssert(ptr_array);
 			memmove(ptr_array - nLen, ptr_array, sizeof(type_t) * inx_size);
 		}
-		return true;
+		return TRUE;
 	}
 
 	iterator_t Find(const type_t& tItem) const

@@ -5,16 +5,16 @@
 #include <xmmintrin.h>
 #include <emmintrin.h>
 
-bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
+BOOL Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
 {
 	CImage exp_des;
-	exp_des.SetTrust(false);
+	exp_des.SetTrust(FALSE);
 	exp_des = imgDes;
-	if (exp_des.IsNull()) return false;
+	if (exp_des.IsNull()) return FALSE;
 	CImage exp_src;
-	exp_src.SetTrust(false);
+	exp_src.SetTrust(FALSE);
 	exp_src = imgSrc;
-	if (exp_src.IsNull()) return false;
+	if (exp_src.IsNull()) return FALSE;
 
 	// 格式化区域
 
@@ -55,7 +55,7 @@ bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
 	// 获得合适的宽与高
 	LONG w = min(rc_des.Width(), rc_src.Width());
 	LONG h = min(rc_des.Height(), rc_src.Height());
-	if (w <= 0 || h <= 0) return true;
+	if (w <= 0 || h <= 0) return TRUE;
 	// 计算坐标起点
 	LONG inx_des = (sz_des.cy - rc_des.Top() - 1) * sz_des.cx + rc_des.Left();
 	LONG inx_src = (sz_src.cy - rc_src.Top() - 1) * sz_src.cx + rc_src.Left();
@@ -99,5 +99,5 @@ bool Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
 		}
 	}
 
-	return true;
+	return TRUE;
 }

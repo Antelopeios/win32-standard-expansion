@@ -129,7 +129,7 @@ public:
 						items_t::iterator_t ite = items->Find(ctrl);
 						sub(ite);
 
-						while(true)
+						while(TRUE)
 						{
 							IGuiCtrl* it = (*ite);
 							it->GetWindowRect(rc_it);
@@ -168,7 +168,7 @@ public:
 						items_t::iterator_t ite = items->Find(ctrl);
 						add(ite);
 
-						while(true)
+						while(TRUE)
 						{
 							IGuiCtrl* it = (*ite);
 							it->GetWindowRect(rc_it);
@@ -274,7 +274,7 @@ public:
 		items_t* items = GetItems();
 		if (items->Empty()) m_FocItm = NULL;
 		LONG space = GetSpace();
-		bool b_top = (bool)(LONG_PTR)m_Ctrl->GetState(_T("align_top"));
+		BOOL b_top = (BOOL)(LONG_PTR)m_Ctrl->GetState(_T("align_top"));
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
@@ -380,7 +380,7 @@ public:
 			(off1 && off2 ? 
 			(abs(off1) < abs(off2) ? off1 : off2) : 
 			(off1 ? off1 : off2));
-		m_Ctrl->SetScrollSize(scr_sz, true);
+		m_Ctrl->SetScrollSize(scr_sz, TRUE);
 	}
 
 	// ÏûÏ¢ÏìÓ¦
@@ -411,14 +411,14 @@ public:
 				CRect foc_rct;
 				m_FocItm->GetWindowRect(foc_rct);
 				pic->SetWindowRect(foc_rct);
-				pic->SetVisible(true);
+				pic->SetVisible(TRUE);
 				break;
 			}
 		case WM_KILLFOCUS:
 			{
 				IGuiCtrl* pic = GetFocPic();
 				if(!pic) break;
-				pic->SetVisible(false);
+				pic->SetVisible(FALSE);
 			}
 			break;
 		case WM_KEYDOWN:

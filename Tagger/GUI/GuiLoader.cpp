@@ -76,20 +76,20 @@ void CGuiLoader::LoadCtl()
 	REG_CTL(cover, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc)));
 	GET_CTL(cover)->SetState(_T("text"), GET_TXT(cover));
 	GET_CTL(cover)->SetState(_T("edit"), &CString(_T("请输入待查询标签")));
-	GET_CTL(cover)->SetVisible(false);
+	GET_CTL(cover)->SetVisible(FALSE);
 	GET_CTL(cover)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cover"), &gc)));
 
 	// 标签云
 	REG_CTL(cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
-	GET_CTL(cloud)->SetTrust(true);
-	GET_CTL(cloud)->SetState(_T("align_top"), (void*)false);
+	GET_CTL(cloud)->SetTrust(TRUE);
+	GET_CTL(cloud)->SetState(_T("align_top"), (void*)FALSE);
 	GET_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 	// 加载标签
 	CListT<IGuiCtrl*> tags_list;
 	for(int i = 0; i < 40; ++i)
 	{
 		IGuiCtrl* tag = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), GET_CTL(cloud)->GetGC()));
-		tag->SetState(_T("thr_sta"), (void*)true);
+		tag->SetState(_T("thr_sta"), (void*)TRUE);
 		CText txt[8];
 		txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 		LOGFONT lf = {0};
@@ -98,7 +98,7 @@ void CGuiLoader::LoadCtl()
 		txt[0].Create(&lf);
 		txt[0].SetColor(ExRGBA(160, 160, 160, 255));
 		txt[0].SetString(_T("测试标签"));
-		lf.lfUnderline = true;
+		lf.lfUnderline = TRUE;
 		txt[1].Create(&lf);
 		txt[1].SetColor(ExRGBA(101, 177, 177, 255));
 		txt[1].SetString(_T("测试标签"));
@@ -117,8 +117,8 @@ void CGuiLoader::LoadCtl()
 	REG_CTL(scr_cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_cloud)->GetState(_T("up")))->SetWindowRect(CRect());
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_cloud)->GetState(_T("down")))->SetWindowRect(CRect());
-	GET_CTL(scr_cloud)->SetState(_T("sli_blk_thr_sta"), (void*)true);
-	GET_CTL(scr_cloud)->SetState(_T("sli_ori"), (void*)true);
+	GET_CTL(scr_cloud)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
+	GET_CTL(scr_cloud)->SetState(_T("sli_ori"), (void*)TRUE);
 	GET_CTL(scr_cloud)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	pixel_t pix[8] = {0};
 	for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
@@ -150,9 +150,9 @@ void CGuiLoader::LoadCtl()
 	img_foc[8] = GET_IMG(foc_rb)->Get();
 	// 文件列表
 	REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
-	GET_CTL(files)->SetTrust(true);
-	GET_CTL(files)->SetVisible(false);
-	GET_CTL(files)->SetState(_T("align_top"), (void*)false);
+	GET_CTL(files)->SetTrust(TRUE);
+	GET_CTL(files)->SetVisible(FALSE);
+	GET_CTL(files)->SetState(_T("align_top"), (void*)FALSE);
 	GET_CTL(files)->SetState(_T("space"), (void*)4);
 	GET_CTL(files)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 	GET_CTL(files)->SetState(_T("foc_image"), img_foc);
@@ -179,11 +179,11 @@ void CGuiLoader::LoadCtl()
 	GET_CTL(files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_files"), &gc)));
 	// 文件列表滚动条
 	REG_CTL(scr_files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
-	GET_CTL(scr_files)->SetVisible(false);
+	GET_CTL(scr_files)->SetVisible(FALSE);
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_files)->GetState(_T("up")))->SetWindowRect(CRect());
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_files)->GetState(_T("down")))->SetWindowRect(CRect());
-	GET_CTL(scr_files)->SetState(_T("sli_blk_thr_sta"), (void*)true);
-	GET_CTL(scr_files)->SetState(_T("sli_ori"), (void*)true);
+	GET_CTL(scr_files)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
+	GET_CTL(scr_files)->SetState(_T("sli_ori"), (void*)TRUE);
 	GET_CTL(scr_files)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	GET_CTL(scr_files)->SetState(_T("sli_blk_color"), pix);
 	GET_CTL(scr_files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_files"), &gc)));
@@ -205,7 +205,7 @@ void CGuiLoader::LoadWnd()
 	GET_WND(main)->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	GET_WND(main)->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	GET_WND(main)->CenterWindow();
-	GET_WND(main)->SetLayered(false, false);
+	GET_WND(main)->SetLayered(FALSE, FALSE);
 	GET_WND(main)->GetClientRect(rc_wnd);
 
 	// 事件关联
@@ -255,7 +255,7 @@ void CGuiLoader::Init()
 {
 #ifdef	_CONSOLE
 	m_Msg.Create();
-	while(true)
+	while(TRUE)
 	{
 		// 获得输入
 		CStringT<char> s;
@@ -266,7 +266,7 @@ void CGuiLoader::Init()
 			c = getchar();
 			if (c == '\n') break;
 			s += c;
-		} while(true);
+		} while(TRUE);
 		// 判断输入
 		if (s == "exit")
 			break;

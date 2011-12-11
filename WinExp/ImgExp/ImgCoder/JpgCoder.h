@@ -154,9 +154,9 @@ protected:
 	}
 
 public:
-	EXP_INLINE static bool CheckFile(IFileObject* pFile)
+	EXP_INLINE static BOOL CheckFile(IFileObject* pFile)
 	{
-		if(!pFile) return false;
+		if(!pFile) return FALSE;
 		BYTE chk_head[2] = { 0xFF, 0xD8 };
 		return ICoderObject::CheckFile(pFile, chk_head);
 	}
@@ -170,14 +170,14 @@ public:
 	{}
 
 public:
-	bool Encode(image_t Image)
+	BOOL Encode(image_t Image)
 	{
 		IFileObject* file = GetFile();
-		if(!file) return false;
+		if(!file) return FALSE;
 		CImage exp_image;
-		exp_image.SetTrust(false);
+		exp_image.SetTrust(FALSE);
 		exp_image = Image;
-		if (exp_image.IsNull()) return false;
+		if (exp_image.IsNull()) return FALSE;
 		// 声明并初始化压缩对象
 		struct jpeg_compress_struct cinfo;
 		struct jpeg_error_mgr jerr;
@@ -192,7 +192,7 @@ public:
 		cinfo.input_components = 3;
 		cinfo.in_color_space = JCS_RGB;
 		jpeg_set_defaults(&cinfo);
-		jpeg_set_quality(&cinfo, 80, true);
+		jpeg_set_quality(&cinfo, 80, TRUE);
 		// 开始压缩
 		jpeg_start_compress(&cinfo, TRUE);
 		JSAMPROW row_pointer[1];
@@ -219,7 +219,7 @@ public:
 		jpeg_finish_compress(&cinfo);
 		// 释放资源
 		jpeg_destroy_compress(&cinfo);
-		return true;
+		return TRUE;
 	}
 	image_t Decode()
 	{

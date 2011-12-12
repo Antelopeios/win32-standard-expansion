@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-11
-// Version:	1.0.0019.2025
+// Date:	2011-12-12
+// Version:	1.0.0020.1430
 //
 // History:
 //	- 1.0.0015.1600(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -44,6 +44,7 @@
 //								- 移除CArrayT中直接与指针做比较的接口
 //	- 1.0.0018.1520(2011-06-27)	# 修正当CArrayT的迭代器走到上/下限时可以继续移动的问题
 //	- 1.0.0019.2025(2011-07-11)	# 修正CArrayT::operator[]()无法顺利通过编译的问题
+//	- 1.0.0020.1430(2011-12-12)	^ 优化CArrayT::InitElements的效率,去掉元素构造前的置空操作
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Array_h__
@@ -75,7 +76,7 @@ protected:
 	EXP_INLINE void InitElements(type_t* pDst, DWORD nCount)
 	{
 		if (!pDst || nCount == 0) return;
-		ZeroMemory(pDst, sizeof(type_t) * nCount);
+	//	ZeroMemory(pDst, sizeof(type_t) * nCount);
 		CTraits::Construct<type_t>(pDst, nCount);
 	}
 	EXP_INLINE void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)

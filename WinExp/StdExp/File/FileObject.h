@@ -33,12 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-08
-// Version:	1.0.0004.1722
+// Date:	2011-12-13
+// Version:	1.0.0005.1522
 //
 // History:
 //	- 1.0.0003.0106(2011-04-04)	+ 添加CFileSeeker类,用于自动还原文件索引
 //	- 1.0.0004.1722(2011-09-08)	+ 添加IFileObject::SetSize()接口,方便调整文件大小
+//	- 1.0.0005.1522(2011-12-13)	+ 添加IFileObject::operator=()操作符重载,支持文件内容直接拷贝
+//								+ 添加IFileObject::Clear()接口,支持直接清空文件
 //////////////////////////////////////////////////////////////////
 
 #ifndef __FileObject_h__
@@ -62,6 +64,31 @@ public:
 		end		= FILE_END
 	};
 
+	class CFileSeeker
+	{
+	protected:
+		IFileObject* m_pFile;
+		uint64_t	 m_nTell;
+
+	public:
+		CFileSeeker(IFileObject* pFile)
+			: m_pFile(pFile)
+			, m_nTell(-1)
+		{
+			if (m_pFile)
+			{
+				m_nTell = m_pFile->Tell();
+				if (m_nTell == (uint64_t)-1)
+					m_pFile = NULL;
+			}
+		}
+		~CFileSeeker()
+		{
+			if (m_pFile)
+				m_pFile->Seek(m_nTell, IFileObject::begin);
+		}
+	};
+
 public:
 	IFileObject() {}
 	virtual ~IFileObject() {}
@@ -71,6 +98,7 @@ public:
 
 	virtual DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR)) = 0;
 	virtual DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR)) = 0;
+	virtual BOOL Clear() = 0;
 
 	virtual BOOL Seek(int64_t nOffset, int iOrigin = current) = 0;
 	virtual uint64_t Tell() = 0;
@@ -106,34 +134,19 @@ public:
 		else
 			return sString;
 	}
-};
 
-//////////////////////////////////////////////////////////////////
-
-class CFileSeeker
-{
-protected:
-	IFileObject* m_pFile;
-	uint64_t	 m_nTell;
-
-public:
-	CFileSeeker(IFileObject* pFile)
-		: m_pFile(pFile)
-		, m_nTell(-1)
+	IFileObject& operator=(IFileObject& rFile)
 	{
-		if (m_pFile)
-		{
-			m_nTell = m_pFile->Tell();
-			if (m_nTell == (uint64_t)-1)
-				m_pFile = NULL;
-		}
-	}
-	~CFileSeeker()
-	{
-		if (m_pFile)
-			m_pFile->Seek(m_nTell, IFileObject::begin);
+		if (!Clear()) return (*this);
+		CFileSeeker seeker(&(rFile));
+		BYTE buff[1 << 20] = {0};	// 1M的缓存区
+		while(rFile.Read(buff, _countof(buff), sizeof(BYTE)) != 0)
+			if (Write(buff, _countof(buff), sizeof(BYTE)) != _countof(buff)) break;
+		return (*this);
 	}
 };
+
+typedef IFileObject::CFileSeeker CFileSeeker;
 
 //////////////////////////////////////////////////////////////////
 

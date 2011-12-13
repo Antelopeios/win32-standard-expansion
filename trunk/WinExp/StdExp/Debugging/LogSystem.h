@@ -199,12 +199,22 @@ public:
 
 private:
 	BuffCache m_Cache;
-	DWORD	  m_LogTM;	// 记录写入的总日志条数
+	BOOL	  m_bCoutTime;
 
 public:
-	TLog() : m_LogTM(0) {}
+	TLog()
+		: m_bCoutTime(TRUE)
+	{}
 
-	void Cout(LPCTSTR sCout, BOOL bCoutTime = TRUE)
+public:
+	BOOL SetCoutTime(BOOL bCoutTime)
+	{
+		BOOL is_cout_time = m_bCoutTime;
+		m_bCoutTime = bCoutTime;
+		return is_cout_time;
+	}
+
+	void Cout(LPCTSTR sCout)
 	{
 		if (!sCout) return;
 
@@ -215,30 +225,34 @@ public:
 		// 将"\n"改为"\r\n"
 		CStringT<char> str_cout(bn ? m_Cache.GetCurrBuff() + 1 : m_Cache.GetCurrBuff()), 
 			str_old("\n"), str_new("\r\n");
-		CStringT<char>::iterator_t ite;
-		while((ite = str_cout.Find('\n')) != str_cout.Tail())
+		CStringT<char>::iterator_t ite = str_cout.Head();
+		while((ite = str_cout.Find(ite, str_cout.Tail(), '\n')) != str_cout.Tail())
 		{
 			str_cout.Del(ite);
 			str_cout.AddString("\r\n", ite);
+			ite += 2;
 		}
 
 		// 写入时间戳
-		if (bCoutTime)
+		if (m_bCoutTime)
 		{
 			SYSTEMTIME sys;
 			GetLocalTime(&sys);
-			sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, 
+			sprintf_s(m_Cache.GetCurrBuff(), DEF_MAX_BUFLIMIT, 
 				bn ? "\r\n[%02d:%02d:%02d.%03d]\t%s" : "[%02d:%02d:%02d.%03d]\t%s", 
-				sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds, str_cout.c_str());
+				sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds, (LPCSTR)str_cout);
 			m_Cache.SetCurrBuff();
 		}
-
-		++m_LogTM;
+		else
+		{
+			sprintf_s(m_Cache.GetCurrBuff(), DEF_MAX_BUFLIMIT, bn ? "\r\n%s" : "%s", (LPCSTR)str_cout);
+			m_Cache.SetCurrBuff();
+		}
 	}
 
-	void ToFile(LPCTSTR sPath, IFileObject* pFile)
+	void ToFile(IFileObject* pFile)
 	{
-		if (!sPath || !pFile) return;
+		if (!pFile) return;
 		for(BuffCache::CIterator ite(m_Cache.GetStart()); !ite.IsEnd(); ++ite)
 		{
 			char* cout = m_Cache.GetBuff(ite);

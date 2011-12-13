@@ -35,6 +35,9 @@
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-12-13
 // Version:	1.0.0000.1640
+//
+// Reference:
+//	- Mike Carruth's CrashRpt(http://www.codeproject.com/KB/debug/crash_report.aspx)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __CrashHandler_h__
@@ -44,19 +47,35 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Debugging/Trace.h"
+#include "Container/Container.h"
+
 EXP_BEG
+
+//////////////////////////////////////////////////////////////////
+
+class PrintfPolicy_Crach
+{
+public:
+	static void Output(PCTSTR sOutputString);
+};
+
+#undef	ExCrash
+#define ExCrash ExPrintfT<PrintfPolicy_Crach>
 
 //////////////////////////////////////////////////////////////////
 
 interface ICrashHandler
 {
+	ICrashHandler();
+	virtual ~ICrashHandler();
+
 	virtual void OnCrash() = 0;
 
+	CString GetCrashPath();
 	CString GetCrashFile();
 	CString GetCrashLog();
 };
-
-void ExCout(LPCTSTR sCout);
 
 //////////////////////////////////////////////////////////////////
 

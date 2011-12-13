@@ -35,13 +35,15 @@
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-12-13
 // Version:	1.0.0000.1640
+//
+// Reference:
+//	- Mike Carruth's CrashRpt(http://www.codeproject.com/KB/debug/crash_report.aspx)
 //////////////////////////////////////////////////////////////////
 
 #include "Common/Common.h"
 #include "CrashHandler.h"
 #include "File/File.h"
 #include "Memory/Memory.h"
-#include "Container/Container.h"
 #include "Debugging/LogSystem.h"
 
 #include <DbgHelp.h>
@@ -51,23 +53,37 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-ICrashHandler* g_pCrashHandler = NULL;
+LPTOP_LEVEL_EXCEPTION_FILTER g_OldCrashFilter = NULL;
 PEXCEPTION_POINTERS g_pExInfo = NULL;
 
 struct _ModuleListEntry
 {
 	MINIDUMP_MODULE_CALLBACK item;
-	struct _ModuleListEntry *next;
-} g_ModHead, *g_ModTail;
+	_ModuleListEntry* next;
+} g_ModHead, *g_ModTail = &g_ModHead;
 
 CLog g_Log;
+
+ICrashHandler* g_pCrashHandler = NULL;
+
+//////////////////////////////////////////////////////////////////
+
+void PrintfPolicy_Crach::Output(PCTSTR sOutputString)
+{
+	g_Log.Cout(sOutputString);
+}
 
 //////////////////////////////////////////////////////////////////
 
 LONG WINAPI UnhandledExceptionFilter(PEXCEPTION_POINTERS pExInfo)
 {
 	g_pExInfo = pExInfo;
-	if (g_pCrashHandler) g_pCrashHandler->OnCrash();
+	if (g_pCrashHandler)
+	{
+		g_pCrashHandler->GetCrashFile();
+		g_pCrashHandler->GetCrashLog();
+		g_pCrashHandler->OnCrash();
+	}
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -75,7 +91,7 @@ BOOL CALLBACK MiniDumpCallback(PVOID, CONST PMINIDUMP_CALLBACK_INPUT CallbackInp
 {
 	if (ModuleCallback == CallbackInput->CallbackType)
 	{
-		g_ModTail->next = ExMem::Alloc(_ModuleListEntry);
+		g_ModTail->next = ExMem::Alloc<_ModuleListEntry>();
 		g_ModTail = g_ModTail->next;
 		g_ModTail->item = CallbackInput->Module;
 		g_ModTail->item.FullPath = _wcsdup(CallbackInput->Module.FullPath);
@@ -84,8 +100,31 @@ BOOL CALLBACK MiniDumpCallback(PVOID, CONST PMINIDUMP_CALLBACK_INPUT CallbackInp
 	return TRUE;
 }
 
-CString GetCrashPath()
+//////////////////////////////////////////////////////////////////
+
+ICrashHandler::ICrashHandler()
 {
+	g_pCrashHandler = this;
+	g_OldCrashFilter = SetUnhandledExceptionFilter(UnhandledExceptionFilter);
+}
+
+ICrashHandler::~ICrashHandler()
+{
+	_ModuleListEntry* node = g_ModHead.next;
+	while(node)
+	{
+		_ModuleListEntry* temp = node;
+		node = node->next;
+		ExMem::Free(temp);
+	}
+	SetUnhandledExceptionFilter(g_OldCrashFilter);
+}
+
+CString ICrashHandler::GetCrashPath()
+{
+	static CString path;
+	if (!path.Empty()) return path;
+
 	TCHAR app_path[MAX_PATH];
 	::GetModuleFileName(NULL, app_path, MAX_PATH);
 	_tcsrchr(app_path, _T('.'))[0] = _T('\0');
@@ -93,23 +132,21 @@ CString GetCrashPath()
 	TCHAR tmp_path[MAX_PATH]; size_t r_s = 0;
 	_tgetenv_s(&r_s, tmp_path, _T("TEMP"));
 
-	CString path;
-	path.Format(_T("%s\\%s"), tmp_path, app_path);
+	path.Format(_T("%s\\%s"), tmp_path, _tcsrchr(app_path, _T('\\')) + 1);
 	return path;
 }
 
-//////////////////////////////////////////////////////////////////
-
 CString ICrashHandler::GetCrashFile()
 {
-	CString path;
-	path.Format(_T("%s.dmp"), (LPCTSTR)GetCrashPath());
+	static CString path;
+	if (!path.Empty()) return path;
 
+	path.Format(_T("%s.dmp"), (LPCTSTR)GetCrashPath());
 	CIOFile file;
-	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return NULL;
+	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return _T("");
 
 	MINIDUMP_EXCEPTION_INFORMATION info;
-	info.ThreadId = GetCurrentThreadId();
+	info.ThreadId = ::GetCurrentThreadId();
 	info.ExceptionPointers = g_pExInfo;
 	info.ClientPointers = FALSE;
 
@@ -121,7 +158,13 @@ CString ICrashHandler::GetCrashFile()
 		GetCurrentProcess(),
 		GetCurrentProcessId(),
 		file,
-		static_cast<MINIDUMP_TYPE>(DUMP_TYPE),
+		static_cast<MINIDUMP_TYPE>(
+			MiniDumpWithFullMemory | 
+			MiniDumpWithDataSegs | 
+			MiniDumpWithHandleData | 
+			MiniDumpWithProcessThreadData | 
+			MiniDumpScanMemory | 
+			MiniDumpWithIndirectlyReferencedMemory),
 		g_pExInfo ? &info : NULL,
 		NULL,
 		&mini_dump);
@@ -131,51 +174,58 @@ CString ICrashHandler::GetCrashFile()
 
 CString ICrashHandler::GetCrashLog()
 {
-	CString path;
+	static CString path;
+	if (!path.Empty()) return path;
+
 	path.Format(_T("%s.log"), (LPCTSTR)GetCrashPath());
+	CIOFile file;
+	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return _T("");
 
-	_ModuleListEntry* node = g_ModHead->next;
-	while (node)
+	BOOL cout_time_old = g_Log.SetCoutTime(FALSE);
+
+	_ModuleListEntry* node = g_ModHead.next;
+	while(node)
 	{
-		char temp[MAX_PATH];
-		::CharToOemW(node->item.FullPath, temp);
-		sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, "\r\nFullPath: %s\r\n", temp);
-		m_Cache.SetCurrBuff();
+		ExCrash(_T("\nFullPath: %s\n"), node->item.FullPath);
+		ExCrash(_T("BaseAddress: 0x%08X\n"), node->item.BaseOfImage);
+		ExCrash(_T("Size: 0x%08X\n"), node->item.SizeOfImage);
 
-		sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, "BaseAddress: 0x%08X\r\n", node->item.BaseOfImage);
-		m_Cache.SetCurrBuff();
+		WIN32_FIND_DATA fd = {0};
+		HANDLE file = ::FindFirstFile(node->item.FullPath, &fd);
+		if (INVALID_HANDLE_VALUE != file)
+		{
+			::FindClose(file);
+			FILETIME ft = {0};
+			::FileTimeToLocalFileTime(&(fd.ftLastWriteTime), &ft);
+			SYSTEMTIME st = {0};
+			::FileTimeToSystemTime(&ft, &st);
+			ExCrash(_T("TimeStamp: %02u/%02u/%04u %02u:%02u:%02u\n"), 
+				st.wMonth, 
+				st.wDay, 
+				st.wYear, 
+				st.wHour, 
+				st.wMinute, 
+				st.wSecond);
+		}
 
-		sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, "Size: 0x%08X\r\n", node->item.SizeOfImage);
-		m_Cache.SetCurrBuff();
-
-		FILETIME    ft = CUtility::getLastWriteFileTime(node->item.FullPath);
-		SYSTEMTIME  st = {0};
-		FileTimeToSystemTime(&ft, &st);
-		sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, "TimeStamp: %02u/%02u/%04u %02u:%02u:%02u\r\n", 
-			st.wMonth, 
-			st.wDay, 
-			st.wYear, 
-			st.wHour, 
-			st.wMinute, 
-			st.wSecond);
-		m_Cache.SetCurrBuff();
-
-		sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, "FileVersion: %d.%d.%d.%d\r\n", 
+		ExCrash(_T("FileVersion: %d.%d.%d.%d\n"), 
 			HIWORD(node->item.VersionInfo.dwFileVersionMS),
 			LOWORD(node->item.VersionInfo.dwFileVersionMS),
 			HIWORD(node->item.VersionInfo.dwFileVersionLS),
 			LOWORD(node->item.VersionInfo.dwFileVersionLS));
-		m_Cache.SetCurrBuff();
-
-		sprintf_s(m_Cache.GetCurrBuff(), MAX_BUF_LIMIT, "ProductVersion: %d.%d.%d.%d\r\n", 
+		ExCrash(_T("ProductVersion: %d.%d.%d.%d\n"), 
 			HIWORD(node->item.VersionInfo.dwProductVersionMS),
 			LOWORD(node->item.VersionInfo.dwProductVersionMS),
 			HIWORD(node->item.VersionInfo.dwProductVersionLS),
 			LOWORD(node->item.VersionInfo.dwProductVersionLS));
-		m_Cache.SetCurrBuff();
 
 		node = node->next;
 	}
+
+	g_Log.SetCoutTime(cout_time_old);
+
+	g_Log.ToFile(&file);
+	return path;
 }
 
 //////////////////////////////////////////////////////////////////

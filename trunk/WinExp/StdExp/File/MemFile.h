@@ -88,14 +88,12 @@ public:
 			m_MemBuff.SetSize(nSize);
 		return TRUE;
 	}
-	virtual BOOL Close()
+	BOOL Close()
 	{
-		m_MemBuff.Clear();
-		m_Position = m_MemBuff.Head();
-		return TRUE;
+		return Clear();
 	}
 
-	virtual DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
+	DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
 	{
 		if (!pBuff || nCount == 0 || nSize == 0) return 0;
 		if (Eof()) return 0;
@@ -107,7 +105,7 @@ public:
 
 		return (len / nSize);
 	}
-	virtual DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
+	DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
 	{
 		if (!pBuff || nCount == 0 || nSize == 0) return 0;
 		if (Error()) return 0;
@@ -130,8 +128,14 @@ public:
 
 		return (len / nSize);
 	}
+	BOOL Clear()
+	{
+		m_MemBuff.Clear();
+		m_Position = m_MemBuff.Head();
+		return TRUE;
+	}
 
-	virtual BOOL Seek(int64_t nOffset, int iOrigin = current)
+	BOOL Seek(int64_t nOffset, int iOrigin = current)
 	{
 		if (Error()) return FALSE;
 		long new_pos = m_Position->Index();
@@ -147,17 +151,17 @@ public:
 		m_Position->nIndx = new_pos;
 		return TRUE;
 	}
-	virtual uint64_t Tell()
+	uint64_t Tell()
 	{
 		if (Error()) return -1;
 		return m_Position->Index();
 	}
-	virtual uint64_t Size()
+	uint64_t Size()
 	{
 		if (Error()) return -1;
 		return m_MemBuff.GetCount();
 	}
-	virtual BOOL SetSize(uint64_t nSize)
+	BOOL SetSize(uint64_t nSize)
 	{
 		if (!Seek(nSize, begin)) return FALSE;
 		if (nSize < Size())
@@ -173,17 +177,17 @@ public:
 		}
 		return TRUE;
 	}
-	virtual BOOL Flush()
+	BOOL Flush()
 	{
 		if (Error()) return FALSE;
 		return TRUE;
 	}
-	virtual BOOL Eof()
+	BOOL Eof()
 	{
 		if (Error()) return TRUE;
 		return (m_Position->Index() >= m_MemBuff.GetCount());
 	}
-	virtual BOOL Error()
+	BOOL Error()
 	{
 		return m_MemBuff.IsNull();
 	}

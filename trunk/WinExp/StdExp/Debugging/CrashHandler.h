@@ -1,4 +1,4 @@
-// Copyright 2010, Ä¾Í·ÔÆ
+// Copyright 2011, Ä¾Í·ÔÆ
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,31 +28,38 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Debugging - µ÷ÊÔ
+// CrashHandler - ±ÀÀ£²¶»ñ
 //
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-04
-// Version:	1.0.0001.2202
+// Date:	2011-12-13
+// Version:	1.0.0000.1640
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Debugging_h__
-#define __Debugging_h__
+#ifndef __CrashHandler_h__
+#define __CrashHandler_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Common/Common.h"
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "Debugging/Assertion.h"
-#include "Debugging/Trace.h"
-#include "Debugging/LogSystem.h"
-#include "Debugging/CrashHandler.h"
+interface ICrashHandler
+{
+	virtual void OnCrash() = 0;
+
+	CString GetCrashFile();
+	CString GetCrashLog();
+};
+
+void ExCout(LPCTSTR sCout);
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Debugging_h__*/
+EXP_END
+
+#endif/*__CrashHandler_h__*/

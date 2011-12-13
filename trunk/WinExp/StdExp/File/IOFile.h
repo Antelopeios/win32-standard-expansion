@@ -181,7 +181,7 @@ public:
 			return FALSE;
 		return TRUE;
 	}
-	virtual BOOL Close()
+	BOOL Close()
 	{
 		BOOL ret = Error() ? TRUE : CloseHandle(m_hFile);
 		m_hFile = INVALID_HANDLE_VALUE;
@@ -189,7 +189,7 @@ public:
 		return ret;
 	}
 
-	virtual DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
+	DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
 	{
 		if (!pBuff || nCount == 0 || nSize == 0) return 0;
 		if (Eof()) return 0;
@@ -199,7 +199,7 @@ public:
 
 		return (len / nSize);
 	}
-	virtual DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
+	DWORD Write(LPCVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
 	{
 		if (!pBuff || nCount == 0 || nSize == 0) return 0;
 		if (Error()) return 0;
@@ -209,8 +209,12 @@ public:
 
 		return (len / nSize);
 	}
+	BOOL Clear()
+	{
+		return SetSize(0);
+	}
 
-	virtual BOOL Seek(int64_t nOffset, int iOrigin = current)
+	BOOL Seek(int64_t nOffset, int iOrigin = current)
 	{
 		if (Error()) return FALSE;
 		if (iOrigin != begin && iOrigin != end && iOrigin != current)
@@ -222,7 +226,7 @@ public:
 
 		return (liOff.LowPart != (DWORD)-1);
 	}
-	virtual uint64_t Tell()
+	uint64_t Tell()
 	{
 		if (Error()) return -1;
 
@@ -234,7 +238,7 @@ public:
 
 		return liPos.QuadPart;
 	}
-	virtual uint64_t Size()
+	uint64_t Size()
 	{
 		if (Error()) return -1;
 
@@ -245,17 +249,17 @@ public:
 
 		return liSize.QuadPart;
 	}
-	virtual BOOL SetSize(uint64_t nSize)
+	BOOL SetSize(uint64_t nSize)
 	{
 		if (!Seek(nSize, begin)) return FALSE;
 		return ::SetEndOfFile(m_hFile);
 	}
-	virtual BOOL Flush()
+	BOOL Flush()
 	{
 		if (Error()) return FALSE;
 		return ::FlushFileBuffers(m_hFile);
 	}
-	virtual BOOL Eof()
+	BOOL Eof()
 	{
 		if (Error()) return TRUE;
 
@@ -266,7 +270,7 @@ public:
 
 		return (tell >= size);
 	}
-	virtual BOOL Error()
+	BOOL Error()
 	{
 		return (!m_hFile || m_hFile == INVALID_HANDLE_VALUE);
 	}

@@ -169,7 +169,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Debugging\CrashHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Debugging\CrashHandler.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Debugging\Debugging.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Debugging\LogSystem.h"
 				>
 			</File>
 			<File

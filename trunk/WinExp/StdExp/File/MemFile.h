@@ -74,6 +74,8 @@ protected:
 public:
 	CMemFileT(BYTE* pBuff = NULL, DWORD nSize = 1)
 	{ Open(pBuff, nSize); }
+	CMemFileT(IFileObject& rFile)
+	{ rFile.CopyTo(*this); }
 	virtual ~CMemFileT()
 	{ Close(); }
 

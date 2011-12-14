@@ -90,6 +90,9 @@ public:
 	CIOFile(LPCTSTR sPath, UINT nOpenFlags = modeRead | shareCompat)
 		: m_hFile(INVALID_HANDLE_VALUE)
 	{ Open(sPath, nOpenFlags); }
+	CIOFile(IFileObject& rFile)
+		: m_hFile(INVALID_HANDLE_VALUE)
+	{ rFile.CopyTo(*this); }
 	virtual ~CIOFile()
 	{ Close(); }
 

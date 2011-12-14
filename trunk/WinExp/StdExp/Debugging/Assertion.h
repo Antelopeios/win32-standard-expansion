@@ -72,9 +72,9 @@ EXP_INLINE void ExMBW(PCWSTR wsMsg, UINT uType = MB_ICONERROR)
 }
 
 #ifdef  _UNICODE
-#define ExMB	ExMBW
+#define ExMB	EXP::ExMBW
 #else /*_UNICODE*/
-#define ExMB	ExMBA
+#define ExMB	EXP::ExMBA
 #endif/*_UNICODE*/
 
 EXP_INLINE void ExFail(PSTR csMsg)
@@ -91,7 +91,7 @@ EXP_INLINE void ExAssertFail(PCSTR csFile, int iLine, PCSTR csExpr)
 }
 
 #ifdef _DEBUG
-#define ExAssert(x)		if (!(x)) ExAssertFail(__FILE__, __LINE__, #x)
+#define ExAssert(x)		if (!(x)) EXP::ExAssertFail(__FILE__, __LINE__, #x)
 #else
 #define ExAssert(x)		__noop
 #endif

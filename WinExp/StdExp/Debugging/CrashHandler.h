@@ -72,9 +72,9 @@ interface ICrashHandler
 
 	virtual void OnCrash() = 0;
 
-	CString GetCrashPath();
-	CString GetCrashFile();
-	CString GetCrashLog();
+	const CString& GetCrashPath();
+	const CString& GetCrashDmp();
+	const CString& GetCrashLog();
 };
 
 //////////////////////////////////////////////////////////////////

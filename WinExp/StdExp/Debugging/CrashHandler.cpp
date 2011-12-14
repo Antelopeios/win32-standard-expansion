@@ -80,7 +80,7 @@ LONG WINAPI UnhandledExceptionFilter(PEXCEPTION_POINTERS pExInfo)
 	g_pExInfo = pExInfo;
 	if (g_pCrashHandler)
 	{
-		g_pCrashHandler->GetCrashFile();
+		g_pCrashHandler->GetCrashDmp();
 		g_pCrashHandler->GetCrashLog();
 		g_pCrashHandler->OnCrash();
 	}
@@ -120,7 +120,7 @@ ICrashHandler::~ICrashHandler()
 	SetUnhandledExceptionFilter(g_OldCrashFilter);
 }
 
-CString ICrashHandler::GetCrashPath()
+const CString& ICrashHandler::GetCrashPath()
 {
 	static CString path;
 	if (!path.Empty()) return path;
@@ -136,14 +136,14 @@ CString ICrashHandler::GetCrashPath()
 	return path;
 }
 
-CString ICrashHandler::GetCrashFile()
+const CString& ICrashHandler::GetCrashDmp()
 {
 	static CString path;
 	if (!path.Empty()) return path;
 
 	path.Format(_T("%s.dmp"), (LPCTSTR)GetCrashPath());
 	CIOFile file;
-	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return _T("");
+	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return (path = _T(""));
 
 	MINIDUMP_EXCEPTION_INFORMATION info;
 	info.ThreadId = ::GetCurrentThreadId();
@@ -172,14 +172,14 @@ CString ICrashHandler::GetCrashFile()
 	return path;
 }
 
-CString ICrashHandler::GetCrashLog()
+const CString& ICrashHandler::GetCrashLog()
 {
 	static CString path;
 	if (!path.Empty()) return path;
 
 	path.Format(_T("%s.log"), (LPCTSTR)GetCrashPath());
 	CIOFile file;
-	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return _T("");
+	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return (path = _T(""));
 
 	BOOL cout_time_old = g_Log.SetCoutTime(FALSE);
 

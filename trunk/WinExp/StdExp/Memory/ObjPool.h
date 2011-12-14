@@ -91,8 +91,8 @@ struct _ObjPoolPolicyT
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	static const DWORD DEF_SIZE = 100;
-	static const DWORD MAX_SIZE = 10000;
+	static const DWORD DEF_SIZE = 10;
+	static const DWORD MAX_SIZE = 1000;
 };
 
 //////////////////////////////////////////////////////////////////

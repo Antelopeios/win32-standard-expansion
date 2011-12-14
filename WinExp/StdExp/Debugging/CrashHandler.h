@@ -61,7 +61,7 @@ public:
 };
 
 #undef	ExCrash
-#define ExCrash ExPrintfT<PrintfPolicy_Crach>
+#define ExCrash EXP::ExPrintfT<EXP::PrintfPolicy_Crach>
 
 //////////////////////////////////////////////////////////////////
 

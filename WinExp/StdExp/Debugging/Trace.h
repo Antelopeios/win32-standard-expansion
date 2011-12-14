@@ -114,11 +114,11 @@ public:
 //////////////////////////////////////////////////////////////////
 
 #undef	ExDPrintf
-#define ExDPrintf	ExPrintfT<PrintfPolicy_Debug>
+#define ExDPrintf	EXP::ExPrintfT<EXP::PrintfPolicy_Debug>
 #undef	ExCPrintf
-#define ExCPrintf	ExPrintfT<PrintfPolicy_Console>
+#define ExCPrintf	EXP::ExPrintfT<EXP::PrintfPolicy_Console>
 #undef	ExMPrintf
-#define ExMPrintf	ExPrintfT<PrintfPolicy_Message>
+#define ExMPrintf	EXP::ExPrintfT<EXP::PrintfPolicy_Message>
 
 #undef	ExTrace
 #ifdef	_DEBUG

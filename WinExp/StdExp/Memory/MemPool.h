@@ -179,7 +179,7 @@ protected:
 	// 对象池策略
 	template <DWORD SizeT>
 	struct pool_policy_t : public PolicyT::pool_policy_t
-	{ static const DWORD MAX_SIZE = (((DWORD)~0) / sizeof(_TypeT<SizeT>) >> 1); };
+	{ static const DWORD MAX_SIZE = ((((DWORD)~0) / sizeof(_TypeT<SizeT>)) >> 5); };
 
 	// 对象池
 	template <typename PolicyT>

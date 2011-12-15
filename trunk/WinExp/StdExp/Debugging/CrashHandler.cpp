@@ -46,7 +46,6 @@
 #include "Common/Common.h"
 #include "CrashHandler.h"
 #include "File/File.h"
-#include "Memory/Memory.h"
 #include "Debugging/LogSystem.h"
 #include "Debugging/XZipFile.h"
 
@@ -240,10 +239,10 @@ CString ICrashHandler::GetCrashZip(LPCTSTR sPath/* = NULL*/)
 		// 得到压缩包文件名
 		TCHAR app_path[MAX_PATH];
 		GetModuleFileName(NULL, app_path, MAX_PATH);
-		_tcsrchr(app_path, _T('\\'))[1] = _T('\0');
+		_tcsrchr(app_path, _T('.'))[0] = _T('\0');
 		SYSTEMTIME sys = {0};
 		GetLocalTime(&sys);
-		path.Format(_T("%s%4d.%02d.%02d_%02d.%02d.%02d_%03d.zip"), (LPCTSTR)app_path, 
+		path.Format(_T("%s_%4d.%02d.%02d_%02d.%02d.%02d_%03d.zip"), (LPCTSTR)app_path, 
 			sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
 	}
 	// 生成压缩包并压缩文件

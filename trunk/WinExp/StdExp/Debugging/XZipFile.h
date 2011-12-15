@@ -45,6 +45,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Debugging/XZip/XZip.h"
+#include "Memory/Memory.h"
 #include "Container/String.h"
 
 EXP_BEG

@@ -51,6 +51,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Debugging/Trace.h"
+#include "Memory/Memory.h"
 #include "Container/String.h"
 
 EXP_BEG

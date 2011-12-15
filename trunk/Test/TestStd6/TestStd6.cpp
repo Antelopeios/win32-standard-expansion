@@ -10,8 +10,8 @@ class CCrash : public ICrashHandler
 public:
 	void OnCrash()
 	{
-		ExMPrintf(_T("好吧,我挂了...=.=\n崩溃转储在这里: %s\n崩溃日志在这里: %s"), 
-			(LPCTSTR)GetCrashFile(), (LPCTSTR)GetCrashLog());
+		ExMPrintf(_T("好吧,我挂了...=.=\n崩溃转储在这里: %s\n崩溃日志在这里: %s\n崩溃信息打包到这里:\n%s"), 
+			(LPCTSTR)GetCrashDmp(), (LPCTSTR)GetCrashLog(), (LPCTSTR)GetCrashZip());
 	}
 } g_Crash;
 

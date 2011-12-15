@@ -33,11 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-13
-// Version:	1.0.0000.1640
+// Date:	2011-12-15
+// Version:	1.0.0001.1145
 //
 // Reference:
 //	- Mike Carruth's CrashRpt(http://www.codeproject.com/KB/debug/crash_report.aspx)
+//
+// History:
+//	- 1.0.0001.1145(2011-12-15)	+ 添加ICrashHandler::GetCrashZip()接口,支持直接将崩溃信息打包为zip文件
 //////////////////////////////////////////////////////////////////
 
 #ifndef __CrashHandler_h__
@@ -48,7 +51,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Debugging/Trace.h"
-#include "Container/Container.h"
+#include "Container/String.h"
 
 EXP_BEG
 
@@ -75,6 +78,7 @@ interface ICrashHandler
 	const CString& GetCrashPath();
 	const CString& GetCrashDmp();
 	const CString& GetCrashLog();
+	CString GetCrashZip(LPCTSTR sPath = NULL);
 };
 
 //////////////////////////////////////////////////////////////////

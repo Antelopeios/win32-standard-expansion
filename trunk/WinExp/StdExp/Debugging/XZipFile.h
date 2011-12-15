@@ -1,4 +1,4 @@
-// Copyright 2010, 木头云
+// Copyright 2011, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,32 +28,76 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Debugging - 调试
+// XZipFile - ZIP格式文件打包
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-04
-// Version:	1.0.0001.2202
+// Date:	2011-12-15
+// Version:	1.0.0001.1100
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Debugging_h__
-#define __Debugging_h__
+#ifndef __XZipFile_h__
+#define __XZipFile_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Common/Common.h"
+#include "Debugging/XZip/XZip.h"
+#include "Container/String.h"
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "Debugging/Assertion.h"
-#include "Debugging/Trace.h"
-#include "Debugging/LogSystem.h"
-#include "Debugging/XZipFile.h"
-#include "Debugging/CrashHandler.h"
+class CXZip
+{
+protected:
+	typedef HZIP zip_t;
+	zip_t m_ZipFile;
+
+public:
+	CXZip(LPCTSTR sPath = NULL)
+		: m_ZipFile(NULL)
+	{
+		if (sPath) Open(sPath);
+	}
+	virtual ~CXZip()
+	{
+		if (m_ZipFile) Close();
+	}
+
+public:
+	BOOL Open(LPCTSTR sPath)
+	{
+		CString path(sPath);
+		if (path.Empty()) return FALSE;
+		m_ZipFile = CreateZip((LPTSTR)path, 0, ZIP_FILENAME);
+		return (m_ZipFile != NULL);
+	}
+	void Close()
+	{
+		if (m_ZipFile) CloseZip(m_ZipFile);
+		m_ZipFile = NULL;
+	}
+	BOOL AddFile(LPCTSTR sPath)
+	{
+		CString path(sPath);
+		if (path.Empty()) return FALSE;
+		WIN32_FIND_DATA fd = {0};
+		HANDLE find = ::FindFirstFile(path, &fd);
+		if (find == INVALID_HANDLE_VALUE) return FALSE;
+		::FindClose(find);
+		// Trim path off file name
+		CString sFileName = path.Mid(path.RevFind(_T('\\'))->Index() + 1);
+		// Start a new file in Zip
+		return (ZR_OK == ZipAdd(m_ZipFile, sFileName, (LPTSTR)path, 0, ZIP_FILENAME));
+	}
+};
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Debugging_h__*/
+EXP_END
+
+#endif/*__XZipFile_h__*/

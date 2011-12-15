@@ -188,6 +188,22 @@
 				RelativePath=".\Debugging\Trace.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Debugging\XZipFile.h"
+				>
+			</File>
+			<Filter
+				Name="XZip"
+				>
+				<File
+					RelativePath=".\Debugging\XZip\XZip.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Debugging\XZip\XZip.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Thread"

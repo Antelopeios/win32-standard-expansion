@@ -33,11 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-13
-// Version:	1.0.0000.1640
+// Date:	2011-12-15
+// Version:	1.0.0001.1145
 //
 // Reference:
 //	- Mike Carruth's CrashRpt(http://www.codeproject.com/KB/debug/crash_report.aspx)
+//
+// History:
+//	- 1.0.0001.1145(2011-12-15)	+ 添加ICrashHandler::GetCrashZip()接口,支持直接将崩溃信息打包为zip文件
 //////////////////////////////////////////////////////////////////
 
 #include "Common/Common.h"
@@ -45,6 +48,7 @@
 #include "File/File.h"
 #include "Memory/Memory.h"
 #include "Debugging/LogSystem.h"
+#include "Debugging/XZipFile.h"
 
 #include <DbgHelp.h>
 #pragma comment(lib, "DbgHelp.lib")
@@ -225,6 +229,27 @@ const CString& ICrashHandler::GetCrashLog()
 	g_Log.SetCoutTime(cout_time_old);
 
 	g_Log.ToFile(&file);
+	return path;
+}
+
+CString ICrashHandler::GetCrashZip(LPCTSTR sPath/* = NULL*/)
+{
+	CString path(sPath);
+	if (path.Empty())
+	{
+		// 得到压缩包文件名
+		TCHAR app_path[MAX_PATH];
+		GetModuleFileName(NULL, app_path, MAX_PATH);
+		_tcsrchr(app_path, _T('\\'))[1] = _T('\0');
+		SYSTEMTIME sys = {0};
+		GetLocalTime(&sys);
+		path.Format(_T("%s%4d.%02d.%02d_%02d.%02d.%02d_%03d.zip"), (LPCTSTR)app_path, 
+			sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
+	}
+	// 生成压缩包并压缩文件
+	CXZip zip(path);
+	zip.AddFile(GetCrashDmp());
+	zip.AddFile(GetCrashLog());
 	return path;
 }
 

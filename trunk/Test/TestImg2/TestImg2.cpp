@@ -213,8 +213,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			
 				//Render(mem_img, imgShow, CRect(), CPoint());
 
-				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderCopy(200));
-				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal(200));
+				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderCopy(/*200*/));
+				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal(/*200*/));
 				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay(200));
 
 				//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));

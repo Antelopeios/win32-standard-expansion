@@ -200,7 +200,7 @@ public:
 	{
 		PreFilter();
 
-		BYTE g = 
+		chann_t g = 
 			(ExGetR(pix_des[i_d]) * 38 + ExGetG(pix_des[i_d]) * 75 + ExGetB(pix_des[i_d]) * 15) >> 7;
 		pix_des[i_d] = ExRGBA(g, g, g, ExGetA(pix_des[i_d]));
 
@@ -346,10 +346,10 @@ public:
 		}
 		pix_des[i_d] = ExRGBA
 			(
-			(BYTE)(r > (BYTE)~0 ? (BYTE)~0 : r), 
-			(BYTE)(g > (BYTE)~0 ? (BYTE)~0 : g), 
-			(BYTE)(b > (BYTE)~0 ? (BYTE)~0 : b), 
-			(BYTE)(a > (BYTE)~0 ? (BYTE)~0 : a)
+			(chann_t)(r > EXP_CM ? EXP_CM : r), 
+			(chann_t)(g > EXP_CM ? EXP_CM : g), 
+			(chann_t)(b > EXP_CM ? EXP_CM : b), 
+			(chann_t)(a > EXP_CM ? EXP_CM : a)
 			);
 
 		EndBlockFilter();
@@ -400,10 +400,10 @@ public:
 
 		PreFilter();
 
-		BYTE a_d = ExGetA(pix_des[i_d]);
-		BYTE r_d = ExGetR(pix_des[i_d]);
-		BYTE g_d = ExGetG(pix_des[i_d]);
-		BYTE b_d = ExGetB(pix_des[i_d]);
+		chann_t a_d = ExGetA(pix_des[i_d]);
+		chann_t r_d = ExGetR(pix_des[i_d]);
+		chann_t g_d = ExGetG(pix_des[i_d]);
+		chann_t b_d = ExGetB(pix_des[i_d]);
 		pixel_t pix = ExRGBA
 			(
 			ExGetR(m_Grad[0]) + off[0] * (m_Vert ? y_d : x_d), 
@@ -424,8 +424,8 @@ public:
 				ExGetB(pix) < b_d ? ExGetB(pix) : b_d, 
 				ExGetA(pix) < a_d ? ExGetA(pix) : a_d
 				);
-			break;													   
-		case more:														   
+			break;
+		case more:
 			pix = ExRGBA
 				(
 				ExGetR(pix) > r_d ? ExGetR(pix) : r_d, 

@@ -28,76 +28,73 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// ImgCommon - 图像拓展库公用定义
+// ImgASM - 图像渲染加速
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-19
-// Version:	1.0.0008.1020
-//
-// History:
-//	- 1.0.0001.1700(2011-04-07)	+ 添加pixel_t类型定义
-//	- 1.0.0002.2120(2011-04-07)	+ 添加用于分离pixel_t通道分量的相关接口
-//	- 1.0.0003.1700(2011-04-11)	+ 添加graph_t类型定义
-//	- 1.0.0004.2222(2011-04-20)	+ 添加EXP_ZERO,ExIsZero()与ExIsEqual()定义,方便判断浮点数是否为0以及浮点数相等比较
-//	- 1.0.0005.1730(2011-04-25)	+ 添加EXP_PI定义
-//	- 1.0.0006.0952(2011-05-25)	+ 添加EXP_CM定义代替(BYTE)~0
-//	- 1.0.0007.1413(2011-06-28)	+ 添加ExRevColor(),用于颠倒像素中的颜色通道
-//	- 1.0.0008.1020(2011-12-19)	+ 添加chann_t定义代替BYTE表示通道
-//								+ 添加ExDivCM()用来快速计算((x) / EXP_CM)
+// Date:	2011-12-16
+// Version:	1.0.0001.1520
 //////////////////////////////////////////////////////////////////
 
-#ifndef __ImgCommon_h__
-#define __ImgCommon_h__
+#ifndef __ImgASM_h__
+#define __ImgASM_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "StdExp.h"
+//////////////////////////////////////////////////////////////////
 
-EXP_BEG
+#define ExASM_mov(ptr, xmm, reg) \
+	__asm mov reg, [ptr] \
+	__asm movups xmm, [reg]
+
+#define ExASM_copy(reg1, reg2, xtmp) \
+	__asm movups xtmp, [reg1] \
+	__asm movups [reg2], xtmp
+
+#define ExASM_punpckl(xmm, reg, xmsk) \
+	__asm movups xmm, [reg] \
+	__asm punpcklbw xmm, xmm \
+	__asm pand xmm, xmsk
+
+#define ExASM_punpckh(xmm, reg, xmsk) \
+	__asm movups xmm, [reg] \
+	__asm punpckhbw xmm, xmm \
+	__asm pand xmm, xmsk
+
+#define ExASM_punpap(xmm, xreg, xtmp) \
+	__asm movups xmm, xreg \
+	__asm punpcklwd xmm, xmm \
+	__asm punpckhwd xmm, xmm \
+	__asm punpckhwd xmm, xmm \
+	__asm psrlq xmm, 63 \
+	__asm movups xtmp, xreg \
+	__asm punpckhwd xtmp, xtmp \
+	__asm punpckhwd xtmp, xtmp \
+	__asm punpckhwd xtmp, xtmp \
+	__asm psllq xmm, 63 \
+	__asm por xmm, xtmp
+
+#define ExASM_divcm(xmm, xtmp, xmsk_257) \
+	__asm movups xtmp, xmm \
+	__asm paddw xtmp, xmsk_257 \
+	__asm psrlw xtmp, 8 \
+	__asm paddw xmm, xtmp \
+	__asm psrlw xmm, 8 \
+
+#define ExASM_cmsub(xmm, xreg, xmsk_cm) \
+	__asm movups xmm, xmsk_cm \
+	__asm psubw xmm, xreg
+
+#define ExASM_combpx(xmm1, xmm2) \
+	__asm psllq xmm1, 15 \
+	__asm psrlq xmm1, 15 \
+	__asm psrlq xmm2, 47 \
+	__asm psllq xmm2, 47 \
+	__asm por xmm1, xmm2
 
 //////////////////////////////////////////////////////////////////
 
-// 类型定义
-
-typedef HDC			graph_t;	
-typedef HBITMAP		image_t;
-typedef HFONT		font_t;
-typedef COLORREF	pixel_t;
-typedef BYTE		chann_t;
-
-// 功能定义
-
-#define ExRGB(r, g, b) RGB(r, g, b)
-#define ExRGBA(r, g, b, a) \
-	( (pixel_t) ((((chann_t)(r) | ((WORD)((chann_t)(g))<<8)) | (((DWORD)(chann_t)(b))<<16)) | (((DWORD)(chann_t)(a))<<24)) )
-
-#define ExGetR(pix)	GetRValue(pix)
-#define ExGetG(pix)	GetGValue(pix)
-#define ExGetB(pix)	GetBValue(pix)
-#define ExGetA(pix)	(LOBYTE((pix) >> 24))
-
-#define ExRevColor(pix) \
-	ExRGBA(ExGetB(pix), ExGetG(pix), ExGetR(pix), ExGetA(pix))
-
-#define EXP_ZERO	0.00000001
-#define ExIsZero(num)	(((num) < EXP_ZERO) && ((num) > -EXP_ZERO))
-#define ExIsEqual(a, b)	ExIsZero((a) - (b))
-
-#define EXP_PI		3.14159265
-#define EXP_CM		((chann_t)~0)
-
-#define ExDivCM(x) (((x) + (((x) + 257) >> 8)) >> 8)
-
-//////////////////////////////////////////////////////////////////
-
-#include "ImgCommon/ImgASM.hpp"
-
-//////////////////////////////////////////////////////////////////
-
-EXP_END
-
-#endif/*__ImgCommon_h__*/
+#endif/*__ImgASM_h__*/

@@ -122,7 +122,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// 打开文件并获取解码器
-	CIOFile file(_T("../TestImg1/ground.png")); CGC gc;
+	CIOFile file(_T("../TestImg1/ground.png")/*_T("ground.png")*/); CGC gc;
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	// 解码文件
 	imgOrig = coder->Decode();
@@ -190,30 +190,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DWORD t_s = timeGetTime();
 			for(int i = 0; i < 1000; ++i)
 			{
-				//CGraph mem_grp;
-				//mem_grp.Create();
-				//mem_grp.SetObject(mem_img.Get());
-				//CGraph img_grp;
-				//img_grp.Create();
-				//img_grp.SetObject(imgShow.Get());
+			/*	CGraph mem_grp;
+				mem_grp.Create();
+				mem_grp.SetObject(mem_img.Get());
+				CGraph img_grp;
+				img_grp.Create();
+				img_grp.SetObject(imgShow.Get());
 
-				////BLENDFUNCTION bl = {0};
-				////bl.AlphaFormat = AC_SRC_ALPHA;
-				////bl.SourceConstantAlpha = 255;
-				////AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
-				////		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
+				BLENDFUNCTION bl = {0};
+				bl.AlphaFormat = AC_SRC_ALPHA;
+				bl.SourceConstantAlpha = 255;
+				AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
+						   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
 
 				//BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
 
-				////StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
-				////		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
+				//StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
+				//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
 
-				//img_grp.Delete();
-				//mem_grp.Delete();
-
+				img_grp.Delete();
+				mem_grp.Delete();*/
+			
 				//Render(mem_img, imgShow, CRect(), CPoint());
 
-				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal()/*, &CRenderCopy(200)*//*, &CRenderOverlay()*/);
+				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderCopy(200));
+				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal(200));
+				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay(200));
 
 				//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
 				//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());

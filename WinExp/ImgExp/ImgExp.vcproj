@@ -589,6 +589,10 @@
 			Name="ImgCommon"
 			>
 			<File
+				RelativePath=".\ImgCommon\ImgASM.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ImgCommon\ImgCommon.cpp"
 				>
 			</File>

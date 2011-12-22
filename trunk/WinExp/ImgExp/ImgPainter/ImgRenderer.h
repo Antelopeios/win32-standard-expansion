@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-20
-// Version:	1.0.0015.2300
+// Date:	2011-12-22
+// Version:	1.0.0016.1737
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -60,6 +60,7 @@
 //	- 1.0.0014.1540(2011-08-10)	^ 为CImgRenderer::Render()增加默认参数
 //	- 1.0.0015.2300(2011-12-20)	# 修正原先渲染算法中的计算误差
 //								^ 使用sse优化CRenderNormal与CRenderOverlay
+//	- 1.0.0016.1737(2011-12-22)	# 修正v.0015中sse算法里的错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -186,6 +187,7 @@ public:
 				pixel_t* ps = pix_src + inx_src;
 				pixel_t* pd = pix_des + inx_des;
 				int sse_len = w >> 1;
+				if (sse_len)
 				__asm
 				{
 					mov	eax, [ps]
@@ -289,6 +291,7 @@ public:
 				pixel_t* ps = pix_src + inx_src;
 				pixel_t* pd = pix_des + inx_des;
 				int sse_len = w >> 1;
+				if (sse_len)
 				__asm
 				{
 					mov	eax, [ps]
@@ -297,7 +300,7 @@ public:
 				sse_loop_1:
 					// 拓展ps
 					ExASM_punpckl(xmm0, eax, xmm6)
-					// 拓展pd	 
+					// 拓展pd
 					ExASM_punpckl(xmm1, edx, xmm6)
 					// 拓展as
 					ExASM_punpap(xmm2, xmm0, xmm3)
@@ -421,13 +424,13 @@ public:
 				push edi
 				ExASM_mov(pt, xmm5, eax)
 				ExASM_mov(pm, xmm6, edi)
-				mov esi, [pa]
 			}
 			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
 			{
 				pixel_t* ps = pix_src + inx_src;
 				pixel_t* pd = pix_des + inx_des;
 				int sse_len = w >> 1;
+				if (sse_len)
 				__asm
 				{
 					mov	eax, [ps]
@@ -440,7 +443,7 @@ public:
 					ExASM_punpckl(xmm1, edx, xmm6)
 					// 拓展as
 					ExASM_punpap(xmm2, xmm0, xmm3)
-					movups xmm7, [esi]
+					ExASM_mov(pa, xmm7, esi)
 					pmullw xmm2, xmm7					// a_s * m_Alpha
 					ExASM_divcm(xmm2, xmm4, xmm5)		// (a_s * m_Alpha) / EXP_CM
 					// 拓展ad

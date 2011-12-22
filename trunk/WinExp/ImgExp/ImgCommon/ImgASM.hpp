@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-16
-// Version:	1.0.0001.1520
+// Date:	2011-12-22
+// Version:	1.0.0002.1737
+//
+// History:
+//	- 1.0.0002.1737(2011-12-22)	# 修正ExASM_punpap()中的算法错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgASM_h__
@@ -68,14 +71,10 @@
 	__asm movups xmm, xreg \
 	__asm punpcklwd xmm, xmm \
 	__asm punpckhwd xmm, xmm \
-	__asm punpckhwd xmm, xmm \
-	__asm psrlq xmm, 63 \
 	__asm movups xtmp, xreg \
 	__asm punpckhwd xtmp, xtmp \
 	__asm punpckhwd xtmp, xtmp \
-	__asm punpckhwd xtmp, xtmp \
-	__asm psllq xmm, 63 \
-	__asm por xmm, xtmp
+	__asm punpckhqdq xmm, xtmp
 
 #define ExASM_divcm(xmm, xtmp, xmsk_257) \
 	__asm movups xtmp, xmm \

@@ -4,9 +4,6 @@
 #include "stdafx.h"
 #include "TestImg2.h"
 
-#include "mmsystem.h"
-#pragma comment(lib, "winmm.lib")
-
 #pragma comment(lib, "msimg32.lib")
 
 #define MAX_LOADSTRING 100
@@ -122,7 +119,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// 打开文件并获取解码器
-	CIOFile file(_T("../TestImg1/ground.png")/*_T("ground.png")*/); CGC gc;
+	CIOFile file(_T("../TestImg1/ground.png"));
+	//CIOFile file(_T("ground.png"));
+	CGC gc;
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	// 解码文件
 	imgOrig = coder->Decode();
@@ -133,6 +132,67 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	return TRUE;
 }
+
+volatile long g_Frames = 0, g_FramesCounter = 0;
+volatile BOOL g_EndTest = FALSE;
+CImage g_MemImg;
+CMutex g_MemLck;
+
+class CSpeedTest : public IThread
+{
+protected:
+	DWORD OnThread(LPVOID lpParam)
+	{
+		g_MemImg.Create(imgShow.GetWidth(), imgShow.GetHeight());
+
+		while(!g_EndTest)
+		{
+			{
+				ExLock(g_MemLck, false);
+
+				ZeroMemory(g_MemImg.GetPixels(), g_MemImg.GetSize());
+			/*	{
+					CGraph mem_grp;
+					mem_grp.Create();
+					mem_grp.SetObject(g_MemImg.Get());
+					HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
+					FillRect(mem_grp, &(RECT)CRect(0, 0, imgShow.GetWidth(), imgShow.GetHeight()), brh);
+					mem_grp.Delete();
+				}*/
+				{
+					//CGraph mem_grp;
+					//mem_grp.Create();
+					//mem_grp.SetObject(g_MemImg.Get());
+					//CGraph img_grp;
+					//img_grp.Create();
+					//img_grp.SetObject(imgShow.Get());
+					//BLENDFUNCTION bl = {0};
+					//bl.AlphaFormat = AC_SRC_ALPHA;
+					//bl.SourceConstantAlpha = 255;
+					//AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
+					//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
+					////BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
+					////StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
+					////		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
+					//img_grp.Delete();
+					//mem_grp.Delete();
+				
+					//Render(g_MemImg, imgShow, CRect(), CPoint());
+
+					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderCopy(/*200*/));
+					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderNormal(/*200*/));
+					CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderOverlay(/*200*/));
+
+					//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
+					//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
+				}
+			}
+			++g_FramesCounter;
+		}
+
+		return 0;
+	}
+} g_SpeedTest;
 
 //
 //  函数: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -152,6 +212,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
+	case WM_SHOWWINDOW:
+		if (wParam)
+		{
+			g_SpeedTest.Create();
+			::SetTimer(hWnd, 1, 1000, NULL);
+		}
+		break;
+	case WM_TIMER:
+		if (wParam == 1)
+		{
+			g_Frames = g_FramesCounter;
+			g_FramesCounter = 0;
+			RECT rect = {0};
+			GetClientRect(hWnd, &rect);
+			::InvalidateRect(hWnd, &rect, FALSE);
+		}
+		break;
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
@@ -181,54 +258,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			mem_grp.Create(hdc);
 			mem_grp.SetObject(mem_img.Get());
 
-			HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
+			HBRUSH brh = (HBRUSH)GetStockObject(BLACK_BRUSH/*GRAY_BRUSH*/);
 			FillRect(mem_grp, &rect, brh);
 
-			mem_grp.Delete();
-
-			timeBeginPeriod(1);
-			DWORD t_s = timeGetTime();
-			for(int i = 0; i < 1000; ++i)
 			{
-			/*	CGraph mem_grp;
-				mem_grp.Create();
-				mem_grp.SetObject(mem_img.Get());
-				CGraph img_grp;
-				img_grp.Create();
-				img_grp.SetObject(imgShow.Get());
-
-				BLENDFUNCTION bl = {0};
-				bl.AlphaFormat = AC_SRC_ALPHA;
-				bl.SourceConstantAlpha = 255;
-				AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
-						   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
-
-				//BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
-
-				//StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
-				//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
-
-				img_grp.Delete();
-				mem_grp.Delete();*/
-			
-				//Render(mem_img, imgShow, CRect(), CPoint());
-
-				CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderCopy(/*200*/));
-				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal(/*200*/));
-				//CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderOverlay(200));
-
-				//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
-				//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
+				ExLock(g_MemLck, true);
+				CImgRenderer::Render(mem_img, g_MemImg, CRect(), CPoint(), &CRenderCopy());
 			}
-			DWORD t_e = timeGetTime();
-			timeEndPeriod(1);
-			t_e -= t_s;
-			CString msg;
-			msg.Format(_T("%d ms"), t_e);
-			::MessageBox(NULL, (LPCTSTR)msg, NULL, 0);
+			Render(mem_img, imgShow, 
+				CRect(imgShow.GetWidth(), 0, imgShow.GetWidth() << 1, imgShow.GetHeight()), 
+				CPoint());
 
-			mem_grp.Create(hdc);
-			mem_grp.SetObject(mem_img.Get());
+			CText text(_T(""), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
+			text.Format(_T("%d fps"), g_Frames);
+			CImage bmp_img(text.GetImage());
+			if(!bmp_img.IsNull())
+			{
+				Render
+					(
+					mem_img, bmp_img, 
+					CRect(
+						rect.right - bmp_img.GetWidth() - 5, 
+						rect.bottom - bmp_img.GetHeight() - 5, 
+						rect.right, rect.bottom), 
+					CPoint()
+					);
+			}
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 			mem_grp.Delete();
 		}
@@ -237,6 +292,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_ERASEBKGND:
 		break;
 	case WM_DESTROY:
+		g_EndTest = TRUE;
 		PostQuitMessage(0);
 		break;
 	default:

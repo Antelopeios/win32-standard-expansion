@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-24
-// Version:	1.0.0006.1720
+// Date:	2012-01-03
+// Version:	1.0.0007.1925
 //
 // History:
 //	- 1.0.0001.1539(2011-05-31)	@ 基本完成GuiBoard;GuiCtrl;GuiEffect;GuiEvent等模块的架构构建
@@ -44,6 +44,7 @@
 //								^ 调整结构并优化算法,简化调用接口
 //	- 1.0.0004.1258(2011-10-10)	# 修正若干bug
 //								@ 基本完成XML解析模块的构建
+//	- 1.0.0007.1925(2012-01-03)	^ 配合ImgExp的改动调整窗口与控件的绘图逻辑
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiExp_h__

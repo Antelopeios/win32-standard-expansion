@@ -301,11 +301,7 @@ protected:
 						// ¸²¸ÇÈ«¾Ö»æÍ¼
 						ctl_rct.Inter(clp_rct);
 						ctl_rct.Offset(-clp_rct.pt1);
-						IRenderObject* render = NULL;
-						if (ExDynCast<IGuiBoard>(pGui))
-							render = ExMem::Alloc<CRenderNormal>();
-						CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct, CPoint(), render);
-						ExMem::Free(render);
+						CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct);
 					}
 				}
 				else

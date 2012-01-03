@@ -170,7 +170,7 @@ public:
 	{}
 
 public:
-	BOOL Encode(image_t Image)
+	BOOL OnEncode(image_t Image)
 	{
 		IFileObject* file = GetFile();
 		if(!file) return FALSE;
@@ -221,7 +221,7 @@ public:
 		jpeg_destroy_compress(&cinfo);
 		return TRUE;
 	}
-	image_t Decode()
+	image_t OnDecode()
 	{
 		IFileObject* file = GetFile();
 		if(!CheckFile(file)) return NULL;

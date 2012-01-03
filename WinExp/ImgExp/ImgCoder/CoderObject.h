@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.0.0002.1620
+// Date:	2012-01-03
+// Version:	1.0.0003.1925
 //
 // History:
 //	- 1.0.0001.2350(2011-04-05)	= 将具体的image_t内存块申请工作统一放在ICoderObject中处理
 //								= ICoderObject::DeleteImage()不再断言Image参数
 //	- 1.0.0002.1620(2011-05-19)	+ 添加ICoderObject::Free()接口,方便CImgAnalyzer构造对象后手动释放指针资源
+//	- 1.0.0003.1925(2012-01-03)	+ 重新定义ICoderObject的Encode()与Decode()接口,方便在处理时统一进行某些预处理过程
 //////////////////////////////////////////////////////////////////
 
 #ifndef __CoderObject_h__
@@ -103,8 +104,19 @@ public:
 	virtual IFileObject* GetFile()
 	{ return m_pFile; }
 
-	virtual BOOL Encode(image_t Image) = 0;
-	virtual image_t Decode() = 0;
+	virtual BOOL OnEncode(image_t image) = 0;
+	virtual image_t OnDecode() = 0;
+
+	BOOL Encode(image_t image)
+	{
+		return OnEncode(image);
+	}
+	image_t Decode()
+	{
+		image_t r = OnDecode();
+		CImgFilter::Filter(r, &CFilterPreMul());
+		return r;
+	}
 
 	void Free() { ExMem::Free(this); }
 };

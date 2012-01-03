@@ -67,29 +67,43 @@ BOOL Render(image_t imgDes, image_t imgSrc, CRect& rc_des, CPoint& pt_src)
 	{
 		for(LONG x = 0, i_d = inx_des, i_s = inx_src; x < w; ++x, ++i_d, ++i_s)
 		{
-			int tmp = 0;
 			chann_t a_s = ExGetA(pix_src[i_s]);
-			if (a_s == 0)
-				continue;
-			else
-			if (a_s == EXP_CM) // => m_Alpha == EXP_CM && a_s == EXP_CM
+			if (a_s == EXP_CM)
 			{
 				pix_des[i_d] = pix_src[i_s];
 				continue;
 			}
-			chann_t r_s = ExGetR(pix_src[i_s]);
-			chann_t g_s = ExGetG(pix_src[i_s]);
-			chann_t b_s = ExGetB(pix_src[i_s]);
-			chann_t a_d = ExGetA(pix_des[i_d]);
-			chann_t r_d = ExGetR(pix_des[i_d]);
-			chann_t g_d = ExGetG(pix_des[i_d]);
-			chann_t b_d = ExGetB(pix_des[i_d]);
 			chann_t a_i = EXP_CM - a_s;
-			chann_t a_r = (a_d + a_s) - (tmp = a_d * a_s, ExDivCM(tmp));
-			chann_t r = (tmp = (r_s * a_s + r_d * a_i), ExDivCM(tmp));
-			chann_t g = (tmp = (g_s * a_s + g_d * a_i), ExDivCM(tmp));
-			chann_t b = (tmp = (b_s * a_s + b_d * a_i), ExDivCM(tmp));
-			pix_des[i_d] = ExRGBA(r, g, b, a_r);
+			int tmp;
+			chann_t a = a_s + (tmp = (ExGetA(pix_des[i_d]) * a_i), ExDivCM(tmp));
+			chann_t r = ExGetR(pix_src[i_s]) + (tmp = (ExGetR(pix_des[i_d]) * a_i), ExDivCM(tmp));
+			chann_t g = ExGetG(pix_src[i_s]) + (tmp = (ExGetG(pix_des[i_d]) * a_i), ExDivCM(tmp));
+			chann_t b = ExGetB(pix_src[i_s]) + (tmp = (ExGetB(pix_des[i_d]) * a_i), ExDivCM(tmp));
+			pix_des[i_d] = ExRGBA(r, g, b, a);
+
+			//int tmp = 0;
+			//chann_t a_s = ExGetA(pix_src[i_s]);
+			//if (a_s == 0)
+			//	continue;
+			//else
+			//if (a_s == EXP_CM) // => m_Alpha == EXP_CM && a_s == EXP_CM
+			//{
+			//	pix_des[i_d] = pix_src[i_s];
+			//	continue;
+			//}
+			//chann_t r_s = ExGetR(pix_src[i_s]);
+			//chann_t g_s = ExGetG(pix_src[i_s]);
+			//chann_t b_s = ExGetB(pix_src[i_s]);
+			//chann_t a_d = ExGetA(pix_des[i_d]);
+			//chann_t r_d = ExGetR(pix_des[i_d]);
+			//chann_t g_d = ExGetG(pix_des[i_d]);
+			//chann_t b_d = ExGetB(pix_des[i_d]);
+			//chann_t a_i = EXP_CM - a_s;
+			//chann_t a_r = (a_d + a_s) - (tmp = a_d * a_s, ExDivCM(tmp));
+			//chann_t r = (tmp = (r_s * a_s + r_d * a_i), ExDivCM(tmp));
+			//chann_t g = (tmp = (g_s * a_s + g_d * a_i), ExDivCM(tmp));
+			//chann_t b = (tmp = (b_s * a_s + b_d * a_i), ExDivCM(tmp));
+			//pix_des[i_d] = ExRGBA(r, g, b, a_r);
 		}
 	}
 

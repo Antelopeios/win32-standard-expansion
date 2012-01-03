@@ -155,28 +155,23 @@ public:
 		tmp_grp.SetObject(m_MemImg.Get());
 		// 绘制文字
 		CRect rc(0, 0, sz.cx, sz.cy);
-		CImgFilter::Filter(m_MemImg, rc, &CFilterFill(ExRGBA(0, 0, 0, EXP_CM), 0x1));
+		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRGBA(0, 0, 0, EXP_CM), 0x1));
 		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), 
 			&(RECT)rc, DT_LEFT | DT_TOP);
 		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0x1));
 		if (m_Color != ExRGBA(0, 0, 0, EXP_CM))
-			CImgFilter::Filter
-				(
+			CImgFilter::Filter(
 				m_MemImg, rc, 
-				&CFilterFill
-					(
-					ExRGBA
-						(
+				&CFilterBrush(
+					ExRGBA(
 						ExGetB(m_Color), 
 						ExGetG(m_Color), 
 						ExGetR(m_Color), 
-						ExGetA(m_Color)
-						), 
-					0xf, TRUE
-					)
-				);
+						ExGetA(m_Color)), 
+					0xf, TRUE));
 		// 清理内存并返回
 		tmp_grp.Delete();
+		CImgFilter::Filter(m_MemImg, &CFilterPreMul());
 		return m_MemImg;
 	}
 };

@@ -51,6 +51,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgPainter/ImgRenderer.h"
+#include "ImgPainter/ImgFilter.h"
 
 EXP_BEG
 
@@ -66,6 +67,7 @@ public:
 		exp_des.SetTrust(FALSE);
 		exp_des = imgDes;
 		if (exp_des.IsNull()) return FALSE;
+		CImgASM::PixPreMul(&pixSrc, 1);
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		pixel_t* pix_des = exp_des.GetPixels();
 		if (ptDes.x >= sz_des.cx || ptDes.y >= sz_des.cy) return TRUE;
@@ -75,40 +77,11 @@ public:
 	}
 
 	// 填充
-	EXP_INLINE static BOOL Fill(image_t imgDes, const CRect& rcDes, const pixel_t pixSrc)
+	EXP_INLINE static BOOL Fill(image_t imgDes, const CRect& rcDes, pixel_t pixSrc)
 	{
-		CImage exp_des;
-		exp_des.SetTrust(FALSE);
-		exp_des = imgDes;
-		if (exp_des.IsNull()) return FALSE;
-
-		// 格式化区域
-		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
-		CRect rc_des(rcDes);
-		if (rc_des.IsEmpty())
-			rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
-		else
-		{
-			if (rc_des.pt1.x < 0) rc_des.pt1.x = 0;
-			if (rc_des.pt1.y < 0) rc_des.pt1.y = 0;
-			if (rc_des.pt2.x > sz_des.cx) rc_des.pt2.x = sz_des.cx;
-			if (rc_des.pt2.y > sz_des.cy) rc_des.pt2.y = sz_des.cy;
-		}
-
-		// 获得合适的宽与高
-		LONG w = rc_des.Width(), h = rc_des.Height();
-		if (w <= 0 || h <= 0) return TRUE;
-		// 计算坐标起点
-		LONG inx_des = (sz_des.cy - rc_des.Top() - 1) * sz_des.cx + rc_des.Left();
-
-		// 遍历像素绘图
-		pixel_t* pix_des = exp_des.GetPixels();
-		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
-			for(LONG x = 0, i_d = inx_des; x < w; ++x, ++i_d)
-				pix_des[i_d] = pixSrc;
-		return TRUE;
+		return CImgFilter::Filter(imgDes, rcDes, &CFilterFill(pixSrc));
 	}
-	EXP_INLINE static BOOL Fill(image_t imgDes, const pixel_t pixSrc)
+	EXP_INLINE static BOOL Fill(image_t imgDes, pixel_t pixSrc)
 	{
 		return Fill(imgDes, CRect(), pixSrc);
 	}
@@ -120,6 +93,7 @@ public:
 	exp_des.SetTrust(FALSE); \
 	exp_des = imgDes; \
 	if (exp_des.IsNull()) return FALSE; \
+	CImgASM::PixPreMul(&pixSrc, 1); \
 	CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight()); \
 	CImage img; \
 	img.Create(sz_des.cx, sz_des.cy); \
@@ -146,7 +120,7 @@ public:
 //#define EndDraw
 
 	// 画线
-	EXP_INLINE static BOOL Line(image_t imgDes, const CLine& lnDes, const pixel_t pixSrc)
+	EXP_INLINE static BOOL Line(image_t imgDes, const CLine& lnDes, pixel_t pixSrc)
 	{
 		PreDraw();
 		MoveToEx(grp, lnDes.pt1.x, lnDes.pt1.y, &POINT());

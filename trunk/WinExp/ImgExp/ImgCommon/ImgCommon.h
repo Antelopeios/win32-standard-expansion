@@ -90,14 +90,15 @@ typedef BYTE		chann_t;
 #define EXP_PI		3.14159265
 #define EXP_CM		((chann_t)~0)
 
-#define ExDivCM(x) (((x) + (((x) + 257) >> 8)) >> 8)
-
-//////////////////////////////////////////////////////////////////
-
-#include "ImgCommon/ImgASM.hpp"
+#define ExDivCM(x) (((x) + (((x) >> 8) + 1)) >> 8)
+#define ExMulCM(x) (((x) << 8) - (x))
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#include "ImgCommon/ImgASM.hpp"
+
+//////////////////////////////////////////////////////////////////
 
 #endif/*__ImgCommon_h__*/

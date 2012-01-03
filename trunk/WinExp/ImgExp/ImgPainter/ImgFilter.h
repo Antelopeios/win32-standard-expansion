@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-10
-// Version:	1.0.0005.1540
+// Date:	2012-01-03
+// Version:	1.0.0007.1925
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
@@ -47,6 +47,9 @@
 //	- 1.0.0003.1800(2011-07-14)	# 修正浮雕滤镜的算法错误
 //	- 1.0.0004.1947(2011-07-16)	# 修正CImgFilter::Filter()在执行后有可能修改传入区域的问题
 //	- 1.0.0005.1540(2011-08-10)	+ 添加CImgFilter::Filter()的精简参数重载
+//	- 1.0.0006.1424(2011-12-26)	+ 添加CFilterPreMul图像预乘滤镜
+//	- 1.0.0007.1925(2012-01-03)	= 原先的CFilterFill调整为CFilterBrush,CFilterFill做单纯的上色处理
+//								^ 使用CImgASM优化CFilterBrush在不考虑屏蔽色与屏蔽位时的效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -151,8 +154,22 @@ protected:
 
 //////////////////////////////////////////////////////////////////
 
+// 预乘
+class CFilterPreMul : public IFilterObject
+{
+public:
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+		LONG w, LONG h, LONG inx_des)
+	{
+		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
+			CImgASM::PixPreMul(pix_des + inx_des, w);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
 // 颜色画刷
-class CFilterFill : public IFilterObject
+class CFilterBrush : public IFilterObject
 {
 public:
 	BYTE m_Mask;
@@ -161,7 +178,7 @@ public:
 	pixel_t m_ClrMask;
 
 public:
-	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, BOOL bClrMask = FALSE, pixel_t cMask = 0)
+	CFilterBrush(pixel_t cConst = 0, BYTE bMask = 0xf, BOOL bClrMask = FALSE, pixel_t cMask = 0)
 		: m_Const(cConst)
 		, m_Mask(bMask)
 		, m_bClrMask(bClrMask)
@@ -172,20 +189,68 @@ public:
 				LONG w, LONG h, LONG inx_des)
 	{
 		if (m_Mask == 0) return;
+		if (m_Mask == 0xf && !m_bClrMask)
+		{
+			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
+				CImgASM::PixSetP(pix_des + inx_des, w, m_Const);
+		}
+		else
+		{
+			PreFilter();
 
-		PreFilter();
+			if (m_bClrMask && pix_des[i_d] == m_ClrMask)
+				continue;
+			pix_des[i_d] = ExRGBA
+				(
+				(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pix_des[i_d]), 
+				(m_Mask & 0x04) ? ExGetG(m_Const) : ExGetG(pix_des[i_d]), 
+				(m_Mask & 0x02) ? ExGetB(m_Const) : ExGetB(pix_des[i_d]), 
+				(m_Mask & 0x01) ? ExGetA(m_Const) : ExGetA(pix_des[i_d])
+				);
 
-		if (m_bClrMask && pix_des[i_d] == m_ClrMask)
-			continue;
-		pix_des[i_d] = ExRGBA
-			(
-			(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pix_des[i_d]), 
-			(m_Mask & 0x04) ? ExGetG(m_Const) : ExGetG(pix_des[i_d]), 
-			(m_Mask & 0x02) ? ExGetB(m_Const) : ExGetB(pix_des[i_d]), 
-			(m_Mask & 0x01) ? ExGetA(m_Const) : ExGetA(pix_des[i_d])
-			);
+			EndFilter();
+		}
+	}
+};
 
-		EndFilter();
+//////////////////////////////////////////////////////////////////
+
+// 上色(与CFilterBrush相比多了预乘的处理)
+class CFilterFill : public CFilterBrush
+{
+public:
+	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, BOOL bClrMask = FALSE, pixel_t cMask = 0)
+		: CFilterBrush(cConst, bMask, bClrMask, cMask)
+	{
+		CImgASM::PixPreMul(&m_Const, 1);
+		CImgASM::PixPreMul(&m_ClrMask, 1);
+	}
+
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
+	{
+		if (m_Mask == 0) return;
+		if (m_Mask == 0xf && !m_bClrMask)
+		{
+			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
+				CImgASM::PixSetP(pix_des + inx_des, w, m_Const);
+		}
+		else
+		{
+			PreFilter();
+
+			if (m_bClrMask && pix_des[i_d] == m_ClrMask)
+				continue;
+			pix_des[i_d] = ExRGBA
+				(
+				(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pix_des[i_d]), 
+				(m_Mask & 0x04) ? ExGetG(m_Const) : ExGetG(pix_des[i_d]), 
+				(m_Mask & 0x02) ? ExGetB(m_Const) : ExGetB(pix_des[i_d]), 
+				(m_Mask & 0x01) ? ExGetA(m_Const) : ExGetA(pix_des[i_d])
+				);
+
+			EndFilter();
+		}
 	}
 };
 

@@ -101,7 +101,7 @@ public:
 	{}
 
 public:
-	BOOL Encode(image_t Image)
+	BOOL OnEncode(image_t Image)
 	{
 		IFileObject* file = GetFile();
 		if(!file) return FALSE;
@@ -151,7 +151,7 @@ public:
 		png_destroy_write_struct(&png_ptr, &info_ptr);
 		return TRUE;
 	}
-	image_t Decode()
+	image_t OnDecode()
 	{
 		IFileObject* file = GetFile();
 		if(!CheckFile(file)) return NULL;
@@ -202,6 +202,7 @@ public:
 		png_read_end(png_ptr, info_ptr);
 		// 释放资源
 		png_destroy_read_struct(&png_ptr, &info_ptr, 0);
+		// 返回image_t
 		return image;
 	}
 };

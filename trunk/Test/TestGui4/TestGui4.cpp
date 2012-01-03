@@ -34,29 +34,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// ´´½¨¿Ø¼þ
 
-	pixel_t pix[5] = {0};
+	pixel_t pix[8] = {0};
 
 	IGuiCtrl* scroll1 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc));
 	scroll1->SetWindowRect(CRect(10, 230, 475, 250));
 	scroll1->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
-	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
+	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, 255));
 	scroll1->SetState(_T("sli_blk_color"), pix);
 	scroll1->SetState(_T("sli_all"), (void*)100);
 	scroll1->SetState(_T("sli_fra"), (void*)10);
 	//scroll1->SetState(_T("sli_ori"), (void*)TRUE);
-	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(180, 180, 180, 255));
 	scroll1->SetState(_T("up_color"), pix);
 	scroll1->SetState(_T("dn_color"), pix);
 
 	IGuiCtrl* scroll2 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc));
 	scroll2->SetWindowRect(CRect(455, 10, 475, 225));
 	scroll2->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
-	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(120, 120, 120, 255);
+	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, 255));
 	scroll2->SetState(_T("sli_blk_color"), pix);
 	scroll2->SetState(_T("sli_all"), (void*)100);
 	scroll2->SetState(_T("sli_fra"), (void*)20);
 	scroll2->SetState(_T("sli_ori"), (void*)TRUE);
-	pix[0] = pix[1] = pix[2] = pix[3] = pix[4] = ExRGBA(180, 180, 180, 255);
+	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(180, 180, 180, 255));
 	scroll2->SetState(_T("up_color"), pix);
 	scroll2->SetState(_T("dn_color"), pix);
 

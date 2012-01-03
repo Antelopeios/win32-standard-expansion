@@ -99,7 +99,7 @@ public:
 	{}
 
 public:
-	BOOL Encode(image_t Image)
+	BOOL OnEncode(image_t Image)
 	{
 		IFileObject* file = GetFile();
 		if(!file) return FALSE;
@@ -145,7 +145,7 @@ public:
 		file->Seek(0, IFileObject::begin);
 		return TRUE;
 	}
-	image_t Decode()
+	image_t OnDecode()
 	{
 		IFileObject* file = GetFile();
 		if(!CheckFile(file)) return NULL;
@@ -187,32 +187,28 @@ public:
 			GetImageBuff(file_info.bmiHeader.biWidth, file_info.bmiHeader.biHeight, (BYTE*&)bmbf);
 		if(!image) return NULL;
 		// ½âÎöÍ¼ÏñÐÅÏ¢
-		CBmpCoder::Decode(file, bmp_head, file_info, bmbf);
+		CBmpCoder::OnDecode(file, bmp_head, file_info, bmbf);
 		// ÑÚÂë¸²¸Ç
 		clr_size = (file_info.bmiHeader.biWidth * file_info.bmiHeader.biHeight) >> 8;
 		BYTE* mkbf = ExMem::Alloc<BYTE>(clr_size);
 		file->Read(mkbf, clr_size, sizeof(BYTE));
 		pixel_t* tpbf = bmbf;
 		for(long i = 0; i < clr_size; ++i)
-		{
 			for(int n = 7; n >= 0; --n, ++tpbf)
 			{
 				BYTE c = (mkbf[i] >> (1 * n)) & 0x01;
 				if (c == 0)
 				{
 					if (ExGetA(*tpbf) == 0)
-						*tpbf = ExRGBA
-							(
+						*tpbf = ExRGBA(
 							ExGetR(*tpbf), 
 							ExGetG(*tpbf), 
 							ExGetB(*tpbf), 
-							EXP_CM
-							);
+							EXP_CM);
 				}
 				else
 				if (*tpbf != 0) *tpbf = 0;
 			}
-		}
 		ExMem::Free(mkbf);
 		// ·µ»Øimage_t
 		return image;

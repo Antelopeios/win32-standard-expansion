@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-22
-// Version:	1.0.0016.1737
+// Date:	2012-01-03
+// Version:	1.0.0017.1925
 //
 // History:
 //	- 1.0.0001.1730(2011-04-27)	= 将渲染器内部的渲染回调指针改为滤镜接口
@@ -61,6 +61,8 @@
 //	- 1.0.0015.2300(2011-12-20)	# 修正原先渲染算法中的计算误差
 //								^ 使用sse优化CRenderNormal与CRenderOverlay
 //	- 1.0.0016.1737(2011-12-22)	# 修正v.0015中sse算法里的错误
+//	- 1.0.0017.1925(2012-01-03)	^ 采用CImgASM中的算法实现CRenderCopy与CRenderNormal
+//								- 移除CRenderOverlay(因采用预乘图片进行渲染,此算法已不再需要)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgRenderer_h__
@@ -102,137 +104,8 @@ public:
 		pixel_t* pix_des, pixel_t* pix_src, CSize& sz_des, CSize& sz_src, 
 		LONG w, LONG h, LONG inx_des, LONG inx_src)
 	{
-		if (m_Alpha == 0)
-			return;
-		else
-		if (m_Alpha == EXP_CM)
-		{	// 拷贝像素
-			__asm
-			{
-				push ecx
-				push edx
-				push eax
-			}
-			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
-			{
-				pixel_t* ps = pix_src + inx_src;
-				pixel_t* pd = pix_des + inx_des;
-				int sse_len = w >> 2;
-				__asm
-				{
-					mov	eax, [ps]
-					mov edx, [pd]
-					mov ecx, [sse_len]
-				sse_loop_1:
-					ExASM_copy(eax, edx, xmm0);
-					add eax, 10h
-					add edx, 10h
-					dec ecx
-					jnz sse_loop_1
-				}
-				sse_len <<= 2;
-				int nor_len = w - sse_len;
-				if (nor_len)
-					memcpy(pd + sse_len, ps + sse_len, (nor_len << 2));
-			}
-			__asm
-			{
-				pop eax
-				pop edx
-				pop ecx
-				emms
-			}
-		}
-		else
-		{
-			WORD p_a[8] = 
-			{
-				m_Alpha, m_Alpha, m_Alpha, m_Alpha, 
-				m_Alpha, m_Alpha, m_Alpha, m_Alpha
-			};
-			BYTE a_i = EXP_CM - m_Alpha;
-			WORD p_i[8] = 
-			{
-				a_i, a_i, a_i, a_i, 
-				a_i, a_i, a_i, a_i
-			};
-			WORD p_m[8] = 
-			{
-				0x00ff, 0x00ff, 0x00ff, 0x00ff, 
-				0x00ff, 0x00ff, 0x00ff, 0x00ff
-			};
-			WORD p_t[8] = 
-			{
-				0x0101, 0x0101, 0x0101, 0x0101, 
-				0x0101, 0x0101, 0x0101, 0x0101
-			};
-			pixel_t* pm = (pixel_t*)p_m;
-			pixel_t* pa = (pixel_t*)p_a;
-			pixel_t* pi = (pixel_t*)p_i;
-			pixel_t* pt = (pixel_t*)p_t;
-			__asm
-			{
-				push ecx
-				push edx
-				push eax
-				push esi
-				push edi
-				ExASM_mov(pt, xmm5, eax)
-				ExASM_mov(pm, xmm6, edi)
-				ExASM_mov(pa, xmm7, esi)
-				ExASM_mov(pi, xmm4, esi)
-			}
-			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
-			{
-				pixel_t* ps = pix_src + inx_src;
-				pixel_t* pd = pix_des + inx_des;
-				int sse_len = w >> 1;
-				if (sse_len)
-				__asm
-				{
-					mov	eax, [ps]
-					mov edx, [pd]
-					mov ecx, [sse_len]
-				sse_loop_2:
-					// 拓展ps
-					ExASM_punpckl(xmm0, eax, xmm6)
-					// 拓展pd	 
-					ExASM_punpckl(xmm1, edx, xmm6)
-					// 混色计算
-					pmullw xmm0, xmm7
-					pmullw xmm1, xmm4
-					paddw xmm0, xmm1
-					ExASM_divcm(xmm0, xmm2, xmm5)
-					// 恢复像素
-					packuswb xmm0, xmm0
-					// 保存结果
-					movlpd [edx], xmm0
-					// 循环扫描
-					add eax, 08h
-					add edx, 08h
-					dec ecx
-					jnz sse_loop_2
-				}
-				sse_len <<= 1;
-				for(LONG x = sse_len, i_d = inx_des + sse_len, i_s = inx_src + sse_len; x < w; ++x, ++i_d, ++i_s)
-				{
-					chann_t r_dif = ExGetR(pix_des[i_d]) * (EXP_CM - m_Alpha) + ExGetR(pix_src[i_s]) * m_Alpha;
-					chann_t g_dif = ExGetG(pix_des[i_d]) * (EXP_CM - m_Alpha) + ExGetG(pix_src[i_s]) * m_Alpha;
-					chann_t b_dif = ExGetB(pix_des[i_d]) * (EXP_CM - m_Alpha) + ExGetB(pix_src[i_s]) * m_Alpha;
-					chann_t a_dif = ExGetA(pix_des[i_d]) * (EXP_CM - m_Alpha) + ExGetA(pix_src[i_s]) * m_Alpha;
-					pix_des[i_d] = ExRGBA(ExDivCM(r_dif), ExDivCM(g_dif), ExDivCM(b_dif), ExDivCM(a_dif));
-				}
-			}
-			__asm
-			{
-				pop edi
-				pop esi
-				pop eax
-				pop edx
-				pop ecx
-				emms
-			}
-		}
+		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
+			CImgASM::PixTra(pix_des + inx_des, pix_src + inx_src, w, m_Alpha);
 	}
 };
 
@@ -241,275 +114,19 @@ public:
 // 正常渲染
 class CRenderNormal : public IRenderObject
 {
-protected:
-	chann_t m_Alpha;
-
 public:
-	CRenderNormal(chann_t a = EXP_CM)
-		: m_Alpha(a)
-	{}
-
 	void Render(
 		pixel_t* pix_des, pixel_t* pix_src, CSize& sz_des, CSize& sz_src, 
 		LONG w, LONG h, LONG inx_des, LONG inx_src)
 	{
-		if (m_Alpha == 0)
-			return;
-		else
-		{
-			WORD p_a[8] = 
-			{
-				m_Alpha, m_Alpha, m_Alpha, m_Alpha, 
-				m_Alpha, m_Alpha, m_Alpha, m_Alpha
-			};
-			WORD p_m[8] = 
-			{
-				0x00ff, 0x00ff, 0x00ff, 0x00ff, 
-				0x00ff, 0x00ff, 0x00ff, 0x00ff
-			};
-			WORD p_t[8] = 
-			{
-				0x0101, 0x0101, 0x0101, 0x0101, 
-				0x0101, 0x0101, 0x0101, 0x0101
-			};
-			pixel_t* pa = (pixel_t*)p_a;
-			pixel_t* pm = (pixel_t*)p_m;
-			pixel_t* pt = (pixel_t*)p_t;
-			__asm
-			{
-				push ecx
-				push edx
-				push eax
-				push esi
-				push edi
-				ExASM_mov(pt, xmm5, eax)
-				ExASM_mov(pm, xmm6, edi)
-				ExASM_mov(pa, xmm7, esi)
-			}
-			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
-			{
-				pixel_t* ps = pix_src + inx_src;
-				pixel_t* pd = pix_des + inx_des;
-				int sse_len = w >> 1;
-				if (sse_len)
-				__asm
-				{
-					mov	eax, [ps]
-					mov edx, [pd]
-					mov ecx, [sse_len]
-				sse_loop_1:
-					// 拓展ps
-					ExASM_punpckl(xmm0, eax, xmm6)
-					// 拓展pd
-					ExASM_punpckl(xmm1, edx, xmm6)
-					// 拓展as
-					ExASM_punpap(xmm2, xmm0, xmm3)
-					pmullw xmm2, xmm7					// a_s * m_Alpha
-					ExASM_divcm(xmm2, xmm4, xmm5)		// (a_s * m_Alpha) / EXP_CM
-					// 拓展ad
-					ExASM_punpap(xmm3, xmm1, xmm4)
-					// 混色计算
-					ExASM_cmsub(xmm4, xmm2, xmm6)		// a_i
-					pmullw xmm0, xmm2					// p_s * a_s
-					pmullw xmm4, xmm1					// p_d * a_i
-					paddw xmm0, xmm4					// p_s * a_s + p_d * a_i
-					ExASM_divcm(xmm0, xmm1, xmm5)		// (p_s * a_s + p_d * a_i) / EXP_CM
-					movups xmm4, xmm2
-					paddw xmm4, xmm3					// a_d + a_s
-					pmullw xmm2, xmm3					// a_d * a_s
-					ExASM_divcm(xmm2, xmm1, xmm5)		// (a_d * a_s) / EXP_CM
-					psubw xmm4, xmm2					// (a_d + a_s) - ((a_d * a_s) / EXP_CM)
-					ExASM_combpx(xmm0, xmm4)
-					// 恢复像素
-					packuswb xmm0, xmm0
-					// 保存结果
-					movlpd [edx], xmm0
-					// 循环扫描
-					add eax, 08h
-					add edx, 08h
-					dec ecx
-					jnz sse_loop_1
-				}
-				sse_len <<= 1;
-				for(LONG x = sse_len, i_d = inx_des + sse_len, i_s = inx_src + sse_len; x < w; ++x, ++i_d, ++i_s)
-				{
-					int tmp = 0;
-					chann_t a_s = 
-						(m_Alpha == EXP_CM ? ExGetA(pix_src[i_s]) : (tmp = (ExGetA(pix_src[i_s]) * m_Alpha), ExDivCM(tmp)));
-					if (a_s == 0)
-						continue;
-					else
-					if (a_s == EXP_CM) // => m_Alpha == EXP_CM && a_s == EXP_CM
-					{
-						pix_des[i_d] = pix_src[i_s];
-						continue;
-					}
-					chann_t r_s = ExGetR(pix_src[i_s]);
-					chann_t g_s = ExGetG(pix_src[i_s]);
-					chann_t b_s = ExGetB(pix_src[i_s]);
-					chann_t a_d = ExGetA(pix_des[i_d]);
-					chann_t r_d = ExGetR(pix_des[i_d]);
-					chann_t g_d = ExGetG(pix_des[i_d]);
-					chann_t b_d = ExGetB(pix_des[i_d]);
-					chann_t a_i = EXP_CM - a_s;
-					chann_t a_r = (a_d + a_s) - (tmp = a_d * a_s, ExDivCM(tmp));
-					chann_t r = (tmp = (r_s * a_s + r_d * a_i), ExDivCM(tmp));
-					chann_t g = (tmp = (g_s * a_s + g_d * a_i), ExDivCM(tmp));
-					chann_t b = (tmp = (b_s * a_s + b_d * a_i), ExDivCM(tmp));
-					pix_des[i_d] = ExRGBA(r, g, b, a_r);
-				}
-			}
-			__asm
-			{
-				pop edi
-				pop esi
-				pop eax
-				pop edx
-				pop ecx
-				emms
-			}
-		}
+		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
+			CImgASM::PixBlend(pix_des + inx_des, pix_src + inx_src, w);
 	}
 };
 
 #ifndef EXP_IMG_RENDER
 #define EXP_IMG_RENDER CRenderNormal
 #endif/*EXP_IMG_RENDER*/
-
-//////////////////////////////////////////////////////////////////
-
-// 图片叠加
-class CRenderOverlay : public IRenderObject
-{
-protected:
-	chann_t m_Alpha;
-
-public:
-	CRenderOverlay(chann_t a = EXP_CM)
-		: m_Alpha(a)
-	{}
-
-	void Render(
-		pixel_t* pix_des, pixel_t* pix_src, CSize& sz_des, CSize& sz_src, 
-		LONG w, LONG h, LONG inx_des, LONG inx_src)
-	{
-		if (m_Alpha == 0)
-			return;
-		else
-		{
-			WORD p_m[8] = 
-			{
-				0x00ff, 0x00ff, 0x00ff, 0x00ff, 
-				0x00ff, 0x00ff, 0x00ff, 0x00ff
-			};
-			WORD p_a[8] = 
-			{
-				m_Alpha, m_Alpha, m_Alpha, m_Alpha, 
-				m_Alpha, m_Alpha, m_Alpha, m_Alpha
-			};
-			WORD p_t[8] = 
-			{
-				0x0101, 0x0101, 0x0101, 0x0101, 
-				0x0101, 0x0101, 0x0101, 0x0101
-			};
-			pixel_t* pm = (pixel_t*)p_m;
-			pixel_t* pa = (pixel_t*)p_a;
-			pixel_t* pt = (pixel_t*)p_t;
-			__asm
-			{
-				push ecx
-				push edx
-				push eax
-				push esi
-				push edi
-				ExASM_mov(pt, xmm5, eax)
-				ExASM_mov(pm, xmm6, edi)
-			}
-			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx, inx_src -= sz_src.cx)
-			{
-				pixel_t* ps = pix_src + inx_src;
-				pixel_t* pd = pix_des + inx_des;
-				int sse_len = w >> 1;
-				if (sse_len)
-				__asm
-				{
-					mov	eax, [ps]
-					mov edx, [pd]
-					mov ecx, [sse_len]
-				sse_loop_1:
-					// 拓展ps
-					ExASM_punpckl(xmm0, eax, xmm6)
-					// 拓展pd	 
-					ExASM_punpckl(xmm1, edx, xmm6)
-					// 拓展as
-					ExASM_punpap(xmm2, xmm0, xmm3)
-					ExASM_mov(pa, xmm7, esi)
-					pmullw xmm2, xmm7					// a_s * m_Alpha
-					ExASM_divcm(xmm2, xmm4, xmm5)		// (a_s * m_Alpha) / EXP_CM
-					// 拓展ad
-					ExASM_punpap(xmm3, xmm1, xmm4)
-					// 混色计算
-					ExASM_cmsub(xmm4, xmm2, xmm6)		// EXP_CM - a_s
-					pmullw xmm4, xmm3					// (EXP_CM - a_s) * a_d
-					ExASM_divcm(xmm4, xmm7, xmm5)		// ((EXP_CM - a_s) * a_d) / EXP_CM
-					pmullw xmm0, xmm2					// p_s * a_s
-					pmullw xmm4, xmm1					// p_d * a_i
-					paddw xmm0, xmm4					// p_s * a_s + p_d * a_i
-					ExASM_divcm(xmm0, xmm1, xmm5)		// (p_s * a_s + p_d * a_i) / EXP_CM
-					movups xmm4, xmm2
-					paddw xmm4, xmm3					// a_d + a_s
-					pmullw xmm2, xmm3					// a_d * a_s
-					ExASM_divcm(xmm2, xmm1, xmm5)		// (a_d * a_s) / EXP_CM
-					psubw xmm4, xmm2					// (a_d + a_s) - ((a_d * a_s) / EXP_CM)
-					ExASM_combpx(xmm0, xmm4)
-					// 恢复像素
-					packuswb xmm0, xmm0
-					// 保存结果
-					movlpd [edx], xmm0
-					// 循环扫描
-					add eax, 08h
-					add edx, 08h
-					dec ecx
-					jnz sse_loop_1
-				}
-				sse_len <<= 1;
-				for(LONG x = sse_len, i_d = inx_des + sse_len, i_s = inx_src + sse_len; x < w; ++x, ++i_d, ++i_s)
-				{
-					int tmp = 0;
-					chann_t a_s = 
-						(m_Alpha == EXP_CM ? ExGetA(pix_src[i_s]) : (tmp = (ExGetA(pix_src[i_s]) * m_Alpha), ExDivCM(tmp)));
-					if (a_s == EXP_CM) // => m_Alpha == EXP_CM && a_s == EXP_CM
-					{
-						pix_des[i_d] = pix_src[i_s];
-						continue;
-					}
-					chann_t r_s = ExGetR(pix_src[i_s]);
-					chann_t g_s = ExGetG(pix_src[i_s]);
-					chann_t b_s = ExGetB(pix_src[i_s]);
-					chann_t a_d = ExGetA(pix_des[i_d]);
-					chann_t r_d = ExGetR(pix_des[i_d]);
-					chann_t g_d = ExGetG(pix_des[i_d]);
-					chann_t b_d = ExGetB(pix_des[i_d]);
-					LONG a_i = (tmp = (EXP_CM - a_s) * a_d, ExDivCM(tmp));
-					chann_t a_r = (a_d + a_s) - (tmp = a_d * a_s, ExDivCM(tmp));
-					chann_t r = (tmp = (r_s * a_s + r_d * a_i), ExDivCM(tmp));
-					chann_t g = (tmp = (g_s * a_s + g_d * a_i), ExDivCM(tmp));
-					chann_t b = (tmp = (b_s * a_s + b_d * a_i), ExDivCM(tmp));
-					pix_des[i_d] = ExRGBA(r, g, b, a_r);
-				}
-			}
-			__asm
-			{
-				pop edi
-				pop esi
-				pop eax
-				pop edx
-				pop ecx
-				emms
-			}
-		}
-	}
-};
 
 //////////////////////////////////////////////////////////////////
 

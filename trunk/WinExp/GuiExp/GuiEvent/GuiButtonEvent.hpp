@@ -369,7 +369,7 @@ public:
 							CImgFilter::Filter(m_IconTmp, CRect(), &filter);
 							// 阴影叠加
 							rc.Offset(pt_flt);
-							CImgRenderer::Render(m_IconTmp, icon->Get(), rc, CPoint(), &CRenderOverlay());
+							CImgRenderer::Render(m_IconTmp, icon->Get(), rc, CPoint());
 						}
 						// 保存指针
 						m_IconOld = icon->Get();

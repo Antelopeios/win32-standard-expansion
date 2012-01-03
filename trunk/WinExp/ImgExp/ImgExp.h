@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-20
-// Version:	0.1.0004.1630
+// Date:	2012-01-03
+// Version:	0.1.0005.1925
 //
 // History:
 //	- 0.1.0001.2300(2011-04-19)	@ 完成ImgCoder部分所有类的构建
@@ -42,6 +42,8 @@
 //	- 0.1.0002.1400(2011-05-02)	@ 完成ImgDrawer部分所有类的构建
 //	- 0.1.0003.1750(2011-05-30)	^ ImgTypes部分基于引用计数重新构建,支持自动回收机制
 //	- 0.1.0004.1630(2011-06-20)	@ ImgDrawer重命名为ImgPainter,并添加基本绘图模块
+//	- 0.1.0005.1925(2012-01-03)	^ 所有图片加载,生成与处理均面向预乘图片进行
+//								^ 简化图片的绘制过程与算法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgExp_h__

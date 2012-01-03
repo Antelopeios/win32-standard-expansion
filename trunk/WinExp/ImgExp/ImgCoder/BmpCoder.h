@@ -113,7 +113,8 @@ protected:
 	BYTE* temp = ExMem::Alloc<BYTE>(&gc, pit_b)
 //#define PreDecode
 
-	EXP_INLINE static void Decode32(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void Decode32(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -138,7 +139,8 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode24(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void Decode24(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -163,7 +165,8 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode16(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void Decode16(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -207,7 +210,8 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode8(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void Decode8(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -235,7 +239,8 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode4(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void Decode4(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -268,7 +273,8 @@ protected:
 		}
 	}
 
-	EXP_INLINE static void Decode1(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void Decode1(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		if (!pFile || !bmBuff) return;
 		PreDecode();
@@ -303,7 +309,8 @@ protected:
 
 #pragma pop_macro("PreDecode")
 
-	EXP_INLINE static void Decode(IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
+	EXP_INLINE static void OnDecode(
+		IFileObject* pFile, BITMAPFILEHEADER& bmhHead, BITMAPINFO& bmiInfo, pixel_t* bmBuff)
 	{
 		switch (bmiInfo.bmiHeader.biBitCount)
 		{
@@ -329,7 +336,7 @@ protected:
 	}
 
 public:
-	BOOL Encode(image_t Image)
+	BOOL OnEncode(image_t Image)
 	{
 		IFileObject* file = GetFile();
 		if(!file) return FALSE;
@@ -357,7 +364,7 @@ public:
 		file->Seek(0, IFileObject::begin);
 		return TRUE;
 	}
-	image_t Decode()
+	image_t OnDecode()
 	{
 		IFileObject* file = GetFile();
 		if(!CheckFile(file)) return NULL;
@@ -376,7 +383,7 @@ public:
 			GetImageBuff(file_info.bmiHeader.biWidth, file_info.bmiHeader.biHeight, (BYTE*&)bmbf);
 		if(!image) return NULL;
 		// 解析图像信息
-		Decode(file, file_head, file_info, bmbf);
+		OnDecode(file, file_head, file_info, bmbf);
 		// 返回image_t
 		return image;
 	}

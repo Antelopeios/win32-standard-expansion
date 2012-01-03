@@ -101,17 +101,13 @@ public:
 					CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
-					CImgRenderer::Render
-						(
+					CImgRenderer::Render(
 						mem_img->Get(), txt_img, 
-						CRect
-							(
+						CRect(
 							(rect.Right() - txt_img.GetWidth()) / 2, 
 							(rect.Bottom() - txt_img.GetHeight()) / 2, 
-							rect.Right(), rect.Bottom()
-							), 
-						CPoint()
-						);
+							rect.Right(), rect.Bottom()), 
+						CPoint());
 
 				// ÇåÀí»º´æ
 				if (!ctrl->IsCache()) m_imgTmp.Delete();

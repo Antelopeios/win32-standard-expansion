@@ -1,8 +1,8 @@
-// TestImg2.cpp : 定义应用程序的入口点。
+// TestImg3.cpp : 定义应用程序的入口点。
 //
 
 #include "stdafx.h"
-#include "TestImg2.h"
+#include "TestImg3.h"
 
 #pragma comment(lib, "msimg32.lib")
 
@@ -34,7 +34,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 初始化全局字符串
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_TESTIMG2, szWindowClass, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_TESTIMG3, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	// 执行应用程序初始化:
@@ -43,7 +43,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_TESTIMG2));
+	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_TESTIMG3));
 
 	// 主消息循环:
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -84,10 +84,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTIMG2));
+	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTIMG3));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_TESTIMG2);
+	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_TESTIMG3);
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -110,7 +110,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	hInst = hInstance; // 将实例句柄存储在全局变量中
 
-	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	hWnd = CreateWindowEx(WS_EX_LAYERED, szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
 	if (!hWnd)
@@ -129,70 +129,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
+	CRect rect;
+	GetWindowRect(hWnd, (LPRECT)&rect);
+	InvalidateRect(hWnd, (LPRECT)&rect, FALSE);
+
 	return TRUE;
 }
-
-volatile long g_Frames = 0, g_FramesCounter = 0;
-volatile BOOL g_EndTest = FALSE;
-CImage g_MemImg;
-CMutex g_MemLck;
-
-class CSpeedTest : public IThread
-{
-protected:
-	DWORD OnThread(LPVOID lpParam)
-	{
-		g_MemImg.Create(imgShow.GetWidth(), imgShow.GetHeight());
-
-		while(!g_EndTest)
-		{
-			{
-				ExLock(g_MemLck, false);
-
-				//CImgASM::PixZero(g_MemImg.GetPixels(), g_MemImg.GetSize() >> 2);
-				ZeroMemory(g_MemImg.GetPixels(), g_MemImg.GetSize());
-				//{
-				//	CGraph mem_grp;
-				//	mem_grp.Create();
-				//	mem_grp.SetObject(g_MemImg.Get());
-				//	HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
-				//	FillRect(mem_grp, &(RECT)CRect(0, 0, imgShow.GetWidth(), imgShow.GetHeight()), brh);
-				//	mem_grp.Delete();
-				//}
-				{
-					CGraph mem_grp;
-					mem_grp.Create();
-					mem_grp.SetObject(g_MemImg.Get());
-					CGraph img_grp;
-					img_grp.Create();
-					img_grp.SetObject(imgShow.Get());
-					//BLENDFUNCTION bl = {0};
-					//bl.AlphaFormat = AC_SRC_ALPHA;
-					//bl.SourceConstantAlpha = 255;
-					//AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
-					//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
-					//BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
-					StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
-							   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
-					img_grp.Delete();
-					mem_grp.Delete();
-				
-					//Render(g_MemImg, imgShow, CRect(), CPoint());
-
-					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderCopy(/*200*/));
-					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderNormal());
-					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderOverlay(/*200*/));
-
-					//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
-					//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
-				}
-			}
-			++g_FramesCounter;
-		}
-
-		return 0;
-	}
-} g_SpeedTest;
 
 //
 //  函数: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -212,23 +154,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
-	case WM_SHOWWINDOW:
-		if (wParam)
-		{
-			g_SpeedTest.Create();
-			::SetTimer(hWnd, 1, 1000, NULL);
-		}
-		break;
-	case WM_TIMER:
-		if (wParam == 1)
-		{
-			g_Frames = g_FramesCounter;
-			g_FramesCounter = 0;
-			RECT rect = {0};
-			GetClientRect(hWnd, &rect);
-			::InvalidateRect(hWnd, &rect, FALSE);
-		}
-		break;
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
@@ -248,51 +173,62 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		{
-			RECT rect = {0};
-			GetClientRect(hWnd, &rect);
+			CRect rect;
+			GetWindowRect(hWnd, (LPRECT)&rect);
 
 			CImage mem_img;
-			mem_img.Create(rect.right - rect.left, rect.bottom - rect.top);
+			mem_img.Create(rect.Width(), rect.Height());
+			CImage rdr_img;
+			rdr_img.Create(rect.Width(), rect.Height());
+
+			{
+				CImage ctl_img;
+				ctl_img.Create(rect.Width(), rect.Height());
+
+				pixel_t pixel = ExRGBA(128, 128, 128, 128);
+				CImgASM::PixPreMul(&pixel, 1);
+
+				CImgDrawer::Fill(ctl_img, pixel);
+				CImgRenderer::Render(ctl_img, imgShow, CRect(), CPoint(), &CRenderNormal());
+				//{
+				//	CGraph mem_grp;
+				//	mem_grp.Create();
+				//	mem_grp.SetObject(ctl_img.Get());
+				//	CGraph img_grp;
+				//	img_grp.Create();
+				//	img_grp.SetObject(imgShow.Get());
+				//	BLENDFUNCTION bl = {0};
+				//	bl.AlphaFormat = AC_SRC_ALPHA;
+				//	bl.SourceConstantAlpha = 255;
+				//	AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
+				//			   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
+				//	img_grp.Delete();
+				//	mem_grp.Delete();
+				//}
+
+				CImgRenderer::Render(rdr_img, ctl_img, CRect(), CPoint(), &CRenderNormal());
+			}
+
+			CImgRenderer::Render(mem_img, rdr_img, CRect(), CPoint(), &CRenderCopy());
 
 			CGraph mem_grp;
 			mem_grp.Create(hdc);
 			mem_grp.SetObject(mem_img.Get());
 
-			HBRUSH brh = (HBRUSH)GetStockObject(/*BLACK_BRUSH*/GRAY_BRUSH);
-			FillRect(mem_grp, &rect, brh);
+			POINT pt_wnd = {rect.Left(), rect.Top()};
+			SIZE  sz_wnd = {rect.Width(), rect.Height()};
+			POINT pt_src = {0, 0};
 
-			{
-				ExLock(g_MemLck, true);
-				Render(mem_img, g_MemImg, CRect(), CPoint());
-			}
-			Render(mem_img, imgShow, 
-				CRect(imgShow.GetWidth(), 0, imgShow.GetWidth() << 1, imgShow.GetHeight()), 
-				CPoint());
+			BLENDFUNCTION blend		  = {0};
+			blend.AlphaFormat		  = AC_SRC_ALPHA;
+			blend.SourceConstantAlpha = EXP_CM;
+			::UpdateLayeredWindow(hWnd, hdc, &pt_wnd, &sz_wnd, mem_grp, &pt_src, 0, &blend, ULW_ALPHA);
 
-			CText text(_T(""), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
-			text.Format(_T("%d fps, %d mspkf"), g_Frames, g_Frames ? 1000000 / g_Frames : 0);
-			CImage bmp_img(text.GetImage());
-			if(!bmp_img.IsNull())
-			{
-				Render
-					(
-					mem_img, bmp_img, 
-					CRect(
-						rect.right - bmp_img.GetWidth() - 5, 
-						rect.bottom - bmp_img.GetHeight() - 5, 
-						rect.right, rect.bottom), 
-					CPoint()
-					);
-			}
-			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 			mem_grp.Delete();
 		}
 		EndPaint(hWnd, &ps);
 		break;
-	case WM_ERASEBKGND:
-		break;
 	case WM_DESTROY:
-		g_EndTest = TRUE;
 		PostQuitMessage(0);
 		break;
 	default:

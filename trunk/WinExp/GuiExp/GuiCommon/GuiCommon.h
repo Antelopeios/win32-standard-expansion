@@ -94,9 +94,6 @@ public:
 EXP_END
 #define EXP_SINGLETON IGuiSingletonT
 
-// 置换掉默认的Normal渲染器
-#define EXP_IMG_RENDER CRenderOverlay
-
 // 图像处理库
 #include "ImgExp.h"
 

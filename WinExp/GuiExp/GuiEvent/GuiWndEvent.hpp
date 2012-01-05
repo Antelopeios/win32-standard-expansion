@@ -398,7 +398,7 @@ public:
 					CImage mem_img;
 					mem_img.Create(rect.Width(), rect.Height());
 					if (board->IsColorKey())
-						CImgDrawer::Fill(mem_img, rect, board->GetColorKey());
+						CImgFilter::Filter(mem_img, rect, &CFilterBrush(board->GetColorKey()));
 					// ¸²¸Ç¿Ø¼þ»æÍ¼
 					ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
 					// ¸²¸Ç»º´æ»æÍ¼

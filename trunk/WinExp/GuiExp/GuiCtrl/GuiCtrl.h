@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-21
-// Version:	1.0.0018.1710
+// Date:	2011-09-22
+// Version:	1.0.0017.2154
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -59,7 +59,6 @@
 //	- 1.0.0015.1643(2011-08-25)	^ 大幅简化IGuiCtrl::GetState()接口的调用方式及效率
 //	- 1.0.0016.1318(2011-08-31)	^ 当IGuiCtrl::SetScroll()传入的参数与当前m_Scroll相等,将不进行m_Scroll的刷新操作
 //	- 1.0.0017.2154(2011-09-22)	^ 当IGuiCtrl::SetScrollSize()传入的参数与当前m_szScroll相等,将不进行后续的消息发送
-//	- 1.0.0018.1710(2011-10-21)	+ IGuiCtrl添加是否进行数据缓存以增加控件绘制速度的选项接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -86,13 +85,11 @@ protected:
 	IGuiEffect* m_Effect;
 	CSize m_szScroll;
 	IGuiCtrl* m_Scroll;
-	BOOL m_bCache;
 
 public:
 	IGuiCtrl()
 		: m_Effect(NULL)
 		, m_Scroll(NULL)
-		, m_bCache(FALSE)
 	{}
 
 protected:
@@ -114,17 +111,6 @@ protected:
 	}
 
 public:
-	BOOL SetCache(BOOL bCache)
-	{
-		BOOL cache = m_bCache;
-		m_bCache = bCache;
-		return cache;
-	}
-	BOOL IsCache()
-	{
-		return m_bCache;
-	}
-
 	void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		if (GetParent())

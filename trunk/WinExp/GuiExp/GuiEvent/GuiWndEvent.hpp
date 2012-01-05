@@ -301,7 +301,7 @@ protected:
 						// ¸²¸ÇÈ«¾Ö»æÍ¼
 						ctl_rct.Inter(clp_rct);
 						ctl_rct.Offset(-clp_rct.pt1);
-						CImgRenderer::Render(mem_img->Get(), ctl_img, ctl_rct);
+						CImgDrawer::Draw(mem_img->Get(), ctl_img, ctl_rct);
 					}
 				}
 				else
@@ -397,23 +397,17 @@ public:
 					// ¹¹½¨»æÍ¼»º´æ
 					CImage mem_img;
 					mem_img.Create(rect.Width(), rect.Height());
-					CGraph mem_grp;
-					mem_grp.Create();
-					mem_grp.SetObject(mem_img.Get());
 					if (board->IsColorKey())
-					{
-						LOGBRUSH br = {BS_SOLID, board->GetColorKey(), NULL};
-						HBRUSH brh = ::CreateBrushIndirect(&br);
-						board->GetClientRect(rect);
-						::FillRect(mem_grp, &(RECT)rect, brh);
-						::DeleteObject(brh);
-					}
+						CImgDrawer::Fill(mem_img, rect, board->GetColorKey());
 					// ¸²¸Ç¿Ø¼þ»æÍ¼
 					ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
 					// ¸²¸Ç»º´æ»æÍ¼
+					CGraph mem_grp;
+					mem_grp.Create();
+					mem_grp.SetObject(mem_img.Get());
 					board->LayeredWindow(hdc, mem_grp);
-					// ½áÊø»æÍ¼
 					mem_grp.Delete();
+					// ½áÊø»æÍ¼
 					::EndPaint(board->GethWnd(), &ps);
 				}
 				else

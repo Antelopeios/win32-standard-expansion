@@ -151,24 +151,19 @@ public:
 		GetSize(sz, tmp_grp);
 		// 创建文字图像
 		m_MemImg.Create(sz.cx, sz.cy);
-		if (m_MemImg.IsNull()) return NULL;
+		if (m_MemImg.IsNull())
+		{
+			tmp_grp.Delete();
+			return NULL;
+		}
 		tmp_grp.SetObject(m_MemImg.Get());
 		// 绘制文字
 		CRect rc(0, 0, sz.cx, sz.cy);
-		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRGBA(0, 0, 0, EXP_CM), 0x1));
-		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), 
-			&(RECT)rc, DT_LEFT | DT_TOP);
-		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0x1));
-		if (m_Color != ExRGBA(0, 0, 0, EXP_CM))
-			CImgFilter::Filter(
-				m_MemImg, rc, 
-				&CFilterBrush(
-					ExRGBA(
-						ExGetB(m_Color), 
-						ExGetG(m_Color), 
-						ExGetR(m_Color), 
-						ExGetA(m_Color)), 
-					0xf, TRUE));
+		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRGBA(0, 0, 0, EXP_CM)));
+		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), &(RECT)rc, DT_LEFT | DT_TOP);
+		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0xf));
+		if (m_Color != ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM))
+		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRevColor(m_Color), 0xf, TRUE, ExRGBA(EXP_CM, EXP_CM, EXP_CM, 0)));
 		// 清理内存并返回
 		tmp_grp.Delete();
 		CImgFilter::Filter(m_MemImg, &CFilterPreMul());

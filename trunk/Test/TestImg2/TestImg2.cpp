@@ -160,31 +160,36 @@ protected:
 				//	mem_grp.Delete();
 				//}
 				{
-					CGraph mem_grp;
-					mem_grp.Create();
-					mem_grp.SetObject(g_MemImg.Get());
-					CGraph img_grp;
-					img_grp.Create();
-					img_grp.SetObject(imgShow.Get());
+					//CGraph mem_grp;
+					//mem_grp.Create();
+					//mem_grp.SetObject(g_MemImg.Get());
+					//CGraph img_grp;
+					//img_grp.Create();
+					//img_grp.SetObject(imgShow.Get());
 					//BLENDFUNCTION bl = {0};
 					//bl.AlphaFormat = AC_SRC_ALPHA;
 					//bl.SourceConstantAlpha = 255;
 					//AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
 					//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
-					//BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
-					StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
-							   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
-					img_grp.Delete();
-					mem_grp.Delete();
-				
+					////BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
+					////StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
+					////		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
+					//img_grp.Delete();
+					//mem_grp.Delete();
+
 					//Render(g_MemImg, imgShow, CRect(), CPoint());
+
+					CImgDrawer::Draw(g_MemImg, imgShow/*, 200*/);
+					//CImgDrawer::Cover(g_MemImg, imgShow/*, 200*/);
 
 					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderCopy(/*200*/));
 					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderNormal());
 					//CImgRenderer::Render(g_MemImg, imgShow, CRect(), CPoint(), &CRenderOverlay(/*200*/));
 
+					//CImgDrawer::Draw(g_MemImg, imgShow, CRect(0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2), CRect()/*, 200*/);
+
 					//CImage img_tmp(CImgDeformer::ZomDeform(imgShow, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2));
-					//CImgRenderer::Render(mem_img, img_tmp, CRect(), CPoint());
+					//CImgRenderer::Render(g_MemImg, img_tmp, CRect(), CPoint(), &CRenderCopy(/*200*/));
 				}
 			}
 			++g_FramesCounter;
@@ -273,17 +278,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			text.Format(_T("%d fps, %d mspkf"), g_Frames, g_Frames ? 1000000 / g_Frames : 0);
 			CImage bmp_img(text.GetImage());
 			if(!bmp_img.IsNull())
-			{
-				Render
-					(
-					mem_img, bmp_img, 
-					CRect(
+				Render(mem_img, bmp_img, CRect(
 						rect.right - bmp_img.GetWidth() - 5, 
 						rect.bottom - bmp_img.GetHeight() - 5, 
-						rect.right, rect.bottom), 
-					CPoint()
-					);
-			}
+						rect.right, rect.bottom), CPoint());
+
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 			mem_grp.Delete();
 		}

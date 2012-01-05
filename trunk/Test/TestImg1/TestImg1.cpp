@@ -383,20 +383,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			CText text(_T("Dark C.at"), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
 			CImage bmp_img(text.GetImage());
 			if(!bmp_img.IsNull())
-			{
-				CImgRenderer::Render
-					(
-					mem_img, bmp_img, 
-					CRect
-						(
-						rect.right - bmp_img.GetWidth() - 5, 
-						rect.bottom - bmp_img.GetHeight() - 5, 
-						rect.right, 
-						rect.bottom
-						), 
-					CPoint()
-					);
-			}
+				CImgRenderer::Render(mem_img, bmp_img, CRect(
+					rect.right - bmp_img.GetWidth() - 5, 
+					rect.bottom - bmp_img.GetHeight() - 5, 
+					rect.right, rect.bottom));
 
 			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
 

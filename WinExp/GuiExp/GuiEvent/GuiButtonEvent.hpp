@@ -143,8 +143,6 @@ class CGuiButtonEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
 
 protected:
-	CRect m_rcOld;
-	CImage m_imgTmp[9];
 	CText m_txtTmp;
 	CImage m_imgClp;
 	DWORD m_LocOld;
@@ -285,70 +283,90 @@ public:
 				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (!ctrl->IsCache() || m_rcOld != clt_rct)
-				{
-					LONG r_h = clt_rct.Height() * sta_tim;
-					// l-t
-					m_imgTmp[0].Set(image[0].Get());
-					// m-t
-					m_imgTmp[1].Set
-						(
-						CImgDeformer::ZomDeform
-							(
-							image[1].Get(), 
-							clt_rct.Width() - image[0].GetWidth() - image[2].GetWidth(), 
-							image[1].GetHeight()
-							)
-						);
-					// r-t
-					m_imgTmp[2].Set(image[2].Get());
-					// l-m
-					m_imgTmp[3].Set
-						(
-						CImgDeformer::ZomDeform
-							(
-							image[3].Get(), 
-							image[3].GetWidth(), 
-							r_h - image[0].GetHeight() - image[6].GetHeight()
-							)
-						);
-					// m-m
-					m_imgTmp[4].Set
-						(
-						CImgDeformer::ZomDeform
-							(
-							image[4].Get(), 
-							clt_rct.Width() - image[3].GetWidth() - image[5].GetWidth(), 
-							r_h - image[1].GetHeight() - image[7].GetHeight()
-							)
-						);
-					// r-m
-					m_imgTmp[5].Set
-						(
-						CImgDeformer::ZomDeform
-							(
-							image[5].Get(), 
-							image[5].GetWidth(), 
-							r_h - image[2].GetHeight() - image[8].GetHeight()
-							)
-						);
-					// l-b
-					m_imgTmp[6].Set(image[6].Get());
-					// m-b
-					m_imgTmp[7].Set
-						(
-						CImgDeformer::ZomDeform
-							(
-							image[7].Get(), 
-							clt_rct.Width() - image[6].GetWidth() - image[8].GetWidth(), 
-							image[7].GetHeight()
-							)
-						);
-					// r-b
-					m_imgTmp[8].Set(image[8].Get());
-					// Save
-					m_rcOld = clt_rct;
-				}
+				LONG r_h = clt_rct.Height() * sta_tim;
+				CRect rc_mem[9];
+				CSize sz_img[9];
+				// l-t
+				rc_mem[0].Set(
+					rect.Left(), rect.Top(), 
+					rect.Left() + image[0].GetWidth(), 
+					rect.Top() + image[0].GetHeight() / sta_tim);
+				sz_img[0].Set(
+					image[0].GetWidth(), 
+					image[0].GetHeight());
+				// m-t
+				rc_mem[1].Set(
+					rect.Left() + image[0].GetWidth(), 
+					rect.Top(), 
+					rect.Right() - image[2].GetWidth(), 
+					rect.Top() + image[1].GetHeight() / sta_tim);
+				sz_img[1].Set(
+					clt_rct.Width() - image[0].GetWidth() - image[2].GetWidth(), 
+					image[1].GetHeight());
+				// r-t
+				rc_mem[2].Set(
+					rect.Right() - image[2].GetWidth(), 
+					rect.Top(), 
+					rect.Right(), 
+					rect.Top() + image[2].GetHeight() / sta_tim);
+				sz_img[2].Set(
+					image[2].GetWidth(), 
+					image[2].GetHeight());
+				// l-m
+				rc_mem[3].Set(
+					rect.Left(), 
+					rect.Top() + image[0].GetHeight() / sta_tim, 
+					rect.Left() + image[3].GetWidth(), 
+					rect.Bottom() - image[6].GetHeight() / sta_tim);
+				sz_img[3].Set(
+					image[3].GetWidth(), 
+					r_h - image[0].GetHeight() - image[6].GetHeight());
+				// m-m
+				rc_mem[4].Set(
+					rect.Left() + image[3].GetWidth(), 
+					rect.Top() + image[1].GetHeight() / sta_tim, 
+					rect.Right() - image[5].GetWidth(), 
+					rect.Bottom() - image[7].GetHeight() / sta_tim);
+				sz_img[4].Set(
+					clt_rct.Width() - image[3].GetWidth() - image[5].GetWidth(), 
+					r_h - image[1].GetHeight() - image[7].GetHeight());
+				// r-m
+				rc_mem[5].Set(
+					rect.Right() - image[5].GetWidth(), 
+					rect.Top() + image[2].GetHeight() / sta_tim, 
+					rect.Right(), 
+					rect.Bottom() - image[8].GetHeight() / sta_tim);
+				sz_img[5].Set(
+					image[5].GetWidth(), 
+					r_h - image[2].GetHeight() - image[8].GetHeight());
+				// l-b
+				rc_mem[6].Set(
+					rect.Left(), 
+					rect.Bottom() - image[6].GetHeight() / sta_tim, 
+					rect.Left() + image[6].GetWidth(), 
+					rect.Bottom());
+				sz_img[6].Set(
+					image[8].GetWidth(), 
+					image[8].GetHeight());
+				// m-b
+				rc_mem[7].Set(
+					rect.Left() + image[6].GetWidth(), 
+					rect.Bottom() - image[7].GetHeight() / sta_tim, 
+					rect.Right() - image[8].GetWidth(), 
+					rect.Bottom());
+				sz_img[7].Set(
+					clt_rct.Width() - image[6].GetWidth() - image[8].GetWidth(), 
+					image[7].GetHeight());
+				// r-b
+				rc_mem[8].Set(
+					rect.Right() - image[8].GetWidth(), 
+					rect.Bottom() - image[8].GetHeight() / sta_tim, 
+					rect.Right(), 
+					rect.Bottom());
+				sz_img[8].Set(
+					image[8].GetWidth(), 
+					image[8].GetHeight());
+				// 图标阴影
 				LONG radius = 0;
 				if (glow)
 				{
@@ -369,7 +387,7 @@ public:
 							CImgFilter::Filter(m_IconTmp, CRect(), &filter);
 							// 阴影叠加
 							rc.Offset(pt_flt);
-							CImgRenderer::Render(m_IconTmp, icon->Get(), rc, CPoint());
+							CImgDrawer::Draw(m_IconTmp, icon->Get(), rc);
 						}
 						// 保存指针
 						m_IconOld = icon->Get();
@@ -378,128 +396,11 @@ public:
 				}
 
 				// 绘图
+				CRect rc_tmp;
 				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
-				// l-t
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[0], 
-					CRect
-						(
-						rect.Left(), 
-						rect.Top(), 
-						rect.Left() + m_imgTmp[0].GetWidth(), 
-						rect.Top() + m_imgTmp[0].GetHeight() / sta_tim
-						), 
-					CPoint(0, m_imgTmp[0].GetHeight() * status / sta_tim)
-					);
-				// m-t
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[1], 
-					CRect
-						(
-						rect.Left() + m_imgTmp[0].GetWidth(), 
-						rect.Top(), 
-						rect.Right() - m_imgTmp[2].GetWidth(), 
-						rect.Top() + m_imgTmp[1].GetHeight() / sta_tim
-						), 
-					CPoint(0, m_imgTmp[1].GetHeight() * status / sta_tim)
-					);
-				// r-t
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[2], 
-					CRect
-						(
-						rect.Right() - m_imgTmp[2].GetWidth(), 
-						rect.Top(), 
-						rect.Right(), 
-						rect.Top() + m_imgTmp[2].GetHeight() / sta_tim
-						), 
-					CPoint(0, m_imgTmp[2].GetHeight() * status / sta_tim)
-					);
-				// l-m
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[3], 
-					CRect
-						(
-						rect.Left(), 
-						rect.Top() + m_imgTmp[0].GetHeight() / sta_tim, 
-						rect.Left() + m_imgTmp[3].GetWidth(), 
-						rect.Bottom() - m_imgTmp[6].GetHeight() / sta_tim
-						), 
-					CPoint(0, m_imgTmp[3].GetHeight() * status / sta_tim)
-					);
-				// m-m
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[4], 
-					CRect
-						(
-						rect.Left() + m_imgTmp[3].GetWidth(), 
-						rect.Top() + m_imgTmp[1].GetHeight() / sta_tim, 
-						rect.Right() - m_imgTmp[5].GetWidth(), 
-						rect.Bottom() - m_imgTmp[7].GetHeight() / sta_tim
-						), 
-					CPoint(0, m_imgTmp[4].GetHeight() * status / sta_tim)
-					);
-				// r-m
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[5], 
-					CRect
-						(
-						rect.Right() - m_imgTmp[5].GetWidth(), 
-						rect.Top() + m_imgTmp[2].GetHeight() / sta_tim, 
-						rect.Right(), 
-						rect.Bottom() - m_imgTmp[8].GetHeight() / sta_tim
-						), 
-					CPoint(0, m_imgTmp[5].GetHeight() * status / sta_tim)
-					);
-				// l-b
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[6], 
-					CRect
-						(
-						rect.Left(), 
-						rect.Bottom() - m_imgTmp[6].GetHeight() / sta_tim, 
-						rect.Left() + m_imgTmp[6].GetWidth(), 
-						rect.Bottom()
-						), 
-					CPoint(0, m_imgTmp[6].GetHeight() * status / sta_tim)
-					);
-				// m-b
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[7], 
-					CRect
-						(
-						rect.Left() + m_imgTmp[6].GetWidth(), 
-						rect.Bottom() - m_imgTmp[7].GetHeight() / sta_tim, 
-						rect.Right() - m_imgTmp[8].GetWidth(), 
-						rect.Bottom()
-						), 
-					CPoint(0, m_imgTmp[7].GetHeight() * status / sta_tim)
-					);
-				// r-b
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp[8], 
-					CRect
-						(
-						rect.Right() - m_imgTmp[8].GetWidth(), 
-						rect.Bottom() - m_imgTmp[8].GetHeight() / sta_tim, 
-						rect.Right(), 
-						rect.Bottom()
-						), 
-					CPoint(0, m_imgTmp[8].GetHeight() * status / sta_tim)
-					);
-				// 清理缓存
-				if (!ctrl->IsCache())
-					for(int i = 0; i < _countof(m_imgTmp); ++i)
-						m_imgTmp[i].Delete();
+				for(int i = 0; i < _countof(rc_mem); ++i)
+					CImgDrawer::Draw(mem_img->Get(), image[i], rc_mem[i], 
+						CPoint(0, image[i].GetHeight() * status / sta_tim), sz_img[i]);
 
 				// 绘文字
 				DWORD locate = (DWORD)ctrl->GetState(_T("locate"));
@@ -554,15 +455,9 @@ public:
 							}
 							// 覆盖剪切文本
 							CImage img_tmp(clp_txt.GetImage());
-							CImgRenderer::Render(m_imgClp, img_tmp, 
-								CRect
-									(
-									(img_rct.Width() - img_tmp.GetWidth()) >> 1, 
-									txt_off, 
-									(img_rct.Width() + img_tmp.GetWidth()) >> 1, 
-									txt_off + txt_clp.cy
-									), 
-								CPoint(), &CRenderCopy());
+							CImgDrawer::Cover(m_imgClp, img_tmp, CRect(
+								(img_rct.Width() - img_tmp.GetWidth()) >> 1, txt_off, 
+								(img_rct.Width() + img_tmp.GetWidth()) >> 1, txt_off + txt_clp.cy));
 							// 折行
 							clp_str = ((LPCTSTR)clp_str) + clp_txt.GetLength();
 							clp_txt.SetString(clp_str);
@@ -571,7 +466,7 @@ public:
 						while(txt_off + txt_clp.cy <= img_rct.Height() - 4);
 					}
 					if (shake_ico != 0 && (status == 2 || status == 6)) img_rct.Offset(CPoint(1, 1));
-					CImgRenderer::Render(mem_img->Get(), m_imgClp, img_rct);
+					CImgDrawer::Draw(mem_img->Get(), m_imgClp, img_rct);
 				}
 
 				// 绘图标
@@ -637,7 +532,7 @@ public:
 					break;
 				}
 				if (shake_ico != 0 && (status == 2 || status == 6)) icon_rct.Offset(CPoint(1, 1));
-				CImgRenderer::Render(mem_img->Get(), icon->Get(), icon_rct, CPoint());
+				CImgDrawer::Draw(mem_img->Get(), icon->Get(), icon_rct);
 			}
 			break;
 		}
@@ -651,8 +546,6 @@ class CGuiPushBtnEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiPushBtnEvent, IGuiEvent)
 
 protected:
-	CRect m_rcOld;
-	CImage m_imgTmp;
 	CText m_txtTmp;
 	CImage m_imgClp;
 	DWORD m_LocOld;
@@ -773,25 +666,17 @@ public:
 				ctrl->GetClientRect(clt_rct);
 
 				// 处理
-				if (!ctrl->IsCache() || m_rcOld != clt_rct)
-				{
-					LONG r_h = clt_rct.Height() * sta_tim;
-					// m-m
-					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), clt_rct.Width(), r_h));
-					// Save
-					m_rcOld = clt_rct;
-				}
+				LONG r_h = clt_rct.Height() * sta_tim;
 
 				// 绘图
 				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
 				// m-m
-				CImgRenderer::Render
-					(
-					mem_img->Get(), m_imgTmp, rect, 
-					CPoint(0, m_imgTmp.GetHeight() * status / sta_tim)
-					);
-				// 清理缓存
-				if (!ctrl->IsCache()) m_imgTmp.Delete();
+				CImgDrawer::Draw(mem_img->Get(), image->Get(), rect, CRect(0, 0, 
+					rect.Width() >= clt_rct.Width() ? 
+					image->GetWidth() : image->GetWidth() * rect.Width() / clt_rct.Width(), 
+					rect.Height() >= r_h ? 
+					image->GetHeight() : image->GetHeight() * rect.Height() / r_h).MoveTo(
+					CPoint(0, image->GetHeight() * status / sta_tim)));
 
 				// 绘文字
 				DWORD locate = (DWORD)ctrl->GetState(_T("locate"));
@@ -845,22 +730,16 @@ public:
 						}
 						// 覆盖剪切文本
 						CImage img_tmp(clp_txt.GetImage());
-						CImgRenderer::Render(m_imgClp, img_tmp, 
-							CRect
-								(
-								(img_rct.Width() - img_tmp.GetWidth()) >> 1, 
-								txt_off, 
-								(img_rct.Width() + img_tmp.GetWidth()) >> 1, 
-								txt_off + txt_clp.cy
-								), 
-							CPoint(), &CRenderCopy());
+						CImgDrawer::Cover(m_imgClp, img_tmp, CRect(
+							(img_rct.Width() - img_tmp.GetWidth()) >> 1, txt_off, 
+							(img_rct.Width() + img_tmp.GetWidth()) >> 1, txt_off + txt_clp.cy));
 						// 折行
 						clp_str = ((LPCTSTR)clp_str) + clp_txt.GetLength();
 						clp_txt.SetString(clp_str);
 						txt_off += (txt_clp.cy + 2);
 					}
 				}
-				CImgRenderer::Render(mem_img->Get(), m_imgClp, img_rct);
+				CImgDrawer::Draw(mem_img->Get(), m_imgClp, img_rct);
 			}
 			break;
 		}

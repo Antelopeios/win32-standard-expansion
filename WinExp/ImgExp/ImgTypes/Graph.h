@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-24
-// Version:	1.0.0002.2319
+// Date:	2012-01-04
+// Version:	1.0.0003.2230
 //
 // History:
 //	- 1.0.0001.1334(2011-04-12)	^ 移除IGraphObject接口,通过ITypeObjectT接口模板统一通用的接口
 //								= CExpGraph更名为CGraph
 //	- 1.0.0002.2319(2011-05-24)	+ 为CGraph的属性获取接口添加const类型
+//	- 1.0.0003.2230(2012-01-04)	# CGraph::SetObject()只能记录第一个传入的类型参数,导致部分资源无法自动释放
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Graph_h__
@@ -115,7 +116,7 @@ public:
 	{
 		HGDIOBJ tmp_obj(::SelectObject(Get(), hObj));
 		DWORD type = ::GetObjectType(hObj);
-		if (m_TypLst.Find(m_TypLst) == m_TypLst.Tail())
+		if (m_TypLst.Find(type) == m_TypLst.Tail())
 		{
 			m_TypLst.Add(type);
 			if (tmp_obj && (m_ObjLst.Find(tmp_obj) == m_ObjLst.Tail()))

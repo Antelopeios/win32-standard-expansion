@@ -564,7 +564,7 @@ public:
 		{
 			CImage txt_img(empt->GetImage());
 			if(!txt_img.IsNull())
-				CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 		}
 		else
 		{
@@ -581,7 +581,7 @@ public:
 					filter.m_ClrMask = txt_sel_color;
 					CImgFilter::Filter(txt_img, sel_rc, &filter);
 				}
-				CImgRenderer::Render(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 			}
 		}
 

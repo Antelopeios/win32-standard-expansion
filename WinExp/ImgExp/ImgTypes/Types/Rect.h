@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-31
-// Version:	1.0.0009.1308
+// Date:	2012-01-04
+// Version:	1.0.0010.2204
 //
 // History:
 //	- 1.0.0002.2350(2011-04-19)	+ CRect改为CRectT<>,支持通过模板参数控制内部数据的类型
@@ -49,6 +49,8 @@
 //	- 1.0.0008.2229(2011-08-30)	+ 添加可以方便直观的修改CRectT中Left;Right等属性的接口
 //								+ 添加直接获取及修改顶点的接口
 //	- 1.0.0009.1308(2011-08-31)	= 调整CRectT::IsEmpty()接口,当区域大小为负数时也判定为TRUE
+//	- 1.0.0010.2204(2012-01-04)	+ CRectT的所有修改接口均提供返回值
+//								+ 添加新的CRectT::Set(),支持直接通过数值设置CRectT
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Rect_h__
@@ -83,57 +85,68 @@ public:
 	{ (*this) = tRect; }
 
 public:
-	EXP_INLINE void Set(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
+	EXP_INLINE CRectT& Set(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
 	{
 		pt1 = Pt1;
 		pt2 = Pt2;
+		return (*this);
 	}
-	EXP_INLINE void Offset(const CPointT<TypeT>& Pt)
+	EXP_INLINE CRectT& Set(TypeT nX1, TypeT nY1, TypeT nX2, TypeT nY2)
+	{
+		return Set(CPointT<TypeT>(nX1, nY1), CPointT<TypeT>(nX2, nY2));
+	}
+	EXP_INLINE CRectT& Offset(const CPointT<TypeT>& Pt)
 	{
 		pt1 += Pt;
 		pt2 += Pt;
+		return (*this);
 	}
-	EXP_INLINE void MoveTo(const CPointT<TypeT>& Pt)
+	EXP_INLINE CRectT& MoveTo(const CPointT<TypeT>& Pt)
 	{
 		CPointT<TypeT> pt(pt2 - pt1);
 		pt1 = Pt;
 		pt2 = pt1 + pt;
+		return (*this);
 	}
 
-	EXP_INLINE void Inter(const CRectT& tRect)
+	EXP_INLINE CRectT& Inter(const CRectT& tRect)
 	{
-		Set(CPointT<TypeT>(max(pt1.x, tRect.pt1.x), max(pt1.y, tRect.pt1.y)), 
-			CPointT<TypeT>(min(pt2.x, tRect.pt2.x), min(pt2.y, tRect.pt2.y)));
+		return Set(CPointT<TypeT>(max(pt1.x, tRect.pt1.x), max(pt1.y, tRect.pt1.y)), 
+				   CPointT<TypeT>(min(pt2.x, tRect.pt2.x), min(pt2.y, tRect.pt2.y)));
 	}
-	EXP_INLINE void Union(const CRectT& tRect)
+	EXP_INLINE CRectT& Union(const CRectT& tRect)
 	{
-		Set(CPointT<TypeT>(min(pt1.x, tRect.pt1.x), min(pt1.y, tRect.pt1.y)), 
-			CPointT<TypeT>(max(pt2.x, tRect.pt2.x), max(pt2.y, tRect.pt2.y)));
+		return Set(CPointT<TypeT>(min(pt1.x, tRect.pt1.x), min(pt1.y, tRect.pt1.y)), 
+				   CPointT<TypeT>(max(pt2.x, tRect.pt2.x), max(pt2.y, tRect.pt2.y)));
 	}
 
-	EXP_INLINE void Inflate(const CPointT<TypeT>& Pt)
+	EXP_INLINE CRectT& Inflate(const CPointT<TypeT>& Pt)
 	{
 		pt1.x -= Pt.x;
 		pt2.x += Pt.x;
 		pt1.y -= Pt.y;
 		pt2.y += Pt.y;
+		return (*this);
 	}
-	EXP_INLINE void Inflate(const CRectT& tRect)
+	EXP_INLINE CRectT& Inflate(const CRectT& tRect)
 	{
 		pt1 -= tRect.pt1;
 		pt2 += tRect.pt2;
+		return (*this);
 	}
-	EXP_INLINE void Deflate(const CPointT<TypeT>& Pt)
+	EXP_INLINE CRectT& Deflate(const CPointT<TypeT>& Pt)
 	{
 		pt1.x += Pt.x;
 		pt2.x -= Pt.x;
 		pt1.y += Pt.y;
 		pt2.y -= Pt.y;
+		return (*this);
 	}
-	EXP_INLINE void Deflate(const CRectT& tRect)
+	EXP_INLINE CRectT& Deflate(const CRectT& tRect)
 	{
 		pt1 += tRect.pt1;
 		pt2 -= tRect.pt2;
+		return (*this);
 	}
 
 	EXP_INLINE BOOL IsEmpty()
@@ -153,14 +166,12 @@ public:
 
 	EXP_INLINE CRectT& operator=(const CRectT& tRect)
 	{
-		Set(tRect.pt1, tRect.pt2);
-		return (*this);
+		return Set(tRect.pt1, tRect.pt2);
 	}
 	EXP_INLINE CRectT& operator=(RECT& tRect)
 	{
-		Set(CPointT<TypeT>(tRect.left, tRect.top), 
-			CPointT<TypeT>(tRect.right, tRect.bottom));
-		return (*this);
+		return Set(CPointT<TypeT>(tRect.left, tRect.top), 
+				   CPointT<TypeT>(tRect.right, tRect.bottom));
 	}
 	EXP_INLINE BOOL operator==(const CRectT& tRect)
 	{ return ((pt1 == tRect.pt1) && (pt2 == tRect.pt2)); }
@@ -176,23 +187,19 @@ public:
 
 	EXP_INLINE CRectT& operator+=(const CPointT<TypeT>& Pt)
 	{
-		Inflate(Pt);
-		return (*this);
+		return Inflate(Pt);
 	}
 	EXP_INLINE CRectT& operator-=(const CPointT<TypeT>& Pt)
 	{
-		Deflate(Pt);
-		return (*this);
+		return Deflate(Pt);
 	}
 	EXP_INLINE CRectT& operator+=(const CRectT& tRect)
 	{
-		Inflate(tRect);
-		return (*this);
+		return Inflate(tRect);
 	}
 	EXP_INLINE CRectT& operator-=(const CRectT& tRect)
 	{
-		Deflate(tRect);
-		return (*this);
+		return Deflate(tRect);
 	}
 
 	EXP_INLINE CRectT operator+(const CPointT<TypeT>& Pt)

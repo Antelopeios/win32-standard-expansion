@@ -102,7 +102,7 @@ public:
 		if (!board) return;
 		if (ctrl->IsUpdated())
 		{
-			CImgRenderer::Render(tImg, m_imgCac, CRect(), CPoint(), &CRenderCopy());
+			CImgDrawer::Cover(tImg, m_imgCac);
 			SetTimer(board->GethWnd());
 		}
 		else

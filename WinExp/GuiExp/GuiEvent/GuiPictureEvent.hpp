@@ -61,10 +61,6 @@ class CGuiPictureEvent : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CGuiPictureEvent, IGuiEvent)
 
-protected:
-	CRect m_rcOld;
-	CImage m_imgTmp;
-
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
@@ -88,29 +84,17 @@ public:
 				ctrl->GetClipRect(rect);
 				ctrl->GetClientRect(clt_rct);
 
-				// 处理
-				if (!ctrl->IsCache() || (!image->IsNull() && m_rcOld != clt_rct))
-				{
-					m_imgTmp.Set(CImgDeformer::ZomDeform(image->Get(), clt_rct.Width(), clt_rct.Height()));
-					m_rcOld = clt_rct;
-				}
-
 				// 绘图
 				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
 				if (!image->IsNull())
-					CImgRenderer::Render(mem_img->Get(), m_imgTmp, rect, CPoint());
+					CImgDrawer::Draw(mem_img->Get(), image->Get(), rect, 
+						CPoint(), CSize(clt_rct.Width(), clt_rct.Height()));
 				CImage txt_img(text->GetImage());
 				if (!txt_img.IsNull())
-					CImgRenderer::Render(
-						mem_img->Get(), txt_img, 
-						CRect(
-							(rect.Right() - txt_img.GetWidth()) / 2, 
-							(rect.Bottom() - txt_img.GetHeight()) / 2, 
-							rect.Right(), rect.Bottom()), 
-						CPoint());
-
-				// 清理缓存
-				if (!ctrl->IsCache()) m_imgTmp.Delete();
+					CImgDrawer::Draw(mem_img->Get(), txt_img, CRect(
+						(rect.Right() - txt_img.GetWidth()) / 2, 
+						(rect.Bottom() - txt_img.GetHeight()) / 2, 
+						rect.Right(), rect.Bottom()));
 			}
 			break;
 		}

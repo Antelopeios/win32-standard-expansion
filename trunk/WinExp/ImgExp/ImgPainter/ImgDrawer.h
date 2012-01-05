@@ -169,22 +169,22 @@ public:
 		// 校验rc_src
 		if (rc_src.Left() < 0)
 		{
-			rc_des.Left(rc_des.Left() - rc_des.Left() * rc_des.Width() / rc_src.Width());
+			rc_des.Left(rc_des.Left() - rc_src.Left() * rc_des.Width() / rc_src.Width());
 			rc_src.Left(0);
 		}
 		if (rc_src.Right() > sz_src.cx)
 		{
-			rc_des.Right(rc_des.Right() - (rc_des.Right() - sz_src.cx) * rc_des.Width() / rc_src.Width());
+			rc_des.Right(rc_des.Right() - (rc_src.Right() - sz_src.cx) * rc_des.Width() / rc_src.Width());
 			rc_src.Right(sz_src.cx);
 		}
 		if (rc_src.Top() < 0)
 		{
-			rc_des.Top(rc_des.Top() - rc_des.Top() * rc_des.Height() / rc_src.Height());
+			rc_des.Top(rc_des.Top() - rc_src.Top() * rc_des.Height() / rc_src.Height());
 			rc_src.Top(0);
 		}
 		if (rc_src.Bottom() > sz_src.cy)
 		{
-			rc_des.Bottom(rc_des.Bottom() - (rc_des.Bottom() - sz_src.cy) * rc_des.Height() / rc_src.Height());
+			rc_des.Bottom(rc_des.Bottom() - (rc_src.Bottom() - sz_src.cy) * rc_des.Height() / rc_src.Height());
 			rc_src.Bottom(sz_src.cy);
 		}
 		// 开始绘图

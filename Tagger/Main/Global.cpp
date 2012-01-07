@@ -3,49 +3,26 @@
 
 //////////////////////////////////////////////////////////////////
 
-CGlobal::CGlobal()
-	: m_AppInst(NULL)
+CGlobal g_Global;
+
+//////////////////////////////////////////////////////////////////
+
+DWORD CGlobal::OnInit()
 {
+	DWORD ret = IApp::OnInit();
+
+	TAG()->Init();
+
+	return ret;
 }
 
-CGlobal* g_instance = NULL;
-CGlobal* CGlobal::Instance()
+DWORD CGlobal::OnExit(DWORD nCode)
 {
-	if (g_instance == NULL)
-		g_instance = ExMem::Alloc<CGlobal>();
-	return g_instance;
+	TAG()->Term();
+	return nCode;
 }
 
-void CGlobal::Init()
-{
-	m_AppInst = ::GetModuleHandle(NULL);
-
-	::GetModuleFileName(NULL, m_AppPath.GetCStr(MAX_PATH), MAX_PATH);
-	int inx = (m_AppPath.RevFind(_T('\\')) + 1)->Index();
-	m_AppName = ((LPCTSTR)m_AppPath) + inx;
-	m_AppPath[inx] = _T('\0');
-}
-
-void CGlobal::Term()
-{
-	ExMem::Free(this);
-	g_instance = NULL;
-}
-
-HINSTANCE CGlobal::AppInst()
-{
-	return m_AppInst;
-}
-
-CString CGlobal::AppPath()
-{
-	return m_AppPath;
-}
-
-CString CGlobal::AppName()
-{
-	return m_AppName;
-}
+//////////////////////////////////////////////////////////////////
 
 HGLOBAL CGlobal::GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/)
 {

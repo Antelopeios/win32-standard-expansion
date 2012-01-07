@@ -326,7 +326,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CImgFilter::Filter(tmp, CRect(), &filter);
 				// 阴影叠加
 				rc.Offset(pt_flt);
-				CImgRenderer::Render(tmp, imgShow, rc, CPoint(), &CRenderOverlay());
+				CImgRenderer::Render(tmp, imgShow, rc, CPoint());
 				imgShow = tmp;
 				// 刷新窗口
 				Invalidate(hWnd);

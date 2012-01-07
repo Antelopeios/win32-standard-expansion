@@ -343,7 +343,7 @@ void CData::Init()
 	m_TaskSmph.Create(0, 0x7FFFFFFF);
 	m_ComplEvt.Create(TRUE);
 
-	m_File.Open(GLB()->AppPath() + _T("Data.dat"), 
+	m_File.Open(CString(CGlobal::GetPath()) + _T("Data.dat"), 
 		CIOFile::modeReadWrite | CIOFile::modeCreate | CIOFile::modeNoTruncate);
 	m_Data.SetFile(&m_File);
 	m_Data.Decode();

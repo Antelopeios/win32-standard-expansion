@@ -6,30 +6,6 @@
 
 //////////////////////////////////////////////////////////////////
 
-#ifdef	_CONSOLE
-int _tmain(int argc, _TCHAR* argv[])
-{
-#else /*_CONSOLE*/
-int APIENTRY _tWinMain(HINSTANCE hInstance,
-					   HINSTANCE hPrevInstance,
-					   LPTSTR    lpCmdLine,
-					   int       nCmdShow)
-{
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
-#endif/*_CONSOLE*/
-
-	// 初始化
-	TAG()->Init();
-
-	// 卸载
-	TAG()->Term();
-
-	return 0;
-}
-
-//////////////////////////////////////////////////////////////////
-
 CTagger::CTagger()
 {
 }
@@ -44,7 +20,6 @@ CTagger* CTagger::Instance()
 
 void CTagger::Init()
 {
-	GLB()->Init();	// 全局初始化
 	DAT()->Init();	// 数据层初始化
 	GUI()->Init();	// 界面层初始化
 }
@@ -53,7 +28,6 @@ void CTagger::Term()
 {
 	GUI()->Term();	// 界面层卸载
 	DAT()->Term();	// 数据层卸载
-	GLB()->Term();	// 全局卸载
 
 	ExMem::Free(this);
 	g_instance = NULL;

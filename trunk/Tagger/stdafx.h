@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "GuiExp.h"
+#define _CONSOLE
 
+#define EXP_USING_APP
+#include "GuiExp.h"
 #pragma comment(lib, "StdExp.lib")
 #pragma comment(lib, "ImgExp.lib")
 #pragma comment(lib, "GuiExp.lib")
-
-#define _CONSOLE

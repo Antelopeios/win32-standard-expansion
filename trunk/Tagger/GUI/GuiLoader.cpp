@@ -24,12 +24,12 @@ void CGuiLoader::LoadRes()
 	BYTE* buff = NULL; DWORD size = 0;
 	HGLOBAL hres = NULL;
 #define REG_RES_IMG(res_id, img_id) \
-	hres = GLB()->GetBinary(res_id, _T("PNG"), buff, size); \
+	hres = CGlobal::GetBinary(res_id, _T("PNG"), buff, size); \
 	if (hres) \
 	{ \
 		file.Open(buff, size); \
 		REG_IMG(img_id, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode()); \
-		GLB()->ReleaseBinary(hres); \
+		CGlobal::ReleaseBinary(hres); \
 	}
 //#define REG_RES_IMG(res_id, img_id)
 	// 加载文件项图片
@@ -196,7 +196,7 @@ void CGuiLoader::LoadWnd()
 {
 	// 窗口资源定义
 	CRect rc_wnd(0, 0, GUI()->DefSize().cx, GUI()->DefSize().cy);
-	HICON ic_wnd = ::LoadIcon(GLB()->AppInst(), MAKEINTRESOURCE(IDI_TAGGER));
+	HICON ic_wnd = ::LoadIcon(CGlobal::GetInstance(), MAKEINTRESOURCE(IDI_TAGGER));
 
 	// 创建窗口对象并设置
 	REG_WND(main, ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc)));
@@ -359,6 +359,7 @@ void CGuiLoader::Init()
 			_tcprintf_s(_T("共找到%d条结果\n\n"), tmp.GetCount());
 		}
 	}
+	::PostQuitMessage(0);
 #else /*_CONSOLE*/
 	CRect rc_dsk;
 	::GetClientRect(::GetDesktopWindow(), (LPRECT)&rc_dsk);
@@ -369,19 +370,6 @@ void CGuiLoader::Init()
 	LoadCtl();
 	LoadWnd();
 	LinkGui();
-
-	// 主消息循环
-	MSG msg = {0}; BOOL ret = FALSE;
-	while ((ret = ::GetMessage(&msg, NULL, 0, 0)) != 0)
-	{
-		if (ret == -1)
-			break;
-		else
-		{
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
-	}
 #endif/*_CONSOLE*/
 }
 

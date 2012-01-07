@@ -209,6 +209,14 @@
 			Name="Thread"
 			>
 			<File
+				RelativePath=".\Thread\App.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Thread\App.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Thread\Event.h"
 				>
 			</File>

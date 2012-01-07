@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-09
-// Version:	1.1.0008.1712
+// Date:	2012-01-08
+// Version:	1.1.0009.0150
 //
 // History:
 //	- 1.0.0002.1540(2011-07-20)	= 将CThreadAdapterT的单例独立到外部,定义EXP_SINGLETON_TRDCREATOR,可由外部按需要自行替换
@@ -46,6 +46,8 @@
 //	- 1.1.0007.1150(2011-12-07)	+ 添加OnMessage虚函数回调,方便UI线程处理消息之前的初始化过程
 //								= 调整回调接口名称为OnThread
 //	- 1.1.0008.1712(2011-12-09)	= 为OnThread接口添加默认实现,不再为纯虚函数
+//	- 1.1.0009.0150(2012-01-08)	= 将借由IThreadT::creator_t实现的部分功能接口改为虚接口
+//								+ 添加OnExit虚函数回调,方便UI线程处理消息之后的退出过程
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadCreator_h__
@@ -118,13 +120,14 @@ protected:
 						::DispatchMessage(&msg);
 				}
 			}
-			return (DWORD)msg.wParam;
+			return _this->OnExit((DWORD)msg.wParam);
 		}
 		else
 			return _this->OnThread(_this->GetParam());
 	}
 	virtual DWORD OnThread(LPVOID lpParam) { return 0; }
 	virtual BOOL OnMessage(const MSG* lpMsg) { return FALSE; }
+	virtual DWORD OnExit(DWORD nCode) { return nCode; }
 
 public:
 	BOOL Create(_IN_ BOOL bUIThread = FALSE, 
@@ -149,18 +152,18 @@ public:
 	DWORD GetID()
 	{ return m_nIDThread; }
 
-	BOOL PostMessage(UINT nMsg, WPARAM wParam = 0, LPARAM lParam = NULL)
+	virtual BOOL PostMessage(UINT nMsg, WPARAM wParam = 0, LPARAM lParam = NULL)
 	{
 		if (!IsUIThread()) return FALSE;
 		return ::PostThreadMessage(GetID(), nMsg, wParam, lParam);
 	}
 
-	DWORD Suspend()
+	virtual DWORD Suspend()
 	{ return creator_t::Suspend(m_hSync); }
-	DWORD Resume()
+	virtual DWORD Resume()
 	{ return creator_t::Resume(m_hSync); }
 
-	BOOL Terminate(DWORD dwExitCode = 0)
+	virtual BOOL Terminate(DWORD dwExitCode = 0)
 	{
 		if (!creator_t::Terminate(m_hSync, dwExitCode)) return FALSE;
 		return Close();

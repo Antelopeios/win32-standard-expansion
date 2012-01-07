@@ -1,4 +1,4 @@
-// Copyright 2010-2011, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,37 +28,28 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Thread - 线程
+// App - 应用程序类
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-04
-// Version:	1.0.0001.2202
+// Date:	2012-01-08
+// Version:	1.0.0000.0030
 //////////////////////////////////////////////////////////////////
-
-#ifndef __Thread_h__
-#define __Thread_h__
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 #include "Common/Common.h"
+#include "App.h"
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "Thread/SyncObject.h"
-#include "Thread/Event.h"
-#include "Thread/Semaphore.h"
-#include "Thread/ThreadModel.h"
-#include "Thread/Lock.h"
-#include "Thread/NonLock.h"
-#include "Thread/ThreadHeap.h"
-#include "Thread/ThreadPool.h"
-#include "Thread/ThreadCreator.h"
-#include "Thread/App.h"
+IApp* IApp::m_pThis = NULL;
+BOOL IApp::m_IsSingle = TRUE;
+TCHAR IApp::m_Full[MAX_PATH] = {0};
+TCHAR IApp::m_Path[MAX_PATH] = {0};
+TCHAR IApp::m_Name[MAX_PATH] = {0};
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Thread_h__*/
+EXP_END

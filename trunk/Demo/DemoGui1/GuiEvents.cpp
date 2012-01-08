@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "DemoGui1.h"
 
 #define GUI_W_MIN 1000
 #define GUI_H_MIN 750

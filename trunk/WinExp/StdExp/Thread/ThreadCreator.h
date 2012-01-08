@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-01-08
-// Version:	1.1.0009.0150
+// Version:	1.1.0009.1420
 //
 // History:
 //	- 1.0.0002.1540(2011-07-20)	= 将CThreadAdapterT的单例独立到外部,定义EXP_SINGLETON_TRDCREATOR,可由外部按需要自行替换
@@ -46,7 +46,7 @@
 //	- 1.1.0007.1150(2011-12-07)	+ 添加OnMessage虚函数回调,方便UI线程处理消息之前的初始化过程
 //								= 调整回调接口名称为OnThread
 //	- 1.1.0008.1712(2011-12-09)	= 为OnThread接口添加默认实现,不再为纯虚函数
-//	- 1.1.0009.0150(2012-01-08)	= 将借由IThreadT::creator_t实现的部分功能接口改为虚接口
+//	- 1.1.0009.1420(2012-01-08)	= 将借由IThreadT::creator_t实现的部分功能接口改为虚接口
 //								+ 添加OnExit虚函数回调,方便UI线程处理消息之后的退出过程
 //////////////////////////////////////////////////////////////////
 
@@ -123,7 +123,7 @@ protected:
 			return _this->OnExit((DWORD)msg.wParam);
 		}
 		else
-			return _this->OnThread(_this->GetParam());
+			return _this->OnExit(_this->OnThread(_this->GetParam()));
 	}
 	virtual DWORD OnThread(LPVOID lpParam) { return 0; }
 	virtual BOOL OnMessage(const MSG* lpMsg) { return FALSE; }

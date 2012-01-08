@@ -1,9 +1,8 @@
 #include "stdafx.h"
-#include "DemoGui1.h"
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiLoader
+class CGuiLoader : public IApp
 {
 protected:
 	CGC& gc;

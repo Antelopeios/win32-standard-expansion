@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-01-08
-// Version:	1.0.0000.0030
+// Version:	1.0.0000.1420
 //////////////////////////////////////////////////////////////////
 
 #ifndef __App_h__
@@ -71,6 +71,9 @@ public:
 	}
 
 public:
+	// App对象
+	EXP_INLINE static IApp* GetApp() { return m_pThis; }
+
 	// 进程句柄
 	EXP_INLINE static HINSTANCE GetInstance() { return (HINSTANCE)m_pThis->GetHandle(); }
 

@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-08
-// Version:	1.0.0005.1722
+// Date:	2012-01-08
+// Version:	1.0.0006.1607
 //
 // History:
 //	- 1.0.0005.1722(2011-09-08)	+ 添加CMemFileT::SetSize()接口实现
+//	- 1.0.0006.1607(2012-01-08)	# 修正CMemFileT::Clear()调用之后文件被自动关闭的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemFile_h__
@@ -92,7 +93,9 @@ public:
 	}
 	BOOL Close()
 	{
-		return Clear();
+		m_MemBuff.Clear();
+		m_Position = m_MemBuff.Head();
+		return TRUE;
 	}
 
 	DWORD Read(LPVOID pBuff, DWORD nCount, DWORD nSize = sizeof(TCHAR))
@@ -132,9 +135,7 @@ public:
 	}
 	BOOL Clear()
 	{
-		m_MemBuff.Clear();
-		m_Position = m_MemBuff.Head();
-		return TRUE;
+		return Open();
 	}
 
 	BOOL Seek(int64_t nOffset, int iOrigin = current)

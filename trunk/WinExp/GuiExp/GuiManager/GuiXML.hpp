@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-10
-// Version:	1.0.0006.1256
+// Date:	2012-01-08
+// Version:	1.0.0007.1617
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
@@ -47,6 +47,7 @@
 //	- 1.0.0004.1121(2011-09-16)	+ 添加CGuiXML::AddNode()接口重载,支持直接通过名字创建结点
 //	- 1.0.0005.2056(2011-09-18)	^ 简化CGuiXML中的部分实现
 //	- 1.0.0006.1256(2011-10-10)	+ CGuiXML支持UTF-8格式的xml解析
+//	- 1.0.0007.1617(2012-01-08)	# 修正若干CGuiXML内部编码转换的错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_hpp__
@@ -379,78 +380,64 @@ protected:
 		return TRUE;
 	}
 
-	void Encode(iterator_t& ite)
+	void Encode(iterator_t& ite, CString& enc)
 	{
 		typedef CListT<iterator_t> list_t;
 
 		node_t* node = ite->Val();
-		CStringT<char> buf;
+		CString buf;
 
 		if (node->nam == _T("?xml"))
 		{
 			// 写入名称
-			buf = "<?xml";
-			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			buf = _T("<?xml");
+			m_mFile.Write(buf.GetCStr(), buf.GetLength());
 			// 写入属性
 			for(map_t::iterator_t it = node->att.Head(); it != node->att.Tail(); ++it)
 			{
-				buf = " ";
-				buf += it->Key();
-				buf += "=\"";
-				buf += it->Val();
-				buf += "\"";
-				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+				buf.Format(_T(" %s=\"%s\""), (LPCTSTR)(it->Key()), (LPCTSTR)(it->Val()));
+				m_mFile.Write(buf.GetCStr(), buf.GetLength());
+				if (it->Key() == _T("encoding")) enc = it->Val();
 			}
 			// 完毕
-			buf = "?>\r\n";
-			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			buf = _T("?>\r\n");
+			m_mFile.Write(buf.GetCStr(), buf.GetLength());
 		}
 		else
 		if (node->nam != _T(""))
 		{
 			// 写入名称
-			buf = "<";
-			buf += node->nam;
-			m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+			buf.Format(_T("<%s"), (LPCTSTR)(node->nam));
+			m_mFile.Write(buf.GetCStr(), buf.GetLength());
 
 			// 写入属性
 			for(map_t::iterator_t it = node->att.Head(); it != node->att.Tail(); ++it)
 			{
-				buf = " ";
-				buf += it->Key();
-				buf += "=\"";
-				buf += it->Val();
-				buf += "\"";
-				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+				buf.Format(_T(" %s=\"%s\""), (LPCTSTR)(it->Key()), (LPCTSTR)(it->Val()));
+				m_mFile.Write(buf.GetCStr(), buf.GetLength());
 			}
 
 			if (node->val != _T(""))
 			{	// 写入值
-				buf = ">";
-				buf += node->val;
-				buf += "</";
-				buf += node->nam;
-				buf += ">";
-				m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+				buf.Format(_T(">%s</%s>"), (LPCTSTR)(node->val), (LPCTSTR)(node->nam));
+				m_mFile.Write(buf.GetCStr(), buf.GetLength());
 			}
 			else
 			{	// 写入子节点
 				list_t list = ite->Children();
 				if(!list.Empty())
 				{
-					buf = ">\r\n";
-					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+					buf = _T(">\r\n");
+					m_mFile.Write(buf.GetCStr(), buf.GetLength());
 					for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
-						Encode(*it);
-					buf = "</";
-					buf += node->nam;
-					buf += ">\r\n";
-					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+						Encode(*it, enc);
+					buf.Format(_T("</%s>\r\n"), (LPCTSTR)(node->nam));
+					m_mFile.Write(buf.GetCStr(), buf.GetLength());
 				}
 				else
 				{
-					buf = "/>\r\n";
-					m_pFile->Write(buf.GetCStr(), buf.GetLength(), sizeof(char));
+					buf = _T("/>\r\n");
+					m_mFile.Write(buf.GetCStr(), buf.GetLength());
 				}
 			}
 		}
@@ -460,7 +447,7 @@ protected:
 			if(!list.Empty())
 			{
 				for(list_t::iterator_t it = list.Head(); it != list.Tail(); ++it)
-					Encode(*it);
+					Encode(*it, enc);
 			}
 		}
 	}
@@ -483,48 +470,93 @@ public:
 	BOOL Encode()
 	{
 		if (!m_pFile) return FALSE;
-		if (!m_pFile->SetSize(0))
-			return FALSE;
+		// 文件清空
+		if (!m_pFile->Clear()) return FALSE;
+		if (!m_mFile.Clear()) return FALSE;
 		// 开始编码
-		Encode(m_xData.Head());
-		return TRUE;
+		CString enc(_T("utf-8"));
+		Encode(m_xData.Head(), enc);
+		enc.Lower();
+		// 判断文件编码并转换
+		CGC gc; char* tmp_str = NULL; int len = (int)m_mFile.Size();
+	#ifdef	_UNICODE
+		if (enc == _T("utf-8"))
+			CString::WideCharToMultiByte(CP_UTF8, (LPCWSTR)(LPCVOID)m_mFile, 
+				len / sizeof(wchar_t), tmp_str, len, &gc);
+		else
+		if (enc == _T("gb2312"))
+			CString::WideCharToMultiByte(CP_ACP, (LPCWSTR)(LPCVOID)m_mFile, 
+				len / sizeof(wchar_t), tmp_str, len, &gc);
+	#else /*_UNICODE*/
+		if (enc == _T("utf-8"))
+		{
+			wchar_t* tmp_unc = NULL;
+			CString::MultiByteToWideChar(CP_ACP, (LPCSTR)(LPCVOID)m_mFile, 
+				len, tmp_unc, len, &gc);
+			CString::WideCharToMultiByte(CP_UTF8, tmp_unc, len, tmp_str, len, &gc);
+		}
+		else
+		if (enc == _T("gb2312"))
+			tmp_str = (LPCSTR)(LPCVOID)m_mFile;
+	#endif/*_UNICODE*/
+		return (m_pFile->Write(tmp_str, len, sizeof(char)) == len);
 	}
 	// 解码
 	BOOL Decode()
 	{
 		if (!m_pFile) return FALSE;
-		if (!m_pFile->Seek(0, IFileObject::begin))
-			return FALSE;
+		CFileSeeker seeker(m_pFile);
+		if (!m_pFile->Seek(0, IFileObject::begin)) return FALSE;
 		Clear();
 		// 编码转换
 		uint64_t len64 = m_pFile->Size();
-		if (len64 > (1 << 30)) return FALSE;		// 忽略大于1G的文件
+		if (len64 > (1 << 30)) return FALSE;			// 忽略大于1G的文件
 		{
+			CString enc(_T("utf-8"));
 			CStringT<char> buf; buf.GetCStr(1 << 19);	// 1M的缓存区(CStringT默认会将传入大小翻倍拓展)
+			// 先确定编码类型
 			while(m_pFile->Read(buf.GetCStr(), buf.GetSize(), sizeof(char)) != 0)
 			{
-				CGC gc; wchar_t* tmp_str = NULL; int len = 0;
 				CStringT<char>::iterator_t ite_stt = buf.Find("<?xml");
 				CStringT<char>::iterator_t ite_end = buf.Find(ite_stt, buf.Tail(), "?>");
-				if (ite_stt == buf.Tail() || ite_end == buf.Tail())
-					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
-				else
+				if (ite_stt != buf.Tail() && ite_end != buf.Tail())
 				{
 					CStringT<char> tmp(buf.Mid(ite_stt->Index(), ite_end->Index() - ite_stt->Index()));
 					tmp.Lower();
 					if (tmp.Find("encoding=\"utf-8\"") != tmp.Tail())
-						CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+						enc = _T("utf-8");
 					else
 					if (tmp.Find("encoding=\"gb2312\"") != tmp.Tail())
-						CString::MultiByteToWideChar(CP_ACP, buf.GetCStr(), -1, tmp_str, len, &gc);
-					else
-						CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+						enc = _T("gb2312");
+					break;
 				}
-				if (m_mFile.Write(tmp_str, len, sizeof(wchar_t)) != len) break;
 			}
+			// 开始转换编码
+			if (!m_pFile->Seek(0, IFileObject::begin)) return FALSE;
+			while(m_pFile->Read(buf.GetCStr(), buf.GetSize(), sizeof(char)) != 0)
+			{
+				CGC gc; TCHAR* tmp_str = NULL; int len = 0;
+			#ifdef	_UNICODE
+				if (enc == _T("utf-8"))
+					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+				else
+				if (enc == _T("gb2312"))
+					CString::MultiByteToWideChar(CP_ACP, buf.GetCStr(), -1, tmp_str, len, &gc);
+			#else /*_UNICODE*/
+				if (enc == _T("utf-8"))
+				{
+					wchar_t* tmp_unc = NULL;
+					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_unc, len, &gc);
+					CString::WideCharToMultiByte(CP_ACP, tmp_unc, -1, tmp_str, len, &gc);
+				}
+				else
+				if (enc == _T("gb2312"))
+					tmp_str = buf.GetCStr();
+			#endif/*_UNICODE*/
+				if (m_mFile.Write(tmp_str, len) != len) break;
+			}
+			if (!m_mFile.Seek(0, IFileObject::begin)) return FALSE;
 		}
-		if(!m_mFile.Seek(0, IFileObject::begin))
-			return FALSE;
 		// 开始解析
 		BOOL ret = FALSE;
 		state_t cur_sta = sta_nor, old_sta = sta_nor;

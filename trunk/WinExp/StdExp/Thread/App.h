@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-08
-// Version:	1.0.0000.1420
+// Date:	2012-01-09
+// Version:	1.0.0001.1030
+//
+// History:
+//	- 1.0.0001.1030(2012-01-09)	+ IApp构造添加nSingleID参数,支持直接通过资源ID确定唯一性字符串
 //////////////////////////////////////////////////////////////////
 
 #ifndef __App_h__
@@ -93,7 +96,7 @@ public:
 	EXP_INLINE static LPCTSTR GetCmdLine() { return ::GetCommandLine(); }
 
 public:
-	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/)
+	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/, UINT nSingleID = 0)
 	{
 		if (m_pThis) return;
 
@@ -112,6 +115,9 @@ public:
 		TCHAR str_name[MAX_PATH];
 		if (sSingle && _tcslen(sSingle) > 0)
 			_tcscpy_s(str_name, sSingle);
+		else
+		if (nSingleID > 0)
+			::LoadString((HINSTANCE)m_hSync, nSingleID, str_name, _countof(str_name));
 		else
 		{
 			_tcscpy_s(str_name, m_Full);

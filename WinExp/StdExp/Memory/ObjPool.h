@@ -218,7 +218,7 @@ public:
 			block = (block_t*)m_Alloc.Alloc(sizeof(block_t) + nSize);
 		ExAssert(block);
 		// 构造=>返回内存
-		return (void*)(CTraits::Construct<block_t>(block) + 1);
+		return (void*)(_Traits::Construct<block_t>(block) + 1);
 	}
 	void* Alloc() { return Alloc(m_nObjSize); }
 	// 回收内存
@@ -230,7 +230,7 @@ public:
 		ExAssert(!block->bFree);
 		if (block->bFree) return;
 		// 析构=>归还/释放内存
-		CTraits::Destruct<block_t>(block);
+		_Traits::Destruct<block_t>(block);
 		if (m_nFreSize < m_nMaxSize)
 		{
 			block->pNext = m_FreeList;
@@ -249,7 +249,7 @@ public:
 			m_FreeList = block->pNext;
 			// 析构=>释放内存
 			if(!block->bFree)
-				CTraits::Destruct<block_t>(block);
+				_Traits::Destruct<block_t>(block);
 			m_Alloc.Free(block);
 		}
 		m_FreeList = NULL;
@@ -278,14 +278,14 @@ public:
 		if (nSize == 0) return NULL;
 		if (nSize <= sizeof(TypeT)) nSize = sizeof(TypeT);
 		// 构造=>返回内存
-		return (void*)CTraits::Construct<TypeT>(CBlockPoolT::Alloc(nSize));
+		return (void*)_Traits::Construct<TypeT>(CBlockPoolT::Alloc(nSize));
 	}
 	// 回收内存
 	void Free(void* pPtr)
 	{
 		if (!pPtr) return;
 		// 析构=>归还/释放内存
-		CTraits::Destruct<TypeT>(pPtr);
+		_Traits::Destruct<TypeT>(pPtr);
 		CBlockPoolT::Free(pPtr);
 	}
 	// 清空内存
@@ -299,8 +299,8 @@ public:
 			// 析构=>释放内存
 			if(!block->bFree)
 			{
-				CTraits::Destruct<TypeT>(block + 1);
-				CTraits::Destruct<block_t>(block);
+				_Traits::Destruct<TypeT>(block + 1);
+				_Traits::Destruct<block_t>(block);
 			}
 			m_Alloc.Free(block);
 		}

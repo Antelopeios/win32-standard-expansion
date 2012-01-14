@@ -142,16 +142,7 @@ public:
 	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if( GetSize() >= nSize ) return;
-		type_t* pArray = (type_t*)ZeroMemory(alloc_t::Alloc<type_t>(nSize), sizeof(type_t) * nSize);
-		if (m_Array)
-		{
-			if (sizeof(type_t) == 1)
-				strcpy_s((char*)pArray, nSize, (char*)m_Array);
-			else
-				wcscpy_s((wchar_t*)pArray, nSize, (wchar_t*)m_Array);
-			alloc_t::Free(m_Array);
-		}
-		m_Array = pArray;
+		m_Array = alloc_t::ReAlloc<type_t>(m_Array, nSize);
 		m_nSize = nSize;
 	}
 	void SetSizeExpan(DWORD nSize = PolicyT::DEF_SIZE)
@@ -178,18 +169,8 @@ public:
 		if (GetLength() == GetSize()) return;
 		if (m_Array)
 		{
-			DWORD count = GetCount();
-			type_t* pArray = alloc_t::Alloc<type_t>(count);
-			if (pArray)
-			{
-				if (sizeof(type_t) == 1)
-					strcpy_s((char*)pArray, count, (char*)m_Array);
-				else
-					wcscpy_s((wchar_t*)pArray, count, (wchar_t*)m_Array);
-			}
-			alloc_t::Free(m_Array);
-			m_Array = pArray;
-			m_nSize = count;
+			m_nSize = GetCount();
+			m_Array = alloc_t::ReAlloc<type_t>(m_Array, m_nSize);
 		}
 		else
 			m_nSize = 0;

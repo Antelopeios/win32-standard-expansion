@@ -89,8 +89,7 @@ public:
 	{
 		if (!c_key) return FALSE;
 		key_map_t& types = Instance();
-		CString key(c_key);
-		key_map_t::iterator_t ite = types.Locate(key);
+		key_map_t::iterator_t ite = types.Locate(c_key);
 		if (ite == types.Tail())
 			return NULL;
 		else

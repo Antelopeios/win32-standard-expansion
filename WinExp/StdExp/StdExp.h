@@ -1,4 +1,4 @@
-// Copyright 2010-2011, 木头云
+// Copyright 2010-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-14
-// Version:	0.1.0018.1750
+// Date:	2012-01-14
+// Version:	0.1.0019.2202
 //
 // History:
 //	- 0.1.0005.2000(2010-12-11)	@ 完成Memory部分所有类的构建
@@ -55,6 +55,8 @@
 //	- 0.1.0017.1542(2011-12-10)	# 修正为了提升效率,使用函数内static变量做临时存储,而导致的多线程访问异常
 //	- 0.1.0018.1750(2011-12-14)	+ 在Debugging模块中添加CrashHandler崩溃捕获机制
 //								# 修正在不使用EXP默认域定义的情况下某些宏无法使用的问题
+//	- 0.1.0019.2202(2012-01-14)	+ 为Memory部分的对外接口添加ReAlloc方法
+//								^ 使用Traits及ReAlloc优化部分内存管理与容器类中的算法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __StdExp_h__

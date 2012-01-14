@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-11-27
-// Version:	1.0.0005.1316
+// Date:	2012-01-11
+// Version:	1.0.0006.1202
 //
 // History:
 //	- 1.0.0004.2110(2011-03-04)	^ CMemHeapAlloc的接口添加EXP_INLINE提高效率
 //								+ 添加ExCheckMem()内存正确性检查接口
 //	- 1.0.0005.1316(2011-11-27)	+ 定义EXP_MEMHEAP_ALLOC宏,支持外部替换默认的堆分配器
+//	- 1.0.0006.1202(2012-01-11)	+ 添加CMemHeapAlloc::ReAlloc()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __HeapAlloc_h__
@@ -67,6 +68,16 @@ public:
 	{ return HeapSize(GetProcessHeap(), 0, pPtr); }
 	EXP_INLINE static void* Alloc(DWORD nSize)
 	{ return HeapAlloc(GetProcessHeap(), 0, nSize); }
+	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
+	{
+		if (nSize == 0 && !pPtr) return NULL;
+		if (nSize == 0)
+		{
+			Free(pPtr);
+			return NULL;
+		}
+		return pPtr ? HeapReAlloc(GetProcessHeap(), 0, pPtr, nSize) : Alloc(nSize);
+	}
 	EXP_INLINE static void Free(void* pPtr)
 	{ HeapFree(GetProcessHeap(), 0, pPtr); }
 

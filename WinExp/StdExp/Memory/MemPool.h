@@ -232,45 +232,45 @@ public:
 	CMemPoolT()
 	{
 		int i = 0;
-		m_PoolList[i]	= (IObjPool*)CTraits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_01_t>(m_Alloc.Alloc(sizeof(pool_01_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_02_t>(m_Alloc.Alloc(sizeof(pool_02_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_03_t>(m_Alloc.Alloc(sizeof(pool_03_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_04_t>(m_Alloc.Alloc(sizeof(pool_04_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_05_t>(m_Alloc.Alloc(sizeof(pool_05_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_06_t>(m_Alloc.Alloc(sizeof(pool_06_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_07_t>(m_Alloc.Alloc(sizeof(pool_07_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_08_t>(m_Alloc.Alloc(sizeof(pool_08_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_09_t>(m_Alloc.Alloc(sizeof(pool_09_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_10_t>(m_Alloc.Alloc(sizeof(pool_10_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_11_t>(m_Alloc.Alloc(sizeof(pool_11_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_12_t>(m_Alloc.Alloc(sizeof(pool_12_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_13_t>(m_Alloc.Alloc(sizeof(pool_13_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_14_t>(m_Alloc.Alloc(sizeof(pool_14_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_15_t>(m_Alloc.Alloc(sizeof(pool_15_t)));
-		m_PoolList[++i]	= (IObjPool*)CTraits::Construct<pool_16_t>(m_Alloc.Alloc(sizeof(pool_16_t)));
+		m_PoolList[i]	= (IObjPool*)_Traits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_01_t>(m_Alloc.Alloc(sizeof(pool_01_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_02_t>(m_Alloc.Alloc(sizeof(pool_02_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_03_t>(m_Alloc.Alloc(sizeof(pool_03_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_04_t>(m_Alloc.Alloc(sizeof(pool_04_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_05_t>(m_Alloc.Alloc(sizeof(pool_05_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_06_t>(m_Alloc.Alloc(sizeof(pool_06_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_07_t>(m_Alloc.Alloc(sizeof(pool_07_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_08_t>(m_Alloc.Alloc(sizeof(pool_08_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_09_t>(m_Alloc.Alloc(sizeof(pool_09_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_10_t>(m_Alloc.Alloc(sizeof(pool_10_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_11_t>(m_Alloc.Alloc(sizeof(pool_11_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_12_t>(m_Alloc.Alloc(sizeof(pool_12_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_13_t>(m_Alloc.Alloc(sizeof(pool_13_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_14_t>(m_Alloc.Alloc(sizeof(pool_14_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_15_t>(m_Alloc.Alloc(sizeof(pool_15_t)));
+		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_16_t>(m_Alloc.Alloc(sizeof(pool_16_t)));
 	}
 	~CMemPoolT()
 	{
 		Clear(PolicyT::DUMP_MEM_LEAKS);
 		int i = 0;
-		m_Alloc.Free(CTraits::Destruct<pool_00_t>(m_PoolList[i]));
-		m_Alloc.Free(CTraits::Destruct<pool_01_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_02_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_03_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_04_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_05_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_06_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_07_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_08_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_09_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_10_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_11_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_12_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_13_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_14_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_15_t>(m_PoolList[++i]));
-		m_Alloc.Free(CTraits::Destruct<pool_16_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_00_t>(m_PoolList[i]));
+		m_Alloc.Free(_Traits::Destruct<pool_01_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_02_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_03_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_04_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_05_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_06_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_07_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_08_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_09_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_10_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_11_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_12_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_13_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_14_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_15_t>(m_PoolList[++i]));
+		m_Alloc.Free(_Traits::Destruct<pool_16_t>(m_PoolList[++i]));
 	}
 
 public:

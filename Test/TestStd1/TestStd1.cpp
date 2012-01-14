@@ -20,7 +20,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	const int TestSMax = 100000;
 #endif/*_DEBUG*/
 	unsigned int tStart = 0, tEnd = 0;
-	void* Test[TestLast] = {NULL};
+	void* Test[TestLast] = {0};
 	DWORD Size[TestLast] = {0};
 	int nMax = TestSMax - TestSMin + 1;
 
@@ -178,6 +178,105 @@ int _tmain(int argc, _TCHAR* argv[])
 			Test[j] = blk_pool.Alloc();
 		for(int j = 0; j < TestLast; j++)
 			blk_pool.Free(Test[TestLast - 1 - j]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
+
+	/////////////////////////////////
+	// ReAlloc
+	ExCPrintf(_T("/////////////////////////////////\n\n"));
+	/////////////////////////////////
+
+	ExCPrintf(_T("Start for realloc...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		Test[0] = realloc(NULL, Size[0]);
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = realloc(Test[j - 1], Size[j]);
+		free(Test[TestLast - 1]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+
+	ExCPrintf(_T("Start for HeapReAlloc...\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		Test[0] = CMemHeapAlloc::ReAlloc(NULL, Size[0]);
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = CMemHeapAlloc::ReAlloc(Test[j - 1], Size[j]);
+		CMemHeapAlloc::Free(Test[TestLast - 1]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
+
+	/////////////////////////////////
+
+	ExCPrintf(_T("Start for MemHeap...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		Test[0] = CMemAdapterT<_MemHeap>::ReAlloc(NULL, Size[0]);
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = CMemAdapterT<_MemHeap>::ReAlloc(Test[j - 1], Size[j]);
+		CMemAdapterT<_MemHeap>::Free(Test[TestLast - 1]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+
+	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
+	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
+
+	ExCPrintf(_T("Start for MemPool...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		Test[0] = CMemAdapterT<_MemPool>::ReAlloc(NULL, Size[0]);
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = CMemAdapterT<_MemPool>::ReAlloc(Test[j - 1], Size[j]);
+		CMemAdapterT<_MemPool>::Free(Test[TestLast - 1]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
+
+	/////////////////////////////////
+
+	ExCPrintf(_T("Start for GCHeap...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		CHeapGC gc;
+		Test[0] = CGCAllocT<CHeapGC>::ReAlloc(&gc, NULL, Size[0]);
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = CGCAllocT<CHeapGC>::ReAlloc(&gc, Test[j - 1], Size[j]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+
+	//CMemAdapterT<_MemPool>::GetAlloc().Clear();
+	//CMemAdapterT<_MemPool>::GetAlloc().SetPoolSize();
+
+	ExCPrintf(_T("Start for GCPool...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		CPoolGC gc;
+		Test[0] = CGCAllocT<CPoolGC>::ReAlloc(&gc, NULL, Size[0]);
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = CGCAllocT<CPoolGC>::ReAlloc(&gc, Test[j - 1], Size[j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);

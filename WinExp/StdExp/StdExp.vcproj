@@ -296,6 +296,10 @@
 				RelativePath=".\Memory\SmartPtr.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Memory\Traits.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Pattern"

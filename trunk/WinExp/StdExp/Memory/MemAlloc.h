@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-20
-// Version:	1.0.0017.1540
+// Date:	2012-01-14
+// Version:	1.0.0018.1650
 //
 // History:
 //	- 1.0.0016.2133(2011-04-05)	- 移除ExMem的通用内存分配接口定义,此定义在GC.h中实现
 //	- 1.0.0017.1540(2011-07-20)	= 将CMemAdapterT的单例独立到外部,定义EXP_SINGLETON_MEMALLOC,可由外部按需要自行替换
+//	- 1.0.0018.1650(2012-01-14)	+ 添加CMemAdapterT::ReAlloc()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemAlloc_h__
@@ -64,6 +65,7 @@ class CMemAdapterT : public EXP_SINGLETON_MEMALLOC
 {
 public:
 	typedef AllocT alloc_t;
+	enum { HeadSize = alloc_t::HeadSize };
 
 	EXP_INLINE static alloc_t& GetPolicy()
 	{ return Instance(); }
@@ -81,11 +83,19 @@ public:
 	{ return GetPolicy().Valid(pPtr); }
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return GetPolicy().Size(pPtr); }
+
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
 	{ return GetPolicy().Alloc<TypeT>(nCount); }
 	EXP_INLINE static void* Alloc(DWORD nSize)
 	{ return GetPolicy().Alloc(nSize); }
+
+	template <typename TypeT>
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount)
+	{ return GetPolicy().ReAlloc<TypeT>(pPtr, nCount); }
+	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
+	{ return GetPolicy().ReAlloc(pPtr, nSize); }
+
 	EXP_INLINE static void Free(void* pPtr)
 	{ GetPolicy().Free(pPtr); }
 };

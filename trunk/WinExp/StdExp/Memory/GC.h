@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.1.0017.1640
+// Date:	2012-01-14
+// Version:	1.1.0018.1742
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
@@ -46,6 +46,7 @@
 //	- 1.1.0017.1640(2011-05-19)	+ 添加CGCT::Regist接口,支持从外部直接注册指针
 //								= CGCT::CheckAlloc()与CGCT::CheckFree()改为静态函数
 //								= CGCAllocT在不使用外部GC构造对象时仍然向指针管理器注册指针(统一所有的指针管理)
+//	- 1.1.0018.1742(2012-01-14)	+ 添加CGCT::ReAlloc接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -99,6 +100,79 @@ public:
 		EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr);
 		return ptr;
 	}
+
+	EXP_INLINE static void* CheckReAlloc(void* pPtr, DWORD nSize)
+	{
+		// 检查指针是否为空
+		if (pPtr == NULL)
+			return CheckAlloc<BYTE>(nSize);
+		// 检查大小是否为零
+		if (nSize == 0)
+			return NULL;
+		// 检查指针现有大小
+		DWORD ptr_siz = alloc_t::Size(pPtr);
+		// 若现有大小可以满足需求, 则直接返回
+		if (ptr_siz >= nSize)
+			return pPtr;
+		// 若现有大小无法满足需求, 则分配新的空间并拷贝原有数据
+		void* ptr_new = CheckAlloc<BYTE>(nSize);
+		memcpy(ptr_new, pPtr, ptr_siz);
+		return ptr_new;
+	}
+	template <typename TypeT>
+	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount, _true_type)
+	{
+		return (TypeT*)CheckReAlloc(pPtr, sizeof(TypeT) * nCount);
+	}
+	template <typename TypeT>
+	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount, _false_type)
+	{
+		// 检查指针是否为空
+		if (pPtr == NULL)
+			return CheckAlloc<TypeT>(nCount);
+		// 检查大小是否为零
+		if (nCount == 0)
+			return NULL;
+		// 检查指针现有对象数量
+		_Regist* real = (_Regist*)_Regist::RealPtr(pPtr);
+		// 若现有数量等于需求数量, 则直接返回
+		if (real->count == nCount)
+			return (TypeT*)pPtr;
+		// 若现有数量大于需求数量, 则销毁多余对象, 并直接返回
+		if (real->count > nCount)
+		{
+			if (real->destruct)
+				real->destruct(((TypeT*)pPtr) + nCount, real->count - nCount);
+			real->count = nCount;
+			return (TypeT*)pPtr;
+		}
+		// 若现有数量小于需求数量, 则检查指针现有大小
+		DWORD ptr_siz = alloc_t::Size(pPtr);
+		DWORD size = sizeof(TypeT) * nCount;
+		// 若现有大小可以满足需求, 则构造新对象, 并直接返回
+		if (ptr_siz >= size)
+		{
+			_Traits::Construct<TypeT>(((TypeT*)pPtr) + real->count, nCount - real->count);
+			real->count = nCount;
+			return (TypeT*)pPtr;
+		}
+		// 若现有大小无法满足需求, 则分配新的空间, 拷贝原有对象数据, 并构造新对象
+		void* ptr_new = alloc_t::Alloc(size);
+		_Regist* real_new = (_Regist*)_Regist::RealPtr(ptr_new);
+		real_new->count = nCount;
+		real_new->destruct = (_Regist::traitor_t)(_Traits::Destruct<TypeT>);
+		memcpy(ptr_new, pPtr, sizeof(TypeT) * real->count);
+		_Traits::Construct<TypeT>(((TypeT*)ptr_new) + real->count, nCount - real->count);
+		// 注册新空间
+		EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr_new);
+		return (TypeT*)ptr_new;
+	}
+	template <typename TypeT>
+	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount)
+	{
+		return CheckReAlloc<TypeT>(pPtr, nCount, _TraitsT<TypeT>::is_POD_type());
+	}
+
 	EXP_INLINE static void CheckFree(void* pPtr)
 	{
 		EXP_PTR_MANAGER.Del(pPtr);
@@ -127,14 +201,7 @@ public:
 	{
 		ExLock(m_Mutex, FALSE, mutex_t);
 		if( GetGCSize() >= nSize ) return;
-		void** pArray = alloc_t::Alloc<void*>(nSize);
-		if (m_BlockArray)
-		{
-			if (m_nIndx)
-				memcpy(pArray, m_BlockArray, sizeof(void*) * m_nIndx);
-			alloc_t::Free(m_BlockArray);
-		}
-		m_BlockArray = pArray;
+		m_BlockArray = alloc_t::ReAlloc<void*>(m_BlockArray, nSize);
 		m_nSize = nSize;
 	}
 
@@ -172,6 +239,21 @@ public:
 	{
 		if (nSize == 0) return NULL;
 		return (void*)Alloc<BYTE>(nSize);
+	}
+	template <typename TypeT>
+	TypeT* ReAlloc(void* pPtr, DWORD nCount)
+	{
+		if (nCount == 0) return NULL;
+		TypeT* ptr_new = CheckReAlloc<TypeT>(pPtr, nCount);
+		if (ptr_new == pPtr)
+			return ptr_new;
+		else
+			return (TypeT*)Regist(ptr_new);
+	}
+	void* ReAlloc(void* pPtr, DWORD nSize)
+	{
+		if (nSize == 0) return NULL;
+		return (void*)ReAlloc<BYTE>(pPtr, nSize);
 	}
 	// 回收内存
 	void Free(void* pPtr)
@@ -220,23 +302,44 @@ public:
 	{ return alloc_t::Valid(pPtr); }
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return alloc_t::Size(pPtr); }
+
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
 	{ return gc_alloc_t::CheckAlloc<TypeT>(nCount); }
 	EXP_INLINE static void* Alloc(DWORD nSize)
 	{ return gc_alloc_t::CheckAlloc<BYTE>(nSize); }
+
+	template <typename TypeT>
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount)
+	{
+		TypeT* ptr_new = gc_alloc_t::CheckReAlloc<TypeT>(pPtr, nCount);
+		if (ptr_new != pPtr) Free(pPtr);
+		return ptr_new;
+	}
+	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
+	{ return ReAlloc<BYTE>(pPtr, nSize); }
+
 	EXP_INLINE static void Free(void* pPtr)
 	{ gc_alloc_t::CheckFree(pPtr); }
+
 	// gc_alloc_t
 	EXP_INLINE static BOOL Valid(gc_alloc_t* alloc, void* pPtr)
 	{ return alloc ? alloc->Valid(pPtr) : Valid(pPtr); }
 	EXP_INLINE static DWORD Size(gc_alloc_t* alloc, void* pPtr)
 	{ return alloc ? alloc->Size(pPtr) : Size(pPtr); }
+
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(gc_alloc_t* alloc, DWORD nCount = 1)
 	{ return alloc ? alloc->Alloc<TypeT>(nCount) : Alloc<TypeT>(nCount); }
 	EXP_INLINE static void* Alloc(gc_alloc_t* alloc, DWORD nSize)
 	{ return alloc ? alloc->Alloc(nSize) : Alloc(nSize); }
+
+	template <typename TypeT>
+	EXP_INLINE static TypeT* ReAlloc(gc_alloc_t* alloc, void* pPtr, DWORD nCount)
+	{ return alloc ? alloc->ReAlloc<TypeT>(pPtr, nCount) : ReAlloc<TypeT>(pPtr, nCount); }
+	EXP_INLINE static void* ReAlloc(gc_alloc_t* alloc, void* pPtr, DWORD nSize)
+	{ return alloc ? alloc->ReAlloc(pPtr, nSize) : ReAlloc(pPtr, nSize); }
+
 	EXP_INLINE static void Free(gc_alloc_t* alloc, void* pPtr)
 	{ if (alloc) alloc->Free(pPtr); else Free(pPtr); }
 };

@@ -48,6 +48,7 @@
 
 //////////////////////////////////////////////////////////////////
 
+#include "Memory/Traits.h"
 #include "Memory/RegistAlloc.h"
 #include "Memory/MemHeap.h"
 #include "Memory/ObjPool.h"

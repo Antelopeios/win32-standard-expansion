@@ -73,16 +73,25 @@ protected:
 	DWORD	m_nCont;
 
 protected:
-	EXP_INLINE void InitElements(type_t* pDst, DWORD nCount)
+	EXP_INLINE static void InitElements(type_t* pDst, DWORD nCount)
 	{
 		if (!pDst || nCount == 0) return;
 	//	ZeroMemory(pDst, sizeof(type_t) * nCount);
-		CTraits::Construct<type_t>(pDst, nCount);
+		_Traits::Construct<type_t>(pDst, nCount);
 	}
-	EXP_INLINE void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
+	EXP_INLINE static void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount, _true_type)
+	{
+		if (!pDst || !pSrc || nCount == 0) return;
+		memcpy(pDst, pSrc, sizeof(type_t) * nCount);
+	}
+	EXP_INLINE static void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount, _false_type)
 	{
 		if (!pDst || !pSrc || nCount == 0) return;
 		while (nCount--) *pDst++ = *pSrc++;
+	}
+	EXP_INLINE static void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
+	{
+		CopyElements(pDst, pSrc, nCount, _TraitsT<type_t>::is_POD_type());
 	}
 
 public:
@@ -118,14 +127,7 @@ public:
 	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if( GetSize() >= nSize ) return;
-		type_t* pArray = alloc_t::Alloc<type_t>(nSize);
-		if (m_Array)
-		{
-			memcpy(pArray, m_Array, sizeof(type_t) * GetCount());
-			InitElements(m_Array, GetSize());
-			alloc_t::Free(m_Array);
-		}
-		m_Array = pArray;
+		m_Array = alloc_t::ReAlloc<type_t>(m_Array, nSize);
 		m_nSize = nSize;
 	}
 	void SetSizeExpan(DWORD nSize = PolicyT::DEF_SIZE)
@@ -152,13 +154,8 @@ public:
 		if (GetCount() == GetSize()) return;
 		if (m_Array)
 		{
-			type_t* pArray = alloc_t::Alloc<type_t>(GetCount());
-			if (pArray)
-				memcpy(pArray, m_Array, sizeof(type_t) * GetCount());
-			InitElements(m_Array, GetSize());
-			alloc_t::Free(m_Array);
-			m_Array = pArray;
-			m_nSize = m_nCont;
+			m_nSize = GetCount();
+			m_Array = alloc_t::ReAlloc<type_t>(m_Array, m_nSize);
 		}
 		else
 			m_nCont = m_nSize = 0;
@@ -311,7 +308,7 @@ public:
 		type_t* ptr_array = m_Array + inx_node;
 		ExAssert(ptr_array);
 		// É¾³ýÔªËØ
-		CTraits::Destruct<type_t>(ptr_array - nLen, sizeof(type_t) * nLen);
+		_Traits::Destruct<type_t>(ptr_array - nLen, sizeof(type_t) * nLen);
 		m_nCont -= nLen;
 		// ÒÆ¶¯ÔªËØ
 		if (inx_size)

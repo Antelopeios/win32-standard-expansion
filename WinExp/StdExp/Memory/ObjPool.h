@@ -277,7 +277,7 @@ public:
 	void* Alloc(DWORD nSize = sizeof(TypeT))
 	{
 		if (nSize == 0) return NULL;
-		if (nSize <= sizeof(TypeT)) nSize = sizeof(TypeT);
+		if (nSize < sizeof(TypeT)) nSize = sizeof(TypeT);
 		// 构造=>返回内存
 		return (void*)_Traits::Construct<TypeT>(CBlockPoolT::Alloc(nSize));
 	}

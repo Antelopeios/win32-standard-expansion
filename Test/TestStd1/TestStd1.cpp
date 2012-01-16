@@ -8,24 +8,7 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//class A
-	//{
-	//public:
-	//	int i;
-
-	//	A()
-	//		: i(3)
-	//	{
-	//	}
-	//	//~A()
-	//	//{ i = 0; }
-
-	//	int* GetI()
-	//	{
-	//		return &i;
-	//	}
-	//};
-	typedef int A;
+	typedef BYTE A;
 
 #ifdef	_DEBUG
 	const int TestCont = 100;
@@ -87,34 +70,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		CGC gc;
 		for(int j = 0; j < TestLast; j++)
 			Test[j] = gcnew(gc, A)[Size[j]];
-	}
-	tEnd = timeGetTime();
-	timeEndPeriod(1);
-	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
-
-	ExCPrintf(_T("Start for renew...\t\t"));
-	timeBeginPeriod(1);
-	tStart = timeGetTime();
-	for(int i = 0; i < TestCont; i++)
-	{
-		Test[0] = renew(NULL, A)[Size[0]];
-		for(int j = 1; j < TestLast; j++)
-			Test[j] = renew(Test[j - 1], A)[Size[j]];
-		delete (Test[TestLast - 1]);
-	}
-	tEnd = timeGetTime();
-	timeEndPeriod(1);
-	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
-
-	ExCPrintf(_T("Start for gcrenew...\t\t"));
-	timeBeginPeriod(1);
-	tStart = timeGetTime();
-	for(int i = 0; i < TestCont; i++)
-	{
-		CGC gc;
-		Test[0] = gcrenew(gc, NULL, A)[Size[0]];
-		for(int j = 1; j < TestLast; j++)
-			Test[j] = gcrenew(gc, Test[j - 1], A)[Size[j]];
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
@@ -227,7 +182,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = (A*)pool.Alloc();
+			Test[j] = (A*)pool.Alloc(TestSMax * sizeof(A));
 		for(int j = 0; j < TestLast; j++)
 			pool.Free(Test[TestLast - 1 - j]);
 	}
@@ -255,6 +210,38 @@ int _tmain(int argc, _TCHAR* argv[])
 	// ReAlloc
 	ExCPrintf(_T("/////////////////////////////////\n\n"));
 	/////////////////////////////////
+
+#ifdef	EXP_USING_NEW
+
+	ExCPrintf(_T("Start for renew...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		Test[0] = renew(NULL, A)[Size[0]];
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = renew(Test[j - 1], A)[Size[j]];
+		delete (Test[TestLast - 1]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
+
+	ExCPrintf(_T("Start for gcrenew...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		CGC gc;
+		Test[0] = gcrenew(gc, NULL, A)[Size[0]];
+		for(int j = 1; j < TestLast; j++)
+			Test[j] = gcrenew(gc, Test[j - 1], A)[Size[j]];
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
+
+#endif/*EXP_USING_NEW*/
 
 	ExCPrintf(_T("Start for realloc...\t\t"));
 	timeBeginPeriod(1);

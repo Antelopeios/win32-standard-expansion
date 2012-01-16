@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-14
-// Version:	1.1.0018.1742
+// Date:	2012-01-16
+// Version:	1.1.0019.1800
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
@@ -47,6 +47,7 @@
 //								= CGCT::CheckAlloc()与CGCT::CheckFree()改为静态函数
 //								= CGCAllocT在不使用外部GC构造对象时仍然向指针管理器注册指针(统一所有的指针管理)
 //	- 1.1.0018.1742(2012-01-14)	+ 添加CGCT::ReAlloc接口
+//	- 1.1.0019.1800(2012-01-16)	+ 支持通过EXP_MANAGED_ALLPTR关闭CGCAllocT的托管非GC内存分配
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -303,6 +304,7 @@ public:
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return alloc_t::Size(pPtr); }
 
+#ifdef	EXP_MANAGED_ALLPTR
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
 	{ return gc_alloc_t::CheckAlloc<TypeT>(nCount); }
@@ -321,6 +323,22 @@ public:
 
 	EXP_INLINE static void Free(void* pPtr)
 	{ gc_alloc_t::CheckFree(pPtr); }
+#else /*EXP_MANAGED_ALLPTR*/
+	template <typename TypeT>
+	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
+	{ return alloc_t::Alloc<TypeT>(nCount); }
+	EXP_INLINE static void* Alloc(DWORD nSize)
+	{ return alloc_t::Alloc(nSize); }
+
+	template <typename TypeT>
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount)
+	{ return alloc_t::ReAlloc<TypeT>(pPtr, nCount); }
+	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
+	{ return alloc_t::ReAlloc(pPtr, nSize); }
+
+	EXP_INLINE static void Free(void* pPtr)
+	{ alloc_t::Free(pPtr); }
+#endif/*EXP_MANAGED_ALLPTR*/
 
 	// gc_alloc_t
 	EXP_INLINE static BOOL Valid(gc_alloc_t* alloc, void* pPtr)

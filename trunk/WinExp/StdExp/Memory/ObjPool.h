@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-11
-// Version:	1.0.0017.1715
+// Date:	2012-01-16
+// Version:	1.0.0018.1915
 //
 // History:
 //	- 1.0.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
@@ -43,6 +43,7 @@
 //								= CPoolTypeT改名为IPoolTypeT
 //	- 1.0.0016.1640(2011-06-14)	# 修正因IObjPool由于某些原因(如单例)被提前析构,从而导致IPoolTypeT::Free()的R6025错误
 //	- 1.0.0017.1715(2011-10-11)	+ 添加CBlockPoolT,支持按照动态大小创建粒度对象
+//	- 1.0.0018.1915(2012-01-16)	# 修正CObjPoolT在析构时自动调用的是CBlockPoolT::Clear(),从而导致的内存释放错误
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -269,7 +270,7 @@ public:
 		: CBlockPoolT(sizeof(TypeT), nSize)
 	{}
 	virtual ~CObjPoolT()
-	{}
+	{ Clear(); }
 
 public:
 	// 分配内存

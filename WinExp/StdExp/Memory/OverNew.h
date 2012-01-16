@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,37 +28,91 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Memory - 内存
+// OverNew - 全局new操作符重载
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-21
-// Version:	1.0.0005.0025
+// Date:	2012-01-15
+// Version:	1.0.0000.1800
+//
+// History:
+//	- 1.0.0000.1800(2012-01-15)	@ 开始构建全局new操作符重载
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Memory_h__
-#define __Memory_h__
+#ifndef __OverNew_h__
+#define __OverNew_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Common/Common.h"
-
-//////////////////////////////////////////////////////////////////
-
-#include "Memory/Traits.h"
-#include "Memory/RegistAlloc.h"
-#include "Memory/MemHeap.h"
-#include "Memory/ObjPool.h"
-#include "Memory/MemPool.h"
-#include "Memory/MemAlloc.h"
-#include "Memory/PtrManager.h"
-#include "Memory/SmartPtr.h"
 #include "Memory/GC.h"
-#include "Memory/OverNew.h"
+
+#ifdef	EXP_USING_NEW
+
+//////////////////////////////////////////////////////////////////
+// malloc
+
+EXP_INLINE void* __cdecl operator new(size_t size)
+{
+	return EXP::ExMem::Alloc(size);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr)
+{
+#ifdef	EXP_MANAGED_ALLPTR
+	ZeroMemory(EXP::_Regist::RealPtr(ptr), sizeof(EXP::_Regist));
+#endif/*EXP_MANAGED_ALLPTR*/
+	EXP::ExMem::Free(ptr);
+}
+
+EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker)
+{
+	return maker(EXP::ExMem::Alloc(&gc, size), size);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t)
+{
+	operator delete(ptr);
+}
+
+//////////////////////////////////////////////////////////////////
+// realloc
+
+EXP_INLINE void* __cdecl operator new(size_t size, void* ptr, void*)
+{
+	return EXP::ExMem::ReAlloc(ptr, size);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, void*, void*)
+{
+	operator delete(ptr);
+}
+
+EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker, void* ptr)
+{
+	return maker(EXP::ExMem::ReAlloc(&gc, ptr, size), size);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t, void*)
+{
+	operator delete(ptr);
+}
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Memory_h__*/
+#undef	gcnew
+#define gcnew(gc, type) new(gc, (&EXP::_Regist::Maker<type>)) type
+
+#undef	renew
+#define renew(ptr, type) new(ptr, NULL) type
+
+#undef	gcrenew
+#define gcrenew(gc, ptr, type) new(gc, (&EXP::_Regist::Maker<type>), ptr) type
+
+//////////////////////////////////////////////////////////////////
+
+#endif/*EXP_USING_NEW*/
+
+#endif/*__OverNew_h__*/

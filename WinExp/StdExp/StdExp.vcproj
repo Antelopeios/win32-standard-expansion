@@ -285,6 +285,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Memory\OverNew.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Memory\PtrManager.h"
 				>
 			</File>

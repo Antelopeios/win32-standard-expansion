@@ -59,11 +59,12 @@
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
-// 登记并自动构造/析构的内存分配器
+// 用于内存块登记的结构定义
 
 struct _Regist
 {
 	typedef _Traits::traitor_t traitor_t;
+	typedef void* (*maker_t)(void*, DWORD);
 
 	traitor_t	destruct;
 	DWORD		count;
@@ -76,7 +77,30 @@ struct _Regist
 	{
 		return (((_Regist*)pReal) + 1);
 	}
+
+	template <typename TypeT>
+	static void* Maker(void* pPtr, DWORD size, _false_type)
+	{
+		DWORD count = size / sizeof(TypeT);
+		_Regist* reg = (_Regist*)RealPtr(pPtr);
+		reg->count = count;
+		reg->destruct = (traitor_t)(_Traits::Destruct<TypeT>);
+		return pPtr;
+	}
+	template <typename TypeT>
+	static void* Maker(void* pPtr, DWORD size, _true_type)
+	{
+		return pPtr;
+	}
+	template <typename TypeT>
+	static void* Maker(void* pPtr, DWORD size)
+	{
+		return Maker<TypeT>(pPtr, size, _TraitsT<TypeT>::is_POD_type());
+	}
 };
+
+//////////////////////////////////////////////////////////////////
+// 登记并自动构造/析构的内存分配器
 
 template <typename AllocT>
 class CRegistAllocT

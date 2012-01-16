@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-14
-// Version:	1.0.0001.2102
+// Date:	2012-01-16
+// Version:	1.0.0002.1916
 //
 // History:
 //	- 1.0.0001.2102(2012-01-14)	= 将萃取器部分从RegistAlloc中独立出来
+//	- 1.0.0002.1916(2012-01-16)	^ 简化类型萃取器的特化定义列表
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Traits_h__
@@ -66,83 +67,33 @@ struct _TraitsT
 
 // 特化
 
-template <>
-struct _TraitsT<char>
-{
-	typedef _true_type is_POD_type;
-};
+#undef ExSplTraits
+#define ExSplTraits(type, name) \
+	template <name> \
+	struct _TraitsT<type> \
+	{ \
+		typedef _true_type is_POD_type; \
+	}
+//#define SplTraitsType(type)
 
-template <>
-struct _TraitsT<signed char>
-{
-	typedef _true_type is_POD_type;
-};
+ExSplTraits(bool);
+ExSplTraits(float);
+ExSplTraits(double);
+ExSplTraits(long double);
 
-template <>
-struct _TraitsT<unsigned char>
-{
-	typedef _true_type is_POD_type;
-};
+ExSplTraits(int);
+ExSplTraits(unsigned int);
 
-template <>
-struct _TraitsT<short>
-{
-	typedef _true_type is_POD_type;
-};
+ExSplTraits(char);
+ExSplTraits(unsigned char);
 
-template <>
-struct _TraitsT<unsigned short>
-{
-	typedef _true_type is_POD_type;
-};
+ExSplTraits(short);
+ExSplTraits(unsigned short);
 
-template <>
-struct _TraitsT<int>
-{
-	typedef _true_type is_POD_type;
-};
+ExSplTraits(long);
+ExSplTraits(unsigned long);
 
-template <>
-struct _TraitsT<unsigned int>
-{
-	typedef _true_type is_POD_type;
-};
-
-template <>
-struct _TraitsT<long>
-{
-	typedef _true_type is_POD_type;
-};
-
-template <>
-struct _TraitsT<unsigned long>
-{
-	typedef _true_type is_POD_type;
-};
-
-template <>
-struct _TraitsT<float>
-{
-	typedef _true_type is_POD_type;
-};
-
-template <>
-struct _TraitsT<double>
-{
-	typedef _true_type is_POD_type;
-};
-
-template <>
-struct _TraitsT<long double>
-{
-	typedef _true_type is_POD_type;
-};
-
-template <typename TypeT>
-struct _TraitsT<TypeT*>
-{
-	typedef _true_type is_POD_type;
-};
+ExSplTraits(TypeT*, typename TypeT);
 
 //////////////////////////////////////////////////////////////////
 // 构造/析构函数萃取器

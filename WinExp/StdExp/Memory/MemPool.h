@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-04-03
-// Version:	1.3.0025.2220
+// Date:	2012-01-16
+// Version:	1.3.0026.1445
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -48,6 +48,7 @@
 //								^ CMemPoolT内部结构体采用1字节内存对齐优化内存占用
 //	- 1.3.0024.1014(2011-04-01) # 修正CMemPoolT::pool_policy_t因上次优化导致的编译错误
 //	- 1.3.0025.2220(2011-04-03) # 修正CMemPoolT::CLagPoolT::Alloc并未将分配的内存块内容初始化为空,导致内存池链表添加异常
+//	- 1.3.0026.1445(2012-01-16) + 支持通过EXP_UNDUMPED_NAMESPACE在Debug模式下关闭内存泄漏检测
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -358,31 +359,33 @@ public:
 		pool->Free(block);
 	}
 
+#ifndef EXP_UNDUMPED_NAMESPACE
 #ifdef	_DEBUG
 #ifndef	EXP_DUMPING_MEMLEAKS
 #define	EXP_DUMPING_MEMLEAKS
 #endif/*EXP_DUMPING_MEMLEAKS*/
 #endif/*_DEBUG*/
+#endif/*EXP_UNDUMPED_NAMESPACE*/
 
 	// 清空内存池
 	void Clear(BOOL bDump = TRUE)
 	{
 		ExLock(m_Mutex, FALSE, mutex_t);
 		// 清理内存记录链表
-#ifdef	EXP_DUMPING_MEMLEAKS
-		DWORD dump_counter = 0;
-		if (bDump)
-			ExDPrintf(_T("\nDumping memory leaks...\n"));
-#endif/*EXP_DUMPING_MEMLEAKS*/
 		if( !m_UsedList.Empty() )
 		{
+	#ifdef	EXP_DUMPING_MEMLEAKS
+			DWORD dump_counter = 0;
+			if (bDump)
+				ExDPrintf(_T("\nDumping memory leaks...\n"));
+	#endif/*EXP_DUMPING_MEMLEAKS*/
 			block_t* item = m_UsedList.Head();
 			do
 			{
 				block_t* temp = item->pNext;
 				IObjPool* pool = item->pPool;
 				ExAssert(pool);
-#ifdef	EXP_DUMPING_MEMLEAKS
+	#ifdef	EXP_DUMPING_MEMLEAKS
 				if (bDump && ++dump_counter)
 				{
 					BYTE* ptr = (BYTE*)PtrBlock(item);
@@ -392,25 +395,25 @@ public:
 						ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7], 
 						ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
 				}
-#endif/*EXP_DUMPING_MEMLEAKS*/
+	#endif/*EXP_DUMPING_MEMLEAKS*/
 				m_UsedList.Pop(item);
 				pool->Free(item);
 				item = temp;
 			} while( item != m_UsedList.Tail() );
+	#ifdef	EXP_DUMPING_MEMLEAKS
+			if (bDump)
+			{
+				if (dump_counter == 0)
+					ExDPrintf(_T("No memory leak has been found!\n"));
+				else
+				if (dump_counter == 1)
+					ExDPrintf(_T("\n1 memory leak has been found!\n"));
+				else
+					ExDPrintf(_T("\n%d memory leaks have been found!\n"), dump_counter);
+				ExDPrintf(_T("Complete memory leak detection.\n\n"));
+			}
+	#endif/*EXP_DUMPING_MEMLEAKS*/
 		}
-#ifdef	EXP_DUMPING_MEMLEAKS
-		if (bDump)
-		{
-			if (dump_counter == 0)
-				ExDPrintf(_T("No memory leak has been found!\n"));
-			else
-			if (dump_counter == 1)
-				ExDPrintf(_T("\n1 memory leak has been found!\n"));
-			else
-				ExDPrintf(_T("\n%d memory leaks have been found!\n"), dump_counter);
-			ExDPrintf(_T("Complete memory leak detection.\n\n"));
-		}
-#endif/*EXP_DUMPING_MEMLEAKS*/
 		// 清理对象池
 		for(int i = 0; i < 17; ++i)
 			m_PoolList[i]->Clear();

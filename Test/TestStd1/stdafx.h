@@ -6,4 +6,5 @@
 #pragma once
 
 #define EXP_THREAD_MODEL _SingleModel
+//#define EXP_USING_NEW
 #include "StdExp.h"

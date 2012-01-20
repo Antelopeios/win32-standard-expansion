@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-20
-// Version:	1.0.0007.1540
+// Date:	2012-01-20
+// Version:	1.0.0008.1712
 //
 // History:
 //	- 1.0.0001.1135(2011-05-04)	+ 添加wnd_t类型定义
@@ -44,6 +44,7 @@
 //	- 1.0.0005.1438(2011-07-06)	^ 简化结构,统一EXP_API相关的类/结构/接口声明
 //	- 1.0.0006.0120(2011-07-07)	= 关闭由StdExp的RTTI改动引起的C4275警告
 //	- 1.0.0007.1540(2011-07-20)	+ 添加ExGC()接口,供外部获取全局GC,防止由于DLL内外全局GC生存周期不一致导致的析构异常
+//	- 1.0.0007.1540(2012-01-20)	- 移除ExGC()接口,使用对象相互托管方式解决GC析构顺序导致的异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCommon_h__
@@ -110,9 +111,6 @@ EXP_END
 #include "GuiCommon/GuiInterface.h"
 
 EXP_BEG
-
-// 模块内部GC接口
-EXP_API CGC& ExGC();
 
 // 通用对象创建接口
 EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);

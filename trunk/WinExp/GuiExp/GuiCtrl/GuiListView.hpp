@@ -85,7 +85,7 @@ protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
 	LONG m_AllLine, m_FraLine;
-	CGuiButton m_FocPic;
+	CGuiButton* m_FocPic;
 	BOOL m_AlignTop;
 
 public:
@@ -94,16 +94,17 @@ public:
 		, m_AllLine(0)
 		, m_FraLine(0)
 		, m_AlignTop(TRUE)
+		, m_FocPic(NULL)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
-		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
-		AddComp(&m_FocPic);
+		m_FocPic = ExDynCast<CGuiButton>(ExGui(_T("CGuiButton"), GetGC()));
+		m_FocPic->SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
+		AddComp(m_FocPic);
 	}
 	~CGuiListView()
 	{
-		ClearComp();
 	}
 
 public:
@@ -114,11 +115,11 @@ public:
 		{
 			CString type(sType);
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic.GetState(type);
+			return m_FocPic->GetState(type);
 		}
 		else
 		if (sType == _T("foc"))
-			return (void*)(&m_FocPic);
+			return (void*)(m_FocPic);
 		else
 		if (sType == _T("items"))
 			return (void*)(&m_ItemList);
@@ -143,7 +144,7 @@ public:
 		if (type.Left(4) == _T("foc_"))
 		{
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic.SetState(type, pState);
+			return m_FocPic->SetState(type, pState);
 		}
 		else
 		if (sType == _T("items"))

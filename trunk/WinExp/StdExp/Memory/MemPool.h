@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-16
-// Version:	1.3.0026.1445
+// Date:	2012-01-20
+// Version:	1.3.0027.1712
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -49,6 +49,8 @@
 //	- 1.3.0024.1014(2011-04-01) # 修正CMemPoolT::pool_policy_t因上次优化导致的编译错误
 //	- 1.3.0025.2220(2011-04-03) # 修正CMemPoolT::CLagPoolT::Alloc并未将分配的内存块内容初始化为空,导致内存池链表添加异常
 //	- 1.3.0026.1445(2012-01-16) + 支持通过EXP_UNDUMPED_NAMESPACE在Debug模式下关闭内存泄漏检测
+//	- 1.3.0027.1712(2012-01-20) + 完善内存泄漏检测及其输出
+//								# 修正CMemPoolT::Size()返回大小有误的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -65,6 +67,14 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+#ifndef EXP_UNDUMPED_NAMESPACE
+#ifdef	_DEBUG
+#ifndef	EXP_DUMPING_MEMLEAKS
+#define	EXP_DUMPING_MEMLEAKS
+#endif/*EXP_DUMPING_MEMLEAKS*/
+#endif/*_DEBUG*/
+#endif/*EXP_UNDUMPED_NAMESPACE*/
+
 template <typename AllocT = EXP_MEMHEAP_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 struct _MemPoolPolicy;
 
@@ -78,16 +88,31 @@ public:
 	typedef typename PolicyT::byte byte;
 
 protected:
+#ifdef	EXP_DUMPING_MEMLEAKS
+	volatile LONG m_nTime;
+#endif/*EXP_DUMPING_MEMLEAKS*/
+
+public:
 #pragma pack(1)
 	// 内存块标记结点
 	struct block_t
 	{
 		IObjPool*	pPool;	// 对象池指针
+#ifdef	EXP_DUMPING_MEMLEAKS
+		LPCSTR		sFile;
+		int			nLine;
+		LONG		nTime;
+#endif/*EXP_DUMPING_MEMLEAKS*/
 		block_t*	pPrev;	// 上一个结点
 		block_t*	pNext;	// 下一个结点
 
 		block_t()
 			: pPool(NULL)
+#ifdef	EXP_DUMPING_MEMLEAKS
+			, sFile(NULL)
+			, nLine(0)
+			, nTime(0)
+#endif/*EXP_DUMPING_MEMLEAKS*/
 			, pPrev(NULL)
 			, pNext(NULL)
 		{}
@@ -99,6 +124,7 @@ protected:
 	};
 #pragma pack()
 
+protected:
 	// 内存块标记链表
 	typedef class blk_list_t
 	{
@@ -218,9 +244,10 @@ protected:
 	typedef CObjPoolT<_TypeT<16384>, pool_policy_t<16384> >	pool_15_t;
 	typedef CObjPoolT<_TypeT<32768>, pool_policy_t<32768> >	pool_16_t;
 
+public:
 	// 结点转换函数
-	EXP_INLINE block_t* BlockPtr(void* pPtr) { return pPtr ? (block_t*)(((BYTE*)pPtr) - sizeof(block_t)) : NULL; }
-	EXP_INLINE void* PtrBlock(block_t* pPtr) { return pPtr ? (void*)(pPtr + 1) : NULL; }
+	EXP_INLINE static block_t* BlockPtr(void* pPtr) { return pPtr ? (block_t*)(((BYTE*)pPtr) - sizeof(block_t)) : NULL; }
+	EXP_INLINE static void* PtrBlock(block_t* pPtr) { return pPtr ? (void*)(pPtr + 1) : NULL; }
 
 protected:
 	alloc_t		m_Alloc;
@@ -231,6 +258,9 @@ protected:
 
 public:
 	CMemPoolT()
+#ifdef	EXP_DUMPING_MEMLEAKS
+		: m_nTime(0)
+#endif/*EXP_DUMPING_MEMLEAKS*/
 	{
 		int i = 0;
 		m_PoolList[i]	= (IObjPool*)_Traits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
@@ -293,7 +323,7 @@ public:
 		if (!block) return 0;
 		IObjPool* pool = block->pPool;
 		if (!pool) return 0;
-		return pool->Size(block);
+		return pool->Size(block) - sizeof(block_t);
 	}
 	// 分配内存
 	void* Alloc(DWORD nSize)
@@ -340,9 +370,21 @@ public:
 		// 返回标记内存块
 		ExAssert(block);
 		block->pPool = m_PoolList[mid];
+#ifdef	EXP_DUMPING_MEMLEAKS
+		block->nTime = ++m_nTime;
+#endif/*EXP_DUMPING_MEMLEAKS*/
 		m_UsedList.Push(block);
 		return PtrBlock(block);
 	}
+#ifdef	EXP_DUMPING_MEMLEAKS
+	void* SetAlloc(void* p, LPCSTR sFile, int nLine)
+	{
+		if (!p) return NULL;
+		BlockPtr(p)->sFile = sFile;
+		BlockPtr(p)->nLine = nLine;
+		return p;
+	}
+#endif/*EXP_DUMPING_MEMLEAKS*/
 	// 回收内存
 	void Free(void* pPtr)
 	{
@@ -358,15 +400,6 @@ public:
 		if (!pool) return;
 		pool->Free(block);
 	}
-
-#ifndef EXP_UNDUMPED_NAMESPACE
-#ifdef	_DEBUG
-#ifndef	EXP_DUMPING_MEMLEAKS
-#define	EXP_DUMPING_MEMLEAKS
-#endif/*EXP_DUMPING_MEMLEAKS*/
-#endif/*_DEBUG*/
-#endif/*EXP_UNDUMPED_NAMESPACE*/
-
 	// 清空内存池
 	void Clear(BOOL bDump = TRUE)
 	{
@@ -374,45 +407,53 @@ public:
 		// 清理内存记录链表
 		if( !m_UsedList.Empty() )
 		{
-	#ifdef	EXP_DUMPING_MEMLEAKS
+#ifdef	EXP_DUMPING_MEMLEAKS
 			DWORD dump_counter = 0;
 			if (bDump)
-				ExDPrintf(_T("\nDumping memory leaks...\n"));
-	#endif/*EXP_DUMPING_MEMLEAKS*/
+				ExDPrintf(_T("\nDetected memory leaks!\nDumping objects ->\n"));
+#endif/*EXP_DUMPING_MEMLEAKS*/
 			block_t* item = m_UsedList.Head();
 			do
 			{
-				block_t* temp = item->pNext;
+				block_t* next = item->pNext;
 				IObjPool* pool = item->pPool;
 				ExAssert(pool);
-	#ifdef	EXP_DUMPING_MEMLEAKS
+#ifdef	EXP_DUMPING_MEMLEAKS
 				if (bDump && ++dump_counter)
 				{
 					BYTE* ptr = (BYTE*)PtrBlock(item);
-					ExDPrintf(_T("\nMemory leak at 0x%08X, %d bytes long.\nData:"), ptr, pool->Size(item));
-					ExDPrintf(
-						_T("%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n"), 
-						ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7], 
-						ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+					if (item->nTime > 0)
+						ExDPrintf(_T("{%d, 0x%08X, %d bytes}"), item->nTime, ptr, pool->Size(item));
+					else
+						ExDPrintf(_T("{0x%08X, %d bytes}"), ptr, pool->Size(item));
+					ExDPrintf(_T("\t[%02X %02X %02X %02X %02X %02X %02X %02X]"), 
+						ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7]);
+					if (item->sFile)
+					{
+						ExDPrintf(_T("\t"));
+						OutputDebugStringA(item->sFile);
+						ExDPrintf(_T("\t(%d)"), item->nLine);
+					}
+					ExDPrintf(_T("\n"));
 				}
-	#endif/*EXP_DUMPING_MEMLEAKS*/
+#endif/*EXP_DUMPING_MEMLEAKS*/
 				m_UsedList.Pop(item);
 				pool->Free(item);
-				item = temp;
-			} while( item != m_UsedList.Tail() );
-	#ifdef	EXP_DUMPING_MEMLEAKS
+				item = next;
+			} while(!m_UsedList.Empty());
+#ifdef	EXP_DUMPING_MEMLEAKS
 			if (bDump)
 			{
 				if (dump_counter == 0)
-					ExDPrintf(_T("No memory leak has been found!\n"));
+					ExDPrintf(_T("No Object has been found!\n"));
 				else
 				if (dump_counter == 1)
-					ExDPrintf(_T("\n1 memory leak has been found!\n"));
+					ExDPrintf(_T("1 Object has been found!\n"));
 				else
-					ExDPrintf(_T("\n%d memory leaks have been found!\n"), dump_counter);
-				ExDPrintf(_T("Complete memory leak detection.\n\n"));
+					ExDPrintf(_T("%d Objects have been found!\n"), dump_counter);
+				ExDPrintf(_T("Object dump complete.\n\n"));
 			}
-	#endif/*EXP_DUMPING_MEMLEAKS*/
+#endif/*EXP_DUMPING_MEMLEAKS*/
 		}
 		// 清理对象池
 		for(int i = 0; i < 17; ++i)

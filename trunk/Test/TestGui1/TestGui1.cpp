@@ -18,7 +18,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//CGuiManager::Load(&f_xml);
 
 	// 垃圾回收器
-	CGC& gc = ExGC();
+	CGC gc;
 
 	// 加载资源
 	CIOFile file(_T("../TestImg1/ground.png"));
@@ -58,7 +58,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	IGuiEffect* eff2 = ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"), &gc));
 
 	// 创建按钮控件对象并设置
-	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc));
+	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton")));
 	btn->SetState(_T("image"), img_btn);
 	btn->SetState(_T("text"), txt_btn);
 	btn->SetState(_T("locate"), (void*)4);
@@ -67,7 +67,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	btn->SetEffect(eff1);
 
 	// 创建图片控件对象并设置
-	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc));
+	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture")));
 	pic->SetState(_T("image"), &img_pic);
 	//CText text(_T("Dark C.at"), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 0, 255));
 	//pic->SetState(_T("text"), &text);
@@ -82,17 +82,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->SetLayered();
 	wnd->ShowWindow(SW_SHOW);
 
-	// 创建事件对象并设置
-	CCustomEvent cus_evt;
-	CCusPicEvent pic_evt;
-	CCusBtnEvent btn_evt;
-
 	// 将窗口与控件及事件对象关联
-	pic->AddEvent(&pic_evt);
-	btn->AddEvent(&btn_evt);
+	pic->AddEvent(ExMem::Alloc<CCusPicEvent>());
+	btn->AddEvent(ExMem::Alloc<CCusBtnEvent>());
 	wnd->AddComp(pic);
 	pic->AddComp(btn);
-	wnd->AddEvent(&cus_evt);
+	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
+
+	IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn")));
+	itm->Free();
 
 	// 主消息循环:
 	MSG msg = {0};

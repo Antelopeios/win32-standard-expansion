@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-16
-// Version:	1.0.0002.1916
+// Date:	2012-01-19
+// Version:	1.0.0003.1530
 //
 // History:
 //	- 1.0.0001.2102(2012-01-14)	= 将萃取器部分从RegistAlloc中独立出来
 //	- 1.0.0002.1916(2012-01-16)	^ 简化类型萃取器的特化定义列表
+//	- 1.0.0003.1530(2012-01-19)	+ 添加wchar_t的特化定义
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Traits_h__
@@ -86,6 +87,8 @@ ExSplTraits(unsigned int);
 
 ExSplTraits(char);
 ExSplTraits(unsigned char);
+
+ExSplTraits(wchar_t);
 
 ExSplTraits(short);
 ExSplTraits(unsigned short);

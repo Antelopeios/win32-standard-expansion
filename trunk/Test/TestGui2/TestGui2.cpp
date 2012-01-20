@@ -15,7 +15,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// 垃圾回收器
-	CGC& gc = ExGC();
+	CGC gc;
 
 	// 相关资源定义
 	RECT rc_dsk = {0};
@@ -37,21 +37,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->GetClientRect(rc_wnd);
 
 	// 创建控件
-	IGuiCtrl* edit = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc));
+	IGuiCtrl* edit = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit")));
 	edit->SetWindowRect(rc_wnd);
 	edit->SetState(_T("text"), &txt_edt);
 	txt_edt.SetColor(ExRGBA(128, 128, 128, 255));
 	txt_edt.SetString(_T("现在的Edit里面什么都没有哦"));
 	edit->SetState(_T("empty_text"), &txt_edt);
 
-	// 创建事件对象并设置
-	CCustomEvent cus_evt;
-	CFillEvent	 fil_evt;
-
 	// 关联对象
 	wnd->AddComp(edit);
-	wnd->AddEvent(&cus_evt);
-	wnd->AddEvent(&fil_evt);
+	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
+	wnd->AddEvent(ExMem::Alloc<CFillEvent>());
 
 	// 主消息循环:
 	MSG msg = {0};

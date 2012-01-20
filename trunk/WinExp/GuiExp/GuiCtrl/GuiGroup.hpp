@@ -74,7 +74,6 @@ public:
 	{}
 	~CGuiGroup()
 	{
-		ClearComp();
 	}
 
 public:

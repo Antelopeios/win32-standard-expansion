@@ -15,7 +15,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// 垃圾回收器
-	CGC& gc = ExGC();
+	CGC gc;
 
 	// 相关资源定义
 	RECT rc_dsk = {0};
@@ -68,11 +68,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->GetClientRect(rc_wnd);
 
 	// 创建列表控件
-	IGuiCtrl* list = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc));
+	IGuiCtrl* list = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView")));
 	CListT<IGuiCtrl*> items;
-	for(int i = 0; i < 100; ++i)
+	for(int i = 0; i < 1/*00*/; ++i)
 	{
-		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
+		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
 		btn->SetState(_T("icon"), &img_pic);
 		//btn->SetState(_T("glow"), (void*)1);
 		btn->SetState(_T("image"), img_btn);
@@ -88,14 +88,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	list->SetState(_T("space"), (void*)5);
 	list->SetWindowRect(rc_wnd);
 
-	// 创建事件对象并设置
-	CCustomEvent cus_evt;
-	CFillEvent	 fil_evt;
-
 	// 关联对象
 	wnd->AddComp(list);
-	wnd->AddEvent(&cus_evt);
-	wnd->AddEvent(&fil_evt);
+	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
+	wnd->AddEvent(ExMem::Alloc<CFillEvent>());
 
 	// 主消息循环:
 	MSG msg = {0};

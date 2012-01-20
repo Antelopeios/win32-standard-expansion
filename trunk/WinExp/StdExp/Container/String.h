@@ -141,8 +141,9 @@ public:
 	{ return m_nSize; }
 	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
-		if( GetSize() >= nSize ) return;
+		if (GetSize() >= nSize) return;
 		m_Array = alloc_t::ReAlloc<type_t>(m_Array, nSize);
+		if (GetSize() == 0) m_Array[0] = 0;
 		m_nSize = nSize;
 	}
 	void SetSizeExpan(DWORD nSize = PolicyT::DEF_SIZE)

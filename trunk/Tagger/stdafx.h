@@ -5,7 +5,7 @@
 
 #pragma once
 
-#define _CONSOLE
+//#define _CONSOLE
 
 #define EXP_USING_APP
 #include "GuiExp.h"

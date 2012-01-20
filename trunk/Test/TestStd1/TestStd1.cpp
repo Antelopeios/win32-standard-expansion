@@ -46,21 +46,21 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	/////////////////////////////////
 
+#ifdef	EXP_USING_NEW
+
 	ExCPrintf(_T("\nStart for new/delete...\t\t"));
 	timeBeginPeriod(1);
 	tStart = timeGetTime();
 	for(int i = 0; i < TestCont; i++)
 	{
 		for(int j = 0; j < TestLast; j++)
-			Test[j] = new A[Size[j]];
+			Test[j] = dbnew A[Size[j]];
 		for(int j = 0; j < TestLast; j++)
 			delete [] (Test[TestLast - 1 - j]);
 	}
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
 	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
-
-#ifdef	EXP_USING_NEW
 
 	ExCPrintf(_T("Start for gcnew...\t\t"));
 	timeBeginPeriod(1);
@@ -74,6 +74,22 @@ int _tmain(int argc, _TCHAR* argv[])
 	tEnd = timeGetTime();
 	timeEndPeriod(1);
 	ExCPrintf(_T("%dms\n\n"), (tEnd - tStart));
+
+#else /*EXP_USING_NEW*/
+
+	ExCPrintf(_T("\nStart for new/delete...\t\t"));
+	timeBeginPeriod(1);
+	tStart = timeGetTime();
+	for(int i = 0; i < TestCont; i++)
+	{
+		for(int j = 0; j < TestLast; j++)
+			Test[j] = new A[Size[j]];
+		for(int j = 0; j < TestLast; j++)
+			delete [] (Test[TestLast - 1 - j]);
+	}
+	tEnd = timeGetTime();
+	timeEndPeriod(1);
+	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
 
 #endif/*EXP_USING_NEW*/
 

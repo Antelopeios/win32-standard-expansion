@@ -55,6 +55,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}
 
+	imgShow.Delete();
+
 	return (int) msg.wParam;
 }
 
@@ -195,6 +197,7 @@ protected:
 			++g_FramesCounter;
 		}
 
+		g_MemImg.Delete();
 		return 0;
 	}
 } g_SpeedTest;

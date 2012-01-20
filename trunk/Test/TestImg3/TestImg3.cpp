@@ -55,6 +55,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}
 
+	imgShow.Delete();
+
 	return (int) msg.wParam;
 }
 

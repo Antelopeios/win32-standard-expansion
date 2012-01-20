@@ -5,7 +5,7 @@
 class CGuiLoader : public IApp
 {
 protected:
-	CGC& gc;
+	CGC gc;
 
 	CListT<CImage*> list_ico;
 	CListT<CString> list_str;
@@ -188,9 +188,9 @@ protected:
 		// 创建控件对象并设置
 
 	#define GuiLoadPic(name) \
-		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc))); \
+		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture")))); \
 		GUI_CTL(name)->SetState(_T("image"), GUI_IMG(name)); \
-		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
+		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name))))
 	//#define GuiLoadPic()
 
 		GuiLoadPic(banner);
@@ -210,7 +210,8 @@ protected:
 		txt_btn[0].SetColor(ExRGBA(0, 0, 0, 255));
 		for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
 
-		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
+		REG_CTL(list, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"))));
+		GUI_CTL(list)->SetTrust();
 		GUI_CTL(list)->SetState(_T("image"), GUI_IMG(list));
 		//GUI_CTL(list)->SetState(_T("align_top"), (void*)FALSE);
 		CImage img_btn[9];
@@ -228,7 +229,7 @@ protected:
 		CListT<CString>::iterator_t ite_str = list_str.Head();
 		for(; ite_ico != list_ico.Tail() && ite_str != list_str.Tail(); ++ite_ico, ++ite_str)
 		{
-			IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), &gc));
+			IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
 			btn->SetState(_T("image"), img_btn);
 			btn->SetState(_T("icon"), *ite_ico);
 			for(int i = 0; i < _countof(txt_btn); ++i) txt_btn[i].SetString(*ite_str);
@@ -252,10 +253,10 @@ protected:
 		img_btn[8] = GUI_IMG(list_foc_rb)->Get();
 		GUI_CTL(list)->SetState(_T("foc_image"), img_btn);
 		GUI_CTL(list)->SetState(_T("space"), (void*)15);
-		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"), &gc)));
+		GUI_CTL(list)->InsEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_list"))));
 		if (!items_list.Empty()) items_list.HeadItem()->SetFocus();
 
-		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
+		REG_CTL(scr_h, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"))));
 		GUI_CTL(scr_h)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
 		GUI_CTL(scr_h)->SetState(_T("up_thr_sta"), (void*)TRUE);
 		GUI_CTL(scr_h)->SetState(_T("dn_thr_sta"), (void*)TRUE);
@@ -287,19 +288,19 @@ protected:
 			GUI_CTL(scr_h)->SetState(_T("dn_image"), img);
 			((IGuiCtrl*)GUI_CTL(scr_h)->GetState(_T("down")))->SetWindowRect(CRect(0, 0, img[4].GetWidth(), img[4].GetHeight() / 3));
 		}
-		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"), &gc)));
+		GUI_CTL(scr_h)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_h"))));
 
 		GUI_CTL(list)->SetScroll(GUI_CTL(scr_h));
 
 	#define GuiLoadBtn(name, thr_sta) \
-		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc))); \
+		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton")))); \
 		GUI_CTL(name)->SetState(_T("thr_sta"), (void*)thr_sta); \
 		{ \
 			CImage tmp[9]; \
 			tmp[4] = GUI_IMG(name)->Get(); \
 			GUI_CTL(name)->SetState(_T("image"), tmp); \
 		} \
-		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
+		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name))))
 	//#define GuiLoadBtn()
 
 		GuiLoadBtn(win_sysbtn_close, 1);
@@ -308,28 +309,30 @@ protected:
 		GuiLoadBtn(win_sysbtn_min, 1);
 
 	#define GuiLoadGrp(name, count, thr_sta) \
-		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc))); \
+		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup")))); \
+		GUI_CTL(name)->SetTrust(); \
 		CArrayT<IGuiCtrl*> items_##name; \
 		for(int i = 0; i < count; ++i) \
 		{ \
-			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"), &gc)); \
+			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton"))); \
 			itm->SetState(_T("thr_sta"), (void*)thr_sta); \
 			items_##name.Add(itm); \
 		} \
 		GUI_CTL(name)->SetState(_T("items"), &items_##name); \
 		GUI_CTL(name)->SetState(_T("image"), GUI_IMG(name)); \
-		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
+		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name))))
 	//#define GuiLoadGrp()
 
 		GuiLoadGrp(gamesearch_charmap, 26, 1);
 		GuiLoadGrp(toolbar_tools, 8, 1);
 
-		REG_CTL(topbar_btn, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"), &gc)));
+		REG_CTL(topbar_btn, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiGroup"))));
 		CArrayT<IGuiCtrl*> items_topbar_btn;
 		IGuiEvent* items_topbar_btn_evt = ExDynCast<IGuiEvent>(ExGui(_T("CEvent_items_topbar_btn"), &gc));
+		items_topbar_btn_evt->SetTrust(FALSE);
 		for(int i = 0; i < 8; ++i)
 		{
-			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc));
+			IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn")));
 			itm->AddEvent(items_topbar_btn_evt);
 			items_topbar_btn.Add(itm);
 		}
@@ -338,12 +341,12 @@ protected:
 		GUI_CTL(topbar_btn)->SetState(_T("sta_cnt"), (void*)4);
 		GUI_CTL(topbar_btn)->SetState(_T("sty_box"), (void*)FALSE);
 		GUI_CTL(topbar_btn)->SetState(_T("image"), GUI_IMG(topbar_btn));
-		GUI_CTL(topbar_btn)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_topbar_btn"), &gc)));
+		GUI_CTL(topbar_btn)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_topbar_btn"))));
 
 	#define GuiLoadPsh(name) \
-		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn"), &gc))); \
+		REG_CTL(name, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn")))); \
 		GUI_CTL(name)->SetState(_T("image"), GUI_IMG(name)); \
-		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name), &gc)))
+		GUI_CTL(name)->AddEvent(ExDynCast<IGuiEvent>(ExGui(CString(_T("CEvent_")) + _T(#name))))
 	//#define GuiLoadGrp()
 
 		GuiLoadPsh(tag_qb);
@@ -378,7 +381,7 @@ protected:
 		GUI_WND(main)->CenterWindow();
 		GUI_WND(main)->SetLayered(FALSE);
 		GUI_WND(main)->GetClientRect(rc_wnd);
-		GUI_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
+		GUI_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"))));
 	}
 
 	// 关联对象
@@ -434,7 +437,6 @@ protected:
 
 public:
 	CGuiLoader()
-		: gc(ExGC())
 	{
 		LoadRes();
 		LoadCtl();

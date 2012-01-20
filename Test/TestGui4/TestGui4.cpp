@@ -14,7 +14,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// 垃圾回收器
-	CGC& gc = ExGC();
+	CGC gc;
 
 	// 相关资源定义
 	RECT rc_dsk = {0};
@@ -36,7 +36,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	pixel_t pix[8] = {0};
 
-	IGuiCtrl* scroll1 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc));
+	IGuiCtrl* scroll1 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll")));
 	scroll1->SetWindowRect(CRect(10, 230, 475, 250));
 	scroll1->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, 255));
@@ -48,7 +48,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	scroll1->SetState(_T("up_color"), pix);
 	scroll1->SetState(_T("dn_color"), pix);
 
-	IGuiCtrl* scroll2 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc));
+	IGuiCtrl* scroll2 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll")));
 	scroll2->SetWindowRect(CRect(455, 10, 475, 225));
 	scroll2->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, 255));
@@ -60,15 +60,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	scroll2->SetState(_T("up_color"), pix);
 	scroll2->SetState(_T("dn_color"), pix);
 
-	// 创建事件对象并设置
-	CCustomEvent cus_evt;
-	CFillEvent	 fil_evt;
-
 	// 关联对象
 	wnd->AddComp(scroll1);
 	wnd->AddComp(scroll2);
-	wnd->AddEvent(&cus_evt);
-	//wnd->AddEvent(&fil_evt);
+	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
 
 	// 主消息循环:
 	MSG msg = {0};

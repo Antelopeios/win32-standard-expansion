@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-20
-// Version:	1.0.0006.1540
+// Date:	2012-01-20
+// Version:	1.0.0007.1712
 //
 // History:
 //	- 1.0.0005.2230(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
 //								+ 添加CMapT::Del(iterator_t&)接口,支持由迭代器定位并删除结点
 //								+ 添加CMapT::Null()接口,支持彻底清空CMapT
 //	- 1.0.0006.1540(2011-07-20)	= 将CMapT::_Assoc与IPoolTypeT解耦,避免DLL中置换单例导致IPoolTypeT中的单例模板无法导出
+//	- 1.0.0007.1712(2012-01-20)	# 修正CMapT析构时没有自动释放内部申请的结点内存而导致的内存泄漏
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Map_h__
@@ -124,7 +125,7 @@ public:
 	CMapT(DWORD nSize = PolicyT::DEF_SIZE)
 	{ SetSize(nSize); }
 	~CMapT()
-	{}
+	{ Null(); }
 
 public:
 	DWORD GetSize() const

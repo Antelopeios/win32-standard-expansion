@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-16
-// Version:	1.0.0006.2000
+// Date:	2012-01-20
+// Version:	1.0.0007.1712
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
@@ -42,6 +42,7 @@
 //	- 1.0.0004.1020(2011-07-01)	+ 重写IGuiBase::InsEvent()接口,当事件链表中有数据时,向第二个结点处插入新结点(为了保证第一个插入的结点始终最后执行)
 //	- 1.0.0005.1550(2011-07-07)	# IGuiBase::GetPtCtrl()会返回不可见控件,导致可见控件被遮住而无法响应消息
 //	- 1.0.0006.2000(2011-07-16)	+ 在IGuiBase中添加绘图剪切区的相关接口
+//	- 1.0.0007.1712(2012-01-20)	= IGuiBase::GetGC()默认返回空GC
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -69,14 +70,14 @@ protected:
 
 public:
 	IGuiBase()
-		: m_GC(ExMem::Alloc<CGC>())
+		: m_GC(NULL/*ExMem::Alloc<CGC>()*/)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), GetGC()));
 	}
 	virtual ~IGuiBase(void)
 	{
-		ExMem::Free(m_GC);
+	//	ExMem::Free(m_GC);
 	}
 
 public:

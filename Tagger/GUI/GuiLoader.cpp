@@ -57,30 +57,30 @@ void CGuiLoader::LoadRes()
 void CGuiLoader::LoadCtl()
 {
 	// 内容打底
-	REG_CTL(ground, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)));
+	REG_CTL(ground, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"))));
 	GET_CTL(ground)->SetState(_T("color"), (void*)ExRGBA(242, 242, 242, 255));
-	GET_CTL(ground)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_ground"), &gc)));
+	GET_CTL(ground)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_ground"))));
 
 	// 搜索框打底
-	REG_CTL(bottom1, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)));
+	REG_CTL(bottom1, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"))));
 	GET_CTL(bottom1)->SetState(_T("color"), (void*)ExRGBA(222, 222, 222, 255));
-	GET_CTL(bottom1)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom1"), &gc)));
-	REG_CTL(bottom2, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"), &gc)));
+	GET_CTL(bottom1)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom1"))));
+	REG_CTL(bottom2, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"))));
 	GET_CTL(bottom2)->SetState(_T("color"), (void*)ExRGBA(255, 255, 255, 255));
-	GET_CTL(bottom2)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom2"), &gc)));
+	GET_CTL(bottom2)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom2"))));
 	// 搜索框
-	REG_CTL(search, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc)));
+	REG_CTL(search, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"))));
 	GET_CTL(search)->SetState(_T("text"), GET_TXT(search));
-	GET_CTL(search)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_search"), &gc)));
+	GET_CTL(search)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_search"))));
 	// 覆盖框
-	REG_CTL(cover, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"), &gc)));
+	REG_CTL(cover, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"))));
 	GET_CTL(cover)->SetState(_T("text"), GET_TXT(cover));
 	GET_CTL(cover)->SetState(_T("edit"), &CString(_T("请输入待查询标签")));
 	GET_CTL(cover)->SetVisible(FALSE);
-	GET_CTL(cover)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cover"), &gc)));
+	GET_CTL(cover)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cover"))));
 
 	// 标签云
-	REG_CTL(cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
+	REG_CTL(cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"))));
 	GET_CTL(cloud)->SetTrust(TRUE);
 	GET_CTL(cloud)->SetState(_T("align_top"), (void*)FALSE);
 	GET_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
@@ -112,9 +112,9 @@ void CGuiLoader::LoadCtl()
 		tags_list.Add(tag);
 	}
 	GET_CTL(cloud)->SetState(_T("items"), &tags_list);
-	GET_CTL(cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cloud"), &gc)));
+	GET_CTL(cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cloud"))));
 	// 标签云滚动条
-	REG_CTL(scr_cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
+	REG_CTL(scr_cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"))));
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_cloud)->GetState(_T("up")))->SetWindowRect(CRect());
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_cloud)->GetState(_T("down")))->SetWindowRect(CRect());
 	GET_CTL(scr_cloud)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
@@ -123,7 +123,7 @@ void CGuiLoader::LoadCtl()
 	pixel_t pix[8] = {0};
 	for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
 	GET_CTL(scr_cloud)->SetState(_T("sli_blk_color"), pix);
-	GET_CTL(scr_cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_cloud"), &gc)));
+	GET_CTL(scr_cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_cloud"))));
 	// 关联滚动条
 	GET_CTL(cloud)->SetScroll(GET_CTL(scr_cloud));
 
@@ -149,7 +149,7 @@ void CGuiLoader::LoadCtl()
 	img_foc[7] = GET_IMG(foc_b)->Get();
 	img_foc[8] = GET_IMG(foc_rb)->Get();
 	// 文件列表
-	REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"), &gc)));
+	REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"))));
 	GET_CTL(files)->SetTrust(TRUE);
 	GET_CTL(files)->SetVisible(FALSE);
 	GET_CTL(files)->SetState(_T("align_top"), (void*)FALSE);
@@ -176,9 +176,9 @@ void CGuiLoader::LoadCtl()
 		file_list.Add(file);
 	}
 	GET_CTL(files)->SetState(_T("items"), &file_list);
-	GET_CTL(files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_files"), &gc)));
+	GET_CTL(files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_files"))));
 	// 文件列表滚动条
-	REG_CTL(scr_files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"), &gc)));
+	REG_CTL(scr_files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"))));
 	GET_CTL(scr_files)->SetVisible(FALSE);
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_files)->GetState(_T("up")))->SetWindowRect(CRect());
 	ExDynCast<IGuiCtrl>(GET_CTL(scr_files)->GetState(_T("down")))->SetWindowRect(CRect());
@@ -186,7 +186,7 @@ void CGuiLoader::LoadCtl()
 	GET_CTL(scr_files)->SetState(_T("sli_ori"), (void*)TRUE);
 	GET_CTL(scr_files)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	GET_CTL(scr_files)->SetState(_T("sli_blk_color"), pix);
-	GET_CTL(scr_files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_files"), &gc)));
+	GET_CTL(scr_files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_files"))));
 	// 关联滚动条
 	GET_CTL(files)->SetScroll(GET_CTL(scr_files));
 }
@@ -209,7 +209,7 @@ void CGuiLoader::LoadWnd()
 	GET_WND(main)->GetClientRect(rc_wnd);
 
 	// 事件关联
-	GET_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"), &gc)));
+	GET_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"))));
 }
 
 // 关联对象
@@ -261,7 +261,7 @@ void CGuiLoader::Init()
 		CStringT<char> s;
 		char c = 0;
 		putchar('>');
-		do 
+		do
 		{
 			c = getchar();
 			if (c == '\n') break;

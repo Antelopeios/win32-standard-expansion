@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-15
-// Version:	1.0.0000.1800
+// Date:	2012-01-20
+// Version:	1.0.0001.1712
 //
 // History:
 //	- 1.0.0000.1800(2012-01-15)	@ 开始构建全局new操作符重载
+//	- 1.0.0001.1712(2012-01-20)	+ 添加dbnew及相关内存泄漏自动检测代码
 //////////////////////////////////////////////////////////////////
 
 #ifndef __OverNew_h__
@@ -101,6 +102,87 @@ EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::make
 }
 
 //////////////////////////////////////////////////////////////////
+// debug_new
+//////////////////////////////////////////////////////////////////
+
+#ifdef	EXP_DUMPING_MEMLEAKS
+
+EXP_INLINE void* MakeObj(void* p, LPCSTR sFile, int nLine)
+{
+	EXP::ExMem::alloc_t::GetAlloc().SetAlloc(EXP::_Regist::RealPtr(p), sFile, nLine);
+	return p;
+}
+
+//////////////////////////////////////////////////////////////////
+// malloc
+
+EXP_INLINE void* __cdecl operator new(size_t size, LPCSTR sFile, int nLine)
+{
+	return MakeObj(operator new(size), sFile, nLine);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, LPCSTR, int)
+{
+	operator delete(ptr);
+}
+
+EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker, LPCSTR sFile, int nLine)
+{
+	return MakeObj(operator new(size, gc, maker), sFile, nLine);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t, LPCSTR, int)
+{
+	operator delete(ptr);
+}
+
+//////////////////////////////////////////////////////////////////
+// realloc
+
+EXP_INLINE void* __cdecl operator new(size_t size, void* ptr, LPCSTR sFile, int nLine)
+{
+	return MakeObj(operator new(size, ptr, NULL), sFile, nLine);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, void*, LPCSTR, int)
+{
+	operator delete(ptr);
+}
+
+EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker, void* ptr, LPCSTR sFile, int nLine)
+{
+	return MakeObj(operator new(size, gc, maker, ptr), sFile, nLine);
+}
+
+EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t, void*, LPCSTR, int)
+{
+	operator delete(ptr);
+}
+
+//////////////////////////////////////////////////////////////////
+
+#endif/*EXP_DUMPING_MEMLEAKS*/
+
+//////////////////////////////////////////////////////////////////
+
+#ifdef	EXP_DUMPING_MEMLEAKS
+
+#undef	dbnew
+#define dbnew new(__FILE__, __LINE__)
+
+#undef	gcnew
+#define gcnew(gc, type) new(gc, (&EXP::_Regist::Maker<type>), __FILE__, __LINE__) type
+
+#undef	renew
+#define renew(ptr, type) new(ptr, __FILE__, __LINE__) type
+
+#undef	gcrenew
+#define gcrenew(gc, ptr, type) new(gc, (&EXP::_Regist::Maker<type>), ptr, __FILE__, __LINE__) type
+
+#else /*EXP_DUMPING_MEMLEAKS*/
+
+#undef	dbnew
+#define dbnew new
 
 #undef	gcnew
 #define gcnew(gc, type) new(gc, (&EXP::_Regist::Maker<type>)) type
@@ -110,6 +192,8 @@ EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::make
 
 #undef	gcrenew
 #define gcrenew(gc, ptr, type) new(gc, (&EXP::_Regist::Maker<type>), ptr) type
+
+#endif/*EXP_DUMPING_MEMLEAKS*/
 
 //////////////////////////////////////////////////////////////////
 

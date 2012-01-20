@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-24
-// Version:	1.0.0017.1720
+// Date:	2012-01-20
+// Version:	1.0.0018.1712
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -60,6 +60,8 @@
 //	- 1.0.0015.1454(2011-09-02)	+ 添加IGuiEvent的事件状态接口,当当前事件处理完后,可根据保存的事件状态判断是否继续执行下一个事件对象
 //	- 1.0.0016.1517(2011-09-28)	+ 为IGuiComp::DelComp()接口添加是否自动释放移除的关联对象的参数
 //	- 1.0.0017.1720(2011-10-24)	# 修正因Event在MouseMove时对Ctrl指针的依赖,导致当一个Comp对象移除自身的Ctrl子对象时MouseMove引起的Run-Time异常
+//	- 1.0.0018.1712(2012-01-20)	+ IGuiEvent支持对单独的某一个时间对象设置托管
+//								= IGuiSender与IGuiComp默认托管所有子对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -107,6 +109,7 @@ public:
 	};
 
 protected:
+	BOOL m_bTru;
 	LRESULT m_Result;
 	state_t m_State;
 
@@ -116,13 +119,16 @@ protected:
 
 public:
 	IGuiEvent()
-		: m_Result(0)
+		: m_bTru(TRUE)
+		, m_Result(0)
 		, m_State(continue_next)
 	{}
 	virtual ~IGuiEvent()
 	{}
 
 public:
+	virtual void SetTrust(BOOL bTru = TRUE) { m_bTru = bTru; }
+	virtual BOOL IsTrust() { return m_bTru; }
 	// 额外的存储指针
 	virtual void* Param() { return NULL; }
 	// 事件结果接口
@@ -157,7 +163,7 @@ private:
 
 public:
 	IGuiSender(void)
-		: m_bTru(FALSE)
+		: m_bTru(TRUE)
 		, m_CldrEvt(ExMem::Alloc<evt_list_t>())
 	{}
 	virtual ~IGuiSender(void)
@@ -203,14 +209,14 @@ public:
 		if (ite == GetEvent().Tail()) return;
 		// 删除对象
 		GetEvent().Del(ite);
-		if (m_bTru) pEvent->Free();
+		if (m_bTru && pEvent->IsTrust()) pEvent->Free();
 	}
 	virtual void ClearEvent()
 	{
 		if (m_bTru)
 			for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 			{
-				if (!(*ite)) continue;
+				if (!(*ite) || !(*ite)->IsTrust()) continue;
 				(*ite)->Free();
 			}
 		GetEvent().Clear();
@@ -291,7 +297,7 @@ private:
 
 public:
 	IGuiComp(void)
-		: m_bTru(FALSE)
+		: m_bTru(TRUE)
 		, m_Pare(NULL)
 		, m_Cldr(ExMem::Alloc<list_t>())
 	{}

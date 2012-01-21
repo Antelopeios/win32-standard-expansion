@@ -91,10 +91,10 @@ public:
 	{ return GetPolicy().Alloc(nSize); }
 
 	template <typename TypeT>
-	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount)
-	{ return GetPolicy().ReAlloc<TypeT>(pPtr, nCount); }
-	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
-	{ return GetPolicy().ReAlloc(pPtr, nSize); }
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount, BOOL bFree = TRUE)
+	{ return GetPolicy().ReAlloc<TypeT>(pPtr, nCount, bFree); }
+	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize, BOOL bFree = TRUE)
+	{ return GetPolicy().ReAlloc(pPtr, nSize, bFree); }
 
 	EXP_INLINE static void Free(void* pPtr)
 	{ GetPolicy().Free(pPtr); }

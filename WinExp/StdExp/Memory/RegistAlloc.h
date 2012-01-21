@@ -186,7 +186,7 @@ public:
 		return Alloc<TypeT>(nCount, _TraitsT<TypeT>::is_POD_type());
 	}
 
-	EXP_INLINE void* ReAlloc(void* pPtr, DWORD nSize)
+	EXP_INLINE void* ReAlloc(void* pPtr, DWORD nSize, BOOL bFree = TRUE)
 	{
 		// 检查指针是否为空
 		if (pPtr == NULL)
@@ -194,7 +194,7 @@ public:
 		// 检查大小是否为零
 		if (nSize == 0)
 		{
-			Free(pPtr);
+			if (bFree) Free(pPtr);
 			return NULL;
 		}
 		// 检查指针现有大小
@@ -206,16 +206,16 @@ public:
 		void* ptr_new = Alloc(nSize);
 		memcpy(ptr_new, pPtr, ptr_siz);
 		// 释放旧空间, 返回新空间
-		m_Alloc.Free(RealPtr(pPtr));
+		if (bFree) m_Alloc.Free(RealPtr(pPtr));
 		return ptr_new;
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, _true_type)
+	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, _true_type, BOOL bFree = TRUE)
 	{
-		return (TypeT*)ReAlloc(pPtr, sizeof(TypeT) * nCount);
+		return (TypeT*)ReAlloc(pPtr, sizeof(TypeT) * nCount, bFree);
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, _false_type)
+	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, _false_type, BOOL bFree = TRUE)
 	{
 		// 检查指针是否为空
 		if (pPtr == NULL)
@@ -223,7 +223,7 @@ public:
 		// 检查大小是否为零
 		if (nCount == 0)
 		{
-			Free(pPtr);
+			if (bFree) Free(pPtr);
 			return NULL;
 		}
 		// 检查指针现有对象数量
@@ -257,13 +257,13 @@ public:
 		memcpy(ptr_new, pPtr, sizeof(TypeT) * real->count);
 		_Traits::Construct<TypeT>(((TypeT*)ptr_new) + real->count, nCount - real->count);
 		// 释放旧空间, 返回新空间
-		m_Alloc.Free(RealPtr(pPtr));
+		if (bFree) m_Alloc.Free(RealPtr(pPtr));
 		return (TypeT*)ptr_new;
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount)
+	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, BOOL bFree = TRUE)
 	{
-		return ReAlloc<TypeT>(pPtr, nCount, _TraitsT<TypeT>::is_POD_type());
+		return ReAlloc<TypeT>(pPtr, nCount, _TraitsT<TypeT>::is_POD_type(), bFree);
 	}
 
 	EXP_INLINE void Free(void* pPtr)

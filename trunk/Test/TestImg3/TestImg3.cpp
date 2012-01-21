@@ -172,6 +172,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
+	case WM_SIZE:
+		{
+			CRect rect;
+			GetWindowRect(hWnd, (LPRECT)&rect);
+			InvalidateRect(hWnd, (LPRECT)&rect, FALSE);
+		}
+		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		{
@@ -180,38 +187,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			CImage mem_img;
 			mem_img.Create(rect.Width(), rect.Height());
-			CImage rdr_img;
-			rdr_img.Create(rect.Width(), rect.Height());
 
-			{
-				CImage ctl_img;
-				ctl_img.Create(rect.Width(), rect.Height());
-
-				pixel_t pixel = ExRGBA(128, 128, 128, 128);
-				CImgASM::PixPreMul(&pixel, 1);
-
-				CImgDrawer::Fill(ctl_img, pixel);
-				CImgRenderer::Render(ctl_img, imgShow, CRect(), CPoint(), &CRenderNormal());
-				//{
-				//	CGraph mem_grp;
-				//	mem_grp.Create();
-				//	mem_grp.SetObject(ctl_img.Get());
-				//	CGraph img_grp;
-				//	img_grp.Create();
-				//	img_grp.SetObject(imgShow.Get());
-				//	BLENDFUNCTION bl = {0};
-				//	bl.AlphaFormat = AC_SRC_ALPHA;
-				//	bl.SourceConstantAlpha = 255;
-				//	AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
-				//			   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
-				//	img_grp.Delete();
-				//	mem_grp.Delete();
-				//}
-
-				CImgRenderer::Render(rdr_img, ctl_img, CRect(), CPoint(), &CRenderNormal());
-			}
-
-			CImgRenderer::Render(mem_img, rdr_img, CRect(), CPoint(), &CRenderCopy());
+			CImgDrawer::Fill(mem_img, ExRGBA(128, 128, 128, 128));
+			CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal());
 
 			CGraph mem_grp;
 			mem_grp.Create(hdc);

@@ -97,86 +97,34 @@ public:
 	template <typename TypeT>
 	EXP_INLINE static TypeT* CheckAlloc(DWORD nCount = 1)
 	{
+#ifdef	EXP_MANAGED_ALLPTR
 		TypeT* ptr = alloc_t::Alloc<TypeT>(nCount);
 		EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr);
 		return ptr;
+#else /*EXP_MANAGED_ALLPTR*/
+		return alloc_t::Alloc<TypeT>(nCount);
+#endif/*EXP_MANAGED_ALLPTR*/
 	}
 
-	EXP_INLINE static void* CheckReAlloc(void* pPtr, DWORD nSize)
-	{
-		// 检查指针是否为空
-		if (pPtr == NULL)
-			return CheckAlloc<BYTE>(nSize);
-		// 检查大小是否为零
-		if (nSize == 0)
-			return NULL;
-		// 检查指针现有大小
-		DWORD ptr_siz = alloc_t::Size(pPtr);
-		// 若现有大小可以满足需求, 则直接返回
-		if (ptr_siz >= nSize)
-			return pPtr;
-		// 若现有大小无法满足需求, 则分配新的空间并拷贝原有数据
-		void* ptr_new = CheckAlloc<BYTE>(nSize);
-		memcpy(ptr_new, pPtr, ptr_siz);
-		return ptr_new;
-	}
-	template <typename TypeT>
-	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount, _true_type)
-	{
-		return (TypeT*)CheckReAlloc(pPtr, sizeof(TypeT) * nCount);
-	}
-	template <typename TypeT>
-	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount, _false_type)
-	{
-		// 检查指针是否为空
-		if (pPtr == NULL)
-			return CheckAlloc<TypeT>(nCount);
-		// 检查大小是否为零
-		if (nCount == 0)
-			return NULL;
-		// 检查指针现有对象数量
-		_Regist* real = (_Regist*)_Regist::RealPtr(pPtr);
-		// 若现有数量等于需求数量, 则直接返回
-		if (real->count == nCount)
-			return (TypeT*)pPtr;
-		// 若现有数量大于需求数量, 则销毁多余对象, 并直接返回
-		if (real->count > nCount)
-		{
-			if (real->destruct)
-				real->destruct(((TypeT*)pPtr) + nCount, real->count - nCount);
-			real->count = nCount;
-			return (TypeT*)pPtr;
-		}
-		// 若现有数量小于需求数量, 则检查指针现有大小
-		DWORD ptr_siz = alloc_t::Size(pPtr);
-		DWORD size = sizeof(TypeT) * nCount;
-		// 若现有大小可以满足需求, 则构造新对象, 并直接返回
-		if (ptr_siz >= size)
-		{
-			_Traits::Construct<TypeT>(((TypeT*)pPtr) + real->count, nCount - real->count);
-			real->count = nCount;
-			return (TypeT*)pPtr;
-		}
-		// 若现有大小无法满足需求, 则分配新的空间, 拷贝原有对象数据, 并构造新对象
-		void* ptr_new = alloc_t::Alloc(size);
-		_Regist* real_new = (_Regist*)_Regist::RealPtr(ptr_new);
-		real_new->count = nCount;
-		real_new->destruct = (_Regist::traitor_t)(_Traits::Destruct<TypeT>);
-		memcpy(ptr_new, pPtr, sizeof(TypeT) * real->count);
-		_Traits::Construct<TypeT>(((TypeT*)ptr_new) + real->count, nCount - real->count);
-		// 注册新空间
-		EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr_new);
-		return (TypeT*)ptr_new;
-	}
 	template <typename TypeT>
 	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount)
 	{
-		return CheckReAlloc<TypeT>(pPtr, nCount, _TraitsT<TypeT>::is_POD_type());
+#ifdef	EXP_MANAGED_ALLPTR
+		TypeT* ptr_new = alloc_t::ReAlloc<TypeT>(pPtr, nCount, FALSE);
+		if (ptr_new != pPtr) EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr_new);
+		return ptr_new;
+#else /*EXP_MANAGED_ALLPTR*/
+		return alloc_t::ReAlloc<TypeT>(pPtr, nCount, FALSE);
+#endif/*EXP_MANAGED_ALLPTR*/
 	}
 
 	EXP_INLINE static void CheckFree(void* pPtr)
 	{
+#ifdef	EXP_MANAGED_ALLPTR
 		EXP_PTR_MANAGER.Del(pPtr);
+#else /*EXP_MANAGED_ALLPTR*/
+		alloc_t::Free(pPtr);
+#endif/*EXP_MANAGED_ALLPTR*/
 	}
 
 public:
@@ -304,7 +252,6 @@ public:
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return alloc_t::Size(pPtr); }
 
-#ifdef	EXP_MANAGED_ALLPTR
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
 	{ return gc_alloc_t::CheckAlloc<TypeT>(nCount); }
@@ -323,22 +270,6 @@ public:
 
 	EXP_INLINE static void Free(void* pPtr)
 	{ gc_alloc_t::CheckFree(pPtr); }
-#else /*EXP_MANAGED_ALLPTR*/
-	template <typename TypeT>
-	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
-	{ return alloc_t::Alloc<TypeT>(nCount); }
-	EXP_INLINE static void* Alloc(DWORD nSize)
-	{ return alloc_t::Alloc(nSize); }
-
-	template <typename TypeT>
-	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount)
-	{ return alloc_t::ReAlloc<TypeT>(pPtr, nCount); }
-	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
-	{ return alloc_t::ReAlloc(pPtr, nSize); }
-
-	EXP_INLINE static void Free(void* pPtr)
-	{ alloc_t::Free(pPtr); }
-#endif/*EXP_MANAGED_ALLPTR*/
 
 	// gc_alloc_t
 	EXP_INLINE static BOOL Valid(gc_alloc_t* alloc, void* pPtr)

@@ -111,7 +111,7 @@ private:
 	key_map_t dc_funcs;
 
 private:
-	CTypeInfoFactory() : dc_funcs(1021) {}
+	CTypeInfoFactory() : dc_funcs(1009) {}
 
 public:
 	// 向工厂注册一个类名

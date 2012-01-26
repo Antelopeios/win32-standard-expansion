@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{496C4806-8F01-4F35-9F94-BCB9106B8837}</ProjectGuid>
+    <RootNamespace>ImgExp</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)!)Build\Bin\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)!)Build\Temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)!)Build\Bin\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)!)Build\Temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\GuiExp;..\ImgExp;..\StdExp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\GuiExp;..\ImgExp;..\StdExp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ImgCoder\BmpCoder.h" />
+    <ClInclude Include="ImgCoder\CoderObject.h" />
+    <ClInclude Include="ImgCoder\IcoCoder.h" />
+    <ClInclude Include="ImgCoder\ImgAnalyzer.h" />
+    <ClInclude Include="ImgCoder\ImgCoder.h" />
+    <ClInclude Include="ImgCoder\JpgCoder.h" />
+    <ClInclude Include="ImgCoder\PngCoder.h" />
+    <ClInclude Include="ImgCoder\jpeg\jchuff.h" />
+    <ClInclude Include="ImgCoder\jpeg\jconfig.h" />
+    <ClInclude Include="ImgCoder\jpeg\jdct.h" />
+    <ClInclude Include="ImgCoder\jpeg\jdhuff.h" />
+    <ClInclude Include="ImgCoder\jpeg\jerror.h" />
+    <ClInclude Include="ImgCoder\jpeg\jinclude.h" />
+    <ClInclude Include="ImgCoder\jpeg\jmemsys.h" />
+    <ClInclude Include="ImgCoder\jpeg\jmorecfg.h" />
+    <ClInclude Include="ImgCoder\jpeg\jpegint.h" />
+    <ClInclude Include="ImgCoder\jpeg\jpeglib.h" />
+    <ClInclude Include="ImgCoder\jpeg\jversion.h" />
+    <ClInclude Include="ImgCoder\png\png.h" />
+    <ClInclude Include="ImgCoder\png\pngconf.h" />
+    <ClInclude Include="ImgCoder\zlib\crc32.h" />
+    <ClInclude Include="ImgCoder\zlib\deflate.h" />
+    <ClInclude Include="ImgCoder\zlib\inffast.h" />
+    <ClInclude Include="ImgCoder\zlib\inffixed.h" />
+    <ClInclude Include="ImgCoder\zlib\inflate.h" />
+    <ClInclude Include="ImgCoder\zlib\inftrees.h" />
+    <ClInclude Include="ImgCoder\zlib\trees.h" />
+    <ClInclude Include="ImgCoder\zlib\zconf.h" />
+    <ClInclude Include="ImgCoder\zlib\zconf.in.h" />
+    <ClInclude Include="ImgCoder\zlib\zlib.h" />
+    <ClInclude Include="ImgCoder\zlib\zutil.h" />
+    <ClInclude Include="ImgCommon\ImgASM.hpp" />
+    <ClInclude Include="ImgCommon\ImgCommon.h" />
+    <ClInclude Include="ImgTypes\Font.h" />
+    <ClInclude Include="ImgTypes\Graph.h" />
+    <ClInclude Include="ImgTypes\Image.h" />
+    <ClInclude Include="ImgTypes\ImgTypes.h" />
+    <ClInclude Include="ImgTypes\Text.h" />
+    <ClInclude Include="ImgTypes\TypeObject.h" />
+    <ClInclude Include="ImgTypes\Types\Line.h" />
+    <ClInclude Include="ImgTypes\Types\Point.h" />
+    <ClInclude Include="ImgTypes\Types\Rect.h" />
+    <ClInclude Include="ImgTypes\Types\Size.h" />
+    <ClInclude Include="ImgTypes\Types\Types.h" />
+    <ClInclude Include="ImgPainter\ImgDeformer.h" />
+    <ClInclude Include="ImgPainter\ImgDrawer.h" />
+    <ClInclude Include="ImgPainter\ImgFilter.h" />
+    <ClInclude Include="ImgPainter\ImgPainter.h" />
+    <ClInclude Include="ImgPainter\ImgRenderer.h" />
+    <ClInclude Include="ImgExp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ImgCoder\jpeg\jcapimin.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcapistd.c" />
+    <ClCompile Include="ImgCoder\jpeg\jccoefct.c" />
+    <ClCompile Include="ImgCoder\jpeg\jccolor.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcdctmgr.c" />
+    <ClCompile Include="ImgCoder\jpeg\jchuff.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcinit.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcmainct.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcmarker.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcmaster.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcomapi.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcparam.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcphuff.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcprepct.c" />
+    <ClCompile Include="ImgCoder\jpeg\jcsample.c" />
+    <ClCompile Include="ImgCoder\jpeg\jctrans.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdapimin.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdapistd.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdatadst.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdatasrc.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdcoefct.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdcolor.c" />
+    <ClCompile Include="ImgCoder\jpeg\jddctmgr.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdhuff.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdinput.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdmainct.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdmarker.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdmaster.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdmerge.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdphuff.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdpostct.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdsample.c" />
+    <ClCompile Include="ImgCoder\jpeg\jdtrans.c" />
+    <ClCompile Include="ImgCoder\jpeg\jerror.c" />
+    <ClCompile Include="ImgCoder\jpeg\jfdctflt.c" />
+    <ClCompile Include="ImgCoder\jpeg\jfdctfst.c" />
+    <ClCompile Include="ImgCoder\jpeg\jfdctint.c" />
+    <ClCompile Include="ImgCoder\jpeg\jidctflt.c" />
+    <ClCompile Include="ImgCoder\jpeg\jidctfst.c" />
+    <ClCompile Include="ImgCoder\jpeg\jidctint.c" />
+    <ClCompile Include="ImgCoder\jpeg\jidctred.c" />
+    <ClCompile Include="ImgCoder\jpeg\jmemmgr.c" />
+    <ClCompile Include="ImgCoder\jpeg\jmemnobs.c" />
+    <ClCompile Include="ImgCoder\jpeg\jquant1.c" />
+    <ClCompile Include="ImgCoder\jpeg\jquant2.c" />
+    <ClCompile Include="ImgCoder\jpeg\jutils.c" />
+    <ClCompile Include="ImgCoder\png\png.c" />
+    <ClCompile Include="ImgCoder\png\pngerror.c" />
+    <ClCompile Include="ImgCoder\png\pnggccrd.c" />
+    <ClCompile Include="ImgCoder\png\pngget.c" />
+    <ClCompile Include="ImgCoder\png\pngmem.c" />
+    <ClCompile Include="ImgCoder\png\pngpread.c" />
+    <ClCompile Include="ImgCoder\png\pngread.c" />
+    <ClCompile Include="ImgCoder\png\pngrio.c" />
+    <ClCompile Include="ImgCoder\png\pngrtran.c" />
+    <ClCompile Include="ImgCoder\png\pngrutil.c" />
+    <ClCompile Include="ImgCoder\png\pngset.c" />
+    <ClCompile Include="ImgCoder\png\pngtrans.c" />
+    <ClCompile Include="ImgCoder\png\pngvcrd.c" />
+    <ClCompile Include="ImgCoder\png\pngwio.c" />
+    <ClCompile Include="ImgCoder\png\pngwrite.c" />
+    <ClCompile Include="ImgCoder\png\pngwtran.c" />
+    <ClCompile Include="ImgCoder\png\pngwutil.c" />
+    <ClCompile Include="ImgCoder\zlib\adler32.c" />
+    <ClCompile Include="ImgCoder\zlib\compress.c" />
+    <ClCompile Include="ImgCoder\zlib\crc32.c" />
+    <ClCompile Include="ImgCoder\zlib\deflate.c" />
+    <ClCompile Include="ImgCoder\zlib\gzio.c" />
+    <ClCompile Include="ImgCoder\zlib\infback.c" />
+    <ClCompile Include="ImgCoder\zlib\inffast.c" />
+    <ClCompile Include="ImgCoder\zlib\inflate.c" />
+    <ClCompile Include="ImgCoder\zlib\inftrees.c" />
+    <ClCompile Include="ImgCoder\zlib\trees.c" />
+    <ClCompile Include="ImgCoder\zlib\uncompr.c" />
+    <ClCompile Include="ImgCoder\zlib\zutil.c" />
+    <ClCompile Include="ImgCommon\ImgCommon.cpp" />
+    <ClCompile Include="ImgTypes\Image.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StdExp\StdExp.vcxproj">
+      <Project>{60ae5eaa-3717-42dc-bcf7-fc3d2f5cb6ec}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

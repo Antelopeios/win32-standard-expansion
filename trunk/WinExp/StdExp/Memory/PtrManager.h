@@ -134,7 +134,7 @@ public:
 	typedef ModelT model_t;
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
-	typedef CMapT<void*, IReferPtr*, _MapPolicyT<CHash, alloc_t> > ptr_map_t;
+	typedef CMapT<void*, IReferPtr*, _MapPolicyT<1009, CHash, alloc_t> > ptr_map_t;
 
 protected:
 	mutex_t		m_Mutex;
@@ -143,8 +143,7 @@ protected:
 
 public:
 	CPtrManagerT()
-		: m_ReferPtrs(1021)
-		, m_IsDest(FALSE)
+		: m_IsDest(FALSE)
 	{}
 	~CPtrManagerT()
 	{

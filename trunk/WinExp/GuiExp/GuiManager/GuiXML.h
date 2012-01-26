@@ -50,8 +50,8 @@
 //	- 1.0.0007.1617(2012-01-08)	# 修正若干CGuiXML内部编码转换的错误
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiXML_hpp__
-#define __GuiXML_hpp__
+#ifndef __GuiXML_h__
+#define __GuiXML_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -688,4 +688,4 @@ public:
 
 EXP_END
 
-#endif/*__GuiXML_hpp__*/
+#endif/*__GuiXML_h__*/

@@ -230,21 +230,15 @@ public:
 
 	iterator_t Head() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = 0;
-		return ite;
+		return node_t(this, 0);
 	}
 	iterator_t Tail() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_nCont;
-		return ite;
+		return node_t(this, m_nCont);
 	}
 	iterator_t Last() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_nCont - 1;
-		return ite;
+		return node_t(this, m_nCont - 1);
 	}
 	type_t& HeadItem() const
 	{ return GetAt(0); }
@@ -333,13 +327,13 @@ struct _ArrayPolicyT
 		container_t* pCont;
 		DWORD	nIndx;
 
-		node_t(container_t* p = NULL)
+		node_t(container_t* p = NULL, DWORD b = 0)
 			: pCont(p)
-			, nIndx(0)
+			, nIndx(b)
 		{}
-		node_t(const container_t* p)
+		node_t(const container_t* p, DWORD b = 0)
 			: pCont((container_t*)p)
-			, nIndx(0)
+			, nIndx(b)
 		{}
 
 		type_t& Val() { return pCont->GetAt(nIndx); }

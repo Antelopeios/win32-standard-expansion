@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-20
-// Version:	1.3.0027.1712
+// Date:	2012-01-27
+// Version:	1.3.0028.0218
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -51,6 +51,7 @@
 //	- 1.3.0026.1445(2012-01-16) + 支持通过EXP_UNDUMPED_NAMESPACE在Debug模式下关闭内存泄漏检测
 //	- 1.3.0027.1712(2012-01-20) + 完善内存泄漏检测及其输出
 //								# 修正CMemPoolT::Size()返回大小有误的问题
+//	- 1.3.0028.0218(2012-01-27) ^ 预先保存CMemPoolT中每个ObjPool的粒度大小,在需要时直接获取
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -254,6 +255,7 @@ protected:
 	mutex_t		m_Mutex;
 
 	IObjPool*	m_PoolList[17];
+	DWORD		m_PoolSize[17];
 	blk_list_t	m_UsedList;
 
 public:
@@ -262,46 +264,63 @@ public:
 		: m_nTime(0)
 #endif/*EXP_DUMPING_MEMLEAKS*/
 	{
-		int i = 0;
-		m_PoolList[i]	= (IObjPool*)_Traits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_01_t>(m_Alloc.Alloc(sizeof(pool_01_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_02_t>(m_Alloc.Alloc(sizeof(pool_02_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_03_t>(m_Alloc.Alloc(sizeof(pool_03_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_04_t>(m_Alloc.Alloc(sizeof(pool_04_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_05_t>(m_Alloc.Alloc(sizeof(pool_05_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_06_t>(m_Alloc.Alloc(sizeof(pool_06_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_07_t>(m_Alloc.Alloc(sizeof(pool_07_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_08_t>(m_Alloc.Alloc(sizeof(pool_08_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_09_t>(m_Alloc.Alloc(sizeof(pool_09_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_10_t>(m_Alloc.Alloc(sizeof(pool_10_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_11_t>(m_Alloc.Alloc(sizeof(pool_11_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_12_t>(m_Alloc.Alloc(sizeof(pool_12_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_13_t>(m_Alloc.Alloc(sizeof(pool_13_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_14_t>(m_Alloc.Alloc(sizeof(pool_14_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_15_t>(m_Alloc.Alloc(sizeof(pool_15_t)));
-		m_PoolList[++i]	= (IObjPool*)_Traits::Construct<pool_16_t>(m_Alloc.Alloc(sizeof(pool_16_t)));
+		IObjPool** pool = m_PoolList; DWORD* size = m_PoolSize;
+		*pool = (IObjPool*)_Traits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_01_t>(m_Alloc.Alloc(sizeof(pool_01_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_02_t>(m_Alloc.Alloc(sizeof(pool_02_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_03_t>(m_Alloc.Alloc(sizeof(pool_03_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_04_t>(m_Alloc.Alloc(sizeof(pool_04_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_05_t>(m_Alloc.Alloc(sizeof(pool_05_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_06_t>(m_Alloc.Alloc(sizeof(pool_06_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_07_t>(m_Alloc.Alloc(sizeof(pool_07_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_08_t>(m_Alloc.Alloc(sizeof(pool_08_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_09_t>(m_Alloc.Alloc(sizeof(pool_09_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_10_t>(m_Alloc.Alloc(sizeof(pool_10_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_11_t>(m_Alloc.Alloc(sizeof(pool_11_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_12_t>(m_Alloc.Alloc(sizeof(pool_12_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_13_t>(m_Alloc.Alloc(sizeof(pool_13_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_14_t>(m_Alloc.Alloc(sizeof(pool_14_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_15_t>(m_Alloc.Alloc(sizeof(pool_15_t)));
+		*(size++) = (*(pool++))->GetObjSize();
+		*pool = (IObjPool*)_Traits::Construct<pool_16_t>(m_Alloc.Alloc(sizeof(pool_16_t)));
+		*(size++) = (*(pool++))->GetObjSize();
 	}
 	~CMemPoolT()
 	{
 		Clear(PolicyT::DUMP_MEM_LEAKS);
-		int i = 0;
-		m_Alloc.Free(_Traits::Destruct<pool_00_t>(m_PoolList[i]));
-		m_Alloc.Free(_Traits::Destruct<pool_01_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_02_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_03_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_04_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_05_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_06_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_07_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_08_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_09_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_10_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_11_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_12_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_13_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_14_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_15_t>(m_PoolList[++i]));
-		m_Alloc.Free(_Traits::Destruct<pool_16_t>(m_PoolList[++i]));
+		IObjPool** pool = m_PoolList;
+		m_Alloc.Free(_Traits::Destruct<pool_00_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_01_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_02_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_03_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_04_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_05_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_06_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_07_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_08_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_09_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_10_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_11_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_12_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_13_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_14_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_15_t>(*(pool++)));
+		m_Alloc.Free(_Traits::Destruct<pool_16_t>(*(pool++)));
 	}
 
 public:
@@ -337,7 +356,7 @@ public:
 		while (left <= right)
 		{
 			mid = (left + right) / 2;
-			DWORD size = m_PoolList[mid]->GetObjSize();
+			DWORD size = m_PoolSize[mid];
 			if (size == nSize)
 				break;
 			else
@@ -348,13 +367,13 @@ public:
 					mid = 0;
 					break;
 				} else
-				if (m_PoolList[++mid]->GetObjSize() >= nSize)
+				if (m_PoolSize[++mid] >= nSize)
 					break;
 				else
 					left = mid;
 			} else
 			{
-				size = m_PoolList[--mid]->GetObjSize();
+				size = m_PoolSize[--mid];
 				if (size == nSize)
 					break;
 				else

@@ -1,0 +1,412 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ImgCoder">
+      <UniqueIdentifier>{be6555ec-fb94-40b6-8292-0f8e739379bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgCoder\jpeg">
+      <UniqueIdentifier>{7bf090bc-248d-446d-b3ae-9d5867c065cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgCoder\png">
+      <UniqueIdentifier>{9f251f5d-a810-4992-866b-be1bf555418d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgCoder\zlib">
+      <UniqueIdentifier>{fca6f095-6532-419e-8ba2-39694e3a81c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgCommon">
+      <UniqueIdentifier>{4063deda-2823-4c5a-ae53-e1544c651fac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgTypes">
+      <UniqueIdentifier>{62baaed1-a3c5-4063-9ae4-5d86ac639eb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgTypes\Types">
+      <UniqueIdentifier>{3390e849-c239-4d12-94ca-38448d621782}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImgPainter">
+      <UniqueIdentifier>{8cb936ed-5c9b-43a4-9cc5-e205b449f03a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ImgCoder\BmpCoder.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\CoderObject.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\IcoCoder.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\ImgAnalyzer.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\ImgCoder.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\JpgCoder.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\PngCoder.h">
+      <Filter>ImgCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jchuff.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jconfig.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jdct.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jdhuff.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jerror.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jinclude.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jmemsys.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jmorecfg.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jpegint.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jpeglib.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\jpeg\jversion.h">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\png\png.h">
+      <Filter>ImgCoder\png</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\png\pngconf.h">
+      <Filter>ImgCoder\png</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\crc32.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\deflate.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\inffast.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\inffixed.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\inflate.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\inftrees.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\trees.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\zconf.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\zconf.in.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\zlib.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCoder\zlib\zutil.h">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCommon\ImgASM.hpp">
+      <Filter>ImgCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgCommon\ImgCommon.h">
+      <Filter>ImgCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Font.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Graph.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Image.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\ImgTypes.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Text.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\TypeObject.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Types\Line.h">
+      <Filter>ImgTypes\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Types\Point.h">
+      <Filter>ImgTypes\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Types\Rect.h">
+      <Filter>ImgTypes\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Types\Size.h">
+      <Filter>ImgTypes\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgTypes\Types\Types.h">
+      <Filter>ImgTypes\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgPainter\ImgDeformer.h">
+      <Filter>ImgPainter</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgPainter\ImgDrawer.h">
+      <Filter>ImgPainter</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgPainter\ImgFilter.h">
+      <Filter>ImgPainter</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgPainter\ImgPainter.h">
+      <Filter>ImgPainter</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgPainter\ImgRenderer.h">
+      <Filter>ImgPainter</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgExp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ImgCoder\jpeg\jcapimin.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcapistd.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jccoefct.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jccolor.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcdctmgr.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jchuff.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcinit.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcmainct.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcmarker.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcmaster.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcomapi.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcparam.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcphuff.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcprepct.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jcsample.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jctrans.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdapimin.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdapistd.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdatadst.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdatasrc.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdcoefct.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdcolor.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jddctmgr.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdhuff.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdinput.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdmainct.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdmarker.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdmaster.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdmerge.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdphuff.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdpostct.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdsample.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jdtrans.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jerror.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jfdctflt.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jfdctfst.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jfdctint.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jidctflt.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jidctfst.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jidctint.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jidctred.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jmemmgr.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jmemnobs.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jquant1.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jquant2.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\jpeg\jutils.c">
+      <Filter>ImgCoder\jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\png.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngerror.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pnggccrd.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngget.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngmem.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngpread.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngread.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngrio.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngrtran.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngrutil.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngset.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngtrans.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngvcrd.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngwio.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngwrite.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngwtran.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\png\pngwutil.c">
+      <Filter>ImgCoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\adler32.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\compress.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\crc32.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\deflate.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\gzio.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\infback.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\inffast.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\inflate.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\inftrees.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\trees.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\uncompr.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCoder\zlib\zutil.c">
+      <Filter>ImgCoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgCommon\ImgCommon.cpp">
+      <Filter>ImgCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgTypes\Image.cpp">
+      <Filter>ImgTypes</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

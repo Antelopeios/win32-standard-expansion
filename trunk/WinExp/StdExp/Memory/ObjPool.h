@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-16
-// Version:	1.0.0018.1915
+// Date:	2012-01-27
+// Version:	1.0.0019.0218
 //
 // History:
 //	- 1.0.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
@@ -44,6 +44,7 @@
 //	- 1.0.0016.1640(2011-06-14)	# 修正因IObjPool由于某些原因(如单例)被提前析构,从而导致IPoolTypeT::Free()的R6025错误
 //	- 1.0.0017.1715(2011-10-11)	+ 添加CBlockPoolT,支持按照动态大小创建粒度对象
 //	- 1.0.0018.1915(2012-01-16)	# 修正CObjPoolT在析构时自动调用的是CBlockPoolT::Clear(),从而导致的内存释放错误
+//	- 1.0.0019.0218(2012-01-27)	^ _ObjPoolPolicyT::MAX_SIZE调整至内存极限大小,默认不限制CObjPoolT的存储数量上限
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -93,7 +94,7 @@ struct _ObjPoolPolicyT
 	typedef CLockT<mutex_policy_t> mutex_t;
 
 	static const DWORD DEF_SIZE = 10;
-	static const DWORD MAX_SIZE = 1000;
+	static const DWORD MAX_SIZE = (DWORD)~0;
 };
 
 //////////////////////////////////////////////////////////////////

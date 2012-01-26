@@ -236,21 +236,15 @@ public:
 
 	iterator_t Head() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_pTree;
-		return ite;
+		return node_t(this, m_pTree);
 	}
 	iterator_t Tail() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = NULL;
-		return ite;
+		return node_t(this, NULL);
 	}
 	iterator_t Last() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_pTree->GetChdrLast();
-		return ite;
+		return node_t(this, m_pTree->GetChdrLast());
 	}
 	type_t HeadItem() const
 	{ return m_pTree->Val; }
@@ -385,13 +379,13 @@ struct _TreePolicyT
 		container_t* pCont;
 		item_t* nIndx;
 
-		node_t(container_t* p = NULL)
+		node_t(container_t* p = NULL, item_t* b = NULL)
 			: pCont(p)
-			, nIndx(NULL)
+			, nIndx(b)
 		{}
-		node_t(const container_t* p)
+		node_t(const container_t* p, item_t* b = NULL)
 			: pCont((container_t*)p)
-			, nIndx(NULL)
+			, nIndx(b)
 		{}
 
 		type_t& Val() { return nIndx->Val; }

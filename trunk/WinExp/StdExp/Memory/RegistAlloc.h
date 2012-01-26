@@ -79,7 +79,7 @@ struct _Regist
 	}
 
 	template <typename TypeT>
-	static void* Maker(void* pPtr, DWORD size, _false_type)
+	EXP_INLINE static void* Maker(void* pPtr, DWORD size, _false_type)
 	{
 		DWORD count = size / sizeof(TypeT);
 		_Regist* reg = (_Regist*)RealPtr(pPtr);
@@ -88,12 +88,12 @@ struct _Regist
 		return pPtr;
 	}
 	template <typename TypeT>
-	static void* Maker(void* pPtr, DWORD size, _true_type)
+	EXP_INLINE static void* Maker(void* pPtr, DWORD size, _true_type)
 	{
 		return pPtr;
 	}
 	template <typename TypeT>
-	static void* Maker(void* pPtr, DWORD size)
+	EXP_INLINE static void* Maker(void* pPtr, DWORD size = sizeof(TypeT))
 	{
 		return Maker<TypeT>(pPtr, size, _TraitsT<TypeT>::is_POD_type());
 	}

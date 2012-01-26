@@ -313,7 +313,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GuiManager\GuiXML.hpp"
+				RelativePath=".\GuiManager\GuiXML.h"
 				>
 			</File>
 		</Filter>

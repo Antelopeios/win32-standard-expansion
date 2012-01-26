@@ -495,21 +495,15 @@ public:
 
 	iterator_t Head() const
 	{
-		iterator_t ite(node_t((CStringT*)this));
-		ite->nIndx = 0;
-		return ite;
+		return node_t((CStringT*)this, 0);
 	}
 	iterator_t Tail() const
 	{
-		iterator_t ite(node_t((CStringT*)this));
-		ite->nIndx = GetLength();
-		return ite;
+		return node_t((CStringT*)this, GetLength());
 	}
 	iterator_t Last()
 	{
-		iterator_t ite(node_t((CStringT*)this));
-		ite->nIndx = GetLength() - 1;
-		return ite;
+		return node_t((CStringT*)this, GetLength() - 1);
 	}
 	type_t& HeadItem() const
 	{ return m_Array[0]; }

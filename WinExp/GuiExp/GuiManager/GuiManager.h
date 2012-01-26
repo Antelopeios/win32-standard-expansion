@@ -53,7 +53,7 @@
 
 //////////////////////////////////////////////////////////////////
 
-#include "GuiManager/GuiXML.hpp"
+#include "GuiManager/GuiXML.h"
 
 EXP_BEG
 

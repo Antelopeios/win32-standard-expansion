@@ -171,21 +171,15 @@ public:
 
 	iterator_t Head() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_pHead;
-		return ite;
+		return node_t(this, m_pHead);
 	}
 	iterator_t Tail() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = NULL;
-		return ite;
+		return node_t(this, NULL);
 	}
 	iterator_t Last() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_pLast;
-		return ite;
+		return node_t(this, m_pLast);
 	}
 	type_t& HeadItem() const
 	{ return m_pHead->Buff; }
@@ -350,13 +344,13 @@ struct _ListPolicyT
 		container_t* pCont;
 		block_t* nIndx;
 
-		node_t(container_t* p = NULL)
+		node_t(container_t* p = NULL, block_t* b = NULL)
 			: pCont(p)
-			, nIndx(NULL)
+			, nIndx(b)
 		{}
-		node_t(const container_t* p)
+		node_t(const container_t* p, block_t* b = NULL)
 			: pCont((container_t*)p)
-			, nIndx(NULL)
+			, nIndx(b)
 		{}
 
 		type_t& Val() { return nIndx->Buff; }

@@ -6,5 +6,6 @@
 #pragma once
 
 #include "GuiExp.h"
+#pragma comment(lib, "StdExp.lib")
 #pragma comment(lib, "ImgExp.lib")
 #pragma comment(lib, "GuiExp.lib")

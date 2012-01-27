@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-01-27
-// Version:	1.0.0019.0218
+// Version:	1.0.0019.1725
 //
 // History:
 //	- 1.0.0012.1202(2011-03-02)	# 修正CObjPoolT::Valid()与CObjPoolT::Size()的内部指针传递错误
@@ -44,7 +44,8 @@
 //	- 1.0.0016.1640(2011-06-14)	# 修正因IObjPool由于某些原因(如单例)被提前析构,从而导致IPoolTypeT::Free()的R6025错误
 //	- 1.0.0017.1715(2011-10-11)	+ 添加CBlockPoolT,支持按照动态大小创建粒度对象
 //	- 1.0.0018.1915(2012-01-16)	# 修正CObjPoolT在析构时自动调用的是CBlockPoolT::Clear(),从而导致的内存释放错误
-//	- 1.0.0019.0218(2012-01-27)	^ _ObjPoolPolicyT::MAX_SIZE调整至内存极限大小,默认不限制CObjPoolT的存储数量上限
+//	- 1.0.0019.1725(2012-01-27)	^ _ObjPoolPolicyT::MAX_SIZE调整至内存极限大小,默认不限制CObjPoolT的存储数量上限
+//								+ _ObjPoolPolicyT支持通过模板参数调整默认粒度对象大小
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ObjPool_h__
@@ -85,7 +86,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMHEAP_ALLOC, typename ModelT = EXP_THREAD_MODEL>
+template <DWORD ObjSizeT = 0, typename AllocT = EXP_MEMHEAP_ALLOC, typename ModelT = EXP_THREAD_MODEL>
 struct _ObjPoolPolicyT
 {
 	typedef AllocT alloc_t;
@@ -93,6 +94,7 @@ struct _ObjPoolPolicyT
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
+	static const DWORD OBJ_SIZE = ObjSizeT;
 	static const DWORD DEF_SIZE = 10;
 	static const DWORD MAX_SIZE = (DWORD)~0;
 };
@@ -108,21 +110,12 @@ public:
 	typedef typename PolicyT::model_t model_t;
 
 protected:
+#pragma pack(1)
 	struct block_t
 	{
 		block_t* pNext;	// 下一个结点
-		BOOL	 bFree;	// 是否已清理
-
-		block_t()
-			: pNext(NULL)
-			, bFree(FALSE)
-		{}
-		~block_t()
-		{
-			bFree = TRUE;
-			pNext = NULL;
-		}
 	};
+#pragma pack()
 
 	alloc_t		m_Alloc;
 	mutex_t		m_Mutex;
@@ -133,7 +126,7 @@ protected:
 	DWORD		m_nObjSize;	// 粒度大小
 
 public:
-	CBlockPoolT(DWORD nObjSize, DWORD nSize = PolicyT::DEF_SIZE)
+	CBlockPoolT(DWORD nObjSize = PolicyT::OBJ_SIZE, DWORD nSize = PolicyT::DEF_SIZE)
 		: m_FreeList(NULL)
 		, m_nFreSize(0)
 		, m_nMaxSize(PolicyT::MAX_SIZE)
@@ -165,7 +158,6 @@ public:
 		for(DWORD i = 0; i < diff_size; ++i)
 		{
 			block_t* block = (block_t*)m_Alloc.Alloc(sizeof(block_t) + m_nObjSize);
-			block->block_t::block_t();
 			block->pNext = m_FreeList;
 			m_FreeList = block;
 			++m_nFreSize;
@@ -219,8 +211,8 @@ public:
 		} else // 分配任意大小内存块
 			block = (block_t*)m_Alloc.Alloc(sizeof(block_t) + nSize);
 		ExAssert(block);
-		// 构造=>返回内存
-		return (void*)(_Traits::Construct<block_t>(block) + 1);
+		// 返回内存
+		return (void*)(block + 1);
 	}
 	void* Alloc() { return Alloc(m_nObjSize); }
 	// 回收内存
@@ -229,10 +221,7 @@ public:
 		if (!pPtr) return;
 		ExLock(m_Mutex, FALSE, mutex_t);
 		block_t* block = (block_t*)((BYTE*)pPtr - sizeof(block_t));
-		ExAssert(!block->bFree);
-		if (block->bFree) return;
-		// 析构=>归还/释放内存
-		_Traits::Destruct<block_t>(block);
+		// 归还/释放内存
 		if (m_nFreSize < m_nMaxSize)
 		{
 			block->pNext = m_FreeList;
@@ -249,9 +238,7 @@ public:
 		{
 			block_t* block = m_FreeList;
 			m_FreeList = block->pNext;
-			// 析构=>释放内存
-			if(!block->bFree)
-				_Traits::Destruct<block_t>(block);
+			// 释放内存
 			m_Alloc.Free(block);
 		}
 		m_FreeList = NULL;
@@ -263,7 +250,7 @@ typedef CBlockPoolT<> CBlockPool;
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT, typename PolicyT = _ObjPoolPolicyT<> >
+template <typename TypeT, typename PolicyT = _ObjPoolPolicyT<sizeof(TypeT)> >
 class CObjPoolT : CBlockPoolT<PolicyT>
 {
 public:
@@ -299,11 +286,7 @@ public:
 			block_t* block = m_FreeList;
 			m_FreeList = block->pNext;
 			// 析构=>释放内存
-			if(!block->bFree)
-			{
-				_Traits::Destruct<TypeT>(block + 1);
-				_Traits::Destruct<block_t>(block);
-			}
+			_Traits::Destruct<TypeT>(block + 1);
 			m_Alloc.Free(block);
 		}
 		m_FreeList = NULL;
@@ -317,7 +300,7 @@ template <typename TypeT, typename AllocT, typename ModelT = EXP_THREAD_MODEL>
 interface IPoolTypeT
 {
 public:
-	typedef CObjPoolT<TypeT, _ObjPoolPolicyT<AllocT, ModelT> > alloc_t;
+	typedef CObjPoolT<TypeT, _ObjPoolPolicyT<sizeof(TypeT), AllocT, ModelT> > alloc_t;
 
 	static alloc_t& GetAlloc()
 	{ return ExSingleton<alloc_t>(); }

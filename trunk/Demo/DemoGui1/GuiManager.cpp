@@ -63,7 +63,7 @@ protected:
 
 		CString path;
 		::GetCurrentDirectory(MAX_PATH, path.GetCStr(MAX_PATH));
-		path += _T("\\ui");
+		path += _T("\\DemoGui1\\ui");
 
 		file.Open(path + _T("\\banner.png"));
 		REG_IMG(banner, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode());

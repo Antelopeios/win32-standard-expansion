@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Main">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{06b75aa1-dcf9-4331-a8b5-41b8786e927f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI">
+      <UniqueIdentifier>{3cf2745c-36fe-4fff-bad8-7a3536233ee2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{f63c4d3d-a9f3-4f69-bf16-12e359d28e46}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DemoGui2\Main\Global.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGui2\Main\Tagger.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGui2\Events\GuiEvents.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGui2\GUI\GuiLoader.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGui2\Data\Data.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGui2\stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DemoGui2\Main\Global.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGui2\Main\Tagger.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGui2\Resource\resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGui2\GUI\GuiLoader.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGui2\GUI\GuiManager.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGui2\Data\Data.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGui2\stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DemoGui2\Resource\file_b.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_b.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_c.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_c.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_l.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_l.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_lb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_lb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_lt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_lt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_r.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_r.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_rb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_rb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_rt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_rt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\file_t.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\file_t.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_b.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_b.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_l.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_l.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_lb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_lb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_lt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_lt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_r.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_r.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_rb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_rb.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_rt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_rt.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\foc_t.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\foc_t.png">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\ReadMe.txt">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\small.ico">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="DemoGui2\Resource\Tagger.ico">
+      <Filter>Resource</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DemoGui2\Resource\Tagger.rc">
+      <Filter>Resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

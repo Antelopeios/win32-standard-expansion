@@ -6,3 +6,4 @@
 #pragma once
 
 #include "StdExp.h"
+#pragma comment(lib, "StdExp.lib")

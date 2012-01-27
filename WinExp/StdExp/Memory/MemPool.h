@@ -502,7 +502,7 @@ struct _MemPoolPolicy
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	typedef _ObjPoolPolicyT<alloc_t, _SingleModel> pool_policy_t;
+	typedef _ObjPoolPolicyT<0, alloc_t, _SingleModel> pool_policy_t;
 	typedef DWORD byte;
 
 	static const BOOL DUMP_MEM_LEAKS = TRUE;

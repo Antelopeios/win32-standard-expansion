@@ -10,7 +10,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	unsigned int tStart = 0, tEnd = 0;
 
-	CIOFile file(_T("test.xml"));
+	CIOFile file(_T("TestGui5\\test.xml"));
 	if (file.Error() || file.Size() == 0) return 0;
 
 	CGuiXML xml;
@@ -35,7 +35,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//xml.AddAttr(_T("author"), _T("DarkCat"), ite);		// 修改/添加detail结点的author属性
 	//xml.DelAttr(_T("name"), ite);						// 删除detail结点的name属性
 
-	file.Open(_T("test_encode.xml"), CIOFile::modeWrite | CIOFile::modeCreate);
+	file.Open(_T("TestGui5\\test_encode.xml"), CIOFile::modeWrite | CIOFile::modeCreate);
 	if (!xml.Encode()) return 0;
 
 	_tsystem(_T("pause"));

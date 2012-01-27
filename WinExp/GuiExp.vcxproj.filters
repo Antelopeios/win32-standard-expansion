@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="GuiCommon">
+      <UniqueIdentifier>{60d23e5a-556a-4fe7-9b79-fc769b962fe1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GuiBoard">
+      <UniqueIdentifier>{70921e25-af8a-4813-8339-e7e5ba4d13e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GuiCtrl">
+      <UniqueIdentifier>{31bfa656-cd64-4d14-98a6-41267ed71e26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GuiEvent">
+      <UniqueIdentifier>{34a0455a-375a-48ed-9f23-1cddacaf506b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GuiEffect">
+      <UniqueIdentifier>{6dc7d28b-df1c-41fa-817a-8513233486e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GuiManager">
+      <UniqueIdentifier>{5cf6ef67-3330-4b4f-8ed6-cacd6acbedee}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GuiExp\GuiCommon\GuiBase.cpp">
+      <Filter>GuiCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiCommon\GuiCommon.cpp">
+      <Filter>GuiCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiCommon\GuiInterface.cpp">
+      <Filter>GuiCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiBoard\GuiBoard.cpp">
+      <Filter>GuiBoard</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiCtrl\GuiCtrl.cpp">
+      <Filter>GuiCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiEvent\GuiEvent.cpp">
+      <Filter>GuiEvent</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp">
+      <Filter>GuiEffect</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GuiExp\GuiCommon\GuiBase.h">
+      <Filter>GuiCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCommon\GuiCommon.h">
+      <Filter>GuiCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCommon\GuiInterface.h">
+      <Filter>GuiCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiBoard\GuiBoard.h">
+      <Filter>GuiBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiBoard\GuiThunk.hpp">
+      <Filter>GuiBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiBoard\GuiWnd.hpp">
+      <Filter>GuiBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiButton.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiCtrl.h">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiEdit.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiGroup.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiListView.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiPicture.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiScroll.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiButtonEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiEditEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiLVEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiPictureEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEffect\GuiEffectBase.hpp">
+      <Filter>GuiEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp">
+      <Filter>GuiEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiManager\GuiConfig.hpp">
+      <Filter>GuiManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiManager\GuiManager.h">
+      <Filter>GuiManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiManager\GuiXML.h">
+      <Filter>GuiManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiExp.h" />
+    <ClInclude Include="GuiExp\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GuiExp\GuiExp.rc" />
+  </ItemGroup>
+</Project>

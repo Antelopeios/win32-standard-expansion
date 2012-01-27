@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{551e9048-4287-4ab6-922e-e245d66f9aa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debugging">
+      <UniqueIdentifier>{067964cf-37c1-45a3-800a-367e9cf34473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debugging\XZip">
+      <UniqueIdentifier>{c662deb4-982d-462e-a244-1655ea1f701e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thread">
+      <UniqueIdentifier>{dbe3f2ee-bc3e-48ef-8a6e-6aa457681b0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{440bbad6-df57-4aca-8455-b3df0ef6b707}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pattern">
+      <UniqueIdentifier>{bfb31080-67a0-4ed0-ac16-97b31e014747}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm">
+      <UniqueIdentifier>{f2045fae-deee-411e-afcb-84f0c4ab08b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Container">
+      <UniqueIdentifier>{9f2658c1-60b8-4f43-9e42-e3a1c73fd462}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File">
+      <UniqueIdentifier>{02afc6c3-92e2-4853-95ed-e280eb4e6c0c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StdExp\Common\Common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Common\LibStd.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Common\TargetVer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\Assertion.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\CrashHandler.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\Debugging.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\LogSystem.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\Trace.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\XZipFile.h">
+      <Filter>Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Debugging\XZip\XZip.h">
+      <Filter>Debugging\XZip</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\App.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\Event.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\Lock.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\NonLock.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\Semaphore.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\SyncObject.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\Thread.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\ThreadCreator.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\ThreadHeap.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\ThreadModel.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Thread\ThreadPool.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\GC.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\MemAlloc.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\MemHeap.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\Memory.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\MemPool.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\ObjPool.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\OverNew.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\PtrManager.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\RegistAlloc.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\SmartPtr.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Memory\Traits.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Pattern\Iterator.h">
+      <Filter>Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Pattern\Pattern.h">
+      <Filter>Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Pattern\Singleton.h">
+      <Filter>Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Algorithm\Algorithm.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Algorithm\Finder.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Algorithm\Hash.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Algorithm\NonCopyable.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Algorithm\RTTI.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Algorithm\Swap.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\Array.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\Container.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\ContainerObject.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\List.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\Map.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\String.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\Container\Tree.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\File\File.h">
+      <Filter>File</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\File\FileObject.h">
+      <Filter>File</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\File\IOFile.h">
+      <Filter>File</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\File\MemFile.h">
+      <Filter>File</Filter>
+    </ClInclude>
+    <ClInclude Include="StdExp\StdExp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StdExp\Debugging\CrashHandler.cpp">
+      <Filter>Debugging</Filter>
+    </ClCompile>
+    <ClCompile Include="StdExp\Debugging\XZip\XZip.cpp">
+      <Filter>Debugging\XZip</Filter>
+    </ClCompile>
+    <ClCompile Include="StdExp\Thread\App.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="StdExp\Algorithm\RTTI.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

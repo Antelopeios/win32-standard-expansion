@@ -14,37 +14,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	//CIOFile f_xml(/*_T("E:/Administrator/桌面/test.xml")*/_T("C:/Users/Working/Desktop/test.xml"));
-	//CGuiManager::Load(&f_xml);
-
 	// 垃圾回收器
 	CGC gc;
 
 	// 加载资源
-	CIOFile file(_T("../TestImg1/ground.png"));
+	CIOFile file(_T("TestImg1/ground.png"));
 	// 解码器
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	if (!coder) return 0;
 	// 图片资源
 	CImage img_pic(coder->Decode());
 	CImage img_btn[9];
-	file.Open(_T("btn_bg_cap_left.png"));
+	file.Open(_T("TestGui1/btn_bg_cap_left.png"));
 	img_btn[0].Set(coder->Decode());
-	file.Open(_T("btn_bg_cap.png"));
+	file.Open(_T("TestGui1/btn_bg_cap.png"));
 	img_btn[1].Set(coder->Decode());
-	file.Open(_T("btn_bg_cap_right.png"));
+	file.Open(_T("TestGui1/btn_bg_cap_right.png"));
 	img_btn[2].Set(coder->Decode());
-	file.Open(_T("btn_bg_left.png"));
+	file.Open(_T("TestGui1/btn_bg_left.png"));
 	img_btn[3].Set(coder->Decode());
-	file.Open(_T("btn_bg.png"));
+	file.Open(_T("TestGui1/btn_bg.png"));
 	img_btn[4].Set(coder->Decode());
-	file.Open(_T("btn_bg_right.png"));
+	file.Open(_T("TestGui1/btn_bg_right.png"));
 	img_btn[5].Set(coder->Decode());
-	file.Open(_T("btn_bg_bottom_left.png"));
+	file.Open(_T("TestGui1/btn_bg_bottom_left.png"));
 	img_btn[6].Set(coder->Decode());
-	file.Open(_T("btn_bg_bottom.png"));
+	file.Open(_T("TestGui1/btn_bg_bottom.png"));
 	img_btn[7].Set(coder->Decode());
-	file.Open(_T("btn_bg_bottom_right.png"));
+	file.Open(_T("TestGui1/btn_bg_bottom_right.png"));
 	img_btn[8].Set(coder->Decode());
 	// 文字资源
 	CText txt_btn[8];

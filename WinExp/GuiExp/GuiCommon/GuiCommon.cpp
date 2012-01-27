@@ -45,6 +45,7 @@
 
 #include "GuiCommon.h"
 
+#pragma comment(lib, "StdExp.lib")
 #pragma comment(lib, "ImgExp.lib")
 
 EXP_BEG

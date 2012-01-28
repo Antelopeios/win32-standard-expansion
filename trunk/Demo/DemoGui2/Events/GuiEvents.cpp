@@ -213,7 +213,7 @@ class CEvent_cloud : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-/*		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
 		if (!ctrl) return;
 
 		switch( nMessage )
@@ -277,7 +277,7 @@ public:
 				GET_CTL(files)->SetVisible(TRUE);
 			}
 			break;
-		}*/
+		}
 	}
 };
 

@@ -81,6 +81,7 @@ public:
 
 	protected:
 		_Pair(const key_t& key) : Key(key)	{}
+		virtual ~_Pair() {}
 	} pair_t;
 
 	typedef struct _Assoc : public _Pair

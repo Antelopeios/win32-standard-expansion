@@ -41,6 +41,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	ExCPrintf(_T("%dms\n"), (tEnd - tStart));
 //#define TEST_CON(name, con, fst, sec)
 
+	_tsystem(_T("pause"));
+
 	TEST_CON(\nStart for list...\t\t, list<int> int_list, int_list.push_back(n), int_list.clear())
 	TEST_CON(Start for CList...\t\t, CList<int> int_list, int_list.AddTail(n), int_list.RemoveAll())
 	TEST_CON(Start for CListT...\t\t, CListT<int> int_list, int_list.Add(n), int_list.Clear())
@@ -54,7 +56,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	typedef CMapT<int, int, _MapPolicyT<TestMapS> > mapt_t;
 	/*
 		stl::map是红黑树;CMapT与CMap是哈希表
-		这两个map测试添加及清空效率其实没有可比性
+		这两种map直接测试效率其实没有可比性
 		以下数值仅供参考
 	*/
 	TEST_CON(\nStart for map...\t\t, map_t int_list, int_list[n] = n, int_list.clear())

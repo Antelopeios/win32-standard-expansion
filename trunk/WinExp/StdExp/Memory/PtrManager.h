@@ -135,7 +135,7 @@ public:
 	typedef ModelT model_t;
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
-	typedef CMapT<void*, IReferPtr*, _MapPolicyT<1009, CHash> > ptr_map_t;
+	typedef CMapT<void*, IReferPtr*, _MapPolicyT<2/*1009*/, CHash> > ptr_map_t;
 
 protected:
 	mutex_t		m_Mutex;

@@ -8,29 +8,29 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	class A
-	{
-	private:
-		BYTE a;
+	//class A
+	//{
+	//private:
+	//	BYTE a;
 
-	public:
-		A() : a(0) {}
-		virtual ~A() {}
-	};
+	//public:
+	//	A() : a(0) {}
+	//	virtual ~A() {}
+	//};
 
-	//typedef BYTE A;
+	typedef BYTE A;
 
 #ifdef	_DEBUG
-	//const int TestCont = 100;
-	//const int TestLast = 100;
-	//const int TestSMin = 1;
-	//const int TestSMax = 10000;
-	const int TestCont = 2;
-	const int TestLast = 1000;
-	const int TestSMin = 1;
-	const int TestSMax = 100000;
-#else /*_DEBUG*/
 	const int TestCont = 100;
+	const int TestLast = 100;
+	const int TestSMin = 1;
+	const int TestSMax = 10000;
+	//const int TestCont = 2;
+	//const int TestLast = 1000;
+	//const int TestSMin = 1;
+	//const int TestSMax = 100000;
+#else /*_DEBUG*/
+	const int TestCont = 1000;
 	const int TestLast = 1000;
 	const int TestSMin = 1;
 	const int TestSMax = 100000;

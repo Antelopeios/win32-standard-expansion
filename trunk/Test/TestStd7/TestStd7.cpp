@@ -24,7 +24,7 @@ protected:
 		return ret;
 	}
 
-	DWORD OnExit(DWORD nCode)
+	DWORD OnTerm(DWORD nCode)
 	{
 		ExCPrintf(_T("Bye~\n"));
 		return nCode;

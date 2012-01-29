@@ -62,16 +62,101 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC>
-struct _TreePolicyT;
+struct _TreePolicy
+{
+	template <typename ContainerT>
+	struct node_t
+	{
+		typedef ContainerT container_t;
 
-template <typename TypeT, typename PolicyT = _TreePolicyT<> >
+		typedef typename container_t::type_t type_t;
+		typedef typename container_t::item_t item_t;
+		typedef typename container_t::list_t list_t;
+		typedef typename container_t::ite_t ite_t;
+
+		typedef typename container_t::iterator_t iter_t;
+		typedef CListT<iter_t> iter_list_t;
+		typedef typename iter_list_t::iterator_t iterator_t;
+
+		container_t* pCont;
+		item_t* nIndx;
+
+		node_t(container_t* p = NULL, item_t* b = NULL)
+			: pCont(p)
+			, nIndx(b)
+		{}
+		node_t(const container_t* p, item_t* b = NULL)
+			: pCont((container_t*)p)
+			, nIndx(b)
+		{}
+
+		type_t& Val() { return nIndx->Val; }
+
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
+		item_t* Index() { return nIndx; }
+
+		const iter_t Parent()
+		{
+			iter_t iter; iter = node_t(pCont);
+			iter->nIndx = nIndx ? nIndx->Pare : NULL;
+			return iter;
+		}
+		const iter_list_t Children()
+		{
+			iter_list_t list;
+			iter_t iter; iter = node_t(pCont);
+			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++ite)
+			{
+				if (!(*ite)) continue;
+				iter->nIndx = (*ite);
+				list.Add(iter);
+			}
+			return list;
+		}
+
+		BOOL operator==(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
+		BOOL operator!=(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
+
+		// 深度优先遍历
+		void Next(long nOff = 1)
+		{
+			if (!pCont || nOff == 0) return;
+			if (nOff > 0)
+			{
+				ExAssert(nIndx);
+				if (nIndx->Chdr.Empty())
+					nIndx = nIndx->GetPareNext();
+				else
+					nIndx = nIndx->Chdr.HeadItem();
+				// 递归遍历
+				if (nOff > 1) Next(nOff - 1);
+			}
+			else
+			{
+				if (nIndx)
+					nIndx = nIndx->GetParePrev();
+				else
+					nIndx = pCont->Last()->Index();
+				// 递归遍历
+				if (nOff < -1) Next(nOff + 1);
+			}
+		}
+		void Prev(long nOff = 1)
+		{ Next(-nOff); }
+	};
+};
+
+//////////////////////////////////////////////////////////////////
+
+template <typename TypeT, typename PolicyT = _TreePolicy>
 class CTreeT : public IContainerObjectT<TypeT, PolicyT, CTreeT<TypeT, PolicyT> >
 {
 public:
 	typedef struct _Item
 	{
-		typedef CListT<_Item*, _ListPolicyT<alloc_t> > list_t;
+		typedef CListT<_Item*> list_t;
 		typedef typename list_t::iterator_t ite_t;
 
 		_Item* Pare;
@@ -80,9 +165,9 @@ public:
 		type_t Val;
 
 		static _Item* Alloc()
-		{ return ExMem::Alloc<_Item>(); }
+		{ return dbnew(_Item); }
 		void Free()
-		{ ExMem::Free(static_cast<_Item*>(this)); }
+		{ del(this); }
 
 		_Item()
 			: Pare(NULL)
@@ -353,97 +438,6 @@ public:
 	}
 	BOOL Del(iterator_t& ite)
 	{ return Del(ite, ite); }
-};
-
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _TreePolicyT
-{
-	typedef AllocT alloc_t;
-
-	template <typename ContainerT>
-	struct node_t
-	{
-		typedef ContainerT container_t;
-
-		typedef typename container_t::type_t type_t;
-		typedef typename container_t::item_t item_t;
-		typedef typename container_t::list_t list_t;
-		typedef typename container_t::ite_t ite_t;
-
-		typedef typename container_t::iterator_t iter_t;
-		typedef CListT<iter_t> iter_list_t;
-		typedef typename iter_list_t::iterator_t iterator_t;
-
-		container_t* pCont;
-		item_t* nIndx;
-
-		node_t(container_t* p = NULL, item_t* b = NULL)
-			: pCont(p)
-			, nIndx(b)
-		{}
-		node_t(const container_t* p, item_t* b = NULL)
-			: pCont((container_t*)p)
-			, nIndx(b)
-		{}
-
-		type_t& Val() { return nIndx->Val; }
-
-		BOOL InThis(container_t* cnt) { return pCont == cnt; }
-		item_t* Index() { return nIndx; }
-
-		const iter_t Parent()
-		{
-			iter_t iter; iter = node_t(pCont);
-			iter->nIndx = nIndx ? nIndx->Pare : NULL;
-			return iter;
-		}
-		const iter_list_t Children()
-		{
-			iter_list_t list;
-			iter_t iter; iter = node_t(pCont);
-			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++ite)
-			{
-				if (!(*ite)) continue;
-				iter->nIndx = (*ite);
-				list.Add(iter);
-			}
-			return list;
-		}
-
-		BOOL operator==(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		BOOL operator!=(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
-
-		// 深度优先遍历
-		void Next(long nOff = 1)
-		{
-			if (!pCont || nOff == 0) return;
-			if (nOff > 0)
-			{
-				ExAssert(nIndx);
-				if (nIndx->Chdr.Empty())
-					nIndx = nIndx->GetPareNext();
-				else
-					nIndx = nIndx->Chdr.HeadItem();
-				// 递归遍历
-				if (nOff > 1) Next(nOff - 1);
-			}
-			else
-			{
-				if (nIndx)
-					nIndx = nIndx->GetParePrev();
-				else
-					nIndx = pCont->Last()->Index();
-				// 递归遍历
-				if (nOff < -1) Next(nOff + 1);
-			}
-		}
-		void Prev(long nOff = 1)
-		{ Next(-nOff); }
-	};
 };
 
 //////////////////////////////////////////////////////////////////

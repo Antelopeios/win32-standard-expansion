@@ -59,8 +59,91 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <DWORD SizeT = 17, typename HashT = CHash, typename AllocT = EXP_MEMORY_ALLOC>
-struct _MapPolicyT;
+template <DWORD SizeT = 17, typename HashT = CHash>
+struct _MapPolicyT
+{
+	typedef HashT hash_t;
+
+	template <typename ContainerT>
+	struct node_t
+	{
+		typedef ContainerT container_t;
+		typedef typename container_t::key_t key_t;
+		typedef typename container_t::type_t type_t;
+		typedef typename container_t::pair_t pair_t;
+		typedef typename container_t::ite_t ite_t;
+
+		container_t* pCont;
+		ite_t nIndx;
+
+		node_t(container_t* p = NULL)
+			: pCont(p)
+		{}
+		node_t(const container_t* p)
+			: pCont((container_t*)p)
+		{}
+
+		key_t& Key() { return nIndx->Val()->Key; }
+		type_t& Val() { return nIndx->Val()->Val; }
+
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
+		pair_t* Index() { return (pair_t*)(nIndx->Val()); }
+
+		BOOL operator==(const node_t& node)
+		{ return (pCont == node.pCont && (nIndx == node.nIndx)); }
+		BOOL operator!=(const node_t& node)
+		{ return (pCont != node.pCont || (nIndx != node.nIndx)); }
+
+		void Next(long nOff = 1)
+		{
+			if (!pCont || nOff == 0) return;
+			if (nOff > 0)
+			{
+				if (!nIndx->Val()) --nOff;
+				while (nIndx != pCont->Tail()->nIndx)
+				{
+					if (0 < nOff)
+					{
+						if ((nIndx++)->Val())
+							--nOff;
+					}
+					else
+					{
+						if (nIndx->Val())
+							break;
+						else
+							++nIndx;
+					}
+				}
+			}
+			else
+			{
+				if (!nIndx->Val()) ++nOff;
+				while (nIndx != pCont->Head()->nIndx)
+				{
+					if (0 > nOff)
+					{
+						if ((nIndx--)->Val())
+							++nOff;
+					}
+					else
+					{
+						if (nIndx->Val())
+							break;
+						else
+							--nIndx;
+					}
+				}
+			}
+		}
+		void Prev(long nOff = 1)
+		{ Next(-nOff); }
+	};
+
+	static const DWORD DEF_SIZE = SizeT;
+};
+
+//////////////////////////////////////////////////////////////////
 
 template <typename KeyT, typename TypeT, typename PolicyT = _MapPolicyT<> >
 class CMapT : public IContainerObjectT<TypeT, PolicyT, CMapT<KeyT, TypeT, PolicyT> >
@@ -87,14 +170,14 @@ public:
 		{}
 
 		static _Assoc* Alloc()
-		{ return alloc_t::Alloc<_Assoc>(); }
+		{ return dbnew(_Assoc); }
 		void Free()
-		{ alloc_t::Free(this); }
+		{ del(this); }
 	} assoc_t;
 
-	typedef CListT<assoc_t*, _ListPolicyT<alloc_t> > alist_t;
+	typedef CListT<assoc_t*> alist_t;
 	typedef typename alist_t::iterator_t ite_t;
-	typedef CArrayT<ite_t, _ArrayPolicyT<alloc_t> > table_t;
+	typedef CArrayT<ite_t> table_t;
 
 protected:
 	alist_t	m_Assoc;
@@ -248,93 +331,6 @@ public:
 		Iter->nIndx->Val()->Free();
 		return m_Assoc.Del(Iter->nIndx);
 	}
-};
-
-//////////////////////////////////////////////////////////////////
-
-template <DWORD SizeT/* = 17*/, typename HashT/* = CHash*/, typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _MapPolicyT
-{
-	typedef AllocT alloc_t;
-	typedef HashT hash_t;
-
-	template <typename ContainerT>
-	struct node_t
-	{
-		typedef ContainerT container_t;
-		typedef typename container_t::key_t key_t;
-		typedef typename container_t::type_t type_t;
-		typedef typename container_t::pair_t pair_t;
-		typedef typename container_t::ite_t ite_t;
-
-		container_t* pCont;
-		ite_t nIndx;
-
-		node_t(container_t* p = NULL)
-			: pCont(p)
-		{}
-		node_t(const container_t* p)
-			: pCont((container_t*)p)
-		{}
-
-		key_t& Key() { return nIndx->Val()->Key; }
-		type_t& Val() { return nIndx->Val()->Val; }
-
-		BOOL InThis(container_t* cnt) { return pCont == cnt; }
-		pair_t* Index() { return (pair_t*)(nIndx->Val()); }
-
-		BOOL operator==(const node_t& node)
-		{ return (pCont == node.pCont && (nIndx == node.nIndx)); }
-		BOOL operator!=(const node_t& node)
-		{ return (pCont != node.pCont || (nIndx != node.nIndx)); }
-
-		void Next(long nOff = 1)
-		{
-			if (!pCont || nOff == 0) return;
-			if (nOff > 0)
-			{
-				if (!nIndx->Val()) --nOff;
-				while (nIndx != pCont->Tail()->nIndx)
-				{
-					if (0 < nOff)
-					{
-						if ((nIndx++)->Val())
-							--nOff;
-					}
-					else
-					{
-						if (nIndx->Val())
-							break;
-						else
-							++nIndx;
-					}
-				}
-			}
-			else
-			{
-				if (!nIndx->Val()) ++nOff;
-				while (nIndx != pCont->Head()->nIndx)
-				{
-					if (0 > nOff)
-					{
-						if ((nIndx--)->Val())
-							++nOff;
-					}
-					else
-					{
-						if (nIndx->Val())
-							break;
-						else
-							--nIndx;
-					}
-				}
-			}
-		}
-		void Prev(long nOff = 1)
-		{ Next(-nOff); }
-	};
-
-	static const DWORD DEF_SIZE = SizeT;
 };
 
 //////////////////////////////////////////////////////////////////

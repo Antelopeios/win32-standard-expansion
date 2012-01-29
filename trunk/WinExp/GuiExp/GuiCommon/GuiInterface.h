@@ -85,7 +85,7 @@ public:
 	virtual ~IGuiObject() {}
 
 public:
-	virtual void Free() { ExMem::Free(this); }
+	virtual void Free() { del(this); }
 };
 
 //////////////////////////////////////////////////////////////////
@@ -164,12 +164,12 @@ private:
 public:
 	IGuiSender(void)
 		: m_bTru(TRUE)
-		, m_CldrEvt(ExMem::Alloc<evt_list_t>())
+		, m_CldrEvt(dbnew(evt_list_t))
 	{}
 	virtual ~IGuiSender(void)
 	{
 		ClearEvent();
-		ExMem::Free(m_CldrEvt);
+		del(m_CldrEvt);
 	}
 
 public:
@@ -299,12 +299,12 @@ public:
 	IGuiComp(void)
 		: m_bTru(TRUE)
 		, m_Pare(NULL)
-		, m_Cldr(ExMem::Alloc<list_t>())
+		, m_Cldr(dbnew(list_t))
 	{}
 	virtual ~IGuiComp(void)
 	{
 		ClearComp();
-		ExMem::Free(m_Cldr);
+		del(m_Cldr);
 	}
 
 protected:

@@ -51,17 +51,69 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/MemAlloc.h"
+#include "Memory/OverNew.h"
 #include "Container/ContainerObject.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC>
-struct _ListPolicyT;
+struct _ListPolicy
+{
+	template <typename ContainerT>
+	struct node_t
+	{
+		typedef ContainerT container_t;
+		typedef typename container_t::type_t type_t;
+		typedef typename container_t::block_t block_t;
 
-template <typename TypeT, typename PolicyT = _ListPolicyT<> >
+		container_t* pCont;
+		block_t* nIndx;
+
+		node_t(container_t* p = NULL, block_t* b = NULL)
+			: pCont(p)
+			, nIndx(b)
+		{}
+		node_t(const container_t* p, block_t* b = NULL)
+			: pCont((container_t*)p)
+			, nIndx(b)
+		{}
+
+		type_t& Val() { return nIndx->Buff; }
+
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
+		block_t* Index() { return nIndx; }
+
+		BOOL operator==(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
+		BOOL operator!=(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
+
+		void Next(long nOff = 1)
+		{
+			if (!pCont || nOff == 0) return;
+			if (nOff > 0)
+				while (nIndx && 0 < nOff--) nIndx = nIndx->pNext;
+			else
+			{
+				if(!nIndx)
+				{
+					nIndx = pCont->Last()->Index();
+					++nOff;
+				}
+				ExAssert(nIndx);
+				while (nIndx != pCont->Head()->Index() && 0 > nOff++)
+					nIndx = nIndx->pPrev;
+			}
+		}
+		void Prev(long nOff = 1)
+		{ Next(-nOff); }
+	};
+};
+
+//////////////////////////////////////////////////////////////////
+
+template <typename TypeT, typename PolicyT = _ListPolicy>
 class CListT : public IContainerObjectT<TypeT, PolicyT, CListT<TypeT, PolicyT> >
 {
 public:
@@ -76,9 +128,9 @@ public:
 		{}
 
 		static _Block* Alloc()
-		{ return alloc_t::Alloc<_Block>(); }
+		{ return dbnew(_Block); }
 		void Free()
-		{ alloc_t::Free(this); }
+		{ del(this); }
 	} block_t;
 
 protected:
@@ -325,64 +377,6 @@ public:
 	}
 	BOOL Del(iterator_t& ite)
 	{ return Del(ite, ite); }
-};
-
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _ListPolicyT
-{
-	typedef AllocT alloc_t;
-
-	template <typename ContainerT>
-	struct node_t
-	{
-		typedef ContainerT container_t;
-		typedef typename container_t::type_t type_t;
-		typedef typename container_t::block_t block_t;
-
-		container_t* pCont;
-		block_t* nIndx;
-
-		node_t(container_t* p = NULL, block_t* b = NULL)
-			: pCont(p)
-			, nIndx(b)
-		{}
-		node_t(const container_t* p, block_t* b = NULL)
-			: pCont((container_t*)p)
-			, nIndx(b)
-		{}
-
-		type_t& Val() { return nIndx->Buff; }
-
-		BOOL InThis(container_t* cnt) { return pCont == cnt; }
-		block_t* Index() { return nIndx; }
-
-		BOOL operator==(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		BOOL operator!=(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
-
-		void Next(long nOff = 1)
-		{
-			if (!pCont || nOff == 0) return;
-			if (nOff > 0)
-				while (nIndx && 0 < nOff--) nIndx = nIndx->pNext;
-			else
-			{
-				if(!nIndx)
-				{
-					nIndx = pCont->Last()->Index();
-					++nOff;
-				}
-				ExAssert(nIndx);
-				while (nIndx != pCont->Head()->Index() && 0 > nOff++)
-					nIndx = nIndx->pPrev;
-			}
-		}
-		void Prev(long nOff = 1)
-		{ Next(-nOff); }
-	};
 };
 
 //////////////////////////////////////////////////////////////////

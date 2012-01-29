@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-14
-// Version:	1.0.0019.2102
+// Date:	2012-01-29
+// Version:	1.0.0020.0451
 //
 // History:
 //	- 1.0.0015.2359(2011-03-01)	# CRegistAllocT::Free()一个空指针时会引发内存异常
@@ -45,6 +45,9 @@
 //	- 1.0.0019.2102(2012-01-14)	+ 添加CRegistAllocT::ReAlloc()
 //								= 将_Regist的定义放在CRegistAllocT外部实现,方便外部调用_Regist内的各种方法
 //								= 将萃取器部分从RegistAlloc中独立出来
+//	- 1.0.0020.0451(2012-01-29)	= CRegistAllocT使用静态内存分配器作为策略,默认使用EXP_MEMPOOL_ALLOC
+//								= CRegistAllocT自身改写为静态类
+//								= 定义CRegistAlloc为EXP_MEMORY_ALLOC,并将ExMem定义为CRegistAlloc的别称
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RegistAlloc_h__
@@ -54,6 +57,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Memory/MemPool.h"
 #include "Memory/Traits.h"
 
 EXP_BEG
@@ -79,30 +83,32 @@ struct _Regist
 	}
 
 	template <typename TypeT>
-	EXP_INLINE static void* Maker(void* pPtr, DWORD size, _false_type)
+	EXP_INLINE static void* Make(void* pReal, DWORD nCount, _false_type)
 	{
-		DWORD count = size / sizeof(TypeT);
-		_Regist* reg = (_Regist*)RealPtr(pPtr);
-		reg->count = count;
+		_Regist* reg = (_Regist*)pReal;
+		reg->count = nCount;
 		reg->destruct = (traitor_t)(_Traits::Destruct<TypeT>);
-		return pPtr;
+		return pReal;
 	}
 	template <typename TypeT>
-	EXP_INLINE static void* Maker(void* pPtr, DWORD size, _true_type)
+	EXP_INLINE static void* Make(void* pReal, DWORD nCount, _true_type)
 	{
-		return pPtr;
+		_Regist* reg = (_Regist*)pReal;
+		reg->count = nCount;
+		reg->destruct = NULL;
+		return pReal;
 	}
 	template <typename TypeT>
-	EXP_INLINE static void* Maker(void* pPtr, DWORD size = sizeof(TypeT))
+	EXP_INLINE static void* Make(void* pReal, DWORD nCount)
 	{
-		return Maker<TypeT>(pPtr, size, _TraitsT<TypeT>::is_POD_type());
+		return Make<TypeT>(pReal, nCount, _TraitsT<TypeT>::is_POD_type());
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 // 登记并自动构造/析构的内存分配器
 
-template <typename AllocT>
+template <typename AllocT = EXP_MEMPOOL_ALLOC>
 class CRegistAllocT
 {
 public:
@@ -110,87 +116,56 @@ public:
 	typedef typename AllocT::alloc_t alloc_t;
 
 public:
-	enum { HeadSize = sizeof(_Regist) };
-
-protected:
-	alloc_t m_Alloc;
-
-protected:
-	EXP_INLINE void* RealPtr(void* pPtr)
-	{
-		return _Regist::RealPtr(pPtr);
-	}
-	EXP_INLINE void* PtrReal(void* pReal)
-	{
-		return _Regist::PtrReal(pReal);
-	}
-
-public:
-	EXP_INLINE alloc_t& GetAlloc() { return m_Alloc; }
-
 	template <typename TypeT>
-	EXP_INLINE TypeT* Construct(void* pPtr)
+	EXP_INLINE static TypeT* Construct(_Regist* pReal)
 	{
-		ExAssert(pPtr);
-		_Regist* real = (_Regist*)RealPtr(pPtr);
-		real->destruct = (traitor_t)(_Traits::Destruct<TypeT>);
-		return _Traits::Construct<TypeT>(pPtr, real->count);
+		return _Traits::Construct<TypeT>(_Regist::PtrReal(pReal), pReal->count);
 	}
-	EXP_INLINE void* Destruct(void* pPtr)
+	EXP_INLINE static void* Destruct(_Regist* pReal)
 	{
-		ExAssert(pPtr);
-		_Regist* real = (_Regist*)RealPtr(pPtr);
-		if (real->destruct)
+		if (pReal->destruct)
 		{
-			real->destruct(pPtr, real->count);
-			real->destruct = NULL;	// 仅允许析构一次,防止高层调用时意外的重复析构
+			pReal->destruct(_Regist::PtrReal(pReal), pReal->count);
+			pReal->destruct = NULL;	// 仅允许析构一次,防止高层调用时意外的重复析构
 		}							// 若需要重复析构,需手动调用CTraits::Destruct<TypeT>
-		return real;
+		return pReal;
 	}
 
 public:
-	EXP_INLINE BOOL Valid(void* pPtr)
+	EXP_INLINE static BOOL Valid(void* pPtr)
 	{
-		return m_Alloc.Valid(RealPtr(pPtr));
+		return alloc_t::Valid(_Regist::RealPtr(pPtr));
 	}
-	EXP_INLINE DWORD Size(void* pPtr)
+	EXP_INLINE static DWORD Size(void* pPtr)
 	{
-		return (m_Alloc.Size(RealPtr(pPtr)) - HeadSize);
+		return alloc_t::Size(_Regist::RealPtr(pPtr)) - sizeof(_Regist);
 	}
 
-	EXP_INLINE void* Alloc(DWORD nSize)
+	EXP_INLINE static void* Alloc(DWORD nSize, LPCSTR sFile = NULL, int nLine = 0)
 	{
 		if (nSize == 0) return NULL;
-		ExAssert(nSize <= ((DWORD)~0 - HeadSize));
-		_Regist* real = (_Regist*)m_Alloc.Alloc(HeadSize + nSize);
-		real->count = nSize;
-		real->destruct = NULL;
-		return PtrReal(real);
+		_Regist* real = (_Regist*)alloc_t::Alloc(sizeof(_Regist) + nSize);
+		return _Regist::PtrReal(_Regist::Make<BYTE>(alloc_t::SetAlloc(real, sFile, nLine), nSize));
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* Alloc(DWORD nCount, _true_type)
-	{
-		return (TypeT*)Alloc(sizeof(TypeT) * nCount);
-	}
-	template <typename TypeT>
-	EXP_INLINE TypeT* Alloc(DWORD nCount, _false_type)
+	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1, LPCSTR sFile = NULL, int nLine = 0)
 	{
 		if (nCount == 0) return NULL;
-		_Regist* real = (_Regist*)m_Alloc.Alloc(HeadSize + (sizeof(TypeT) * nCount));
-		real->count = nCount;
-		return Construct<TypeT>(PtrReal(real));
-	}
-	template <typename TypeT>
-	EXP_INLINE TypeT* Alloc(DWORD nCount = 1)
-	{
-		return Alloc<TypeT>(nCount, _TraitsT<TypeT>::is_POD_type());
+		_Regist* real = (_Regist*)alloc_t::Alloc(sizeof(_Regist) + (sizeof(TypeT) * nCount));
+		return Construct<TypeT>((_Regist*)_Regist::Make<TypeT>(alloc_t::SetAlloc(real, sFile, nLine), nCount));
 	}
 
-	EXP_INLINE void* ReAlloc(void* pPtr, DWORD nSize, BOOL bFree = TRUE)
+	EXP_INLINE static void* SetAlloc(void* p, LPCSTR sFile, int nLine)
+	{
+		alloc_t::SetAlloc(_Regist::RealPtr(p), sFile, nLine);
+		return p;
+	}
+
+	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize, BOOL bFree = TRUE, LPCSTR sFile = NULL, int nLine = 0)
 	{
 		// 检查指针是否为空
 		if (pPtr == NULL)
-			return Alloc(nSize);
+			return Alloc(nSize, sFile, nLine);
 		// 检查大小是否为零
 		if (nSize == 0)
 		{
@@ -203,23 +178,25 @@ public:
 		if (ptr_siz >= nSize)
 			return pPtr;
 		// 若现有大小无法满足需求, 则分配新的空间并拷贝原有数据
-		void* ptr_new = Alloc(nSize);
+		void* ptr_new = Alloc(nSize, sFile, nLine);
 		memcpy(ptr_new, pPtr, ptr_siz);
 		// 释放旧空间, 返回新空间
-		if (bFree) m_Alloc.Free(RealPtr(pPtr));
+		if (bFree) FreeNoDest(pPtr);
 		return ptr_new;
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, _true_type, BOOL bFree = TRUE)
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount, _true_type, 
+									 BOOL bFree = TRUE, LPCSTR sFile = NULL, int nLine = 0)
 	{
-		return (TypeT*)ReAlloc(pPtr, sizeof(TypeT) * nCount, bFree);
+		return (TypeT*)ReAlloc(pPtr, sizeof(TypeT) * nCount, bFree, sFile, nLine);
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, _false_type, BOOL bFree = TRUE)
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount, _false_type, 
+									 BOOL bFree = TRUE, LPCSTR sFile = NULL, int nLine = 0)
 	{
 		// 检查指针是否为空
 		if (pPtr == NULL)
-			return Alloc<TypeT>(nCount);
+			return Alloc<TypeT>(nCount, sFile, nLine);
 		// 检查大小是否为零
 		if (nCount == 0)
 		{
@@ -227,7 +204,7 @@ public:
 			return NULL;
 		}
 		// 检查指针现有对象数量
-		_Regist* real = (_Regist*)RealPtr(pPtr);
+		_Regist* real = (_Regist*)_Regist::RealPtr(pPtr);
 		// 若现有数量等于需求数量, 则直接返回
 		if (real->count == nCount)
 			return (TypeT*)pPtr;
@@ -250,28 +227,38 @@ public:
 			return (TypeT*)pPtr;
 		}
 		// 若现有大小无法满足需求, 则分配新的空间, 拷贝原有对象数据, 并构造新对象
-		_Regist* real_new = (_Regist*)m_Alloc.Alloc(HeadSize + size);
-		real_new->count = nCount;
-		real_new->destruct = (traitor_t)(_Traits::Destruct<TypeT>);
-		void* ptr_new = PtrReal(real_new);
+		_Regist* real_new = (_Regist*)alloc_t::Alloc(sizeof(_Regist) + size);
+		void* ptr_new = _Regist::PtrReal(_Regist::Make<TypeT>(alloc_t::SetAlloc(real_new, sFile, nLine), nCount));
 		memcpy(ptr_new, pPtr, sizeof(TypeT) * real->count);
 		_Traits::Construct<TypeT>(((TypeT*)ptr_new) + real->count, nCount - real->count);
 		// 释放旧空间, 返回新空间
-		if (bFree) m_Alloc.Free(RealPtr(pPtr));
+		if (bFree) FreeNoDest(pPtr);
 		return (TypeT*)ptr_new;
 	}
 	template <typename TypeT>
-	EXP_INLINE TypeT* ReAlloc(void* pPtr, DWORD nCount, BOOL bFree = TRUE)
+	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount, BOOL bFree = TRUE, LPCSTR sFile = NULL, int nLine = 0)
 	{
-		return ReAlloc<TypeT>(pPtr, nCount, _TraitsT<TypeT>::is_POD_type(), bFree);
+		return ReAlloc<TypeT>(pPtr, nCount, _TraitsT<TypeT>::is_POD_type(), bFree, sFile, nLine);
 	}
 
-	EXP_INLINE void Free(void* pPtr)
+	EXP_INLINE static void Free(void* pPtr)
 	{
 		if (!pPtr) return;
-		m_Alloc.Free(Destruct(pPtr));
+		alloc_t::Free(Destruct((_Regist*)_Regist::RealPtr(pPtr)));
+	}
+	EXP_INLINE static void FreeNoDest(void* pPtr)
+	{
+		if (!pPtr) return;
+		alloc_t::Free(_Regist::RealPtr(pPtr));
 	}
 };
+
+typedef CRegistAllocT<> CRegistAlloc;
+typedef CRegistAlloc ExMem;
+
+#ifndef EXP_MEMORY_ALLOC
+#define EXP_MEMORY_ALLOC CRegistAlloc
+#endif/*EXP_MEMORY_ALLOC*/
 
 //////////////////////////////////////////////////////////////////
 

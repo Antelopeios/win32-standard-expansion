@@ -174,7 +174,7 @@ protected:
 	// XML声明
 	BOOL Xml(state_t& eSta, iterator_t& ite)
 	{
-		m_xData.Add(ExMem::Alloc<node_t>(&m_GC), ite);
+		m_xData.Add(gcnew(m_GC, node_t), ite);
 		node_t* node = *ite;
 		node->nam += m_sTemp;
 		m_sTemp = _T("");
@@ -246,7 +246,7 @@ protected:
 		default:
 			if (eSta == sta_jud)
 			{
-				m_xData.Add(ExMem::Alloc<node_t>(&m_GC), ite);
+				m_xData.Add(gcnew(m_GC, node_t), ite);
 				node_t* node = *ite;
 				node->nam += buf;
 			}
@@ -462,7 +462,7 @@ public:
 	{
 		m_xData.Clear();
 		m_GC.Clear();
-		m_xData.Add(ExMem::Alloc<node_t>(&m_GC)); // 添加默认的根节点
+		m_xData.Add(gcnew(m_GC, node_t)); // 添加默认的根节点
 		m_mFile.Open();
 	}
 
@@ -481,19 +481,27 @@ public:
 		CGC gc; char* tmp_str = NULL; int len = (int)m_mFile.Size();
 	#ifdef	_UNICODE
 		if (enc == _T("utf-8"))
+		{
 			CString::WideCharToMultiByte(CP_UTF8, (LPCWSTR)(LPCVOID)m_mFile, 
-				len / sizeof(wchar_t), tmp_str, len, &gc);
+				len / sizeof(wchar_t), tmp_str, len);
+			gc.Regist(tmp_str);
+		}
 		else
 		if (enc == _T("gb2312"))
+		{
 			CString::WideCharToMultiByte(CP_ACP, (LPCWSTR)(LPCVOID)m_mFile, 
-				len / sizeof(wchar_t), tmp_str, len, &gc);
+				len / sizeof(wchar_t), tmp_str, len);
+			gc.Regist(tmp_str);
+		}
 	#else /*_UNICODE*/
 		if (enc == _T("utf-8"))
 		{
 			wchar_t* tmp_unc = NULL;
 			CString::MultiByteToWideChar(CP_ACP, (LPCSTR)(LPCVOID)m_mFile, 
-				len, tmp_unc, len, &gc);
-			CString::WideCharToMultiByte(CP_UTF8, tmp_unc, len, tmp_str, len, &gc);
+				len, tmp_unc, len);
+			gc.Regist(tmp_unc);
+			CString::WideCharToMultiByte(CP_UTF8, tmp_unc, len, tmp_str, len);
+			gc.Regist(tmp_str);
 		}
 		else
 		if (enc == _T("gb2312"))
@@ -538,16 +546,24 @@ public:
 				CGC gc; TCHAR* tmp_str = NULL; int len = 0;
 			#ifdef	_UNICODE
 				if (enc == _T("utf-8"))
-					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len, &gc);
+				{
+					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_str, len);
+					gc.Regist(tmp_str);
+				}
 				else
 				if (enc == _T("gb2312"))
-					CString::MultiByteToWideChar(CP_ACP, buf.GetCStr(), -1, tmp_str, len, &gc);
+				{
+					CString::MultiByteToWideChar(CP_ACP, buf.GetCStr(), -1, tmp_str, len);
+					gc.Regist(tmp_str);
+				}
 			#else /*_UNICODE*/
 				if (enc == _T("utf-8"))
 				{
 					wchar_t* tmp_unc = NULL;
-					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_unc, len, &gc);
-					CString::WideCharToMultiByte(CP_ACP, tmp_unc, -1, tmp_str, len, &gc);
+					CString::MultiByteToWideChar(CP_UTF8, buf.GetCStr(), -1, tmp_unc, len);
+					gc.Regist(tmp_unc);
+					CString::WideCharToMultiByte(CP_ACP, tmp_unc, -1, tmp_str, len);
+					gc.Regist(tmp_str);
 				}
 				else
 				if (enc == _T("gb2312"))
@@ -652,13 +668,13 @@ public:
 
 	BOOL AddNode(const node_t& node, iterator_t& ite)
 	{
-		node_t* p = ExMem::Alloc<node_t>(&m_GC);
+		node_t* p = gcnew(m_GC, node_t);
 		(*p) = node;
 		return m_xData.Add(p, ite);
 	}
 	BOOL AddNode(LPCTSTR sName, iterator_t& ite)
 	{
-		node_t* p = ExMem::Alloc<node_t>(&m_GC);
+		node_t* p = gcnew(m_GC, node_t);
 		p->nam = sName;
 		return m_xData.Add(p, ite);
 	}

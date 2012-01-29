@@ -33,14 +33,17 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-11
-// Version:	1.0.0006.1202
+// Date:	2012-01-28
+// Version:	1.0.0007.2354
 //
 // History:
 //	- 1.0.0004.2110(2011-03-04)	^ CMemHeapAlloc的接口添加EXP_INLINE提高效率
 //								+ 添加ExCheckMem()内存正确性检查接口
 //	- 1.0.0005.1316(2011-11-27)	+ 定义EXP_MEMHEAP_ALLOC宏,支持外部替换默认的堆分配器
 //	- 1.0.0006.1202(2012-01-11)	+ 添加CMemHeapAlloc::ReAlloc()
+//	- 1.0.0007.2354(2012-01-28)	= CMemHeapAlloc改名为CHeapAlloc
+//								- 移除CHeapAlloc::ReAlloc()算法,将ReAlloc()统一在上层完成
+//								- 移除_MemHeap定义,上层直接使用EXP_MEMHEAP_ALLOC
 //////////////////////////////////////////////////////////////////
 
 #ifndef __HeapAlloc_h__
@@ -50,34 +53,25 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/RegistAlloc.h"
+#include "Debugging/Assertion.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CMemHeapAlloc
+class CHeapAlloc
 {
 public:
-	typedef CMemHeapAlloc alloc_t;
+	typedef CHeapAlloc alloc_t;
 
 public:
 	EXP_INLINE static BOOL Valid(void* pPtr)
 	{ return HeapValidate(GetProcessHeap(), 0, pPtr); }
 	EXP_INLINE static DWORD Size(void* pPtr)
 	{ return HeapSize(GetProcessHeap(), 0, pPtr); }
+
 	EXP_INLINE static void* Alloc(DWORD nSize)
 	{ return HeapAlloc(GetProcessHeap(), 0, nSize); }
-	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
-	{
-		if (nSize == 0 && !pPtr) return NULL;
-		if (nSize == 0)
-		{
-			Free(pPtr);
-			return NULL;
-		}
-		return pPtr ? HeapReAlloc(GetProcessHeap(), 0, pPtr, nSize) : Alloc(nSize);
-	}
 	EXP_INLINE static void Free(void* pPtr)
 	{ HeapFree(GetProcessHeap(), 0, pPtr); }
 
@@ -93,7 +87,7 @@ public:
 };
 
 #ifndef EXP_MEMHEAP_ALLOC
-#define EXP_MEMHEAP_ALLOC CMemHeapAlloc
+#define EXP_MEMHEAP_ALLOC CHeapAlloc
 #endif/*EXP_MEMHEAP_ALLOC*/
 
 #ifndef ExCheckMem
@@ -103,8 +97,6 @@ public:
 #define ExCheckMem	__noop
 #endif
 #endif
-
-typedef CRegistAllocT<EXP_MEMHEAP_ALLOC> _MemHeap;
 
 //////////////////////////////////////////////////////////////////
 

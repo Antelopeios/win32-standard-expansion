@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-30
-// Version:	1.3.0028.1804
+// Date:	2012-01-29
+// Version:	1.3.0029.0457
 //
 // History:
 //	- 1.0.0001.1148(2009-08-13)	@ 完成基本的类模板构建
@@ -76,6 +76,7 @@
 //	- 1.3.0028.1804(2011-05-30)	= 将CPtrManagerT独立作为一个单独的模块维护
 //								= 调整CSmartPtrT模板内部定义,参数TypeT直接作为内部变量的类型,而不是TypeT*
 //								+ CSmartPtrT支持不托管内部对象
+//	- 1.3.0029.0457(2012-01-29)	^ 简化CSmartPtrT<>,不再指定线程模型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __SmartPtr_h__
@@ -85,7 +86,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/MemAlloc.h"
 #include "Memory/PtrManager.h"
 
 EXP_BEG
@@ -93,18 +93,17 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // 智能指针类模板
-template <typename TypeT, typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
+template <typename TypeT, typename AllocT = EXP_MEMORY_ALLOC>
 class CSmartPtrT
 {
 public:
 	typedef TypeT type_t;
 	typedef AllocT alloc_t;
-	typedef ModelT model_t;
 
 	// 成员变量
 protected:
-	type_t m_Ptr;
-	BOOL m_bTru;
+	type_t	m_Ptr;
+	BOOL	m_bTru;
 
 	// 构造/析构
 public:
@@ -149,7 +148,7 @@ public:
 	BOOL IsTrust() { return m_bTru; }
 
 	void Inc()
-	{ if (m_bTru) EXP_PTR_MANAGER.Add<alloc_t, model_t>(m_Ptr); }
+	{ if (m_bTru) EXP_PTR_MANAGER.Add<alloc_t>(m_Ptr); }
 	void Dec()
 	{ if (m_bTru) EXP_PTR_MANAGER.Del(m_Ptr); }
 

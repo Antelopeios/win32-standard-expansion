@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-09
-// Version:	1.0.0001.1030
+// Date:	2012-01-28
+// Version:	1.0.0002.1400
 //
 // History:
 //	- 1.0.0001.1030(2012-01-09)	+ IApp构造添加nSingleID参数,支持直接通过资源ID确定唯一性字符串
+//	- 1.0.0002.1400(2012-01-28)	= IThreadT放入App模块内实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __App_h__
@@ -47,11 +48,114 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Thread/SyncObject.h"
-#include "Thread/ThreadHeap.h"
-#include "Thread/ThreadCreator.h"
+#include "Thread/ThreadPool.h"
 
 EXP_BEG
+
+//////////////////////////////////////////////////////////////////
+
+template <typename CreatorT = EXP_THREAD_CREATOR>
+class IThreadT : public ISyncObject
+{
+public:
+	typedef CreatorT creator_t;
+
+protected:
+	BOOL m_bUIThread;
+	LPVOID m_lpParam;
+	DWORD m_nIDThread;
+
+public:
+	IThreadT()
+		: ISyncObject()
+		, m_bUIThread(FALSE)
+		, m_lpParam(NULL)
+		, m_nIDThread(0)
+	{}
+	IThreadT(_IN_ BOOL bUIThread, 
+			 _IN_ LPVOID lpParam = NULL, 
+			 _IN_ DWORD dwFlag = 0, 
+			 _OT_ LPDWORD lpIDThread = NULL)
+		: ISyncObject()
+		, m_bUIThread(FALSE)
+		, m_lpParam(NULL)
+		, m_nIDThread(0)
+	{ Create(lpParam, dwFlag, lpIDThread); }
+	~IThreadT()
+	{}
+
+protected:
+	static DWORD __stdcall ProxyProc(LPVOID lpParam)
+	{
+		IThread* _this = (IThread*)lpParam;
+		if (_this->IsUIThread())
+		{
+			// 先执行线程过程
+			_this->OnThread(_this->GetParam());
+			// 开启UI消息循环
+			MSG msg = {0}; BOOL ret = FALSE;
+			while ((ret = ::GetMessage(&msg, NULL, 0, 0)) != 0)
+			{
+				if (ret == -1)
+					break;
+				else
+				{
+					::TranslateMessage(&msg);
+					if (!_this->OnMessage(&msg))
+						::DispatchMessage(&msg);
+				}
+			}
+			return _this->OnExit((DWORD)msg.wParam);
+		}
+		else
+			return _this->OnExit(_this->OnThread(_this->GetParam()));
+	}
+	virtual DWORD OnThread(LPVOID lpParam) { return 0; }
+	virtual BOOL OnMessage(const MSG* lpMsg) { return FALSE; }
+	virtual DWORD OnExit(DWORD nCode) { return nCode; }
+
+public:
+	BOOL Create(_IN_ BOOL bUIThread = FALSE, 
+				_IN_ LPVOID lpParam = NULL, 
+				_IN_ DWORD dwFlag = 0, 
+				_OT_ LPDWORD lpIDThread = NULL)
+	{
+		if (!IsClosed()) return FALSE;
+		m_bUIThread = bUIThread;
+		m_lpParam = lpParam;
+		m_hSync = creator_t::Create(ProxyProc, this, dwFlag, &m_nIDThread);
+		if (lpIDThread) (*lpIDThread) = m_nIDThread;
+		if (m_hSync == NULL) m_hSync = INVALID_HANDLE_VALUE;
+		if (m_hSync == INVALID_HANDLE_VALUE) return FALSE;
+		return TRUE;
+	}
+
+	BOOL IsUIThread()
+	{ return m_bUIThread; }
+	LPVOID GetParam()
+	{ return m_lpParam; }
+	DWORD GetID()
+	{ return m_nIDThread; }
+
+	virtual BOOL PostMessage(UINT nMsg, WPARAM wParam = 0, LPARAM lParam = NULL)
+	{
+		if (!IsUIThread()) return FALSE;
+		return ::PostThreadMessage(GetID(), nMsg, wParam, lParam);
+	}
+
+	virtual DWORD Suspend()
+	{ return creator_t::Suspend(m_hSync); }
+	virtual DWORD Resume()
+	{ return creator_t::Resume(m_hSync); }
+
+	virtual BOOL Terminate(DWORD dwExitCode = 0)
+	{
+		if (!creator_t::Terminate(m_hSync, dwExitCode)) return FALSE;
+		return Close();
+	}
+};
+
+typedef IThreadT<> IThread;
 
 //////////////////////////////////////////////////////////////////
 

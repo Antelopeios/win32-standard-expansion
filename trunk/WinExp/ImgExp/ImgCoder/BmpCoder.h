@@ -110,7 +110,7 @@ protected:
 	int pit_b = PitchBytes(img_w, bit_c); \
 	int pit_w = PitchWidth(pit_b); \
 	CGC gc; \
-	BYTE* temp = ExMem::Alloc<BYTE>(&gc, pit_b)
+	BYTE* temp = gcnew(gc, BYTE, pit_b)
 //#define PreDecode
 
 	EXP_INLINE static void Decode32(

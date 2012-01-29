@@ -33,12 +33,17 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-20
-// Version:	1.0.0001.1712
+// Date:	2012-01-29
+// Version:	1.0.0002.0006
 //
 // History:
 //	- 1.0.0000.1800(2012-01-15)	@ 开始构建全局new操作符重载
 //	- 1.0.0001.1712(2012-01-20)	+ 添加dbnew及相关内存泄漏自动检测代码
+//	- 1.0.0002.0006(2012-01-29)	= 不再通过new操作符重载重定义new的行为,直接通过宏定义一组新的分配接口
+//								+ 定义realc,支持重新分配并当内存块变化时不释放原先的内存
+//								+ 定义del,用于析构并销毁内存
+//								+ 定义rel,用于直接销毁内存(不调用析构)
+//								+ 定义cnst与dest,用于在已分配好的内存块上构造/析构对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __OverNew_h__
@@ -48,155 +53,70 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/GC.h"
-
-#ifdef	EXP_USING_NEW
-
-//////////////////////////////////////////////////////////////////
-// malloc
-
-EXP_INLINE void* __cdecl operator new(size_t size)
-{
-	return EXP::ExMem::Alloc(size);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr)
-{
-#ifdef	EXP_MANAGED_ALLPTR
-	ZeroMemory(EXP::_Regist::RealPtr(ptr), sizeof(EXP::_Regist));
-#endif/*EXP_MANAGED_ALLPTR*/
-	EXP::ExMem::Free(ptr);
-}
-
-EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker)
-{
-	return maker(EXP::ExMem::Alloc(&gc, size), size);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t)
-{
-	operator delete(ptr);
-}
-
-//////////////////////////////////////////////////////////////////
-// realloc
-
-EXP_INLINE void* __cdecl operator new(size_t size, void* ptr, void*)
-{
-	return EXP::ExMem::ReAlloc(ptr, size);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, void*, void*)
-{
-	operator delete(ptr);
-}
-
-EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker, void* ptr)
-{
-	return maker(EXP::ExMem::ReAlloc(&gc, ptr, size), size);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t, void*)
-{
-	operator delete(ptr);
-}
-
-//////////////////////////////////////////////////////////////////
-// debug_new
-//////////////////////////////////////////////////////////////////
-
-#ifdef	EXP_DUMPING_MEMLEAKS
-
-EXP_INLINE void* MakeObj(void* p, LPCSTR sFile, int nLine)
-{
-	EXP::ExMem::alloc_t::GetAlloc().SetAlloc(EXP::_Regist::RealPtr(p), sFile, nLine);
-	return p;
-}
-
-//////////////////////////////////////////////////////////////////
-// malloc
-
-EXP_INLINE void* __cdecl operator new(size_t size, LPCSTR sFile, int nLine)
-{
-	return MakeObj(operator new(size), sFile, nLine);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, LPCSTR, int)
-{
-	operator delete(ptr);
-}
-
-EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker, LPCSTR sFile, int nLine)
-{
-	return MakeObj(operator new(size, gc, maker), sFile, nLine);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t, LPCSTR, int)
-{
-	operator delete(ptr);
-}
-
-//////////////////////////////////////////////////////////////////
-// realloc
-
-EXP_INLINE void* __cdecl operator new(size_t size, void* ptr, LPCSTR sFile, int nLine)
-{
-	return MakeObj(operator new(size, ptr, NULL), sFile, nLine);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, void*, LPCSTR, int)
-{
-	operator delete(ptr);
-}
-
-EXP_INLINE void* __cdecl operator new(size_t size, EXP::CGC& gc, EXP::_Regist::maker_t maker, void* ptr, LPCSTR sFile, int nLine)
-{
-	return MakeObj(operator new(size, gc, maker, ptr), sFile, nLine);
-}
-
-EXP_INLINE void __cdecl operator delete(void* ptr, EXP::CGC&, EXP::_Regist::maker_t, void*, LPCSTR, int)
-{
-	operator delete(ptr);
-}
+#include "Memory/RegistAlloc.h"
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*EXP_DUMPING_MEMLEAKS*/
-
-//////////////////////////////////////////////////////////////////
-
-#ifdef	EXP_DUMPING_MEMLEAKS
-
+#ifdef	dbnew
 #undef	dbnew
-#define dbnew new(__FILE__, __LINE__)
+#endif/*dbnew*/
 
-#undef	gcnew
-#define gcnew(gc, type) new(gc, (&EXP::_Regist::Maker<type>), __FILE__, __LINE__) type
-
+#ifdef	renew
 #undef	renew
-#define renew(ptr, type) new(ptr, __FILE__, __LINE__) type
+#endif/*renew*/
 
-#undef	gcrenew
-#define gcrenew(gc, ptr, type) new(gc, (&EXP::_Regist::Maker<type>), ptr, __FILE__, __LINE__) type
+#ifdef	realc
+#undef	realc
+#endif/*realc*/
+
+#ifndef	EXP_DUMPING_MEMLEAKS
+
+#define dbnew(type, count)		EXP::ExMem::Alloc<type>(count)
+#define renew(ptr, type, count)	EXP::ExMem::ReAlloc<type>(ptr, count, TRUE)
+#define realc(ptr, type, count)	EXP::ExMem::ReAlloc<type>(ptr, count, FALSE)
 
 #else /*EXP_DUMPING_MEMLEAKS*/
 
-#undef	dbnew
-#define dbnew new
-
-#undef	gcnew
-#define gcnew(gc, type) new(gc, (&EXP::_Regist::Maker<type>)) type
-
-#undef	renew
-#define renew(ptr, type) new(ptr, NULL) type
-
-#undef	gcrenew
-#define gcrenew(gc, ptr, type) new(gc, (&EXP::_Regist::Maker<type>), ptr) type
+#define dbnew(type, count)		(type*)EXP::ExMem::SetAlloc(EXP::ExMem::Alloc<type>(count), __FILE__, __LINE__)
+#define renew(ptr, type, count)	EXP::ExMem::ReAlloc<type>(ptr, count, TRUE, __FILE__, __LINE__)
+#define realc(ptr, type, count)	EXP::ExMem::ReAlloc<type>(ptr, count, FALSE, __FILE__, __LINE__)
 
 #endif/*EXP_DUMPING_MEMLEAKS*/
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*EXP_USING_NEW*/
+#ifdef	gcnew
+#undef	gcnew
+#endif/*gcnew*/
+
+#define gcnew(gc, type, count)	(gc).Alloc<type>(count)
+
+//////////////////////////////////////////////////////////////////
+
+#ifdef	del
+#undef	del
+#endif/*del*/
+
+#ifdef	rel
+#undef	rel
+#endif/*rel*/
+
+#define del(ptr)				EXP::ExMem::Free(ptr)
+#define rel(ptr)				EXP::ExMem::FreeNoDest(ptr)
+
+//////////////////////////////////////////////////////////////////
+
+#ifdef	cnst
+#undef	cnst
+#endif/*cnst*/
+
+#ifdef	dest
+#undef	dest
+#endif/*dest*/
+
+#define cnst(ptr, type, count)	_Traits::Construct<type>(ptr, count)
+#define dest(ptr, type, count)	_Traits::Destruct<type>(ptr, count)
+
+//////////////////////////////////////////////////////////////////
 
 #endif/*__OverNew_h__*/

@@ -70,14 +70,13 @@ protected:
 
 public:
 	IGuiBase()
-		: m_GC(NULL/*ExMem::Alloc<CGC>()*/)
+		: m_GC(NULL)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), GetGC()));
 	}
 	virtual ~IGuiBase(void)
 	{
-	//	ExMem::Free(m_GC);
 	}
 
 public:

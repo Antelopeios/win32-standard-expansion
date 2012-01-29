@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-20
-// Version:	1.3.0030.1540
+// Date:	2012-01-29
+// Version:	1.3.0031.0457
 //
 // History:
 //	- 1.3.0028.1020(2011-05-30)	= 将CPtrManagerT独立作为一个单独的模块维护
 //	- 1.3.0029.1116(2011-05-31)	# 添加一个bool标记,防止CPtrManagerT在析构后继续被调用导致Crash
 //	- 1.3.0030.1540(2011-07-20)	= 将CPtrManager的单例独立到CPtrManager外部,定义EXP_PTR_MANAGER,可由外部按需要自行替换
+//	- 1.3.0031.0457(2012-01-29)	^ 简化CPtrManagerT::CReferPtrT<>,不再指定线程模型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __PtrManager_h__
@@ -49,13 +50,14 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Memory/OverNew.h"
 #include "Container/Map.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
+template <typename ModelT = EXP_THREAD_MODEL>
 class CPtrManagerT : INonCopyable
 {
 protected:
@@ -97,7 +99,7 @@ protected:
 		virtual void Free() = 0;
 	};
 	// 计数指针类
-	template <typename RefAllocT = EXP_MEMORY_ALLOC, typename RefModelT = EXP_THREAD_MODEL>
+	template <typename AllocT = EXP_MEMORY_ALLOC>
 	class CReferPtrT : public IReferPtr
 	{
 	public:
@@ -105,16 +107,16 @@ protected:
 			: IReferPtr()
 		{}
 		~CReferPtrT()
-		{ if (p_ptr) RefAllocT::Free(p_ptr); }
+		{ if (p_ptr) AllocT::Free(p_ptr); }
 
 	public:
 		void Inc()
 		{
-			RefModelT::Inc(&n_ref);
+			ModelT::Inc(&n_ref);
 		}
 		BOOL Dec()
 		{
-			if (RefModelT::Dec(&n_ref) == 0)
+			if (ModelT::Dec(&n_ref) == 0)
 			{
 				Free();
 				return TRUE;
@@ -124,17 +126,16 @@ protected:
 		}
 
 		EXP_INLINE static CReferPtrT* Alloc()
-		{ return AllocT::Alloc<CReferPtrT>(); }
+		{ return dbnew(CReferPtrT); }
 		void Free()
-		{ AllocT::Free(this); }
+		{ del(this); }
 	};
 
 public:
-	typedef AllocT alloc_t;
 	typedef ModelT model_t;
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
-	typedef CMapT<void*, IReferPtr*, _MapPolicyT<1009, CHash, alloc_t> > ptr_map_t;
+	typedef CMapT<void*, IReferPtr*, _MapPolicyT<1009, CHash> > ptr_map_t;
 
 protected:
 	mutex_t		m_Mutex;
@@ -167,7 +168,7 @@ public:
 			return 0;
 	}
 	// 添加指针引用计数
-	template <typename RefAllocT, typename RefModelT>
+	template <typename AllocT>
 	EXP_INLINE void Add(void* pPtr)
 	{
 		if (!pPtr) return;
@@ -177,7 +178,7 @@ public:
 		ptr_map_t::iterator_t ite = m_ReferPtrs.Locate(pPtr);
 		if (ite == m_ReferPtrs.Tail())
 		{
-			ref_ptr = CReferPtrT<RefAllocT, RefModelT>::Alloc();
+			ref_ptr = CReferPtrT<AllocT>::Alloc();
 			ref_ptr->InitPtr(pPtr);
 			m_ReferPtrs.Add(pPtr, ref_ptr);
 		}

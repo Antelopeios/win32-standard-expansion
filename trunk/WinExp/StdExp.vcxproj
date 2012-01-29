@@ -97,15 +97,13 @@
     <ClInclude Include="StdExp\Thread\SyncObject.h" />
     <ClInclude Include="StdExp\Thread\Thread.h" />
     <ClInclude Include="StdExp\Thread\ThreadCreator.h" />
-    <ClInclude Include="StdExp\Thread\ThreadHeap.h" />
     <ClInclude Include="StdExp\Thread\ThreadModel.h" />
     <ClInclude Include="StdExp\Thread\ThreadPool.h" />
     <ClInclude Include="StdExp\Memory\GC.h" />
-    <ClInclude Include="StdExp\Memory\MemAlloc.h" />
     <ClInclude Include="StdExp\Memory\MemHeap.h" />
     <ClInclude Include="StdExp\Memory\Memory.h" />
     <ClInclude Include="StdExp\Memory\MemPool.h" />
-    <ClInclude Include="StdExp\Memory\ObjPool.h" />
+    <ClInclude Include="StdExp\Memory\BlockPool.h" />
     <ClInclude Include="StdExp\Memory\OverNew.h" />
     <ClInclude Include="StdExp\Memory\PtrManager.h" />
     <ClInclude Include="StdExp\Memory\RegistAlloc.h" />

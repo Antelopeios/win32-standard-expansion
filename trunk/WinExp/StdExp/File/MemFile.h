@@ -55,29 +55,27 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC>
-class CMemFileT : public IFileObject
+class CMemFile : public IFileObject
 {
 public:
-	typedef AllocT alloc_t;
-	typedef struct _MemArrayPolicy : public _ArrayPolicyT<alloc_t>
+	typedef struct _MemArrayPolicy : public _ArrayPolicy
 	{
 		static DWORD Expan(DWORD nSize)
 		{ return (((nSize >> 16) + 1) << 16); /*+64KB*/ }
 	} policy_t;
 	typedef CArrayT<BYTE, policy_t> buff_t;
-	typedef typename buff_t::iterator_t iterator_t;
+	typedef buff_t::iterator_t iterator_t;
 
 protected:
 	buff_t m_MemBuff;
 	iterator_t m_Position;
 
 public:
-	CMemFileT(BYTE* pBuff = NULL, DWORD nSize = 1)
+	CMemFile(BYTE* pBuff = NULL, DWORD nSize = 1)
 	{ Open(pBuff, nSize); }
-	CMemFileT(IFileObject& rFile)
+	CMemFile(IFileObject& rFile)
 	{ rFile.CopyTo(*this); }
-	virtual ~CMemFileT()
+	virtual ~CMemFile()
 	{ Close(); }
 
 public:
@@ -123,9 +121,9 @@ public:
 			if (m_Position->Index() > m_MemBuff.GetCount())
 			{	// Ìî³ä¿Õ°×¿Õ¼ä
 				DWORD fill = m_Position->Index() - m_MemBuff.GetCount();
-				BYTE* buff = alloc_t::Alloc<BYTE>(fill);
+				BYTE* buff = dbnew(BYTE, fill);
 				m_MemBuff.AddArray(buff, fill);
-				alloc_t::Free(buff);
+				del(buff);
 			}
 		}
 		m_MemBuff.AddArray((BYTE*)pBuff, len, m_Position);
@@ -173,9 +171,9 @@ public:
 		if (nSize > Size())
 		{	// Ìî³ä¿Õ°×¿Õ¼ä
 			DWORD fill = m_Position->Index() - m_MemBuff.GetCount();
-			BYTE* buff = alloc_t::Alloc<BYTE>(fill);
+			BYTE* buff = dbnew(BYTE, fill);
 			BOOL r = m_MemBuff.AddArray(buff, fill);
-			alloc_t::Free(buff);
+			del(buff);
 			return r;
 		}
 		return TRUE;
@@ -200,8 +198,6 @@ public:
 		return (LPCVOID)(LPBYTE)m_MemBuff;
 	}
 };
-
-typedef CMemFileT<> CMemFile;
 
 //////////////////////////////////////////////////////////////////
 

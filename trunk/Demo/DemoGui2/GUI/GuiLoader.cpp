@@ -6,11 +6,11 @@
 // º”‘ÿ◊ ‘¥
 void CGuiLoader::LoadRes()
 {
-	CText* txt = ExMem::Alloc<CText>(&gc);
+	CText* txt = gcnew(gc, CText);
 	txt->SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	REG_TXT(search, txt);
 
-	txt = ExMem::Alloc<CText>(&gc);
+	txt = gcnew(gc, CText);
 	txt->SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt->SetColor(ExRGBA(0, 0, 0, 100));
 	REG_TXT(cover, txt);
@@ -28,7 +28,7 @@ void CGuiLoader::LoadRes()
 	if (hres) \
 	{ \
 		file.Open(buff, size); \
-		REG_IMG(img_id, ExMem::Alloc<CImage>(&gc))->Set(coder->Decode()); \
+		REG_IMG(img_id, gcnew(gc, CImage))->Set(coder->Decode()); \
 		CGlobal::ReleaseBinary(hres); \
 	}
 //#define REG_RES_IMG(res_id, img_id)
@@ -246,7 +246,7 @@ CGuiLoader* g_instance = NULL;
 CGuiLoader* CGuiLoader::Instance()
 {
 	if (g_instance == NULL)
-		g_instance = ExMem::Alloc<CGuiLoader>();
+		g_instance = dbnew(CGuiLoader);
 	return g_instance;
 }
 
@@ -376,7 +376,7 @@ void CGuiLoader::Init()
 
 void CGuiLoader::Term()
 {
-	ExMem::Free(this);
+	del(this);
 	g_instance = NULL;
 }
 

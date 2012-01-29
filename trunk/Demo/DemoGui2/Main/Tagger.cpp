@@ -14,7 +14,7 @@ CTagger* g_instance = NULL;
 CTagger* CTagger::Instance()
 {
 	if (g_instance == NULL)
-		g_instance = ExMem::Alloc<CTagger>();
+		g_instance = dbnew(CTagger);
 	return g_instance;
 }
 
@@ -29,7 +29,7 @@ void CTagger::Term()
 	GUI()->Term();	// 界面层卸载
 	DAT()->Term();	// 数据层卸载
 
-	ExMem::Free(this);
+	del(this);
 	g_instance = NULL;
 }
 

@@ -118,7 +118,7 @@ public:
 		return r;
 	}
 
-	void Free() { ExMem::Free(this); }
+	void Free() { del(this); }
 };
 
 //////////////////////////////////////////////////////////////////

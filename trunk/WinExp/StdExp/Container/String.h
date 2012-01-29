@@ -78,24 +78,25 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC>
-struct _StringPolicyT;
+typedef _ArrayPolicy _StringPolicy;
 
-template <typename TypeT = TCHAR, typename PolicyT = _StringPolicyT<> >
+//////////////////////////////////////////////////////////////////
+
+template <typename TypeT = TCHAR, typename PolicyT = _StringPolicy>
 class CStringT : public IContainerObjectT<TypeT, PolicyT, CStringT<TypeT, PolicyT> >
 {
 public:
-	static int MultiByteToWideChar(UINT CodePage, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR& lpWideCharStr, int& cchWideChar, void* pGC = NULL)
+	static int MultiByteToWideChar(UINT CodePage, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR& lpWideCharStr, int& cchWideChar)
 	{
 		cchWideChar = ::MultiByteToWideChar(CodePage, NULL, lpMultiByteStr, cbMultiByte, NULL, 0);
-		lpWideCharStr = ExMem::Alloc<wchar_t>((CGC*)pGC, cchWideChar);
+		lpWideCharStr = dbnew(wchar_t, cchWideChar);
 		return ::MultiByteToWideChar(CodePage, NULL, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
 	}
 
-	static int WideCharToMultiByte(UINT CodePage, LPCWSTR lpWideCharStr, int cchWideChar, LPSTR& lpMultiByteStr, int& cbMultiByte, void* pGC = NULL)
+	static int WideCharToMultiByte(UINT CodePage, LPCWSTR lpWideCharStr, int cchWideChar, LPSTR& lpMultiByteStr, int& cbMultiByte)
 	{
 		cbMultiByte = ::WideCharToMultiByte(CodePage, NULL, lpWideCharStr, cchWideChar, NULL, 0, NULL, FALSE);
-		lpMultiByteStr = ExMem::Alloc<char>((CGC*)pGC, cbMultiByte);
+		lpMultiByteStr = dbnew(char, cbMultiByte);
 		return ::WideCharToMultiByte(CodePage, NULL, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, NULL, FALSE);
 	}
 
@@ -142,7 +143,7 @@ public:
 	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if (GetSize() >= nSize) return;
-		m_Array = alloc_t::ReAlloc<type_t>(m_Array, nSize);
+		m_Array = renew(m_Array, type_t, nSize);
 		if (GetSize() == 0) m_Array[0] = 0;
 		m_nSize = nSize;
 	}
@@ -160,7 +161,7 @@ public:
 	{
 		if (m_Array)
 		{
-			alloc_t::Free(m_Array);
+			del(m_Array);
 			m_Array = NULL;
 		}
 		m_nSize = 0;
@@ -171,7 +172,7 @@ public:
 		if (m_Array)
 		{
 			m_nSize = GetCount();
-			m_Array = alloc_t::ReAlloc<type_t>(m_Array, m_nSize);
+			m_Array = renew(m_Array, type_t, m_nSize);
 		}
 		else
 			m_nSize = 0;
@@ -244,7 +245,7 @@ public:
 			MultiByteToWideChar(CP_ACP, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			wcscpy_s((wchar_t*)m_Array, GetSize(), tmp_str);
-			ExMem::Free(tmp_str);
+			del(tmp_str);
 		}
 		return (*this);
 	}
@@ -257,7 +258,7 @@ public:
 			WideCharToMultiByte(CP_OEMCP, pString, -1, tmp_str, len);
 			GetCStr(len); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
 			strcpy_s((char*)m_Array, GetSize(), tmp_str);
-			ExMem::Free(tmp_str);
+			del(tmp_str);
 		}
 		else
 		{
@@ -668,12 +669,6 @@ public:
 };
 
 typedef CStringT<> CString;
-
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _StringPolicyT : public _ArrayPolicyT<AllocT>
-{};
 
 //////////////////////////////////////////////////////////////////
 

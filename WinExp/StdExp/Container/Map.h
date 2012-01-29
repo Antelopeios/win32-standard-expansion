@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-20
-// Version:	1.0.0007.1712
+// Date:	2012-01-29
+// Version:	1.0.0009.1943
 //
 // History:
 //	- 1.0.0005.2230(2011-02-24)	# 修正迭代器获取接口内部实现的一处低级错误(static iterator_t iter(node_t(this));)
@@ -42,6 +42,9 @@
 //								+ 添加CMapT::Null()接口,支持彻底清空CMapT
 //	- 1.0.0006.1540(2011-07-20)	= 将CMapT::_Assoc与IPoolTypeT解耦,避免DLL中置换单例导致IPoolTypeT中的单例模板无法导出
 //	- 1.0.0007.1712(2012-01-20)	# 修正CMapT析构时没有自动释放内部申请的结点内存而导致的内存泄漏
+//	- 1.0.0008.1733(2012-01-27)	^ 采用POD数组及单链表优化CMapT的综合性能
+//								+ _MapPolicyT支持直接通过模板参数调整默认大小
+//	- 1.0.0009.1943(2012-01-29)	# 修正优化后CMapT::Del()接口内的重大算法bug
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Map_h__
@@ -51,8 +54,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Container/Array.h"
-#include "Container/List.h"
+#include "Memory/OverNew.h"
+#include "Container/ContainerObject.h"
 #include "Algorithm/Hash.h"
 
 EXP_BEG
@@ -71,23 +74,25 @@ struct _MapPolicyT
 		typedef typename container_t::key_t key_t;
 		typedef typename container_t::type_t type_t;
 		typedef typename container_t::pair_t pair_t;
-		typedef typename container_t::ite_t ite_t;
+		typedef typename container_t::assoc_t assoc_t;
 
 		container_t* pCont;
-		ite_t nIndx;
+		assoc_t* nIndx;
 
 		node_t(container_t* p = NULL)
 			: pCont(p)
+			, nIndx(NULL)
 		{}
-		node_t(const container_t* p)
+		node_t(const container_t* p, assoc_t* b)
 			: pCont((container_t*)p)
+			, nIndx(b)
 		{}
 
-		key_t& Key() { return nIndx->Val()->Key; }
-		type_t& Val() { return nIndx->Val()->Val; }
+		const key_t& Key() { return nIndx->Key; }
+		type_t& Val() { return nIndx->Val; }
 
 		BOOL InThis(container_t* cnt) { return pCont == cnt; }
-		pair_t* Index() { return (pair_t*)(nIndx->Val()); }
+		pair_t* Index() { return (pair_t*)nIndx; }
 
 		BOOL operator==(const node_t& node)
 		{ return (pCont == node.pCont && (nIndx == node.nIndx)); }
@@ -97,42 +102,20 @@ struct _MapPolicyT
 		void Next(long nOff = 1)
 		{
 			if (!pCont || nOff == 0) return;
-			if (nOff > 0)
+			ExAssert(nOff > 0);
+			assoc_t* lst = NULL;
+			while(nIndx && 0 < nOff--)
 			{
-				if (!nIndx->Val()) --nOff;
-				while (nIndx != pCont->Tail()->nIndx)
+				lst = nIndx;
+				nIndx = nIndx->pNext;
+				if (!nIndx)
 				{
-					if (0 < nOff)
+					DWORD inx = (lst->nHash % pCont->m_nSize) + 1;
+					do
 					{
-						if ((nIndx++)->Val())
-							--nOff;
-					}
-					else
-					{
-						if (nIndx->Val())
-							break;
-						else
-							++nIndx;
-					}
-				}
-			}
-			else
-			{
-				if (!nIndx->Val()) ++nOff;
-				while (nIndx != pCont->Head()->nIndx)
-				{
-					if (0 > nOff)
-					{
-						if ((nIndx--)->Val())
-							++nOff;
-					}
-					else
-					{
-						if (nIndx->Val())
-							break;
-						else
-							--nIndx;
-					}
+						if (inx >= pCont->m_nSize) return;
+						nIndx = pCont->m_Table[inx++];
+					} while(!nIndx);
 				}
 			}
 		}
@@ -148,101 +131,136 @@ struct _MapPolicyT
 template <typename KeyT, typename TypeT, typename PolicyT = _MapPolicyT<> >
 class CMapT : public IContainerObjectT<TypeT, PolicyT, CMapT<KeyT, TypeT, PolicyT> >
 {
+	friend typename node_t;
+
 public:
 	typedef KeyT key_t;
 	typedef typename policy_t::hash_t hash_t;
 
 public:
-	typedef struct
+	typedef struct _Pair
 	{
-		key_t	Key;
-		type_t	Val;
+		const key_t Key;
+		type_t Val;
+
+	protected:
+		_Pair(const key_t& key) : Key(key)	{}
 	} pair_t;
 
-	typedef struct _Assoc : public pair_t
+	typedef struct _Assoc : public _Pair
 	{
-		DWORD	nHash;
-		BOOL	bSet;
+		DWORD nHash;
+		_Assoc* pNext;
 
-		_Assoc(BOOL s = TRUE)
-			: nHash(0)
-			, bSet(s)
+		_Assoc(const key_t& key)
+			: _Pair(key)
+			, nHash(0)
+			, pNext(NULL)
 		{}
 
-		static _Assoc* Alloc()
-		{ return dbnew(_Assoc); }
-		void Free()
-		{ del(this); }
+		EXP_INLINE static _Assoc* Alloc(CBlockPool* pool, const key_t& key)
+		{
+			_Assoc* pa = (_Assoc*)pool->Alloc();
+			pa->_Assoc::_Assoc(key);
+			return pa;
+		}
+		EXP_INLINE void Free(CBlockPool* pool)
+		{
+			this->~_Assoc();
+			pool->Free(this);
+		}
 	} assoc_t;
 
-	typedef CListT<assoc_t*> alist_t;
-	typedef typename alist_t::iterator_t ite_t;
-	typedef CArrayT<ite_t> table_t;
-
 protected:
-	alist_t	m_Assoc;
-	table_t m_Table;
+	assoc_t** m_Table;
+	DWORD m_nSize, m_nCount;
+	CBlockPool* m_Pool;
 
 	// 定位
-	BOOL Locate(_IN_ const key_t& Key, _OT_ ite_t& Iter, _OT_ DWORD* pHash = NULL)
+	assoc_t* Locate(_IN_ const key_t& Key, _OT_ assoc_t*& pLast, 
+					_OT_ DWORD* pIndx = NULL, _OT_ DWORD* pHash = NULL)
 	{
-		DWORD hash = hash_t::HashKey<key_t>(Key);
-		DWORD indx = hash % GetSize();
-		BOOL ret = FALSE;
-		ite_t ite = (m_Table[indx] + 1);
-		ite_t end = (indx == GetSize() - 1) ? m_Assoc.Tail() : m_Table[indx + 1];
-		for(; ite != end; ++ite)
-			if (ite->Val() && 
-				ite->Val()->nHash == hash && 
-				ite->Val()->Key == Key)
+		pLast = NULL;
+		if (IsNull() || Empty())
+		{
+			if (pHash || pIndx)
 			{
-				ret = TRUE;
-				break;
+				DWORD hash = hash_t::HashKey<key_t>(Key);
+				if (pHash) (*pHash) = hash;
+				if (pIndx) (*pIndx) = hash % m_nSize;
 			}
-		Iter = ite;
+			return NULL;
+		}
+		DWORD hash = hash_t::HashKey<key_t>(Key);
+		DWORD indx = hash % m_nSize;
 		if (pHash) (*pHash) = hash;
-		return ret;
+		if (pIndx) (*pIndx) = indx;
+		assoc_t* assoc = m_Table[indx];
+		for(; assoc; pLast = assoc, assoc = assoc->pNext)
+			if (assoc->nHash == hash && assoc->Key == Key) break;
+		return assoc;
+	}
+	assoc_t* Locate(_IN_ const key_t& Key, _OT_ DWORD* pIndx, _OT_ DWORD* pHash = NULL)
+	{
+		assoc_t* lst;
+		return Locate(Key, lst, pIndx, pHash);
 	}
 
 public:
 	CMapT(DWORD nSize = PolicyT::DEF_SIZE)
-	{ SetSize(nSize); }
+		: m_Table(NULL)
+		, m_nSize(0), m_nCount(0)
+		, m_Pool(dbnew(CBlockPool))
+	{
+		m_Pool->SetObjSize(sizeof(assoc_t));
+		SetSize(nSize);
+	}
 	~CMapT()
-	{ Null(); }
+	{
+		Null();
+		del(m_Pool);
+	}
 
 public:
 	DWORD GetSize() const
-	{ return m_Table.GetCount(); }
+	{ return m_nSize; }
 	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
-		if (nSize == 0 || GetSize() == nSize) return;
-		Null();
-		m_Table.SetSize(nSize);
-		// 初始化链表
-		for(DWORD i = 0; i < nSize; ++i)
-			m_Assoc.Add(NULL);
-		// 初始化Table
-		for(ite_t ite = m_Assoc.Head(); ite != m_Assoc.Tail(); ++ite)
-			m_Table.Add(ite);
+		if (m_nSize == nSize) return;
+		if (0 == nSize)
+			Null();
+		else
+		{
+			Clear();
+			m_Table = renew(m_Table, assoc_t*, nSize);
+			ZeroMemory(m_Table, sizeof(assoc_t*) * nSize);
+			m_nSize = nSize;
+		}
 	}
 	DWORD GetCount() const
-	{ return m_Assoc.GetCount() - GetSize(); }
+	{ return m_nCount; }
 
 	BOOL Empty() const
-	{ return m_Assoc.Empty(); }
+	{ return (m_nCount == 0); }
 	void Clear()
 	{
-		DWORD size = GetSize();
-		m_Table.Clear();
-		SetSize(size);
+		if (IsNull() || Empty()) return;
+		for(DWORD i = 0; i < m_nSize; ++i)
+			for(assoc_t* asc = m_Table[i], *lst; lst = asc; asc = asc->pNext, lst->Free(m_Pool));
+		ZeroMemory(m_Table, sizeof(assoc_t*) * m_nSize);
+		m_nCount = 0;
+	}
+
+	BOOL IsNull() const
+	{
+		return (m_nSize == 0 && !m_Table);
 	}
 	void Null()
 	{
-		// 清空 Table 与 Assoc
-		for(ite_t ite = m_Assoc.Head(); ite != m_Assoc.Tail(); ++ite)
-			if (ite->Val()) ite->Val()->Free();
-		m_Assoc.Clear();
-		m_Table.Clear();
+		Clear();
+		del(m_Table);
+		m_Table = NULL;
+		m_nSize = 0;
 	}
 
 	type_t& operator[](const key_t& Key)
@@ -250,59 +268,55 @@ public:
 
 	type_t& GetAt(const key_t& Key)
 	{
-		ite_t ite;
-		DWORD hash = 0;
-		if(!Locate(Key, ite, &hash))
+		ExAssert(!IsNull());
+		DWORD inx = 0, hash = 0;
+		assoc_t* asc = Locate(Key, &inx, &hash);
+		if(!asc)
 		{
-			assoc_t* assoc = assoc_t::Alloc();
-			assoc->nHash = hash;
-			assoc->Key	 = Key;
-			m_Assoc.Add(assoc, ite);
-			--ite;
+			asc = assoc_t::Alloc(m_Pool, Key);
+			asc->nHash = hash;
+			asc->pNext = m_Table[inx];
+			m_Table[inx] = asc;
+			++m_nCount;
 		}
-		ExAssert(ite->Val());
-		return ite->Val()->Val;
+		ExAssert(asc);
+		return asc->Val;
 	}
 
 	iterator_t Locate(const key_t& Key)
 	{
 		iterator_t iter(node_t(this));
-		ite_t ite;
-		if (Locate(Key, ite))
-		{
-			iter->nIndx = ite;
-			return iter;
-		}
-		else
-			return Tail();
+		iter->nIndx = Locate(Key, NULL);
+		return iter;
 	}
 
 	iterator_t Head() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_Assoc.Head();
-		if (ite->nIndx != m_Assoc.Tail() && !ite->nIndx->Val())
-			++ ite;
-		return ite;
+		if (IsNull() || Empty()) return Tail();
+		DWORD i = 0;
+		for(; i < m_nSize; ++i) if (m_Table[i]) break;
+		ExAssert(i < m_nSize);
+		return node_t(this, m_Table[i]);
 	}
 	iterator_t Tail() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_Assoc.Tail();
-		return ite;
+		return node_t(this, NULL);
 	}
 	iterator_t Last() const
 	{
-		iterator_t ite(node_t(this));
-		ite->nIndx = m_Assoc.Last();
-		if (ite->nIndx != m_Assoc.Tail() && !ite->nIndx->Val())
-			-- ite;
-		return ite;
+		if (IsNull() || Empty()) return Head();
+		long i = (long)(m_nSize - 1);
+		for(; i >= 0; --i) if (m_Table[i]) break;
+		ExAssert(i >= 0);
+		assoc_t* asc = m_Table[i], *lst = asc;
+		for(; asc; lst = asc, asc = asc->pNext);
+		ExAssert(lst);
+		return node_t(this, lst);
 	}
 	type_t HeadItem() const
-	{ return Head()->Val()->Val; }
+	{ return Head()->Val(); }
 	type_t LastItem() const
-	{ return Last()->Val()->Val; }
+	{ return Last()->Val(); }
 
 	BOOL Add(const key_t& Key, const type_t& Val)
 	{
@@ -314,11 +328,17 @@ public:
 
 	BOOL Del(const key_t& Key)
 	{
-		ite_t ite;
-		if (Locate(Key, ite))
+		DWORD inx = 0;
+		assoc_t* lst = NULL, *asc = Locate(Key, lst, &inx);
+		if (asc)
 		{
-			ite->Val()->Free();
-			return m_Assoc.Del(ite);
+			if (lst)
+				lst->pNext = asc->pNext;
+			else
+				m_Table[inx] = asc->pNext;
+			asc->Free(m_Pool);
+			--m_nCount;
+			return TRUE;
 		}
 		else
 			return FALSE;
@@ -328,8 +348,7 @@ public:
 		if (Empty()) return TRUE;
 		if (!(Iter->InThis(this))) return FALSE;
 		if (!(Iter->Index())) return FALSE;
-		Iter->nIndx->Val()->Free();
-		return m_Assoc.Del(Iter->nIndx);
+		return Del(Iter->Key());
 	}
 };
 

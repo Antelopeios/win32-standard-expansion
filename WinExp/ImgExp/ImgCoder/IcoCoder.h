@@ -133,7 +133,7 @@ public:
 		file->Write(exp_image.GetPixels(), exp_image.GetSize(), 1);
 		pixel_t* tpbf = exp_image.GetPixels();
 		long clr_size = (exp_image.GetWidth() * exp_image.GetHeight()) >> 8;
-		BYTE* mkbf = (BYTE*)ZeroMemory(ExMem::Alloc<BYTE>(clr_size), clr_size * sizeof(BYTE));
+		BYTE* mkbf = (BYTE*)ZeroMemory(dbnew(BYTE, clr_size), clr_size);
 		for(long i = 0; i < clr_size; ++i)
 		{
 			for(int n = 7; n >= 0; --n, ++tpbf)
@@ -141,7 +141,7 @@ public:
 					mkbf[i] |= (0x01 << (1 * n));
 		}
 		file->Write(mkbf, clr_size, sizeof(BYTE));
-		ExMem::Free(mkbf);
+		del(mkbf);
 		file->Seek(0, IFileObject::begin);
 		return TRUE;
 	}
@@ -190,7 +190,7 @@ public:
 		CBmpCoder::OnDecode(file, bmp_head, file_info, bmbf);
 		// ÑÚÂë¸²¸Ç
 		clr_size = (file_info.bmiHeader.biWidth * file_info.bmiHeader.biHeight) >> 8;
-		BYTE* mkbf = ExMem::Alloc<BYTE>(clr_size);
+		BYTE* mkbf = dbnew(BYTE, clr_size);
 		file->Read(mkbf, clr_size, sizeof(BYTE));
 		pixel_t* tpbf = bmbf;
 		for(long i = 0; i < clr_size; ++i)
@@ -209,7 +209,7 @@ public:
 				else
 				if (*tpbf != 0) *tpbf = 0;
 			}
-		ExMem::Free(mkbf);
+		del(mkbf);
 		// ·µ»Øimage_t
 		return image;
 	}

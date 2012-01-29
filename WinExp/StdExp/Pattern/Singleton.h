@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.0.0007.1554
+// Date:	2012-01-28
+// Version:	1.0.0008.1430
 //
 // History:
 //	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
 //	- 1.0.0006.1909(2011-05-11)	= 重命名CSingletonT为ISingletonT
 //	- 1.0.0007.1554(2011-05-19)	+ StdExp内部的单例调用支持由外部统一置换
+//	- 1.0.0008.1430(2012-01-28)	+ ISingletonT支持外部传入ModelT作为内部实现的线程模型策略
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Singleton_h__
@@ -55,7 +56,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT>
+template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
 interface ISingletonT
 {
 public:
@@ -64,7 +65,7 @@ public:
 		static TypeT* instance = NULL;
 		if (instance == NULL)
 		{
-			ExLockThis();
+			ExLockThis(typename ModelT::_LockPolicy);
 			if (instance == NULL)
 			{
 				static TypeT type;

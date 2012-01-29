@@ -1,4 +1,4 @@
-// Copyright 2010-2011, Ä¾Í·ÔÆ
+// Copyright 2010-2012, Ä¾Í·ÔÆ
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-04
-// Version:	1.0.0001.2202
+// Date:	2012-01-29
+// Version:	1.0.0002.1450
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Thread_h__
@@ -54,9 +54,8 @@
 #include "Thread/ThreadModel.h"
 #include "Thread/Lock.h"
 #include "Thread/NonLock.h"
-#include "Thread/ThreadHeap.h"
-#include "Thread/ThreadPool.h"
 #include "Thread/ThreadCreator.h"
+#include "Thread/ThreadPool.h"
 #include "Thread/App.h"
 
 //////////////////////////////////////////////////////////////////

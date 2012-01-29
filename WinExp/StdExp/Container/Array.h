@@ -54,17 +54,55 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Memory/MemAlloc.h"
+#include "Memory/OverNew.h"
 #include "Container/ContainerObject.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC>
-struct _ArrayPolicyT;
+struct _ArrayPolicy
+{
+	template <typename ContainerT>
+	struct node_t
+	{
+		typedef ContainerT container_t;
+		typedef typename container_t::type_t type_t;
 
-template <typename TypeT, typename PolicyT = _ArrayPolicyT<> >
+		container_t* pCont;
+		DWORD	nIndx;
+
+		node_t(container_t* p = NULL, DWORD b = 0)
+			: pCont(p)
+			, nIndx(b)
+		{}
+		node_t(const container_t* p, DWORD b = 0)
+			: pCont((container_t*)p)
+			, nIndx(b)
+		{}
+
+		type_t& Val() { return pCont->GetAt(nIndx); }
+
+		BOOL InThis(container_t* cnt) { return pCont == cnt; }
+		DWORD Index() { return nIndx; }
+
+		BOOL operator==(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
+		BOOL operator!=(const node_t& node)
+		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
+
+		void Next(long nOff = 1) { if (nIndx < pCont->Tail()->Index()) nIndx += nOff; }
+		void Prev(long nOff = 1) { if (nIndx > pCont->Head()->Index()) nIndx -= nOff; }
+	};
+
+	static const DWORD DEF_SIZE = 0;
+	static DWORD Expan(DWORD nSize)
+	{ return nSize ? (nSize << 1) : 1; }
+};
+
+//////////////////////////////////////////////////////////////////
+
+template <typename TypeT, typename PolicyT = _ArrayPolicy>
 class CArrayT : public IContainerObjectT<TypeT, PolicyT, CArrayT<TypeT, PolicyT> >
 {
 protected:
@@ -75,22 +113,19 @@ protected:
 protected:
 	EXP_INLINE static void InitElements(type_t* pDst, DWORD nCount)
 	{
-		if (!pDst || nCount == 0) return;
-	//	ZeroMemory(pDst, sizeof(type_t) * nCount);
-		_Traits::Construct<type_t>(pDst, nCount);
+		cnst(pDst, type_t, nCount);
 	}
 	EXP_INLINE static void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount, _true_type)
 	{
-		if (!pDst || !pSrc || nCount == 0) return;
 		memcpy(pDst, pSrc, sizeof(type_t) * nCount);
 	}
 	EXP_INLINE static void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount, _false_type)
 	{
-		if (!pDst || !pSrc || nCount == 0) return;
 		while (nCount--) *pDst++ = *pSrc++;
 	}
 	EXP_INLINE static void CopyElements(type_t* pDst, const type_t* pSrc, DWORD nCount)
 	{
+		ExAssert(nCount);
 		CopyElements(pDst, pSrc, nCount, _TraitsT<type_t>::is_POD_type());
 	}
 
@@ -127,7 +162,7 @@ public:
 	void SetSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		if( GetSize() >= nSize ) return;
-		m_Array = alloc_t::ReAlloc<type_t>(m_Array, nSize);
+		m_Array = renew(m_Array, type_t, nSize);
 		m_nSize = nSize;
 	}
 	void SetSizeExpan(DWORD nSize = PolicyT::DEF_SIZE)
@@ -143,8 +178,9 @@ public:
 	{
 		if (m_Array)
 		{
-			InitElements(m_Array + GetCount(), GetSize() - GetCount());
-			alloc_t::Free(m_Array);
+			if (GetCount())
+				dest(m_Array, type_t, GetCount());
+			rel(m_Array);
 			m_Array = NULL;
 		}
 		m_nCont = m_nSize = 0;
@@ -155,7 +191,7 @@ public:
 		if (m_Array)
 		{
 			m_nSize = GetCount();
-			m_Array = alloc_t::ReAlloc<type_t>(m_Array, m_nSize);
+			m_Array = renew(m_Array, type_t, m_nSize);
 		}
 		else
 			m_nCont = m_nSize = 0;
@@ -302,57 +338,13 @@ public:
 		type_t* ptr_array = m_Array + inx_node;
 		ExAssert(ptr_array);
 		// É¾³ýÔªËØ
-		_Traits::Destruct<type_t>(ptr_array - nLen, sizeof(type_t) * nLen);
+		dest(ptr_array - nLen, type_t, nLen);
 		m_nCont -= nLen;
 		// ÒÆ¶¯ÔªËØ
 		if (inx_size)
 			memmove(ptr_array - nLen, ptr_array, sizeof(type_t) * inx_size);
 		return TRUE;
 	}
-};
-
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT/* = EXP_MEMORY_ALLOC*/>
-struct _ArrayPolicyT
-{
-	typedef AllocT alloc_t;
-
-	template <typename ContainerT>
-	struct node_t
-	{
-		typedef ContainerT container_t;
-		typedef typename container_t::type_t type_t;
-
-		container_t* pCont;
-		DWORD	nIndx;
-
-		node_t(container_t* p = NULL, DWORD b = 0)
-			: pCont(p)
-			, nIndx(b)
-		{}
-		node_t(const container_t* p, DWORD b = 0)
-			: pCont((container_t*)p)
-			, nIndx(b)
-		{}
-
-		type_t& Val() { return pCont->GetAt(nIndx); }
-
-		BOOL InThis(container_t* cnt) { return pCont == cnt; }
-		DWORD Index() { return nIndx; }
-
-		BOOL operator==(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) == 0); }
-		BOOL operator!=(const node_t& node)
-		{ return (memcmp(this, &node, sizeof(node_t)) != 0); }
-
-		void Next(long nOff = 1) { if (nIndx < pCont->Tail()->Index()) nIndx += nOff; }
-		void Prev(long nOff = 1) { if (nIndx > pCont->Head()->Index()) nIndx -= nOff; }
-	};
-
-	static const DWORD DEF_SIZE = 0;
-	static DWORD Expan(DWORD nSize)
-	{ return nSize ? (nSize << 1) : 1; }
 };
 
 //////////////////////////////////////////////////////////////////

@@ -109,11 +109,11 @@ protected:
 	EXP_INLINE pixel_t* Alloc(LONG diamet2)
 	{
 		ExAssert(diamet2 > 1);
-		return ExMem::Alloc<pixel_t>(diamet2);
+		return dbnew(pixel_t, diamet2);
 	}
 	EXP_INLINE void Free(pixel_t* pix_blc)
 	{
-		ExMem::Free(pix_blc);
+		del(pix_blc);
 	}
 };
 
@@ -384,7 +384,7 @@ public:
 		double s = (double)m_Radius / 3.0;				// 正态分布的标准偏差σ
 		double sigma2 = 2.0 * s * s;					// 2倍的σ平方,参考N维空间正态分布方程
 		double nuclear = 0.0;							// 高斯卷积核
-		double* matrix = ExMem::Alloc<double>(diamet2);	// 高斯矩阵定义
+		double* matrix = dbnew(double, diamet2);		// 高斯矩阵定义
 
 		// 计算高斯矩阵
 		int i = 0;
@@ -419,7 +419,7 @@ public:
 
 		EndBlockFilter();
 
-		ExMem::Free(matrix);
+		del(matrix);
 	}
 };
 

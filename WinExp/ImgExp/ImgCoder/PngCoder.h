@@ -128,7 +128,7 @@ public:
 		png_write_info(png_ptr, info_ptr);
 		png_set_packing(png_ptr);
 		pixel_t* pixel = exp_image.GetPixels();
-		png_bytep row_pointer = ExMem::Alloc<png_byte>(img_w * img_c);
+		png_bytep row_pointer = dbnew(png_byte, img_w * img_c);
 		for(int y = 0; y < img_h; ++y)
 		{
 			// 读取image_t
@@ -144,7 +144,7 @@ public:
 			// 写入数据
 			png_write_row(png_ptr, row_pointer);
 		}
-		ExMem::Free(row_pointer);
+		del(row_pointer);
 		png_write_end(png_ptr, info_ptr);
 		// 释放资源
 		png_free(png_ptr, palette);
@@ -178,7 +178,7 @@ public:
 			return NULL;
 		}
 		// 解析图像信息
-		png_bytep row_pointer = ExMem::Alloc<png_byte>(img_w * img_c);
+		png_bytep row_pointer = dbnew(png_byte, img_w * img_c);
 		for(int y = 0; y < img_h; ++y)
 		{
 			// 设置标记
@@ -198,7 +198,7 @@ public:
 					);
 			}
 		}
-		ExMem::Free(row_pointer);
+		del(row_pointer);
 		png_read_end(png_ptr, info_ptr);
 		// 释放资源
 		png_destroy_read_struct(&png_ptr, &info_ptr, 0);

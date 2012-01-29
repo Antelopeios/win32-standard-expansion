@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-21
-// Version:	1.0.0008.1554
+// Date:	2012-01-28
+// Version:	1.0.0009.2356
 //
 // History:
 //	- 1.0.0004.0400(2011-02-25)	^ 简化CallProc中锁的调用
@@ -43,6 +43,8 @@
 //								# 修正当线程数为空时,CThreadPoolT::Clear(INFINITE)死锁的问题
 //	- 1.0.0007.1048(2011-06-13)	# 修正CThreadPoolT的限制最大线程数策略无效的问题
 //	- 1.0.0008.1554(2011-09-21)	+ 对_ThreadPool添加一一对应_ThreadHeap的常规接口定义
+//	- 1.0.0009.2356(2012-01-28)	= _ThreadPoolPolicyT改名为_TrdPoolPolicyT
+//								= CThreadPoolCreator改写为CPoolCreatorT
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ThreadPool_h__
@@ -54,18 +56,18 @@
 
 #include "Thread/Semaphore.h"
 #include "Thread/Lock.h"
-#include "Thread/ThreadHeap.h"
+#include "Thread/ThreadCreator.h"
 #include "Container/List.h"
+#include "Pattern/Singleton.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename CreatorT = _ThreadHeap, typename AllocT = EXP_MEMORY_ALLOC>
-struct _ThreadPoolPolicyT
+template <typename CreatorT = EXP_THREAD_CREATOR>
+struct _TrdPoolPolicyT
 {
 	typedef typename CreatorT::creator_t creator_t;
-	typedef AllocT alloc_t;
 	typedef _MultiModel model_t;
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
@@ -84,13 +86,12 @@ struct _ThreadPoolPolicyT
 
 //////////////////////////////////////////////////////////////////
 
-template <typename PolicyT = _ThreadPoolPolicyT<> >
+template <typename PolicyT = _TrdPoolPolicyT<> >
 class CThreadPoolT
 {
 public:
 	typedef typename PolicyT::creator_t creator_t;
 	typedef typename creator_t::call_t call_t;
-	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
 
@@ -105,7 +106,9 @@ public:
 		operator HANDLE()
 		{ return hTrd; }
 	} trd_t;
-	typedef CListT<trd_t, _ListPolicyT<alloc_t> > trd_list_t;
+
+	// 线程对象链表
+	typedef CListT<trd_t> trd_list_t;
 
 	// 内部任务对象
 	typedef struct _Tsk
@@ -124,7 +127,9 @@ public:
 			, tidR(NULL)
 		{}
 	} tsk_t;
-	typedef CListT<tsk_t, _ListPolicyT<alloc_t> > tsk_list_t;
+
+	// 任务对象链表
+	typedef CListT<tsk_t> tsk_list_t;
 
 	// 内部参数传递对象
 	typedef struct _Par
@@ -208,27 +213,31 @@ protected:
 		}
 		else
 			ths->m_Mutex.Unlock(FALSE);	// 解写锁
-		alloc_t::Free(par);
+		del(par);
 		return 0;
 	}
 
 	HANDLE AddTrd(DWORD dwFlag, LPDWORD lpIDThread)
 	{
 		m_TrdList.Add(trd_t());
-		par_t* par = alloc_t::Alloc<par_t>();
+		par_t* par = dbnew(par_t);
 		par->pThs = this;
 		par->tIte = m_TrdList.Last();
 		return (par->tIte->Val().hTrd = m_Creator.Create(CallProc, par, dwFlag, lpIDThread));
 	}
 
 public:
-	CThreadPoolT(DWORD nSize = PolicyT::DefSize())
-		: m_nMaxSize(PolicyT::MaxSize())
+	CThreadPoolT(DWORD nDefSize = PolicyT::DefSize(), 
+				 DWORD nMaxSize = PolicyT::MaxSize())
+		: m_nMaxSize(0)
 		, m_nUseSize(0)
 		, m_TaskSmph(0, 0x7FFFFFFF)
 		, m_ComplEvt(FALSE)
 		, m_ClearEvt(TRUE)
-	{ SetPoolSize(nSize); }
+	{
+		SetMaxSize(nMaxSize);
+		SetPoolSize(nDefSize);
+	}
 	~CThreadPoolT()
 	{ Clear(); }
 
@@ -334,48 +343,39 @@ typedef CThreadPoolT<> CThreadPool;
 
 //////////////////////////////////////////////////////////////////
 
-class CThreadPoolCreator
+template <typename CreatorT = EXP_THREAD_CREATOR>
+class CPoolCreatorT
 {
 public:
-	enum { IsPoolCreator = 1 };
-	typedef CThreadPoolCreator creator_t;
-	typedef CThreadPool::call_t call_t;
-	typedef CThreadPool::creator_t heap_creator_t;
+	typedef CPoolCreatorT creator_t;
+	typedef CThreadPoolT<_TrdPoolPolicyT<CreatorT> > trd_creator_t;
+	typedef typename trd_creator_t::call_t call_t;
+	typedef typename trd_creator_t::creator_t base_creator_t;
 
-	EXP_INLINE static CThreadPool& GetPool()
+	EXP_INLINE static trd_creator_t& GetPool()
 	{
-		static CThreadPool* instance = NULL;
-		if (instance == NULL)
-		{
-			ExLockThis();
-			if (instance == NULL)
-			{
-				static CThreadPool pool;
-				instance = &pool;
-			}
-		}
-		return (*instance);
+		return ExSingleton<trd_creator_t>();
 	}
 
 public:
-	static HANDLE Create(_IN_ call_t lpStartAddr, 
-					     _IN_ LPVOID lpParam = NULL, 
-					     _IN_ DWORD dwFlag = 0, 
-					     _OT_ LPDWORD lpIDThread = NULL)
+	EXP_INLINE static HANDLE Create(_IN_ call_t lpStartAddr, 
+									_IN_ LPVOID lpParam = NULL, 
+									_IN_ DWORD dwFlag = 0, 
+									_OT_ LPDWORD lpIDThread = NULL)
 	{ return GetPool().Create(lpStartAddr, lpParam, dwFlag, lpIDThread); }
-	static BOOL Close(HANDLE hTrd)
-	{ return heap_creator_t::Close(hTrd); }
+	EXP_INLINE static BOOL Close(HANDLE hTrd)
+	{ return base_creator_t::Close(hTrd); }
 
-	static DWORD Suspend(HANDLE hTrd)
-	{ return heap_creator_t::Suspend(hTrd); }
-	static DWORD Resume(HANDLE hTrd)
-	{ return heap_creator_t::Resume(hTrd); }
+	EXP_INLINE static DWORD Suspend(HANDLE hTrd)
+	{ return base_creator_t::Suspend(hTrd); }
+	EXP_INLINE static DWORD Resume(HANDLE hTrd)
+	{ return base_creator_t::Resume(hTrd); }
 
-	static BOOL Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
-	{ return heap_creator_t::Terminate(hTrd, dwExitCode); }
+	EXP_INLINE static BOOL Terminate(HANDLE hTrd, DWORD dwExitCode = 0)
+	{ return base_creator_t::Terminate(hTrd, dwExitCode); }
 };
 
-typedef CThreadPoolCreator _ThreadPool;
+typedef CPoolCreatorT<> CPoolCreator;
 
 //////////////////////////////////////////////////////////////////
 

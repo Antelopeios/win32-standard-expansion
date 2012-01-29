@@ -66,7 +66,6 @@ public:
 	typedef PolicyT		policy_t;
 	typedef ContainerT	container_t;
 
-	typedef typename policy_t::alloc_t alloc_t;
 	typedef typename policy_t::node_t<container_t> node_t;
 	typedef CIteratorT<node_t> iterator_t;
 	typedef CFinderT<container_t> finder_t;

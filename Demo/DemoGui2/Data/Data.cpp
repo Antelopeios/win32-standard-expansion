@@ -334,7 +334,7 @@ CData* g_instance = NULL;
 CData* CData::Instance()
 {
 	if (g_instance == NULL)
-		g_instance = ExMem::Alloc<CData>();
+		g_instance = dbnew(CData);
 	return g_instance;
 }
 
@@ -363,7 +363,7 @@ void CData::Term()
 		m_EncdCntr = 0;
 	}
 
-	ExMem::Free(this);
+	del(this);
 	g_instance = NULL;
 }
 

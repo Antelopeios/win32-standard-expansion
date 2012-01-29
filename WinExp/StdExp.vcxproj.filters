@@ -84,9 +84,6 @@
     <ClInclude Include="StdExp\Thread\ThreadCreator.h">
       <Filter>Thread</Filter>
     </ClInclude>
-    <ClInclude Include="StdExp\Thread\ThreadHeap.h">
-      <Filter>Thread</Filter>
-    </ClInclude>
     <ClInclude Include="StdExp\Thread\ThreadModel.h">
       <Filter>Thread</Filter>
     </ClInclude>
@@ -96,9 +93,6 @@
     <ClInclude Include="StdExp\Memory\GC.h">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="StdExp\Memory\MemAlloc.h">
-      <Filter>Memory</Filter>
-    </ClInclude>
     <ClInclude Include="StdExp\Memory\MemHeap.h">
       <Filter>Memory</Filter>
     </ClInclude>
@@ -106,9 +100,6 @@
       <Filter>Memory</Filter>
     </ClInclude>
     <ClInclude Include="StdExp\Memory\MemPool.h">
-      <Filter>Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="StdExp\Memory\ObjPool.h">
       <Filter>Memory</Filter>
     </ClInclude>
     <ClInclude Include="StdExp\Memory\OverNew.h">
@@ -187,6 +178,9 @@
       <Filter>File</Filter>
     </ClInclude>
     <ClInclude Include="StdExp\StdExp.h" />
+    <ClInclude Include="StdExp\Memory\BlockPool.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdExp\Debugging\CrashHandler.cpp">

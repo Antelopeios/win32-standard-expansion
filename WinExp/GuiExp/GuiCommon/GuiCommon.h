@@ -73,7 +73,7 @@
 #include "Common/Common.h"
 #include "Thread/Lock.h"
 EXP_BEG
-template <typename TypeT>
+template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
 EXP_INTERFACE IGuiSingletonT
 {
 public:
@@ -82,7 +82,7 @@ public:
 		static TypeT* instance = NULL;
 		if (instance == NULL)
 		{
-			ExLockThis();
+			ExLockThis(typename ModelT::_LockPolicy);
 			if (instance == NULL)
 			{
 				static TypeT type;

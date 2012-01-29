@@ -198,7 +198,7 @@ public:
 		JSAMPROW row_pointer[1];
 		pixel_t* pixel = exp_image.GetPixels();
 		DWORD size = (DWORD)(cinfo.image_width * cinfo.input_components);
-		BYTE* data = ExMem::Alloc<BYTE>(size);
+		BYTE* data = dbnew(BYTE, size);
 		while (cinfo.next_scanline < cinfo.image_height)
 		{
 			// 设置标记
@@ -215,7 +215,7 @@ public:
 			row_pointer[0] = data;
 			jpeg_write_scanlines(&cinfo, row_pointer, 1);
 		}
-		ExMem::Free(data);
+		del(data);
 		jpeg_finish_compress(&cinfo);
 		// 释放资源
 		jpeg_destroy_compress(&cinfo);
@@ -248,7 +248,7 @@ public:
 		// 开始解压缩
 		jpeg_start_decompress(&cinfo);
 		DWORD size = (DWORD)(cinfo.image_width * cinfo.num_components);
-		BYTE* data = ExMem::Alloc<BYTE>(size);
+		BYTE* data = dbnew(BYTE, size);
 		JSAMPROW row_pointer[1];
 		while (cinfo.output_scanline < cinfo.output_height)
 		{
@@ -263,7 +263,7 @@ public:
 			for(size_t x = 0; x < cinfo.image_width; ++x, ++pos, inx += cinfo.num_components)
 				bmbf[pos] = ExRGBA(data[inx + 2], data[inx + 1], data[inx], EXP_CM);
 		}
-		ExMem::Free(data);
+		del(data);
 		jpeg_finish_decompress(&cinfo);
 		// 释放资源
 		jpeg_destroy_decompress(&cinfo);

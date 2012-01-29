@@ -338,7 +338,7 @@ private:																					\
 #define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
 	tmp																						\
 	IBaseObject* cls_name::CreateObject(CGC* gc/* = NULL*/)									\
-	{ return (base_name*)ExMem::Alloc<cls_name>(gc); }										\
+	{ return (base_name*)(gc ? gcnew(*gc, cls_name) : dbnew(cls_name)); }					\
 	tmp																						\
 	BOOL cls_name::m_bRegSuccess =															\
 		ExRegTypeInfo( _T(#cls_name), &(cls_name::EXP_TYPEINFO_MEMBER) );

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-27
-// Version:	1.3.0028.0218
+// Date:	2012-01-29
+// Version:	1.3.0029.0451
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -52,6 +52,8 @@
 //	- 1.3.0027.1712(2012-01-20) + 完善内存泄漏检测及其输出
 //								# 修正CMemPoolT::Size()返回大小有误的问题
 //	- 1.3.0028.0218(2012-01-27) ^ 预先保存CMemPoolT中每个ObjPool的粒度大小,在需要时直接获取
+//	- 1.3.0029.0451(2012-01-29) ^ 采用统一类型的对象池作为CMemPoolT内部分级内存分配,简化CMemPoolT的内部实现
+//								+ 通过CMemPoolAllocT实现一个静态内存池分配器,并定义EXP_MEMPOOL_ALLOC作为其别称
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -62,12 +64,13 @@
 #endif // _MSC_VER > 1000
 
 #include "Debugging/Trace.h"
-#include "Memory/ObjPool.h"
+#include "Memory/BlockPool.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+// 内存泄漏检测宏定义
 #ifndef EXP_UNDUMPED_NAMESPACE
 #ifdef	_DEBUG
 #ifndef	EXP_DUMPING_MEMLEAKS
@@ -76,8 +79,22 @@ EXP_BEG
 #endif/*_DEBUG*/
 #endif/*EXP_UNDUMPED_NAMESPACE*/
 
-template <typename AllocT = EXP_MEMHEAP_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-struct _MemPoolPolicy;
+//////////////////////////////////////////////////////////////////
+
+template <typename AllocT = EXP_BLKPOOL_ALLOC, typename ModelT = EXP_THREAD_MODEL>
+struct _MemPoolPolicy
+{
+	typedef AllocT alloc_t;
+	typedef ModelT model_t;
+	typedef typename model_t::_LockPolicy mutex_policy_t;
+	typedef CLockT<mutex_policy_t> mutex_t;
+
+	typedef DWORD byte;
+
+	static const BOOL DUMP_MEM_LEAKS = TRUE;
+};
+
+//////////////////////////////////////////////////////////////////
 
 template <typename PolicyT = _MemPoolPolicy<> >
 class CMemPoolT : INonCopyable
@@ -98,7 +115,7 @@ public:
 	// 内存块标记结点
 	struct block_t
 	{
-		IObjPool*	pPool;	// 对象池指针
+		alloc_t*	pPool;	// 对象池指针
 #ifdef	EXP_DUMPING_MEMLEAKS
 		LPCSTR		sFile;
 		int			nLine;
@@ -117,11 +134,6 @@ public:
 			, pPrev(NULL)
 			, pNext(NULL)
 		{}
-		~block_t()
-		{
-			pPrev = pNext = NULL;
-			pPool = NULL;
-		}
 	};
 #pragma pack()
 
@@ -204,58 +216,15 @@ protected:
 	};
 #pragma pack()
 
-	// 对象池策略
-	template <DWORD SizeT>
-	struct pool_policy_t : public PolicyT::pool_policy_t
-	{ static const DWORD MAX_SIZE = ((((DWORD)~0) / sizeof(_TypeT<SizeT>)) >> 5); };
-
-	// 对象池
-	template <typename PolicyT>
-	class CLagPoolT : INonCopyable, public IObjPool
-	{
-	public:
-		typedef typename PolicyT::alloc_t alloc_t;
-
-	protected:
-		alloc_t m_Alloc;
-
-	public:
-		DWORD GetObjSize()			{ return 0; }
-		BOOL Valid(void* pPtr)		{ return m_Alloc.Valid(pPtr); }
-		DWORD Size(void* pPtr)		{ return m_Alloc.Size(pPtr); }
-		void* Alloc(DWORD nSize)	{ return ZeroMemory(m_Alloc.Alloc(nSize), nSize); }
-		void Free(void* pPtr)		{ m_Alloc.Free(pPtr); }
-		void Clear()				{}
-	};
-	typedef CLagPoolT<typename PolicyT::pool_policy_t>		pool_00_t;
-	typedef CObjPoolT<_TypeT<1>, pool_policy_t<1> >			pool_01_t;
-	typedef CObjPoolT<_TypeT<2>, pool_policy_t<2> >			pool_02_t;
-	typedef CObjPoolT<_TypeT<4>, pool_policy_t<4> >			pool_03_t;
-	typedef CObjPoolT<_TypeT<8>, pool_policy_t<8> >			pool_04_t;
-	typedef CObjPoolT<_TypeT<16>, pool_policy_t<16> >		pool_05_t;
-	typedef CObjPoolT<_TypeT<32>, pool_policy_t<32> >		pool_06_t;
-	typedef CObjPoolT<_TypeT<64>, pool_policy_t<64> >		pool_07_t;
-	typedef CObjPoolT<_TypeT<128>, pool_policy_t<128> >		pool_08_t;
-	typedef CObjPoolT<_TypeT<256>, pool_policy_t<256> >		pool_09_t;
-	typedef CObjPoolT<_TypeT<512>, pool_policy_t<512> >		pool_10_t;
-	typedef CObjPoolT<_TypeT<1024>, pool_policy_t<1024> >	pool_11_t;
-	typedef CObjPoolT<_TypeT<2048>, pool_policy_t<2048> >	pool_12_t;
-	typedef CObjPoolT<_TypeT<4096>, pool_policy_t<4096> >	pool_13_t;
-	typedef CObjPoolT<_TypeT<8192>, pool_policy_t<8192> >	pool_14_t;
-	typedef CObjPoolT<_TypeT<16384>, pool_policy_t<16384> >	pool_15_t;
-	typedef CObjPoolT<_TypeT<32768>, pool_policy_t<32768> >	pool_16_t;
-
 public:
 	// 结点转换函数
 	EXP_INLINE static block_t* BlockPtr(void* pPtr) { return pPtr ? (block_t*)(((BYTE*)pPtr) - sizeof(block_t)) : NULL; }
 	EXP_INLINE static void* PtrBlock(block_t* pPtr) { return pPtr ? (void*)(pPtr + 1) : NULL; }
 
 protected:
-	alloc_t		m_Alloc;
-	mutex_t		m_Mutex;
-
-	IObjPool*	m_PoolList[17];
+	alloc_t		m_PoolList[17];
 	DWORD		m_PoolSize[17];
+	mutex_t		m_Mutex;
 	blk_list_t	m_UsedList;
 
 public:
@@ -264,63 +233,45 @@ public:
 		: m_nTime(0)
 #endif/*EXP_DUMPING_MEMLEAKS*/
 	{
-		IObjPool** pool = m_PoolList; DWORD* size = m_PoolSize;
-		*pool = (IObjPool*)_Traits::Construct<pool_00_t>(m_Alloc.Alloc(sizeof(pool_00_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_01_t>(m_Alloc.Alloc(sizeof(pool_01_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_02_t>(m_Alloc.Alloc(sizeof(pool_02_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_03_t>(m_Alloc.Alloc(sizeof(pool_03_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_04_t>(m_Alloc.Alloc(sizeof(pool_04_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_05_t>(m_Alloc.Alloc(sizeof(pool_05_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_06_t>(m_Alloc.Alloc(sizeof(pool_06_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_07_t>(m_Alloc.Alloc(sizeof(pool_07_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_08_t>(m_Alloc.Alloc(sizeof(pool_08_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_09_t>(m_Alloc.Alloc(sizeof(pool_09_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_10_t>(m_Alloc.Alloc(sizeof(pool_10_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_11_t>(m_Alloc.Alloc(sizeof(pool_11_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_12_t>(m_Alloc.Alloc(sizeof(pool_12_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_13_t>(m_Alloc.Alloc(sizeof(pool_13_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_14_t>(m_Alloc.Alloc(sizeof(pool_14_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_15_t>(m_Alloc.Alloc(sizeof(pool_15_t)));
-		*(size++) = (*(pool++))->GetObjSize();
-		*pool = (IObjPool*)_Traits::Construct<pool_16_t>(m_Alloc.Alloc(sizeof(pool_16_t)));
-		*(size++) = (*(pool++))->GetObjSize();
+		alloc_t* pool = m_PoolList; DWORD* size = m_PoolSize;
+		pool->SetObjSize(0);
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<1>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<2>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<4>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<8>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<16>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<32>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<64>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<128>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<256>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<512>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<1024>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<2048>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<4096>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<8192>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<16384>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<32768>));
+		*(size++) = (pool++)->GetObjSize();
 	}
 	~CMemPoolT()
 	{
 		Clear(PolicyT::DUMP_MEM_LEAKS);
-		IObjPool** pool = m_PoolList;
-		m_Alloc.Free(_Traits::Destruct<pool_00_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_01_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_02_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_03_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_04_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_05_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_06_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_07_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_08_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_09_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_10_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_11_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_12_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_13_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_14_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_15_t>(*(pool++)));
-		m_Alloc.Free(_Traits::Destruct<pool_16_t>(*(pool++)));
 	}
 
 public:
@@ -329,20 +280,16 @@ public:
 	{
 		ExLock(m_Mutex, TRUE, mutex_t);
 		block_t* block = BlockPtr(pPtr);
-		if (!block) return FALSE;
-		IObjPool* pool = block->pPool;
-		if (!pool) return FALSE;
-		return pool->Valid(block);
+		ExAssert(block);
+		return block->pPool->Valid(block);
 	}
 	// 内存大小
 	DWORD Size(void* pPtr)
 	{
 		ExLock(m_Mutex, TRUE, mutex_t);
 		block_t* block = BlockPtr(pPtr);
-		if (!block) return 0;
-		IObjPool* pool = block->pPool;
-		if (!pool) return 0;
-		return pool->Size(block) - sizeof(block_t);
+		ExAssert(block);
+		return block->pPool->Size(block) - sizeof(block_t);
 	}
 	// 分配内存
 	void* Alloc(DWORD nSize)
@@ -385,25 +332,27 @@ public:
 					right = mid;
 			}
 		}
-		block = (block_t*)m_PoolList[mid]->Alloc(nSize);
+		block = (block_t*)m_PoolList[mid].Alloc(nSize);
 		// 返回标记内存块
 		ExAssert(block);
-		block->pPool = m_PoolList[mid];
+		block->block_t::block_t();
+		block->pPool = m_PoolList + mid;
 #ifdef	EXP_DUMPING_MEMLEAKS
 		block->nTime = ++m_nTime;
 #endif/*EXP_DUMPING_MEMLEAKS*/
 		m_UsedList.Push(block);
 		return PtrBlock(block);
 	}
-#ifdef	EXP_DUMPING_MEMLEAKS
-	void* SetAlloc(void* p, LPCSTR sFile, int nLine)
+	EXP_INLINE void* SetAlloc(void* p, LPCSTR sFile, int nLine)
 	{
+#ifdef	EXP_DUMPING_MEMLEAKS
 		if (!p) return NULL;
-		BlockPtr(p)->sFile = sFile;
-		BlockPtr(p)->nLine = nLine;
+		block_t* block = BlockPtr(p);
+		block->sFile = sFile;
+		block->nLine = nLine;
+#endif/*EXP_DUMPING_MEMLEAKS*/
 		return p;
 	}
-#endif/*EXP_DUMPING_MEMLEAKS*/
 	// 回收内存
 	void Free(void* pPtr)
 	{
@@ -414,10 +363,7 @@ public:
 		// 弹出标记块
 		m_UsedList.Pop(block);
 		// 销毁标记块
-		IObjPool* pool = block->pPool;
-		ExAssert(pool);
-		if (!pool) return;
-		pool->Free(block);
+		block->pPool->Free(block);
 	}
 	// 清空内存池
 	void Clear(BOOL bDump = TRUE)
@@ -435,7 +381,7 @@ public:
 			do
 			{
 				block_t* next = item->pNext;
-				IObjPool* pool = item->pPool;
+				alloc_t* pool = item->pPool;
 				ExAssert(pool);
 #ifdef	EXP_DUMPING_MEMLEAKS
 				if (bDump && ++dump_counter)
@@ -476,7 +422,7 @@ public:
 		}
 		// 清理对象池
 		for(int i = 0; i < 17; ++i)
-			m_PoolList[i]->Clear();
+			m_PoolList[i].Clear();
 	}
 };
 
@@ -484,29 +430,40 @@ typedef CMemPoolT<> CMemPool;
 
 //////////////////////////////////////////////////////////////////
 
-class CMemPoolAlloc
+template <typename AllocT = EXP_BLKPOOL_ALLOC, typename ModelT = EXP_THREAD_MODEL>
+class CMemPoolAllocT
 {
 public:
-	typedef CMemPool alloc_t;
+	typedef CMemPoolAllocT alloc_t;
+	typedef CMemPoolT<_MemPoolPolicy<AllocT, ModelT> > mem_alloc_t;
+
+	EXP_INLINE static mem_alloc_t& GetPool()
+	{
+		return EXP_SINGLETON<mem_alloc_t, ModelT>::Instance();
+	}
+
+public:
+	EXP_INLINE static BOOL Valid(void* pPtr)
+	{ return GetPool().Valid(pPtr); }
+	EXP_INLINE static DWORD Size(void* pPtr)
+	{ return GetPool().Size(pPtr); }
+
+	EXP_INLINE static void* Alloc(DWORD nSize)
+	{ return GetPool().Alloc(nSize); }
+	EXP_INLINE static void* SetAlloc(void* p, LPCSTR sFile, int nLine)
+	{ return GetPool().SetAlloc(p, sFile, nLine); }
+	EXP_INLINE static void Free(void* pPtr)
+	{ GetPool().Free(pPtr); }
+
+	EXP_INLINE static void Check()
+	{ base_alloc_t::Check(); }
 };
 
-typedef CRegistAllocT<CMemPoolAlloc> _MemPool;
+typedef CMemPoolAllocT<> CMemPoolAlloc;
 
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT/* = EXP_MEMHEAP_ALLOC*/, typename ModelT/* = EXP_THREAD_MODEL*/>
-struct _MemPoolPolicy
-{
-	typedef AllocT alloc_t;
-	typedef ModelT model_t;
-	typedef typename model_t::_LockPolicy mutex_policy_t;
-	typedef CLockT<mutex_policy_t> mutex_t;
-
-	typedef _ObjPoolPolicyT<0, alloc_t, _SingleModel> pool_policy_t;
-	typedef DWORD byte;
-
-	static const BOOL DUMP_MEM_LEAKS = TRUE;
-};
+#ifndef EXP_MEMPOOL_ALLOC
+#define EXP_MEMPOOL_ALLOC CMemPoolAlloc
+#endif/*EXP_MEMPOOL_ALLOC*/
 
 //////////////////////////////////////////////////////////////////
 

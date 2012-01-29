@@ -85,16 +85,16 @@ public:
 		switch (nFormat)
 		{
 		case bmp:
-			coder = ExMem::Alloc<CBmpCoder>(pGC);
+			coder = pGC ? gcnew(*pGC, CBmpCoder) : dbnew(CBmpCoder);
 			break;
 		case jpg:
-			coder = ExMem::Alloc<CJpgCoder>(pGC);
+			coder = pGC ? gcnew(*pGC, CJpgCoder) : dbnew(CJpgCoder);
 			break;
 		case png:
-			coder = ExMem::Alloc<CPngCoder>(pGC);
+			coder = pGC ? gcnew(*pGC, CPngCoder) : dbnew(CPngCoder);
 			break;
 		case ico:
-			coder = ExMem::Alloc<CIcoCoder>(pGC);
+			coder = pGC ? gcnew(*pGC, CIcoCoder) : dbnew(CIcoCoder);
 			break;
 		}
 		return coder;

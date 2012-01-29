@@ -1,4 +1,4 @@
-// Copyright 2011, Ä¾Í·ÔÆ
+// Copyright 2011-2012, Ä¾Í·ÔÆ
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-21
-// Version:	1.0.0005.0025
+// Date:	2012-01-29
+// Version:	1.0.0006.1356
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Memory_h__
@@ -48,16 +48,15 @@
 
 //////////////////////////////////////////////////////////////////
 
+#include "Memory/MemHeap.h"
+#include "Memory/BlockPool.h"
+#include "Memory/MemPool.h"
 #include "Memory/Traits.h"
 #include "Memory/RegistAlloc.h"
-#include "Memory/MemHeap.h"
-#include "Memory/ObjPool.h"
-#include "Memory/MemPool.h"
-#include "Memory/MemAlloc.h"
+#include "Memory/OverNew.h"
 #include "Memory/PtrManager.h"
 #include "Memory/SmartPtr.h"
 #include "Memory/GC.h"
-#include "Memory/OverNew.h"
 
 //////////////////////////////////////////////////////////////////
 

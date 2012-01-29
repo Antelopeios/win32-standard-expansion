@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-16
-// Version:	1.1.0019.1800
+// Date:	2012-01-28
+// Version:	1.1.0020.2357
 //
 // History:
 //	- 1.1.0013.2300(2011-02-24)	^ 优化CGCT::Free()的实现
@@ -48,6 +48,7 @@
 //								= CGCAllocT在不使用外部GC构造对象时仍然向指针管理器注册指针(统一所有的指针管理)
 //	- 1.1.0018.1742(2012-01-14)	+ 添加CGCT::ReAlloc接口
 //	- 1.1.0019.1800(2012-01-16)	+ 支持通过EXP_MANAGED_ALLPTR关闭CGCAllocT的托管非GC内存分配
+//	- 1.1.0020.2357(2012-01-28)	= CGCT不再由模板参数传入内存分配器,通过通用内存分配方式托管内存
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GC_h__
@@ -63,14 +64,24 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename AllocT = EXP_MEMORY_ALLOC, typename ModelT = EXP_THREAD_MODEL>
-struct _GCPolicyT;
+template <typename ModelT = EXP_THREAD_MODEL>
+struct _GCPolicyT
+{
+	typedef ModelT model_t;
+	typedef typename model_t::_LockPolicy mutex_policy_t;
+	typedef CLockT<mutex_policy_t> mutex_t;
+
+	static const DWORD DEF_SIZE = 100;
+	static DWORD Expan(DWORD nSize)
+	{ return nSize ? (nSize << 1) : 1; }
+};
+
+//////////////////////////////////////////////////////////////////
 
 template <typename PolicyT = _GCPolicyT<> >
 class CGCT : INonCopyable
 {
 public:
-	typedef typename PolicyT::alloc_t alloc_t;
 	typedef typename PolicyT::model_t model_t;
 	typedef typename PolicyT::mutex_t mutex_t;
 
@@ -90,7 +101,7 @@ public:
 	~CGCT()
 	{
 		Clear();
-		alloc_t::Free(m_BlockArray);
+		del(m_BlockArray);
 	}
 
 public:
@@ -98,11 +109,11 @@ public:
 	EXP_INLINE static TypeT* CheckAlloc(DWORD nCount = 1)
 	{
 #ifdef	EXP_MANAGED_ALLPTR
-		TypeT* ptr = alloc_t::Alloc<TypeT>(nCount);
-		EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr);
+		TypeT* ptr = dbnew(TypeT, nCount);
+		EXP_PTR_MANAGER.Add(ptr);
 		return ptr;
 #else /*EXP_MANAGED_ALLPTR*/
-		return alloc_t::Alloc<TypeT>(nCount);
+		return dbnew(TypeT, nCount);
 #endif/*EXP_MANAGED_ALLPTR*/
 	}
 
@@ -110,11 +121,11 @@ public:
 	EXP_INLINE static TypeT* CheckReAlloc(void* pPtr, DWORD nCount)
 	{
 #ifdef	EXP_MANAGED_ALLPTR
-		TypeT* ptr_new = alloc_t::ReAlloc<TypeT>(pPtr, nCount, FALSE);
-		if (ptr_new != pPtr) EXP_PTR_MANAGER.Add<alloc_t, model_t>(ptr_new);
+		TypeT* ptr_new = realc(pPtr, TypeT, nCount);
+		if (ptr_new != pPtr) EXP_PTR_MANAGER.Add(ptr_new);
 		return ptr_new;
 #else /*EXP_MANAGED_ALLPTR*/
-		return alloc_t::ReAlloc<TypeT>(pPtr, nCount, FALSE);
+		return realc(pPtr, TypeT, nCount);
 #endif/*EXP_MANAGED_ALLPTR*/
 	}
 
@@ -123,21 +134,8 @@ public:
 #ifdef	EXP_MANAGED_ALLPTR
 		EXP_PTR_MANAGER.Del(pPtr);
 #else /*EXP_MANAGED_ALLPTR*/
-		alloc_t::Free(pPtr);
+		del(pPtr);
 #endif/*EXP_MANAGED_ALLPTR*/
-	}
-
-public:
-	template <typename TypeT>
-	EXP_INLINE TypeT* Construct(void* pPtr)
-	{
-		ExLock(m_Mutex, FALSE, mutex_t);
-		return alloc_t::Construct<TypeT>(pPtr);
-	}
-	EXP_INLINE void* Destruct(void* pPtr)
-	{
-		ExLock(m_Mutex, FALSE, mutex_t);
-		return alloc_t::Destruct(pPtr);
 	}
 
 public:
@@ -149,23 +147,11 @@ public:
 	void SetGCSize(DWORD nSize = PolicyT::DEF_SIZE)
 	{
 		ExLock(m_Mutex, FALSE, mutex_t);
-		if( GetGCSize() >= nSize ) return;
-		m_BlockArray = alloc_t::ReAlloc<void*>(m_BlockArray, nSize);
+		if (GetGCSize() >= nSize) return;
+		m_BlockArray = renew(m_BlockArray, void*, nSize);
 		m_nSize = nSize;
 	}
 
-	// 内存效验
-	BOOL Valid(void* pPtr)
-	{
-		ExLock(m_Mutex, TRUE, mutex_t);
-		return alloc_t::Valid(pPtr);
-	}
-	// 内存大小
-	DWORD Size(void* pPtr)
-	{
-		ExLock(m_Mutex, TRUE, mutex_t);
-		return alloc_t::Size(pPtr);
-	}
 	// 注册内存
 	void* Regist(void* pPtr)
 	{
@@ -193,6 +179,7 @@ public:
 	TypeT* ReAlloc(void* pPtr, DWORD nCount)
 	{
 		if (nCount == 0) return NULL;
+		ExLock(m_Mutex, FALSE, mutex_t);
 		TypeT* ptr_new = CheckReAlloc<TypeT>(pPtr, nCount);
 		if (ptr_new == pPtr)
 			return ptr_new;
@@ -203,23 +190,6 @@ public:
 	{
 		if (nSize == 0) return NULL;
 		return (void*)ReAlloc<BYTE>(pPtr, nSize);
-	}
-	// 回收内存
-	void Free(void* pPtr)
-	{
-		if (!pPtr) return;
-		ExLock(m_Mutex, FALSE, mutex_t);
-		DWORD i = 0;
-		for(; i < m_nIndx; ++i)
-		{
-			if (pPtr = m_BlockArray[i])
-			{
-				CheckFree(pPtr);
-				memmove((void*)(m_BlockArray + i), (void*)(m_BlockArray + i + 1), sizeof(void*) * (m_nIndx - i - 1));
-				break;
-			}
-		}
-		if (i < m_nIndx) --m_nIndx;
 	}
 	// 清空GC
 	void Clear()
@@ -235,81 +205,6 @@ public:
 };
 
 typedef CGCT<> CGC;
-
-//////////////////////////////////////////////////////////////////
-
-template <typename GCT = CGC>
-class CGCAllocT
-{
-public:
-	typedef GCT gc_alloc_t;
-	typedef typename gc_alloc_t::alloc_t alloc_t;
-
-public:
-	// alloc_t
-	EXP_INLINE static BOOL Valid(void* pPtr)
-	{ return alloc_t::Valid(pPtr); }
-	EXP_INLINE static DWORD Size(void* pPtr)
-	{ return alloc_t::Size(pPtr); }
-
-	template <typename TypeT>
-	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1)
-	{ return gc_alloc_t::CheckAlloc<TypeT>(nCount); }
-	EXP_INLINE static void* Alloc(DWORD nSize)
-	{ return gc_alloc_t::CheckAlloc<BYTE>(nSize); }
-
-	template <typename TypeT>
-	EXP_INLINE static TypeT* ReAlloc(void* pPtr, DWORD nCount)
-	{
-		TypeT* ptr_new = gc_alloc_t::CheckReAlloc<TypeT>(pPtr, nCount);
-		if (ptr_new != pPtr) Free(pPtr);
-		return ptr_new;
-	}
-	EXP_INLINE static void* ReAlloc(void* pPtr, DWORD nSize)
-	{ return ReAlloc<BYTE>(pPtr, nSize); }
-
-	EXP_INLINE static void Free(void* pPtr)
-	{ gc_alloc_t::CheckFree(pPtr); }
-
-	// gc_alloc_t
-	EXP_INLINE static BOOL Valid(gc_alloc_t* alloc, void* pPtr)
-	{ return alloc ? alloc->Valid(pPtr) : Valid(pPtr); }
-	EXP_INLINE static DWORD Size(gc_alloc_t* alloc, void* pPtr)
-	{ return alloc ? alloc->Size(pPtr) : Size(pPtr); }
-
-	template <typename TypeT>
-	EXP_INLINE static TypeT* Alloc(gc_alloc_t* alloc, DWORD nCount = 1)
-	{ return alloc ? alloc->Alloc<TypeT>(nCount) : Alloc<TypeT>(nCount); }
-	EXP_INLINE static void* Alloc(gc_alloc_t* alloc, DWORD nSize)
-	{ return alloc ? alloc->Alloc(nSize) : Alloc(nSize); }
-
-	template <typename TypeT>
-	EXP_INLINE static TypeT* ReAlloc(gc_alloc_t* alloc, void* pPtr, DWORD nCount)
-	{ return alloc ? alloc->ReAlloc<TypeT>(pPtr, nCount) : ReAlloc<TypeT>(pPtr, nCount); }
-	EXP_INLINE static void* ReAlloc(gc_alloc_t* alloc, void* pPtr, DWORD nSize)
-	{ return alloc ? alloc->ReAlloc(pPtr, nSize) : ReAlloc(pPtr, nSize); }
-
-	EXP_INLINE static void Free(gc_alloc_t* alloc, void* pPtr)
-	{ if (alloc) alloc->Free(pPtr); else Free(pPtr); }
-};
-
-typedef CGCAllocT<> CGCAlloc;
-typedef CGCAlloc ExMem;
-
-//////////////////////////////////////////////////////////////////
-
-template <typename AllocT/* = EXP_MEMORY_ALLOC*/, typename ModelT/* = EXP_THREAD_MODEL*/>
-struct _GCPolicyT
-{
-	typedef AllocT alloc_t;
-	typedef ModelT model_t;
-	typedef typename model_t::_LockPolicy mutex_policy_t;
-	typedef CLockT<mutex_policy_t> mutex_t;
-
-	static const DWORD DEF_SIZE = 100;
-	static DWORD Expan(DWORD nSize)
-	{ return nSize ? (nSize << 1) : 1; }
-};
 
 //////////////////////////////////////////////////////////////////
 

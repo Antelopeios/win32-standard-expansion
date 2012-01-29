@@ -80,11 +80,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->ShowWindow(SW_SHOW);
 
 	// 将窗口与控件及事件对象关联
-	pic->AddEvent(ExMem::Alloc<CCusPicEvent>());
-	btn->AddEvent(ExMem::Alloc<CCusBtnEvent>());
+	pic->AddEvent(dbnew(CCusPicEvent));
+	btn->AddEvent(dbnew(CCusBtnEvent));
 	wnd->AddComp(pic);
 	pic->AddComp(btn);
-	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
+	wnd->AddEvent(dbnew(CCustomEvent));
 
 	IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn")));
 	itm->Free();

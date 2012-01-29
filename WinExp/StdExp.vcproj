@@ -245,10 +245,6 @@
 				>
 			</File>
 			<File
-				RelativePath="StdExp\Thread\ThreadHeap.h"
-				>
-			</File>
-			<File
 				RelativePath="StdExp\Thread\ThreadModel.h"
 				>
 			</File>
@@ -261,11 +257,11 @@
 			Name="Memory"
 			>
 			<File
-				RelativePath="StdExp\Memory\GC.h"
+				RelativePath=".\StdExp\Memory\BlockPool.h"
 				>
 			</File>
 			<File
-				RelativePath="StdExp\Memory\MemAlloc.h"
+				RelativePath="StdExp\Memory\GC.h"
 				>
 			</File>
 			<File
@@ -278,10 +274,6 @@
 			</File>
 			<File
 				RelativePath="StdExp\Memory\MemPool.h"
-				>
-			</File>
-			<File
-				RelativePath="StdExp\Memory\ObjPool.h"
 				>
 			</File>
 			<File

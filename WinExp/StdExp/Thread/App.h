@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-29
-// Version:	1.0.0003.2209
+// Date:	2012-01-30
+// Version:	1.0.0004.1008
 //
 // History:
 //	- 1.0.0001.1030(2012-01-09)	+ IApp构造添加nSingleID参数,支持直接通过资源ID确定唯一性字符串
 //	- 1.0.0002.1400(2012-01-28)	= IThreadT放入App模块内实现
 //	- 1.0.0003.2209(2012-01-29)	+ 添加IApp::OnTerm(),与IApp::OnExit()语义相同
+//	- 1.0.0004.1008(2012-01-30)	+ IThreadT支持与IApp的OnInit(),OnTerm()语义相同的外部接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __App_h__
@@ -111,9 +112,11 @@ protected:
 		else
 			return _this->OnExit(_this->OnThread(_this->GetParam()));
 	}
-	virtual DWORD OnThread(LPVOID lpParam) { return 0; }
 	virtual BOOL OnMessage(const MSG* lpMsg) { return FALSE; }
-	virtual DWORD OnExit(DWORD nCode) { return nCode; }
+	virtual DWORD OnThread(LPVOID lpParam) { return OnInit(); }
+	virtual DWORD OnExit(DWORD nCode) { return OnTerm(nCode); }
+	virtual DWORD OnInit() { return 0; }
+	virtual DWORD OnTerm(DWORD nCode) { return nCode; }
 
 public:
 	BOOL Create(_IN_ BOOL bUIThread = FALSE, 
@@ -240,20 +243,7 @@ public:
 		m_hSync = NULL;
 	}
 
-private:
-	DWORD OnThread(LPVOID lpParam)
-	{
-		return OnInit();
-	}
-	DWORD OnExit(DWORD nCode)
-	{
-		return OnTerm(nCode);
-	}
-
-protected:
-	virtual DWORD OnInit() { return 0; }
-	virtual DWORD OnTerm(DWORD nCode) { return nCode; }
-
+public:
 	BOOL Terminate(DWORD dwExitCode = 0)
 	{
 		return TerminateProcess(GetCurrentProcess(), dwExitCode);

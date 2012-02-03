@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-20
-// Version:	1.0.0008.1712
+// Date:	2012-02-02
+// Version:	1.0.0009.1802
 //
 // History:
 //	- 1.0.0001.1135(2011-05-04)	+ 添加wnd_t类型定义
@@ -45,6 +45,7 @@
 //	- 1.0.0006.0120(2011-07-07)	= 关闭由StdExp的RTTI改动引起的C4275警告
 //	- 1.0.0007.1540(2011-07-20)	+ 添加ExGC()接口,供外部获取全局GC,防止由于DLL内外全局GC生存周期不一致导致的析构异常
 //	- 1.0.0007.1540(2012-01-20)	- 移除ExGC()接口,使用对象相互托管方式解决GC析构顺序导致的异常
+//	- 1.0.0009.1802(2012-02-02)	# 全局单例因析构顺序问题可能导致内存泄漏提示
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCommon_h__
@@ -70,15 +71,27 @@
 //////////////////////////////////////////////////////////////////
 
 // 置换掉默认的全局单例
+
 #include "Common/Common.h"
 #include "Thread/Lock.h"
+
 EXP_BEG
+
+template <typename ModelT>
+class CPtrManagerT;
+
 template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
 EXP_INTERFACE IGuiSingletonT
 {
 public:
 	EXP_INLINE static TypeT& Instance()
 	{
+		static BOOL is_init = FALSE;
+		if(!is_init)
+		{
+			is_init = TRUE;
+			IGuiSingletonT<CPtrManager, ModelT>::Instance();
+		}
 		static TypeT* instance = NULL;
 		if (instance == NULL)
 		{
@@ -92,8 +105,10 @@ public:
 		return (*instance);
 	}
 };
+
 EXP_END
-#define EXP_SINGLETON IGuiSingletonT
+
+#define EXP_SINGLETON EXP::IGuiSingletonT
 
 // 图像处理库
 #include "ImgExp.h"

@@ -101,7 +101,7 @@ public:
 	type_t LastItem() const
 	{ return This()->container_t::LastItem(); }
 
-	BOOL Replace(type_t& Type)
+	BOOL Replace(const type_t& Type)
 	{ return This()->container_t::Del(Find(Type)); }
 
 	iterator_t Find(iterator_t& iHead, iterator_t& iTail, const type_t& tItem) const

@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-26
-// Version:	1.0.0010.1818
+// Date:	2012-02-02
+// Version:	1.0.0011.1802
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -48,6 +48,7 @@
 //	- 1.0.0008.1253(2011-06-24)	+ 将IGuiBoard支持通过Create接口控制WNDCLASSEX的style
 //	- 1.0.0009.2008(2011-07-16)	= 调整SetLayered()接口,支持在非半透明图层化模式下设置透明色
 //	- 1.0.0010.1818(2011-08-26)	+ 添加控制是否窗口自绘的接口
+//	- 1.0.0011.1802(2012-02-02)	+ 添加IGuiBoard::SetParent()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -127,6 +128,7 @@ public:
 
 	// 窗口关系控制
 	virtual wnd_t GetParent() = 0;
+	virtual wnd_t SetParent(wnd_t wndParent = NULL) = 0;
 
 	// 设置焦点
 	virtual wnd_t SetFocus() = 0;
@@ -237,6 +239,7 @@ public:
 
 	// 窗口关系控制
 	wnd_t GetParent();
+	wnd_t SetParent(wnd_t wndParent = NULL);
 
 	// 设置焦点
 	wnd_t SetFocus();

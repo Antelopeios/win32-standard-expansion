@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-11
-// Version:	1.0.0000.1100
+// Date:	2012-02-02
+// Version:	1.0.0001.1802
+//
+// History:
+//	- 1.0.0001.1100(2011-05-19)	= 将CGuiWnd与事件处理分离,处理过程放入CGuiWndEvent
+//	- 1.0.0001.1802(2012-02-02)	# 修正当IGuiThunk析构之后接收消息将导致程序崩溃的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiThunk_hpp__
@@ -62,7 +66,7 @@ public:
 		, m_bHook(FALSE)
 	{}
 	virtual ~IGuiThunk(void)
-	{}
+	{ Detach(); }
 
 protected:
 	// 静态回调函数,负责调用窗口过程函数

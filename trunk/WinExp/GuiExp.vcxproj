@@ -102,6 +102,8 @@
     <ClCompile Include="GuiExp\GuiCtrl\GuiCtrl.cpp" />
     <ClCompile Include="GuiExp\GuiEvent\GuiEvent.cpp" />
     <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp" />
+    <ClCompile Include="GuiExp\GuiManager\Executors\Executor.cpp" />
+    <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GuiExp\GuiCommon\GuiBase.h" />
@@ -125,7 +127,8 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiEffectBase.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp" />
-    <ClInclude Include="GuiExp\GuiManager\GuiConfig.hpp" />
+    <ClInclude Include="GuiExp\GuiManager\Executors\Executor.h" />
+    <ClInclude Include="GuiExp\GuiManager\GuiSkin.h" />
     <ClInclude Include="GuiExp\GuiManager\GuiManager.h" />
     <ClInclude Include="GuiExp\GuiManager\GuiXML.h" />
     <ClInclude Include="GuiExp\GuiExp.h" />

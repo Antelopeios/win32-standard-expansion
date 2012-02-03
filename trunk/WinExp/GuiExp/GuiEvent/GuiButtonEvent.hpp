@@ -212,6 +212,7 @@ public:
 				if (status == 2) // 当按下后抬起,视为一次Click
 				{
 					ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+					if(!ctrl->IsValid()) return;
 					IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
 					if (pare)
 						pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_CLICKED, (LPARAM)ctrl);
@@ -610,6 +611,7 @@ public:
 				if (status == 2) // 当按下后抬起,视为一次Click
 				{
 					ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+					if(!ctrl->IsValid()) return;
 					IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
 					if (pare)
 						pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, BN_CLICKED, (LPARAM)ctrl);

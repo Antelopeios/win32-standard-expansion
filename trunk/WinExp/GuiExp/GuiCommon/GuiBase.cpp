@@ -47,7 +47,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+EXP_IMPLEMENT_DYNAMIC_MULT3(IGuiBase, IGuiComp, IGuiSender, IExecutor)
 IGuiBase* IGuiBase::s_pCapture = NULL;
 
 //////////////////////////////////////////////////////////////////

@@ -5,5 +5,6 @@
 
 #pragma once
 
-#define EXP_THREAD_MODEL _SingleModel
+//#define EXP_THREAD_MODEL _SingleModel
+#define EXP_MANAGED_ALLPTR
 #include "StdExp.h"

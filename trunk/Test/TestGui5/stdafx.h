@@ -5,6 +5,7 @@
 
 #pragma once
 
+#define EXP_USING_APP
 #include "GuiExp.h"
 #pragma comment(lib, "StdExp.lib")
 #pragma comment(lib, "ImgExp.lib")

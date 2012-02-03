@@ -19,6 +19,9 @@
     <Filter Include="GuiManager">
       <UniqueIdentifier>{5cf6ef67-3330-4b4f-8ed6-cacd6acbedee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GuiManager\Executors">
+      <UniqueIdentifier>{ce38dcd9-e468-4ee3-9756-e4c9fce09965}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuiExp\GuiCommon\GuiBase.cpp">
@@ -41,6 +44,12 @@
     </ClCompile>
     <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp">
       <Filter>GuiEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiManager\Executors\Executor.cpp">
+      <Filter>GuiManager\Executors</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp">
+      <Filter>GuiManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,9 +116,6 @@
     <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp">
       <Filter>GuiEffect</Filter>
     </ClInclude>
-    <ClInclude Include="GuiExp\GuiManager\GuiConfig.hpp">
-      <Filter>GuiManager</Filter>
-    </ClInclude>
     <ClInclude Include="GuiExp\GuiManager\GuiManager.h">
       <Filter>GuiManager</Filter>
     </ClInclude>
@@ -118,6 +124,12 @@
     </ClInclude>
     <ClInclude Include="GuiExp\GuiExp.h" />
     <ClInclude Include="GuiExp\resource.h" />
+    <ClInclude Include="GuiExp\GuiManager\Executors\Executor.h">
+      <Filter>GuiManager\Executors</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiManager\GuiSkin.h">
+      <Filter>GuiManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GuiExp\GuiExp.rc" />

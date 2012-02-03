@@ -163,7 +163,7 @@ public:
 		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), &(RECT)rc, DT_LEFT | DT_TOP);
 		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0xf));
 		if (m_Color != ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM))
-		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRevColor(m_Color), 0xf, TRUE, ExRGBA(EXP_CM, EXP_CM, EXP_CM, 0)));
+		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(m_Color, 0xf, TRUE, ExRGBA(EXP_CM, EXP_CM, EXP_CM, 0)));
 		// 清理内存并返回
 		tmp_grp.Delete();
 		CImgFilter::Filter(m_MemImg, &CFilterPreMul());

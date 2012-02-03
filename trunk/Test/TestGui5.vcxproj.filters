@@ -26,5 +26,8 @@
     <ClInclude Include="TestGui5\stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TestGui5\TestGui5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

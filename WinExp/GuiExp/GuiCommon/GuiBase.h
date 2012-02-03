@@ -52,14 +52,16 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "GuiManager/GuiManager.h"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
 // GUI 界面对象基础
-EXP_INTERFACE IGuiBase : public IGuiComp, public IGuiSender
+EXP_INTERFACE IGuiBase : public IGuiComp, public IGuiSender, public IExecutor
 {
-	EXP_DECLARE_DYNAMIC_MULT2(IGuiBase, IGuiComp, IGuiSender)
+	EXP_DECLARE_DYNAMIC_MULT3(IGuiBase, IGuiComp, IGuiSender, IExecutor)
 
 protected:
 	CGC* m_GC;
@@ -80,6 +82,14 @@ public:
 	}
 
 public:
+	BOOL IsValid() { return EXP_MULT::IsValid(); }
+
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+	{
+		del(this);
+		return NULL;
+	}
+
 	void InsEvent(IGuiEvent* pEvent)
 	{
 		if (!pEvent) return ;

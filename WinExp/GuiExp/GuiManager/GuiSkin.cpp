@@ -28,63 +28,73 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Singleton - 单例
+// CGuiSkin - 皮肤加载
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-28
-// Version:	1.0.0008.1430
-//
-// History:
-//	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
-//	- 1.0.0006.1909(2011-05-11)	= 重命名CSingletonT为ISingletonT
-//	- 1.0.0007.1554(2011-05-19)	+ StdExp内部的单例调用支持由外部统一置换
-//	- 1.0.0008.1430(2012-01-28)	+ ISingletonT支持外部传入ModelT作为内部实现的线程模型策略
+// Date:	2012-01-31
+// Version:	1.0.0001.0945
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Singleton_h__
-#define __Singleton_h__
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-#include "Thread/Lock.h"
+#include "GuiCommon/GuiCommon.h"
+#include "GuiSkin.h"
+#include "GuiManager/Executors/Executor.h"
+#include "GuiBoard/GuiBoard.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
-interface ISingletonT
+CArrayT<void*> CGuiSkin::m_NewDiv;
+CArrayT<void*> CGuiSkin::m_NedDel;
+
+void CGuiSkin::Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent/* = NULL*/)
 {
-public:
-	EXP_INLINE static TypeT& Instance()
+	IExecutor* exc = CExecutor::Get((*ite)->nam);
+	void* ret = NULL;
+	if (exc)
 	{
-		static TypeT* instance = NULL;
-		if (instance == NULL)
-		{
-			ExLockThis(typename ModelT::_LockPolicy);
-			if (instance == NULL)
-			{
-				static TypeT type;
-				instance = &type;
-			}
-		}
-		return (*instance);
+		ret = exc->Execute(xml, ite, parent);
+		IGuiBoard* brd = ExDynCast<IGuiBoard>(ret);
+		if (brd) m_NewDiv.Add(brd);
+		if (exc->m_pNedDel) m_NedDel.Add(exc->m_pNedDel);
 	}
-};
+	CGuiXML::ite_list_t cld_lst = ite->Children();
+	CGuiXML::ite_list_t::iterator_t i = cld_lst.Head();
+	for(; i != cld_lst.Tail(); ++i) Exec(xml, *i, ret);
+}
 
-#ifndef EXP_SINGLETON
-#define EXP_SINGLETON EXP::ISingletonT
-#endif/*EXP_SINGLETON*/
+BOOL CGuiSkin::Load(IFileObject* pFile)
+{
+	if (!pFile) return FALSE;
+	CGuiXML xml;
+	xml.SetDefEnc(_T("gb2312"));
+	xml.SetFile(pFile);
+	if (!xml.Decode()) return FALSE;
+	// 开始解析脚本
+	Exec(xml, xml.GetRoot());
+	// 发送全局消息
+	for(CArrayT<void*>::iterator_t ite = m_NewDiv.Head(); ite != m_NewDiv.Tail(); ++ite)
+	{
+		IGuiBoard* brd = (IGuiBoard*)(*ite);
+		if (::IsWindowVisible(brd->GethWnd()))
+			brd->SendMessage(WM_SHOWWINDOW, 1);
+	}
+	m_NewDiv.Clear();
+	// 清理垃圾对象
+	for(CArrayT<void*>::iterator_t ite = m_NedDel.Head(); ite != m_NedDel.Tail(); ++ite)
+		del(*ite);
+	m_NedDel.Clear();
+	return TRUE;
+}
 
-template <typename TypeT>
-EXP_INLINE TypeT& ExSingleton() { return EXP_SINGLETON<TypeT>::Instance(); }
+BOOL CGuiSkin::Load(LPCSTR script)
+{
+	CMemFile file((BYTE*)script, strlen(script) * sizeof(CHAR));
+	return Load(&file);
+}
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
-
-#endif/*__Singleton_h__*/

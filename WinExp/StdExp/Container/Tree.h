@@ -75,8 +75,7 @@ struct _TreePolicy
 		typedef typename container_t::ite_t ite_t;
 
 		typedef typename container_t::iterator_t iter_t;
-		typedef CListT<iter_t> iter_list_t;
-		typedef typename iter_list_t::iterator_t iterator_t;
+		typedef CListT<iter_t> ite_list_t;
 
 		container_t* pCont;
 		item_t* nIndx;
@@ -101,9 +100,9 @@ struct _TreePolicy
 			iter->nIndx = nIndx ? nIndx->Pare : NULL;
 			return iter;
 		}
-		const iter_list_t Children()
+		const ite_list_t Children()
 		{
-			iter_list_t list;
+			ite_list_t list;
 			iter_t iter; iter = node_t(pCont);
 			for(ite_t ite = nIndx->Chdr.Head(); ite != nIndx->Chdr.Tail(); ++ite)
 			{
@@ -265,6 +264,7 @@ public:
 
 	typedef typename item_t::list_t list_t;
 	typedef typename item_t::ite_t ite_t;
+	typedef CListT<iterator_t> ite_list_t;
 
 protected:
 	item_t*	m_pTree;	// Ê÷¸ùÖ¸Õë

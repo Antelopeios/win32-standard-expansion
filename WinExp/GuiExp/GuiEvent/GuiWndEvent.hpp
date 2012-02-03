@@ -77,7 +77,7 @@ class CGuiWndEvent : public IGuiEvent
 
 protected:
 	// 鼠标离开检测
-	static UINT_PTR s_MLCheckID, s_MLCheckCT;
+	static UINT_PTR s_MLCheckID;
 	static HWND s_MLCheckWD;
 	static void CALLBACK MouseLeaveCheck(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
@@ -104,7 +104,7 @@ protected:
 	IGuiCtrl* m_pOldFoc;
 	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
-		if (!pGui) return 0;
+		if (!pGui) return NULL;
 		// 向控件转发消息
 		if (nMessage >= WM_MOUSEFIRST && 
 			nMessage <= WM_MOUSELAST || 
@@ -130,8 +130,11 @@ protected:
 					s_MLCheckWD = pGui->GethWnd();
 					IGuiCtrl* cur = ctrl;
 					if (cur == s_MLMove) break;
-					if (s_MLMove)
+					if (s_MLMove && s_MLMove->IsValid())
+					{
 						s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+						if(!s_MLMove->IsValid()) return NULL;
+					}
 					s_MLMove = cur;
 				}
 				break;
@@ -156,6 +159,7 @@ protected:
 			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
 			ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
+			if(!ctrl->IsValid()) return NULL;
 			// 判断返回值
 			lrDef = ctrl->GetResult(lrDef);
 		}
@@ -169,6 +173,7 @@ protected:
 			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
 			ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
+			if(!ctrl->IsValid()) return NULL;
 			// 判断返回值
 			lrDef = ctrl->GetResult(lrDef);
 			// 处理焦点切换
@@ -294,10 +299,14 @@ protected:
 						{
 							if (!eff->IsInit()) eff->Init(ctl_img);
 							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+							if(!ctrl->IsValid()) return NULL;
 							eff->Show(*ite, ctl_img);
 						}
 						else
+						{
 							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+							if(!ctrl->IsValid()) return NULL;
+						}
 						// 覆盖全局绘图
 						ctl_rct.Inter(clp_rct);
 						ctl_rct.Offset(-clp_rct.pt1);
@@ -326,6 +335,7 @@ protected:
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
 				ctrl->Send(*ite, nMessage, wParam, lParam);
+				if(!ctrl->IsValid()) return NULL;
 				// 判断返回值
 				lrDef = ctrl->GetResult(lrDef);
 			}
@@ -341,6 +351,7 @@ protected:
 				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
 				ctrl->Send(*ite, nMessage, wParam, lParam);
+				if(!ctrl->IsValid()) return NULL;
 				// 判断返回值
 				lrDef = ctrl->GetResult(lrDef);
 			}
@@ -356,7 +367,7 @@ public:
 	{}
 	~CGuiWndEvent()
 	{
-		if (--s_MLCheckCT == 0)
+		if (s_MLCheckID != 0)
 			::KillTimer(NULL, s_MLCheckID);
 	}
 
@@ -376,7 +387,6 @@ public:
 				// 鼠标离开事件检测定时器
 				if (s_MLCheckID == 0)
 					s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
-				++s_MLCheckCT;
 				ret = WndSend(board, nMessage, wParam, lParam);
 				break;
 			case WM_PAINT:
@@ -429,7 +439,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiWndEvent, IGuiEvent)
-UINT_PTR CGuiWndEvent::s_MLCheckID = 0, CGuiWndEvent::s_MLCheckCT = 0;
+UINT_PTR CGuiWndEvent::s_MLCheckID = 0;
 HWND CGuiWndEvent::s_MLCheckWD = NULL;
 
 //////////////////////////////////////////////////////////////////

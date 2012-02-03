@@ -108,6 +108,34 @@ public:
 	{}
 
 public:
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+	{
+		style_t* sty = CGuiManagerT<style_t>::Get(xml.GetAttr(_T("style"), ite));
+		if (sty)
+		{
+			if(!sty->font.Empty())
+			{
+				for(int i = 0; i < (int)min(_countof(m_Text), sty->font.GetCount()); ++i)
+					m_Text[i] = *(sty->font[i]);
+			}
+			if(!sty->color.Empty())
+			{
+				for(int i = 0; i < (int)min(_countof(m_Color), sty->color.GetCount()); ++i)
+					m_Color[i] = sty->color[i];
+			}
+			if(!sty->image.Empty())
+			{
+				for(int i = 0; i < (int)min(_countof(m_Image), sty->image.GetCount()); ++i)
+					m_Image[i] = *(sty->image[i]);
+			}
+		}
+		m_Text[0].SetString(xml.GetAttr(_T("text"), ite));
+		for(int i = 1; i < _countof(m_Text); ++i)
+			m_Text[i].SetString(m_Text[0]);
+		SetWindowRect(StringToRect(xml.GetAttr(_T("rect"), ite)));
+		return this;
+	}
+
 	// »ñµÃ¿Ø¼þ×´Ì¬
 	void* GetState(const CString& sType)
 	{

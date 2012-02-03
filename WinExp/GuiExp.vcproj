@@ -305,17 +305,33 @@
 			Name="GuiManager"
 			>
 			<File
-				RelativePath="GuiExp\GuiManager\GuiConfig.hpp"
+				RelativePath="GuiExp\GuiManager\GuiManager.h"
 				>
 			</File>
 			<File
-				RelativePath="GuiExp\GuiManager\GuiManager.h"
+				RelativePath=".\GuiExp\GuiManager\GuiSkin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiManager\GuiSkin.h"
 				>
 			</File>
 			<File
 				RelativePath="GuiExp\GuiManager\GuiXML.h"
 				>
 			</File>
+			<Filter
+				Name="Executors"
+				>
+				<File
+					RelativePath=".\GuiExp\GuiManager\Executors\Executor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GuiExp\GuiManager\Executors\Executor.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="GuiExp\GuiExp.h"

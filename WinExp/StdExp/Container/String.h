@@ -502,7 +502,7 @@ public:
 	{
 		return node_t((CStringT*)this, GetLength());
 	}
-	iterator_t Last()
+	iterator_t Last() const
 	{
 		return node_t((CStringT*)this, GetLength() - 1);
 	}

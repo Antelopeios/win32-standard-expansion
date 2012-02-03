@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-26
-// Version:	1.0.0006.2050
+// Date:	2012-02-02
+// Version:	1.0.0007.1802
 //
 // History:
 //	- 1.0.0002.1525(2011-05-13)	^ 将IGuiBoardBase接口实现与GuiBoard的实现分离
@@ -43,6 +43,7 @@
 //	- 1.0.0005.2000(2011-07-16)	= 根据剪切区绘图的优化调整IGuiBoardBase::LayeredWindow()的实现
 //	- 1.0.0006.2050(2011-08-26)	# 修正一处IGuiBoardBase::SetLayered()内部错误
 //								# 修正当窗口有子窗口时,绘图会将子窗口覆盖的问题
+//	- 1.0.0007.1802(2012-02-02)	+ 添加IGuiBoardBase::SetParent()
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -424,6 +425,11 @@ wnd_t IGuiBoardBase::GetParent()
 {
 	if (IsNull()) return NULL;
 	return (wnd_t)::GetParent(Get());
+}
+wnd_t IGuiBoardBase::SetParent(wnd_t wndParent/* = NULL*/)
+{
+	if (IsNull()) return NULL;
+	return (wnd_t)::SetParent(Get(), wndParent);
 }
 
 // 设置焦点

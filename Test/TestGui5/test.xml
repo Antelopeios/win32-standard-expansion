@@ -3,33 +3,32 @@
 <!--摘要定义-->
 <detail name="Test" author="木头云" home="http://dark-c.at" email="mark.lonr@tom.com" version="1.0" date="2011-05-31" />
 <!--资源定义-->
-<font name="1" face="微软雅黑" size="22" color="#a0a0a0" weight="bold" italic="0" underline="0" />
-<font name="2" face="微软雅黑" size="22" color="#3e7eaa" weight="normal" italic="0" underline="0" />
-<image name="bk" path="../TestImg1/ground.png" />
-<image name="btn-t-l" path="btn_bg_cap_left.png" />
-<image name="btn-t" path="btn_bg_cap.png" />
-<image name="btn-t-r" path="btn_bg_cap_right.png" />
-<image name="btn-l" path="btn_bg_left.png" />
-<image name="btn" path="btn_bg.png" />
-<image name="btn-r" path="btn_bg_right.png" />
-<image name="btn-b-l" path="btn_bg_bottom_left.png" />
-<image name="btn-b" path="btn_bg_bottom.png" />
-<image name="btn-b-r" path="btn_bg_bottom_right.png" />
+<font name="1" face="微软雅黑" size="22" color="#a0a0a0" weight="bold" italic="false" underline="false" />
+<font name="2" color="#003c74c8" />
+<image name="bk" path="TestImg1/ground.png" />
+<image name="btn-t-l" path="TestGui1/btn_bg_cap_left.png" />
+<image name="btn-t" path="TestGui1/btn_bg_cap.png" />
+<image name="btn-t-r" path="TestGui1/btn_bg_cap_right.png" />
+<image name="btn-l" path="TestGui1/btn_bg_left.png" />
+<image name="btn" path="TestGui1/btn_bg.png" />
+<image name="btn-r" path="TestGui1/btn_bg_right.png" />
+<image name="btn-b-l" path="TestGui1/btn_bg_bottom_left.png" />
+<image name="btn-b" path="TestGui1/btn_bg_bottom.png" />
+<image name="btn-b-r" path="TestGui1/btn_bg_bottom_right.png" />
 <!--样式表-->
-<style name="style-gnd" font="1" color="#336699" image="bk" />
-<style name="style-btn" font="2,2,2,2,2" image="btn-t-l,btn-t,btn-t-r,btn-l,btn,btn-r,btn-b-l,btn-b,btn-b-r" />
+<style name="style-gnd" font="1" image="bk" />
+<style name="style-btn" font="2,2,2,2,2,2,2,2" image="btn-t-l,btn-t,btn-t-r,btn-l,btn,btn-r,btn-b-l,btn-b,btn-b-r" />
 <!--层定义-->
-<div name="wnd" class="CGuiWnd" rect="0,0,500,300" pos="center" layer="1" visible="show">
+<div name="wnd" class="CGuiWnd" rect="" pos="" layer="true" mask="" visible="true">
 	<!--事件,每个层可以定义任意个事件-->
 	<event class="CCustomEvent" />
 	<!--嵌套层定义(控件)-->
 	<div name="gnd" class="CGuiPicture" style="style-gnd">
 		<event class="CCusPicEvent" />
-		<!--特效,每个层只能定义一个特效-->
+		<!--特效,每个层只能定义一个特效,后面的特效将会覆盖前面的特效-->
 		<effect class="CGuiFade" />
 		<!--嵌套层定义(控件的子控件)-->
 		<div name="btn" class="CGuiButton" style="style-btn" text="Dark C.at" rect="70,100,180,140">
-			<effect class="CGuiFade" />
 			<event class="CCusBtnEvent" />
 		</div>
 	</div>

@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,20 +28,21 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiConfig - 界面配置文件接口
+// CGuiSkin - 皮肤加载
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-31
-// Version:	1.0.0000.1714
+// Date:	2012-01-31
+// Version:	1.0.0001.0945
 //
 // History:
 //	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
+//	- 1.0.0001.0945(2012-01-31)	= GuiConfig改名为CGuiSkin
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiConfig_hpp__
-#define __GuiConfig_hpp__
+#ifndef __GuiSkin_h__
+#define __GuiSkin_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -51,59 +52,22 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiConfig
+EXP_CLASS CGuiSkin
 {
-public:
-	// 摘要
-	struct detail_t
-	{
-		CString name;		// 名称
-		CString author;		// 作者
-		CString home;		// 主页
-		CString email;		// 邮箱
-		CString version;	// 版本
-		CString date;		// 日期
-	};
+protected:
+	static CArrayT<void*> m_NewDiv;
+	static CArrayT<void*> m_NedDel;
 
 protected:
-	CGuiXML	 m_XML;
-	detail_t m_Detail;
+	static void Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent = NULL);
 
 public:
-	CGuiConfig()
-	{}
-	virtual ~CGuiConfig()
-	{}
-
-protected:
-	BOOL CreateUI()
-	{
-	}
-
-public:
-	BOOL Load(IFileObject* pFile)
-	{
-		if (!pFile) return FALSE;
-		m_XML.SetFile(pFile);
-		if (!m_XML.Decode()) return FALSE;
-		CGuiXML::iterator_t ite;
-		if (!m_XML.GetNode(_T("detail"), ite)) return FALSE;
-		// 开始读取配置文件内容
-		m_Detail.name	 = m_XML.GetAttr(_T("name"),	ite);
-		m_Detail.author	 = m_XML.GetAttr(_T("author"),	ite);
-		m_Detail.home	 = m_XML.GetAttr(_T("home"),	ite);
-		m_Detail.email	 = m_XML.GetAttr(_T("email"),	ite);
-		m_Detail.version = m_XML.GetAttr(_T("version"),	ite);
-		m_Detail.date	 = m_XML.GetAttr(_T("date"),	ite);
-		// 开始创建界面对象
-		return TRUE;
-	}
-
-	const detail_t& GetDetail() { return m_Detail; }
+	static BOOL Load(IFileObject* pFile);
+	static BOOL Load(LPCSTR script);
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiConfig_hpp__*/
+#endif/*__GuiSkin_h__*/

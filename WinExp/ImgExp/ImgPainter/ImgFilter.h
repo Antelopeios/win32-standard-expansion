@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-03
-// Version:	1.0.0007.1925
+// Date:	2012-02-01
+// Version:	1.0.0008.1531
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
@@ -50,6 +50,7 @@
 //	- 1.0.0006.1424(2011-12-26)	+ 添加CFilterPreMul图像预乘滤镜
 //	- 1.0.0007.1925(2012-01-03)	= 原先的CFilterFill调整为CFilterBrush,CFilterFill做单纯的上色处理
 //								^ 使用CImgASM优化CFilterBrush在不考虑屏蔽色与屏蔽位时的效率
+//	- 1.0.0008.1531(2012-02-01)	# 修正CFilterBrush绘图颜色错误的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -183,7 +184,7 @@ public:
 		, m_Mask(bMask)
 		, m_bClrMask(bClrMask)
 		, m_ClrMask(cMask)
-	{}
+	{ m_Const = ExRevColor(m_Const); }
 
 	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
 				LONG w, LONG h, LONG inx_des)

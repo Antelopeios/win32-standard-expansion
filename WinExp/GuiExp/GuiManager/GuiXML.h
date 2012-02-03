@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-08
-// Version:	1.0.0007.1617
+// Date:	2012-02-02
+// Version:	1.0.0008.1802
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
@@ -48,6 +48,7 @@
 //	- 1.0.0005.2056(2011-09-18)	^ 简化CGuiXML中的部分实现
 //	- 1.0.0006.1256(2011-10-10)	+ CGuiXML支持UTF-8格式的xml解析
 //	- 1.0.0007.1617(2012-01-08)	# 修正若干CGuiXML内部编码转换的错误
+//	- 1.0.0008.1802(2012-02-02)	+ 添加CGuiXML::SetDefEnc()与CGuiXML::GetDefEnc()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_h__
@@ -74,6 +75,7 @@ public:
 	} node_t;
 	typedef CTreeT<node_t*> tree_t;
 	typedef tree_t::iterator_t iterator_t;
+	typedef tree_t::ite_list_t ite_list_t;
 
 	// 读取状态
 	enum state_t
@@ -98,10 +100,12 @@ protected:
 	tree_t		 m_xData;
 	CGC			 m_GC;
 	CString		 m_sTemp;
+	CString		 m_sEnc;
 
 public:
 	CGuiXML()
 		: m_pFile(NULL)
+		, m_sEnc(_T("utf-8"))
 	{ Clear(); }
 	virtual ~CGuiXML()
 	{}
@@ -453,12 +457,17 @@ protected:
 	}
 
 public:
-	void SetFile(IFileObject* pFile)
+	EXP_INLINE void SetFile(IFileObject* pFile)
 	{ m_pFile = pFile; }
-	IFileObject* GetFile()
+	EXP_INLINE IFileObject* GetFile()
 	{ return m_pFile; }
 
-	void Clear()
+	EXP_INLINE void SetDefEnc(const CString& enc)
+	{ m_sEnc = enc; }
+	EXP_INLINE const CString GetDefEnc() const
+	{ return m_sEnc; }
+
+	EXP_INLINE void Clear()
 	{
 		m_xData.Clear();
 		m_GC.Clear();
@@ -474,7 +483,7 @@ public:
 		if (!m_pFile->Clear()) return FALSE;
 		if (!m_mFile.Clear()) return FALSE;
 		// 开始编码
-		CString enc(_T("utf-8"));
+		CString enc(m_sEnc);
 		Encode(m_xData.Head(), enc);
 		enc.Lower();
 		// 判断文件编码并转换
@@ -520,7 +529,7 @@ public:
 		uint64_t len64 = m_pFile->Size();
 		if (len64 > (1 << 30)) return FALSE;			// 忽略大于1G的文件
 		{
-			CString enc(_T("utf-8"));
+			CString enc(m_sEnc);
 			CStringT<char> buf; buf.GetCStr(1 << 19);	// 1M的缓存区(CStringT默认会将传入大小翻倍拓展)
 			// 先确定编码类型
 			while(m_pFile->Read(buf.GetCStr(), buf.GetSize(), sizeof(char)) != 0)

@@ -194,6 +194,10 @@ public:
 			}
 		}
 	}
+	EXP_INLINE void Add(void* pPtr)
+	{
+		Add<EXP_MEMORY_ALLOC>(pPtr);
+	}
 	// 删除指针引用计数
 	EXP_INLINE void Del(void* pPtr, BOOL bRelease = FALSE)
 	{

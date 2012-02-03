@@ -58,8 +58,39 @@ class CGuiWnd : public IGuiThunk
 	EXP_DECLARE_DYNCREATE_MULT(CGuiWnd, IGuiThunk)
 
 public:
-	CGuiWnd()
-	{}
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+	{
+		Create(
+			xml.GetAttr(_T("text"), ite), 
+			StringToRect(xml.GetAttr(_T("rect"), ite)), SW_HIDE);
+
+		CString t = xml.GetAttr(_T("pos"), ite); t.Lower();
+		if (t == _T("center")) CenterWindow();
+
+		BOOL clr_key = FALSE; pixel_t key = ExRGB(255, 0, 255);
+		t = xml.GetAttr(_T("mask"), ite);
+		if(!t.Empty())
+		{
+			t.Lower();
+			clr_key = TRUE;
+			key = StringToColor(t);
+		}
+		t = xml.GetAttr(_T("layer"), ite); t.Lower();
+		if (t == _T("false"))
+			SetLayered(FALSE, clr_key, key);
+		else
+		if (t == _T("true"))
+			SetLayered(TRUE, clr_key, key);
+
+		t = xml.GetAttr(_T("visible"), ite); t.Lower();
+		if (t == _T("false"))
+			ShowWindow(SW_HIDE);
+		else
+		if (t == _T("true"))
+			ShowWindow(SW_SHOW);
+
+		return this;
+	}
 };
 
 //////////////////////////////////////////////////////////////////

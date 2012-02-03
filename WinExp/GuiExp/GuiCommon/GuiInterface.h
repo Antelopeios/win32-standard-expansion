@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-20
-// Version:	1.0.0018.1712
+// Date:	2012-02-02
+// Version:	1.0.0019.1802
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -62,6 +62,8 @@
 //	- 1.0.0017.1720(2011-10-24)	# 修正因Event在MouseMove时对Ctrl指针的依赖,导致当一个Comp对象移除自身的Ctrl子对象时MouseMove引起的Run-Time异常
 //	- 1.0.0018.1712(2012-01-20)	+ IGuiEvent支持对单独的某一个时间对象设置托管
 //								= IGuiSender与IGuiComp默认托管所有子对象
+//	- 1.0.0019.1802(2012-02-02)	+ 添加IGuiObject::IsValid()
+//								# 修正某事件处理在跳过后面的事件之后,其返回值仍然有可能被后面未响应事件的默认返回值覆盖的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -80,11 +82,15 @@ EXP_INTERFACE IGuiObject : public IBaseObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiObject, IBaseObject)
 
-public:
-	IGuiObject() {}
-	virtual ~IGuiObject() {}
+protected:
+	BOOL m_bFree;
 
 public:
+	IGuiObject() : m_bFree(FALSE) {}
+	virtual ~IGuiObject() { m_bFree = TRUE; }
+
+public:
+	BOOL IsValid() { return (!m_bFree); }
 	virtual void Free() { del(this); }
 };
 
@@ -170,6 +176,7 @@ public:
 	{
 		ClearEvent();
 		del(m_CldrEvt);
+		m_CldrEvt = NULL;
 	}
 
 public:
@@ -225,6 +232,7 @@ public:
 	// 事件结果接口
 	void SetResult(LRESULT lrRet = 0)
 	{
+		if(!IsValid()) return;
 		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
@@ -233,6 +241,7 @@ public:
 	}
 	LRESULT GetResult(LRESULT lrDef = 0)
 	{
+		if(!IsValid()) return NULL;
 		// 后添加的事件优先执行
 		evt_list_t::iterator_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)
@@ -262,20 +271,31 @@ public:
 				continue;
 			else
 			if (sta == IGuiEvent::return_next)
+			{
+				SetResult(ret);
 				return;
+			}
 			if (!(*ite)) continue;
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			if (!(*ite)->IsValid()) return;
 			sta = (*ite)->GetState();
 			LRESULT r = (*ite)->GetResult();
 			if (r != 0 && ret != r) ret = r;
 		}
-		if (sta != IGuiEvent::continue_next) return;
+		if (sta != IGuiEvent::continue_next)
+		{
+			SetResult(ret);
+			return;
+		}
 		if (*ite)
 		{
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			LRESULT r = (*ite)->GetResult();
+			if (r != 0 && ret != r) ret = r;
 		}
+		SetResult(ret);
 	}
 };
 

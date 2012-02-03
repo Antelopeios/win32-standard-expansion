@@ -1,4 +1,4 @@
-// Copyright 2011-2012, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,82 +28,117 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiManager - 界面管理器
+// Executor - 界面脚本执行
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-31
-// Version:	1.0.0003.1801
+// Date:	2012-01-30
+// Version:	1.0.0000.1058
 //
 // History:
-//	- 1.0.0000.1622(2011-06-13)	@ 开始构建GuiManager接口
-//	- 1.0.0001.0527(2011-08-01)	= 将GuiManager改为模板形式,提供泛型化的界面元素管理
-//	- 1.0.0002.0128(2011-12-10)	+ GuiManager的Reg接口支持重复注册同一个key,第二次注册将会覆盖上次的注册
-//	- 1.0.0003.1801(2012-01-31)	+ 添加CGuiManagerT::Clear()
+//	- 1.0.0000.1058(2012-01-30)	@ 开始构建Executor
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiManager_h__
-#define __GuiManager_h__
+#ifndef __Executor_h__
+#define __Executor_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
 #include "GuiCommon/GuiCommon.h"
-
-//////////////////////////////////////////////////////////////////
-
 #include "GuiManager/GuiXML.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-template <typename TypeT, const DWORD SizeT = 1009>
-class CGuiManagerT
-{
-public:
-	typedef CMapT<CString, TypeT*, _MapPolicyT<SizeT> > key_map_t;
-	EXP_INLINE static key_map_t& Instance()
-	{
-		return ExSingleton<key_map_t>();
-	}
+EXP_API pixel_t StringToColor(CString sColor);
+EXP_API int StringToArray(const CString s, CArrayT<CString> &sa, TCHAR cSpl);
+EXP_API CRect StringToRect(const CString& sRect);
+EXP_API BOOL ReleaseBinary(HGLOBAL hData);
+EXP_API HGLOBAL GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/);
 
-public:
-	EXP_INLINE static TypeT* Reg(LPCTSTR c_key, TypeT* inf)
-	{
-		if (!c_key) return NULL;
-		return (Instance()[c_key] = inf);
-	}
-	EXP_INLINE static TypeT* Get(LPCTSTR c_key)
-	{
-		if (!c_key) return FALSE;
-		key_map_t& types = Instance();
-		key_map_t::iterator_t ite = types.Locate(c_key);
-		if (ite == types.Tail())
-			return NULL;
-		else
-			return ite->Val();
-	}
-	EXP_INLINE static void Clear(BOOL bDel = TRUE)
-	{
-		for(key_map_t::iterator_t ite = Instance().Head(); ite != Instance().Tail(); ++ite)
-			if (bDel) del(*ite);
-	}
+//////////////////////////////////////////////////////////////////
+
+// 摘要
+EXP_STRUCT detail_t
+{
+	CString name;		// 名称
+	CString author;		// 作者
+	CString home;		// 主页
+	CString email;		// 邮箱
+	CString version;	// 版本
+	CString date;		// 日期
 };
 
-#define ExReg(type, key, inf)	EXP::CGuiManagerT<type>::Reg(key, inf)
-#define ExGet(type, key)		EXP::CGuiManagerT<type>::Get(key)
-#define ExClr(type, is_del)		EXP::CGuiManagerT<type>::Clear(is_del)
+// 样式
+EXP_STRUCT style_t
+{
+	CArrayT<CText*> font;
+	CArrayT<pixel_t> color;
+	CArrayT<CImage*> image;
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_INTERFACE IExecutor : public IBaseObject
+{
+	EXP_DECLARE_DYNAMIC_CLS(IExecutor, IBaseObject)
+
+public:
+	void* m_pNedDel;
+
+public:
+	IExecutor() : m_pNedDel(NULL) {}
+	virtual ~IExecutor(void) {}
+
+public:
+	virtual void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent) = 0;
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_CLASS CExecutor
+{
+protected:
+	typedef CMapT<CString, IExecutor*> exc_map_t;
+
+protected:
+	EXP_INLINE static CGC& GetGC()
+	{
+		return ExSingleton<CGC>();
+	}
+	EXP_INLINE static exc_map_t& GetMap()
+	{
+		return ExSingleton<exc_map_t>();
+	}
+	EXP_INLINE static LPCTSTR Transform(LPCTSTR key)
+	{
+		static CString k;
+		k.Format(_T("_%s"), key);
+		return k.Lower();
+	}
+
+public:
+	EXP_INLINE static IExecutor* Get(LPCTSTR key)
+	{
+		if (!key || _tcslen(key) == 0) return NULL;
+		exc_map_t::iterator_t ite = GetMap().Locate(key);
+		if (ite == GetMap().Tail())
+		{
+			IExecutor* exc = ExDynCast<IExecutor>(ExDynCreate(Transform(key), &GetGC()));
+			if (!exc) return NULL;
+			return GetMap()[key] = exc;
+		}
+		else
+			return (*ite);
+	}
+};
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#include "GuiManager/Executors/Executor.h"
-#include "GuiManager/GuiSkin.h"
-
-//////////////////////////////////////////////////////////////////
-
-#endif/*__GuiManager_h__*/
+#endif/*__Executor_h__*/

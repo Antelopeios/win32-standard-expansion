@@ -119,9 +119,6 @@ protected:
 	}
 
 public:
-	virtual BOOL Execute(const CString& key, const CString& val) = 0;
-	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent) { return EXP_BASE::Execute(xml, ite, parent); }
-
 	void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		if (GetParent())
@@ -319,9 +316,6 @@ public:
 	IGuiCtrlBase();
 
 public:
-	BOOL Execute(const CString& key, const CString& val);
-	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent);
-
 	// ¸üÐÂ×´Ì¬
 	void* GetState(const CString& sType);
 	BOOL SetState(const CString& sType, void* pState);

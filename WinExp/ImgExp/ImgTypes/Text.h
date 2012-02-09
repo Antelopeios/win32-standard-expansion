@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-12
-// Version:	1.0.0005.1742
+// Date:	2012-02-03
+// Version:	1.0.0006.1331
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
@@ -43,6 +43,7 @@
 //	- 1.0.0003.1919(2011-06-24)	# 修正CText::GetSize()无法自动匹配字体获取大小的问题
 //	- 1.0.0004.1610(2011-08-10)	^ 使用缓存机制优化CText::GetImage()的效率
 //	- 1.0.0005.1742(2011-08-12)	^ 简化CText::GetSize()接口,可支持省略tGrp参数
+//	- 1.0.0006.1331(2012-02-03)	- 将CString与CText分离
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -62,7 +63,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CText : public CString, public CFont
+class CText : public CFont
 {
 protected:
 	pixel_t m_Color;
@@ -73,9 +74,8 @@ protected:
 	pixel_t m_MemClr;
 
 public:
-	CText(LPCTSTR sCont = NULL, font_t tFont = NULL, pixel_t tColor = ExRGBA(0, 0, 0, EXP_CM))
-		: CString(sCont)
-		, CFont(tFont)
+	CText(font_t tFont = NULL, pixel_t tColor = ExRGBA(0, 0, 0, EXP_CM))
+		: CFont(tFont)
 		, m_Color(tColor)
 	{}
 	virtual ~CText()
@@ -102,7 +102,6 @@ public:
 
 	CText& operator=(const CText& txt)
 	{
-		SetString((LPCTSTR)txt);
 		SetColor(txt.GetColor());
 		SetFont(txt.GetFont());
 		return (*this);
@@ -110,7 +109,6 @@ public:
 
 	friend BOOL operator==(const CText& txt1, const CText& txt2)
 	{
-		if ((CString)txt1 != (CString)txt2) return FALSE;
 		if ((CFont)txt1 != (CFont)txt2) return FALSE;
 		if (txt1.m_Color != txt2.m_Color) return FALSE;
 		return TRUE;
@@ -120,25 +118,25 @@ public:
 		return !(txt1 == txt2);
 	}
 
-	void GetSize(CSize& szCont, graph_t tGrp = NULL)
+	void GetSize(const CString& s, CSize& szCont, graph_t tGrp = NULL)
 	{
 		graph_t grp_tmp = NULL;
 		if (!tGrp) tGrp = grp_tmp = ::CreateCompatibleDC(NULL);
 		HGDIOBJ old = ::SelectObject(tGrp, Get());
 		SIZE size = {0};
-		::GetTextExtentPoint32(tGrp, GetCStr(), (int)GetLength(), &size);
+		::GetTextExtentPoint32(tGrp, s, (int)s.GetLength(), &size);
 		szCont = size;
 		::SelectObject(tGrp, old);
 		if (grp_tmp) ::DeleteDC(grp_tmp);
 	}
 
-	image_t GetImage()
+	image_t GetImage(const CString& s)
 	{
-		if (Empty()) return NULL;
-		if (m_MemStr == (CString)(*this) && 
+		if (s == _T("")) return NULL;
+		if (m_MemStr == s && 
 			m_MemFnt == (CFont)(*this) && 
 			m_MemClr == m_Color) return m_MemImg;
-		m_MemStr = (CString)(*this);
+		m_MemStr = s;
 		m_MemFnt = (CFont)(*this);
 		m_MemClr = m_Color;
 		// 创建临时画板
@@ -148,7 +146,7 @@ public:
 		::SetBkMode(tmp_grp, TRANSPARENT);
 		// 获得文字区域
 		CSize sz;
-		GetSize(sz, tmp_grp);
+		GetSize(m_MemStr, sz, tmp_grp);
 		// 创建文字图像
 		m_MemImg.Create(sz.cx, sz.cy);
 		if (m_MemImg.IsNull())
@@ -160,7 +158,7 @@ public:
 		// 绘制文字
 		CRect rc(0, 0, sz.cx, sz.cy);
 		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRGBA(0, 0, 0, EXP_CM)));
-		::DrawText(tmp_grp, GetCStr(), (int)GetLength(), &(RECT)rc, DT_LEFT | DT_TOP);
+		::DrawText(tmp_grp, m_MemStr, (int)m_MemStr.GetLength(), &(RECT)rc, DT_LEFT | DT_TOP);
 		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0xf));
 		if (m_Color != ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM))
 		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(m_Color, 0xf, TRUE, ExRGBA(EXP_CM, EXP_CM, EXP_CM, 0)));

@@ -78,7 +78,7 @@ public:
 	}
 	EXP_INLINE static TypeT* Get(LPCTSTR c_key)
 	{
-		if (!c_key) return FALSE;
+		if (!c_key) return NULL;
 		key_map_t& types = Instance();
 		key_map_t::iterator_t ite = types.Locate(c_key);
 		if (ite == types.Tail())

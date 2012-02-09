@@ -14,15 +14,6 @@ public:
 
 		switch( nMessage )
 		{
-		case WM_SHOWWINDOW:
-			if (wParam)
-			{
-				CRect rc;
-				ExGet(IGuiCtrl, _T("gnd"))->GetWindowRect(rc);
-				board->MoveWindow(rc);
-				board->CenterWindow();
-			}
-			break;
 		case WM_KEYDOWN:
 			{
 				if (wParam == VK_ESCAPE) // ESC
@@ -52,13 +43,16 @@ public:
 		switch( nMessage )
 		{
 		case WM_SHOWWINDOW:
-			if (wParam && ctrl)
+			if (wParam && ctrl && ::IsWindowVisible(ExGet(IGuiBoard, _T("wnd"))->GethWnd()))
 			{
+				ExGet(IGuiBoard, _T("wnd"))->ShowWindow(SW_HIDE);
 				CImage* img = (CImage*)ctrl->GetState(_T("image"));
-				CRect rc(0, 0, img->GetWidth(), img->GetHeight());
+				CRect rc(0, 0, img->GetWidth(), img->GetHeight()), rect;
+				ExGet(IGuiBoard, _T("wnd"))->GetWindowRect(rect);
+				rect.Width(rc.Width());
+				rect.Height(rc.Height());
+				ExGet(IGuiBoard, _T("wnd"))->MoveWindow(rect);
 				ctrl->SetWindowRect(rc);
-				ExGet(IGuiBoard, _T("wnd"))->MoveWindow(rc);
-				ExGet(IGuiBoard, _T("wnd"))->CenterWindow();
 				ExGet(IGuiBoard, _T("wnd"))->ShowWindow(SW_SHOW);
 			}
 			break;
@@ -83,6 +77,7 @@ EXP_IMPLEMENT_DYNCREATE_CLS(CCusPicEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 
+class CCusBtnEvent2;
 class CCusBtnEvent : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CCusBtnEvent, IGuiEvent)
@@ -97,9 +92,10 @@ public:
 		{
 		case BM_CLICK:
 			{
-				CIOFile file(_T("TestGui5\\test2.xml"));
-				if (file.Error() || file.Size() == 0) return;
-				CGuiSkin::Load(&file);
+				CGuiSkin::Load(_T("<image name=\"bk\" path=\"TestImg1/ground.png\" />"));
+				ExGet(IGuiBoard, _T("wnd"))->SetLayered(TRUE, FALSE);
+				ExGet(IGuiCtrl, _T("btn"))->DelEvent();
+				ExGet(IGuiCtrl, _T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent2));
 			}
 			break;
 		}
@@ -124,9 +120,10 @@ public:
 		{
 		case BM_CLICK:
 			{
-				CIOFile file(_T("TestGui5\\test.xml"));
-				if (file.Error() || file.Size() == 0) return;
-				CGuiSkin::Load(&file);
+				CGuiSkin::Load(_T("<image name=\"bk\" path=\"TestImg1/ground.jpg\" />"));
+				ExGet(IGuiBoard, _T("wnd"))->SetLayered(FALSE, FALSE);
+				ExGet(IGuiCtrl, _T("btn"))->DelEvent();
+				ExGet(IGuiCtrl, _T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent));
 			}
 			break;
 		}
@@ -134,3 +131,38 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CCusBtnEvent2, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+class CEvent_scr_h : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CEvent_scr_h, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		if (!ctrl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				CRect rc_wnd;
+				IGuiBoard* wnd = ctrl->GetBoard();
+				ExAssert(wnd);
+				wnd->GetClientRect(rc_wnd);
+				rc_wnd.Inflate(CPoint(1, 1));
+
+				LONG l, r, t, b;
+				l = rc_wnd.Right() - 20;
+				t = rc_wnd.Top();
+				r = rc_wnd.Right();
+				b = rc_wnd.Bottom();
+				ctrl->SetWindowRect(CRect(l, t, r, b));
+			}
+			break;
+		}
+	}
+};

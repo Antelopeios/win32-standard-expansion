@@ -90,6 +90,39 @@ public:
 			pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
 	}
 
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		if (key == _T("all"))
+			SetState(_T("all"), (void*)_ttol(val));
+		else
+		if (key == _T("fra"))
+			SetState(_T("fra"), (void*)_ttol(val));
+		else
+		if (key == _T("pos"))
+			SetState(_T("pos"), (void*)_ttol(val));
+		else
+		if (key == _T("ori"))
+		{
+			CString temp(val);
+			temp.Lower();
+			if (temp == _T("false"))
+				SetState(_T("ori"), (void*)FALSE);
+			else
+			if (temp == _T("true"))
+				SetState(_T("ori"), (void*)TRUE);
+		}
+		else
+		if (key.Left(4) == _T("blk_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("blk_"));
+			m_Slider.Execute(type, val);
+		}
+		else
+			return EXP_BASE::Execute(key, val);
+		return TRUE;
+	}
+
 	void* GetState(const CString& sType)
 	{
 		if (sType.Left(4) == _T("blk_"))
@@ -198,6 +231,37 @@ public:
 	}
 
 public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		if (key == _T("scroll"))
+		{
+			IGuiCtrl* main = CGuiManagerT<IGuiCtrl>::Get(val);
+			if (main) main->SetScroll(this);
+		}
+		else
+		if (key.Left(4) == _T("sli_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("sli_"));
+			m_Slider.Execute(type, val);
+		}
+		else
+		if (key.Left(3) == _T("up_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("up_"));
+			m_Up.Execute(type, val);
+		}
+		else
+		if (key.Left(3) == _T("dn_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("dn_"));
+			m_Down.Execute(type, val);
+		}
+		return TRUE;
+	}
+
 	void* GetState(const CString& sType)
 	{
 		CString type(sType);

@@ -78,17 +78,18 @@ public:
 protected:
 	status_t m_Status;	// 按钮状态
 	locate_t m_Locate;	// 文字位置
-	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
+	LONG m_LocOff;		// 文字位置偏移(m_Locate == center时无效)
 
-	CImage m_Icon;
+	CImage* m_Icon;
 	BOOL m_bGlow;		// 是否绘制图标外发光
-	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center 时无效)
+	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center时无效)
 	int m_ShakeIco;		// 图标点击摇晃
 
 	int m_ThreeSta;		// 是否是三态按钮
 	pixel_t m_Color[8];
-	CImage m_Image[9];	// 九宫格分割,每个小块保存8个状态
-	CText m_Text[8];
+	CImage* m_Image[9];	// 九宫格分割,每个小块保存8个状态
+	CText* m_Text[8];
+	CString m_Str;
 
 public:
 	CGuiButton()
@@ -99,8 +100,11 @@ public:
 		, m_IcoOff(5)
 		, m_ShakeIco(0)
 		, m_ThreeSta(0)
+		, m_Icon(NULL)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
+		ZeroMemory(m_Image, sizeof(m_Image));
+		ZeroMemory(m_Text, sizeof(m_Text));
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiButtonEvent"), GetGC()));
 	}
@@ -108,32 +112,81 @@ public:
 	{}
 
 public:
-	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+	BOOL Execute(const CString& key, const CString& val)
 	{
-		style_t* sty = CGuiManagerT<style_t>::Get(xml.GetAttr(_T("style"), ite));
-		if (sty)
+		CArrayT<CString> sa;
+		if (key == _T("style"))
 		{
-			if(!sty->font.Empty())
+			style_t* sty = CGuiManagerT<style_t>::Get(val);
+			if (sty)
 			{
-				for(int i = 0; i < (int)min(_countof(m_Text), sty->font.GetCount()); ++i)
-					m_Text[i] = *(sty->font[i]);
-			}
-			if(!sty->color.Empty())
-			{
-				for(int i = 0; i < (int)min(_countof(m_Color), sty->color.GetCount()); ++i)
-					m_Color[i] = sty->color[i];
-			}
-			if(!sty->image.Empty())
-			{
-				for(int i = 0; i < (int)min(_countof(m_Image), sty->image.GetCount()); ++i)
-					m_Image[i] = *(sty->image[i]);
+				if(!sty->font.Empty())
+					for(int i = 0; i < (int)min(_countof(m_Text), sty->font.GetCount()); ++i)
+						m_Text[i] = sty->font[i];
+				if(!sty->color.Empty())
+					SetState(_T("color"), (void*)(pixel_t*)sty->color);
+				if(!sty->image.Empty())
+					for(int i = 0; i < (int)min(_countof(m_Image), sty->image.GetCount()); ++i)
+						m_Image[i] = sty->image[i];
 			}
 		}
-		m_Text[0].SetString(xml.GetAttr(_T("text"), ite));
-		for(int i = 1; i < _countof(m_Text); ++i)
-			m_Text[i].SetString(m_Text[0]);
-		SetWindowRect(StringToRect(xml.GetAttr(_T("rect"), ite)));
-		return this;
+		else
+		if (key == _T("font"))
+		{
+			ExStringToArray(val, sa);
+			for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
+				m_Text[i] = CGuiManagerT<CText>::Get(sa[i]);
+		}
+		else
+		if (key == _T("color"))
+		{
+			ExStringToArray(val, sa);
+			for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
+				m_Color[i] = ExStringToColor(sa[i]);
+		}
+		else
+		if (key == _T("image"))
+		{
+			ExStringToArray(val, sa);
+			for(int i = 0; i < (int)min(_countof(m_Image), sa.GetCount()); ++i)
+				m_Image[i] = CGuiManagerT<CImage>::Get(sa[i]);
+		}
+		else
+		if (key == _T("text"))
+			SetState(_T("text"), (void*)&val);
+		else
+		if (key == _T("status"))
+			SetState(_T("status"), (void*)_ttol(val));
+		else
+		if (key == _T("locate"))
+			SetState(_T("locate"), (void*)_ttol(val));
+		else
+		if (key == _T("loc_off"))
+			SetState(_T("loc_off"), (void*)_ttol(val));
+		else
+		if (key == _T("shake_ico"))
+			SetState(_T("shake_ico"), (void*)_ttoi(val));
+		else
+		if (key == _T("thr_sta"))
+			SetState(_T("thr_sta"), (void*)_ttoi(val));
+		else
+		if (key == _T("icon"))
+			SetState(_T("icon"), CGuiManagerT<CImage>::Get(val));
+		else
+		if (key == _T("ico_off"))
+			SetState(_T("ico_off"), (void*)_ttol(val));
+		else
+		if (key == _T("glow"))
+		{
+			CString temp(val);
+			temp.Lower();
+			if (temp == _T("false"))
+				SetState(_T("glow"), (void*)FALSE);
+			else
+			if (temp == _T("true"))
+				SetState(_T("glow"), (void*)TRUE);
+		}
+		return TRUE;
 	}
 
 	// 获得控件状态
@@ -160,11 +213,14 @@ public:
 		if (sType == _T("image"))
 			return (void*)m_Image;
 		else
-		if (sType == _T("text"))
+		if (sType == _T("font"))
 			return (void*)m_Text;
 		else
+		if (sType == _T("text"))
+			return (void*)(&m_Str);
+		else
 		if (sType == _T("icon"))
-			return (void*)(&m_Icon);
+			return (void*)m_Icon;
 		else
 		if (sType == _T("ico_off"))
 			return (void*)m_IcoOff;
@@ -229,27 +285,33 @@ public:
 		if (sType == _T("color"))
 		{
 			for(int i = 0; i < _countof(m_Color); ++i)
-				m_Color[i] = *((pixel_t*)pState + i);
+				m_Color[i] = ((pixel_t*)pState)[i];
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
 			for(int i = 0; i < _countof(m_Image); ++i)
-				m_Image[i] = *((CImage*)pState + i);
+				m_Image[i] = (CImage*)pState + i;
+			return EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("font"))
+		{
+			for(int i = 0; i < _countof(m_Text); ++i)
+				m_Text[i] = (CText*)pState + i;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
-			for(int i = 0; i < _countof(m_Text); ++i)
-				m_Text[i] = *((CText*)pState + i);
+			m_Str = *(CString*)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("icon"))
 		{
-			m_Icon = *((CImage*)pState);
+			m_Icon = (CImage*)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
@@ -298,16 +360,19 @@ protected:
 	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
 
 	pixel_t m_Color[4];
-	CImage m_Image;		// 保存4个状态
-	CText m_Text[4];
+	CImage* m_Image;	// 保存4个状态
+	CText* m_Text[4];
+	CString m_Str;
 
 public:
 	CGuiPushBtn()
 		: m_Status(nor)
 		, m_Locate(center)
 		, m_LocOff(5)
+		, m_Image(NULL)
 	{
 		ZeroMemory(m_Color, sizeof(m_Color));
+		ZeroMemory(m_Text, sizeof(m_Text));
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiPushBtnEvent"), GetGC()));
 	}
@@ -315,6 +380,58 @@ public:
 	{}
 
 public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		CArrayT<CString> sa;
+		if (key == _T("style"))
+		{
+			style_t* sty = CGuiManagerT<style_t>::Get(val);
+			if (sty)
+			{
+				if(!sty->font.Empty())
+					for(int i = 0; i < (int)min(_countof(m_Text), sty->font.GetCount()); ++i)
+						m_Text[i] = sty->font[i];
+				if(!sty->color.Empty())
+					SetState(_T("color"), (void*)(pixel_t*)sty->color);
+				if(!sty->image.Empty())
+					SetState(_T("image"), sty->image[0]);
+			}
+		}
+		else
+		if (key == _T("font"))
+		{
+			ExStringToArray(val, sa);
+			for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
+				m_Text[i] = CGuiManagerT<CText>::Get(sa[i]);
+		}
+		else
+		if (key == _T("color"))
+		{
+			ExStringToArray(val, sa);
+			for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
+				m_Color[i] = ExStringToColor(sa[i]);
+		}
+		else
+		if (key == _T("image"))
+		{
+			ExStringToArray(val, sa);
+			SetState(_T("image"), CGuiManagerT<CImage>::Get(sa[0]));
+		}
+		else
+		if (key == _T("text"))
+			SetState(_T("text"), (void*)&val);
+		else
+		if (key == _T("status"))
+			SetState(_T("status"), (void*)_ttol(val));
+		else
+		if (key == _T("locate"))
+			SetState(_T("locate"), (void*)_ttol(val));
+		else
+		if (key == _T("loc_off"))
+			SetState(_T("loc_off"), (void*)_ttol(val));
+		return TRUE;
+	}
+
 	// 获得控件状态
 	void* GetState(const CString& sType)
 	{
@@ -331,10 +448,13 @@ public:
 			return (void*)m_Color;
 		else
 		if (sType == _T("image"))
-			return (void*)(&m_Image);
+			return (void*)m_Image;
+		else
+		if (sType == _T("font"))
+			return (void*)m_Text;
 		else
 		if (sType == _T("text"))
-			return (void*)m_Text;
+			return (void*)(&m_Str);
 		else
 			return EXP_BASE::GetState(sType);
 	}
@@ -373,20 +493,26 @@ public:
 		if (sType == _T("color"))
 		{
 			for(int i = 0; i < _countof(m_Color); ++i)
-				m_Color[i] = *((pixel_t*)pState + i);
+				m_Color[i] = ((pixel_t*)pState)[i];
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
-			m_Image = *((CImage*)pState);
+			m_Image = (CImage*)pState;
+			return EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("font"))
+		{
+			for(int i = 0; i < _countof(m_Text); ++i)
+				m_Text[i] = (CText*)pState + i;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
-			for(int i = 0; i < _countof(m_Text); ++i)
-				m_Text[i] = *((CText*)pState + i);
+			m_Str = *(CString*)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		return FALSE;

@@ -70,6 +70,10 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)$(ProjectName)\ui" "$(TargetDir)ui\" /s  /y
+xcopy "$(ProjectDir)$(ProjectName)\icon" "$(TargetDir)icon\" /s  /y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -91,6 +95,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)$(ProjectName)\ui" "$(TargetDir)ui\" /s  /y
+xcopy "$(ProjectDir)$(ProjectName)\icon" "$(TargetDir)icon\" /s  /y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DemoGui1\GuiEvents.cpp" />

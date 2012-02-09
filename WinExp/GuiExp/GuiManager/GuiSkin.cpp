@@ -48,6 +48,7 @@ EXP_BEG
 
 CArrayT<void*> CGuiSkin::m_NewDiv;
 CArrayT<void*> CGuiSkin::m_NedDel;
+CArrayT<void*> CGuiSkin::m_LstDiv;
 
 void CGuiSkin::Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent/* = NULL*/)
 {
@@ -75,13 +76,26 @@ BOOL CGuiSkin::Load(IFileObject* pFile)
 	// 开始解析脚本
 	Exec(xml, xml.GetRoot());
 	// 发送全局消息
-	for(CArrayT<void*>::iterator_t ite = m_NewDiv.Head(); ite != m_NewDiv.Tail(); ++ite)
+	if (m_NewDiv.Empty())
 	{
-		IGuiBoard* brd = (IGuiBoard*)(*ite);
-		if (::IsWindowVisible(brd->GethWnd()))
-			brd->SendMessage(WM_SHOWWINDOW, 1);
+		for(CArrayT<void*>::iterator_t ite = m_LstDiv.Head(); ite != m_LstDiv.Tail(); ++ite)
+		{
+			IGuiBoard* brd = (IGuiBoard*)(*ite);
+			if (::IsWindowVisible(brd->GethWnd()))
+				brd->SendMessage(WM_SHOWWINDOW, 1);
+		}
 	}
-	m_NewDiv.Clear();
+	else
+	{
+		for(CArrayT<void*>::iterator_t ite = m_NewDiv.Head(); ite != m_NewDiv.Tail(); ++ite)
+		{
+			IGuiBoard* brd = (IGuiBoard*)(*ite);
+			if (::IsWindowVisible(brd->GethWnd()))
+				brd->SendMessage(WM_SHOWWINDOW, 1);
+		}
+		m_LstDiv = m_NewDiv;
+		m_NewDiv.Clear();
+	}
 	// 清理垃圾对象
 	for(CArrayT<void*>::iterator_t ite = m_NedDel.Head(); ite != m_NedDel.Tail(); ++ite)
 		del(*ite);
@@ -89,9 +103,10 @@ BOOL CGuiSkin::Load(IFileObject* pFile)
 	return TRUE;
 }
 
-BOOL CGuiSkin::Load(LPCSTR script)
+BOOL CGuiSkin::Load(const CString& script)
 {
-	CMemFile file((BYTE*)script, strlen(script) * sizeof(CHAR));
+	CStringT<char> s(script);
+	CMemFile file((BYTE*)s.GetCStr(), s.GetLength());
 	return Load(&file);
 }
 

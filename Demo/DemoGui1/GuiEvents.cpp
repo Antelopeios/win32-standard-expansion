@@ -21,7 +21,7 @@ public:
 			for(IGuiBase::list_t::iterator_t ite = board->GetChildren().Head(); ite != board->GetChildren().Tail(); ++ite)
 			{
 				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if (!ctrl) continue;
+				if(!ctrl || ExDynCheck(_T("CGuiLVItem"), ExDynCast<IBaseObject>(ctrl))) continue;
 				if (ctrl->IsVisible())
 					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
 			}
@@ -784,12 +784,65 @@ class CEvent_list : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_list, IGuiEvent)
 
 protected:
+	CGC gc;
+
 	IGuiCtrl* m_OldBtn;
 
+	CListT<CImage*> m_list_ico;
+	CListT<CString> m_list_str;
+
+	BOOL m_Loaded;
+
+	void LoadDirImage(CListT<CImage*>& lstImage, CListT<CString>& lstString, LPCTSTR sPath, ICoderObject* pCoder, CGC* pGC)
+	{
+		if (!sPath || !pCoder || !pGC) return;
+		CString path(sPath); path += _T("\\");
+		CString path_find(path); path_find += _T("*");
+
+		CIOFile file;
+		IFileObject* old_file = pCoder->GetFile();
+		pCoder->SetFile(&file);
+
+		WIN32_FIND_DATA fd = {0};
+		HANDLE find = ::FindFirstFile(path_find, &fd);
+		if (find != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				if (0 == wcscmp(fd.cFileName, L".") || 
+					0 == wcscmp(fd.cFileName, L"..")) continue;
+				if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+					LoadDirImage(lstImage, lstString, path + fd.cFileName, pCoder, pGC);
+				else
+				{
+					file.Open(path + fd.cFileName);
+					image_t img = pCoder->Decode();
+					if (img)
+					{
+						CImage* image = gcnew(*pGC, CImage);
+						image->Set(img);
+						lstImage.Add(image);
+						lstString.Add(fd.cFileName);
+					}
+				}
+			} while (::FindNextFile(find, &fd));
+			::FindClose(find);
+		}
+
+		pCoder->SetFile(old_file);
+	}
+	
 public:
 	CEvent_list()
 		: m_OldBtn(NULL)
-	{}
+		, m_Loaded(FALSE)
+	{
+		ICoderObject* coder = CImgAnalyzer::GetCoder(CImgAnalyzer::png, &gc);
+		if (!coder) return;
+		CIOFile file;
+		coder->SetFile(&file);
+		LoadDirImage(m_list_ico, m_list_str, CString(IApp::GetPath()) + _T("icon"), coder, &gc);
+	}
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -802,6 +855,39 @@ public:
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
+				if(!m_Loaded)
+				{
+					m_Loaded = TRUE;
+					IGuiCtrl::items_t items_list;
+					CListT<CImage*>::iterator_t ite_ico = m_list_ico.Head();
+					CListT<CString>::iterator_t ite_str = m_list_str.Head();
+					for(; ite_ico != m_list_ico.Tail() && ite_str != m_list_str.Tail(); ++ite_ico, ++ite_str)
+					{
+						IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
+						btn->Execute(_T("image"), _T("\
+							list_cor_lt,\
+							list_item_top,\
+							list_cor_rt,\
+							list_item_left,\
+							list_item,\
+							list_item_right,\
+							list_cor_lb,\
+							list_item_bottom,\
+							list_cor_rb"));
+						btn->Execute(_T("font"), _T("\
+							txt_btn,txt_btn,txt_btn,txt_btn,\
+							txt_btn,txt_btn,txt_btn,txt_btn"));
+						btn->SetState(_T("icon"), *ite_ico);
+						btn->SetState(_T("text"), &(*ite_str));
+						btn->SetState(_T("locate"), (void*)2);
+						btn->SetState(_T("loc_off"), (void*)18);
+						btn->SetState(_T("ico_off"), (void*)8);
+						btn->SetState(_T("shake_ico"), (void*)1);
+						btn->SetWindowRect(CRect(0, 0, 80, 90));
+						items_list.Add(btn);
+					}
+					GUI_CTL(list)->SetState(_T("items"), &items_list);
+				}
 				CRect rc_wnd;
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
@@ -811,43 +897,10 @@ public:
 				LONG l, r, t, b;
 				l = rc_wnd.Left() + GUI_IMG(line_left)->GetWidth();
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
-				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth() - 
-					(GUI_CTL(scr_h)->IsVisible() ? (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth()) : 0);
+				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
 				ctrl->SetWindowRect(CRect(l, t, r, b));
 			}
-			break;
-		case WM_SIZE:
-			{
-				LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
-				LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
-
-				if (all_line > fra_line)
-				{
-					if (!GUI_CTL(scr_h)->IsVisible())
-					{
-						GUI_CTL(scr_h)->SetVisible(TRUE);
-						CRect rc;
-						ctrl->GetWindowRect(rc);
-						rc.pt2.x -= (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());
-						ctrl->SetWindowRect(rc);
-					}
-				}
-				else
-				{
-					if (GUI_CTL(scr_h)->IsVisible())
-					{
-						GUI_CTL(scr_h)->SetVisible(FALSE);
-						CRect rc;
-						ctrl->GetWindowRect(rc);
-						rc.pt2.x += (GUI_IMG(scr_h)->IsNull() ? 20 : GUI_IMG(scr_h)->GetWidth());
-						ctrl->SetWindowRect(rc);
-					}
-				}
-			}
-			break;
-		case WM_MOUSEWHEEL:
-			GUI_CTL(scr_h)->Send(ExDynCast<IGuiObject>(GUI_CTL(scr_h)), nMessage, wParam, lParam);
 			break;
 		case WM_COMMAND:
 			if (wParam == BN_CLICKED)
@@ -855,10 +908,11 @@ public:
 				IGuiCtrl* btn = (IGuiCtrl*)lParam;
 				if (m_OldBtn == btn) break;
 
-				CText* text = (CText*)btn->GetState(_T("text"));
+				CText* text = ((CText**)btn->GetState(_T("font")))[0];
 				if (!text) break;
+				CString* str = (CString*)btn->GetState(_T("text"));
 				CSize txt_clp;
-				text->GetSize(txt_clp);
+				text->GetSize(*str, txt_clp);
 
 				CRect rc_btn;
 				btn->GetWindowRect(rc_btn);
@@ -874,10 +928,11 @@ public:
 				IGuiCtrl* btn = (IGuiCtrl*)lParam;
 				if (m_OldBtn != btn) break;
 
-				CText* text = (CText*)btn->GetState(_T("text"));
+				CText* text = ((CText**)btn->GetState(_T("font")))[0];
 				if (!text) break;
+				CString* str = (CString*)btn->GetState(_T("text"));
 				CSize txt_clp;
-				text->GetSize(txt_clp);
+				text->GetSize(*str, txt_clp);
 
 				CRect rc_btn;
 				btn->GetWindowRect(rc_btn);
@@ -1158,7 +1213,11 @@ class CEvent_topbar_btn : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CEvent_topbar_btn, IGuiEvent)
 
+protected:
+	BOOL m_Loaded;
+
 public:
+	CEvent_topbar_btn() : m_Loaded(FALSE) {}
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
@@ -1169,6 +1228,13 @@ public:
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
+				if(!m_Loaded)
+				{
+					m_Loaded = TRUE;
+					IGuiCtrl::items_t* items = (IGuiCtrl::items_t*)ctrl->GetState(_T("items"));
+					items->GetAt(0)->SendMessage(BM_CLICK);
+				}
+
 				CRect rc_wnd;
 				IGuiBoard* wnd = ctrl->GetBoard();
 				ExAssert(wnd);
@@ -1209,7 +1275,7 @@ public:
 		{
 		case BM_CLICK:
 			{
-				IGuiComp* pare = ctrl->GetParent();
+				IGuiComp* pare = ctrl->GetParent();	
 				for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
 				{
 					IGuiCtrl* c = ExDynCast<IGuiCtrl>(*ite);

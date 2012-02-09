@@ -81,6 +81,9 @@ EXP_INTERFACE IGuiCtrl : public IGuiBase
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
 
+public:
+	typedef CArrayT<IGuiCtrl*> items_t;
+
 protected:
 	static IGuiCtrl* m_Focus;
 	IGuiEffect* m_Effect;
@@ -116,10 +119,17 @@ protected:
 	}
 
 public:
+	virtual BOOL Execute(const CString& key, const CString& val) = 0;
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent) { return EXP_BASE::Execute(xml, ite, parent); }
+
 	void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		if (GetParent())
 			IGuiSender::Send(pGui, nMessage, wParam, lParam);
+	}
+	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		Send(ExDynCast<IGuiObject>(this), nMessage, wParam, lParam);
 	}
 
 	// 获得控件状态
@@ -309,6 +319,9 @@ public:
 	IGuiCtrlBase();
 
 public:
+	BOOL Execute(const CString& key, const CString& val);
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent);
+
 	// 更新状态
 	void* GetState(const CString& sType);
 	BOOL SetState(const CString& sType, void* pState);

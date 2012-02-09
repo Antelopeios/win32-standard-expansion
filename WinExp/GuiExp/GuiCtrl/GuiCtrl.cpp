@@ -65,6 +65,22 @@ IGuiCtrlBase::IGuiCtrlBase()
 	, m_Updated(TRUE)
 {}
 
+BOOL IGuiCtrlBase::Execute(const CString& key, const CString& val)
+{
+	return FALSE;
+}
+
+void* IGuiCtrlBase::Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+{
+	CGuiXML::map_t::iterator_t it = ite->Val()->att.Head();
+	for(; it != ite->Val()->att.Tail(); ++it)
+		if (!Execute(it->Key(), it->Val())) break;
+	if (it == ite->Val()->att.Head())
+		return EXP_BASE::Execute(xml, ite, parent);
+	else
+		return this;
+}
+
 // ¸üÐÂ×´Ì¬
 void* IGuiCtrlBase::GetState(const CString& sType)
 {
@@ -189,7 +205,7 @@ BOOL IGuiCtrlBase::SetVisible(BOOL bVisible/* = TRUE*/)
 	m_bVisible = bVisible;
 	if (GetParent())
 	{
-		Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, m_bVisible);
+		SendMessage(WM_SHOWWINDOW, m_bVisible);
 		UpdateState();
 	}
 	return old;

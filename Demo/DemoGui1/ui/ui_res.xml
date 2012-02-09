@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<skin>
+<!--窗口标头-->
+<image name="banner" path="banner.png" />
+<!--窗口边角-->
+<image name="corner_lb" path="corner_lb.png" />
+<image name="corner_rb" path="corner_rb.png" />
+<image name="corner_rt" path="corner_rt.png" />
+<image name="corner_lt" path="corner_lt.png" />
+<!--窗口边框-->
+<image name="line_bottom" path="line_bottom.png" />
+<image name="line_left" path="line_left.png" />
+<image name="line_right" path="line_right.png" />
+<image name="line_top" path="line_top.png" />
+<!--窗口切页-->
+<image name="tag_bg" path="tag_bg.png" />
+<image name="tag_qb" path="tag_qb.png" />
+<image name="tag_zx" path="tag_zx.png" />
+<image name="tag_wl" path="tag_wl.png" />
+<image name="tag_dz" path="tag_dz.png" />
+<image name="tag_wy" path="tag_wy.png" />
+<image name="tag_dj" path="tag_dj.png" />
+<!--窗口工具条-->
+<image name="toolbar_bg" path="toolbar_bg.png" />
+<image name="topbar_btn" path="topbar_btn.png" />
+<image name="gamesearch_charmap" path="gamesearch_charmap.png" />
+<image name="toolbar_tools" path="toolbar_tools.png" />
+<!--窗口列表-->
+<image name="list" path="list.png" />
+<!--列表边角-->
+<image name="list_cor_lt" path="list_cor_lt.png" />
+<image name="list_item_top" path="list_item_top.png" />
+<image name="list_cor_rt" path="list_cor_rt.png" />
+<image name="list_item_left" path="list_item_left.png" />
+<image name="list_item" path="list_item.png" />
+<image name="list_item_right" path="list_item_right.png" />
+<image name="list_cor_lb" path="list_cor_lb.png" />
+<image name="list_item_bottom" path="list_item_bottom.png" />
+<image name="list_cor_rb" path="list_cor_rb.png" />
+<!--列表焦点项-->
+<image name="list_foc_lt" path="list_foc_lt.png" />
+<image name="list_foc_top" path="list_foc_top.png" />
+<image name="list_foc_rt" path="list_foc_rt.png" />
+<image name="list_foc_left" path="list_foc_left.png" />
+<image name="list_foc" path="list_foc.png" />
+<image name="list_foc_right" path="list_foc_right.png" />
+<image name="list_foc_lb" path="list_foc_lb.png" />
+<image name="list_foc_bottom" path="list_foc_bottom.png" />
+<image name="list_foc_rb" path="list_foc_rb.png" />
+<!--滚动条-->
+<image name="scr_h" path="scr_h_bg.png" />
+<image name="scr_h_sli_top" path="scr_h_sli_top.png" />
+<image name="scr_h_sli_bottom" path="scr_h_sli_bottom.png" />
+<image name="scr_h_sli" path="scr_h_sli.png" />
+<image name="scr_h_ico" path="scr_h_ico.png" />
+<image name="scr_h_up" path="scr_h_up.png" />
+<image name="scr_h_dn" path="scr_h_dn.png" />
+<!--窗口功能按钮-->
+<image name="win_sysbtn_close" path="win_sysbtn_close.png" />
+<image name="win_sysbtn_max" path="win_sysbtn_max.png" />
+<image name="win_sysbtn_min" path="win_sysbtn_min.png" />
+<image name="win_sysbtn_restore" path="win_sysbtn_restore.png" />
+<!--搜索框-->
+<image name="search_bg" path="search_bg.png" />
+<image name="search_button" path="search_button.png" />
+<image name="google_bg" path="google_bg.png" />
+<image name="google_button" path="google_button.png" />
+
+<!--字体-->
+<font name="txt_btn" color="#000000ff" />
+</skin>

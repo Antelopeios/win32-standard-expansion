@@ -57,13 +57,14 @@ EXP_CLASS CGuiSkin
 protected:
 	static CArrayT<void*> m_NewDiv;
 	static CArrayT<void*> m_NedDel;
+	static CArrayT<void*> m_LstDiv;
 
 protected:
 	static void Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent = NULL);
 
 public:
 	static BOOL Load(IFileObject* pFile);
-	static BOOL Load(LPCSTR script);
+	static BOOL Load(const CString& script);
 };
 
 //////////////////////////////////////////////////////////////////

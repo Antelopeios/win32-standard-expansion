@@ -383,8 +383,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					);
 			}
 
-			CText text(_T("Dark C.at"), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
-			CImage bmp_img(text.GetImage());
+			CText text((font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
+			CString str(_T("Dark C.at"));
+			CImage bmp_img(text.GetImage(str));
 			if(!bmp_img.IsNull())
 				CImgRenderer::Render(mem_img, bmp_img, CRect(
 					rect.right - bmp_img.GetWidth() - 5, 

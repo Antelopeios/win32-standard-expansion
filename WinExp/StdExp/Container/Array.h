@@ -277,9 +277,9 @@ public:
 		return node_t(this, m_nCont - 1);
 	}
 	type_t& HeadItem() const
-	{ return GetAt(0); }
+	{ return m_Array[0]; }
 	type_t& LastItem() const
-	{ return GetAt(m_nCont - 1); }
+	{ return m_Array[m_nCont - 1]; }
 
 	BOOL AddArray(const type_t* pArray, DWORD nSize, iterator_t& Iter)
 	{
@@ -345,6 +345,15 @@ public:
 			memmove(ptr_array - nLen, ptr_array, sizeof(type_t) * inx_size);
 		return TRUE;
 	}
+
+	BOOL PushHead(const type_t& Item)
+	{ return Add(Item, Head()); }
+	BOOL PushLast(const type_t& Item)
+	{ return Add(Item); }
+	BOOL PopHead()
+	{ return Del(Head()); }
+	BOOL PopLast()
+	{ return Del(Last()); }
 };
 
 //////////////////////////////////////////////////////////////////

@@ -248,6 +248,45 @@ protected:
 	{
 		if (!pGui) return 0;
 		// 向控件转发消息
+		if (nMessage == WM_SIZE)
+		{
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+			if (!ctrl || !ctrl->GetScroll() || !ctrl->IsVisible()) goto EndBaseSend;
+			LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
+			LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
+			if (all_line > fra_line)
+			{
+				if(!ctrl->GetScroll()->IsVisible())
+				{
+					ctrl->GetScroll()->SetVisible(TRUE);
+					CRect rc, rc_scr;
+					ctrl->GetWindowRect(rc);
+					ctrl->GetScroll()->GetWindowRect(rc_scr);
+					rc.Right(rc.Right() - rc_scr.Width());
+					ctrl->SetWindowRect(rc);
+				}
+			}
+			else
+			{
+				if (ctrl->GetScroll()->IsVisible())
+				{
+					ctrl->GetScroll()->SetVisible(FALSE);
+					CRect rc, rc_scr;
+					ctrl->GetWindowRect(rc);
+					ctrl->GetScroll()->GetWindowRect(rc_scr);
+					rc.Right(rc.Right() + rc_scr.Width());
+					ctrl->SetWindowRect(rc);
+				}
+			}
+		}
+		else
+		if (nMessage == WM_MOUSEWHEEL)
+		{
+			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+			if (!ctrl || !ctrl->GetScroll() || !ctrl->IsVisible()) goto EndBaseSend;
+			ctrl->GetScroll()->SendMessage(nMessage, wParam, lParam);
+		}
+		else
 		if (nMessage >= WM_MOUSEFIRST && 
 			nMessage <= WM_MOUSELAST || 
 			nMessage >= WM_NCMOUSEMOVE && 
@@ -326,6 +365,19 @@ protected:
 		else
 		if (nMessage == WM_SHOWWINDOW)
 		{
+				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+				if (ctrl && ctrl->GetScroll())
+				{
+					if (wParam)
+					{
+						CRect rc;
+						ctrl->GetWindowRect(rc);
+						ctrl->SendMessage(WM_SIZE, SIZE_RESTORED, ExMakeLong(rc.Width(), rc.Height()));
+					}
+					else
+						ctrl->GetScroll()->SetVisible(FALSE);
+				}
+			else
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
@@ -376,7 +428,6 @@ public:
 		IGuiBase* base = ExDynCast<IGuiBase>(pGui);
 		if (!base) return;
 		// 筛选消息
-		if (nMessage == WM_SIZE) return; /*WM_SIZE消息不应该向下转发*/
 		LRESULT ret = 0;
 		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
 		if (board)

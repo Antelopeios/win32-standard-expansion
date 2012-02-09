@@ -26,33 +26,32 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	txt_lst.SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_lst.SetColor(ExRGBA(0, 60, 116, 200));
 	// 解码器
-	CIOFile file(_T("../TestGui3/icon.png"));
+	CIOFile file(_T("TestGui3/icon.png"));
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	if (!coder) return 0;
 	// 图片资源
 	CImage img_pic(coder->Decode());
 	CImage img_btn[9];
-	file.Open(_T("../TestGui1/btn_bg_cap_left.png"));
+	file.Open(_T("TestGui1/btn_bg_cap_left.png"));
 	img_btn[0].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_cap.png"));
+	file.Open(_T("TestGui1/btn_bg_cap.png"));
 	img_btn[1].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_cap_right.png"));
+	file.Open(_T("TestGui1/btn_bg_cap_right.png"));
 	img_btn[2].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_left.png"));
+	file.Open(_T("TestGui1/btn_bg_left.png"));
 	img_btn[3].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg.png"));
+	file.Open(_T("TestGui1/btn_bg.png"));
 	img_btn[4].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_right.png"));
+	file.Open(_T("TestGui1/btn_bg_right.png"));
 	img_btn[5].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_bottom_left.png"));
+	file.Open(_T("TestGui1/btn_bg_bottom_left.png"));
 	img_btn[6].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_bottom.png"));
+	file.Open(_T("TestGui1/btn_bg_bottom.png"));
 	img_btn[7].Set(coder->Decode());
-	file.Open(_T("../TestGui1/btn_bg_bottom_right.png"));
+	file.Open(_T("TestGui1/btn_bg_bottom_right.png"));
 	img_btn[8].Set(coder->Decode());
 	// 文字资源
 	CText txt_btn[8];
-	txt_btn[0].SetString(_T("Dark C.at"));
 	txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_btn[0].SetColor(ExRGBA(0, 60, 116, 200));
 	for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
@@ -69,14 +68,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建列表控件
 	IGuiCtrl* list = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView")));
-	CListT<IGuiCtrl*> items;
-	for(int i = 0; i < 1/*00*/; ++i)
+	IGuiCtrl::items_t items;
+	for(int i = 0; i < 100; ++i)
 	{
 		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
 		btn->SetState(_T("icon"), &img_pic);
 		//btn->SetState(_T("glow"), (void*)1);
 		btn->SetState(_T("image"), img_btn);
-		btn->SetState(_T("text"), txt_btn);
+		btn->SetState(_T("font"), txt_btn);
+		btn->SetState(_T("text"), &CString(_T("Dark C.at")));
 		CSize sz;
 		//txt_btn->GetSize(sz);
 		btn->SetState(_T("locate"), (void*)2);

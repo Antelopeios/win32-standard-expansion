@@ -87,6 +87,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="xcopy &quot;$(ProjectDir)$(ProjectName)\ui&quot; &quot;$(TargetDir)ui\&quot; /s  /y&#x0D;&#x0A;xcopy &quot;$(ProjectDir)$(ProjectName)\icon&quot; &quot;$(TargetDir)icon\&quot; /s  /y"
 			/>
 		</Configuration>
 		<Configuration
@@ -163,6 +164,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="xcopy &quot;$(ProjectDir)$(ProjectName)\ui&quot; &quot;$(TargetDir)ui\&quot; /s  /y&#x0D;&#x0A;xcopy &quot;$(ProjectDir)$(ProjectName)\icon&quot; &quot;$(TargetDir)icon\&quot; /s  /y"
 			/>
 		</Configuration>
 	</Configurations>

@@ -121,12 +121,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// 打开文件并获取解码器
-	CIOFile file(_T("../TestImg1/ground.png"));
-	//CIOFile file(_T("ground.png"));
+	CIOFile file(_T("TestImg1/ground.png"));
+	//CIOFile file(_T("TestImg2/ground.png"));
 	CGC gc;
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	// 解码文件
-	imgShow = coder->Decode();
+	if (coder) imgShow = coder->Decode();
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

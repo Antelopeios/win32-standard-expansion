@@ -24,12 +24,12 @@ void CGuiLoader::LoadRes()
 	BYTE* buff = NULL; DWORD size = 0;
 	HGLOBAL hres = NULL;
 #define REG_RES_IMG(res_id, img_id) \
-	hres = CGlobal::GetBinary(res_id, _T("PNG"), buff, size); \
+	hres = ExGetBinary(res_id, _T("PNG"), buff, size); \
 	if (hres) \
 	{ \
 		file.Open(buff, size); \
 		REG_IMG(img_id, gcnew(gc, CImage))->Set(coder->Decode()); \
-		CGlobal::ReleaseBinary(hres); \
+		ExReleaseBinary(hres); \
 	}
 //#define REG_RES_IMG(res_id, img_id)
 	// 加载文件项图片
@@ -70,7 +70,7 @@ void CGuiLoader::LoadCtl()
 	GET_CTL(bottom2)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom2"))));
 	// 搜索框
 	REG_CTL(search, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"))));
-	GET_CTL(search)->SetState(_T("text"), GET_TXT(search));
+	GET_CTL(search)->SetState(_T("font"), GET_TXT(search));
 	GET_CTL(search)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_search"))));
 	// 覆盖框
 	REG_CTL(cover, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"))));
@@ -84,29 +84,28 @@ void CGuiLoader::LoadCtl()
 	GET_CTL(cloud)->SetState(_T("align_top"), (void*)FALSE);
 	GET_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 	// 加载标签
-	CListT<IGuiCtrl*> tags_list;
+	IGuiCtrl::items_t tags_list;
 	for(int i = 0; i < 40; ++i)
 	{
 		IGuiCtrl* tag = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
 		tag->SetState(_T("thr_sta"), (void*)TRUE);
-		CText txt[8];
+		CText* txt = gcnew(gc, CText, 8);
 		txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 		LOGFONT lf = {0};
 		txt[0].GetLogFont(&lf);
 		lf.lfHeight -= i;
 		txt[0].Create(&lf);
 		txt[0].SetColor(ExRGBA(160, 160, 160, 255));
-		txt[0].SetString(_T("测试标签"));
 		lf.lfUnderline = TRUE;
 		txt[1].Create(&lf);
 		txt[1].SetColor(ExRGBA(101, 177, 177, 255));
-		txt[1].SetString(_T("测试标签"));
 		txt[2].Create(&lf);
 		txt[2].SetColor(ExRGBA(0, 160, 160, 255));
-		txt[2].SetString(_T("测试标签"));
+		CString str(_T("测试标签"));
 		CSize sz;
-		txt[0].GetSize(sz);
-		tag->SetState(_T("text"), txt);
+		txt[0].GetSize(str, sz);
+		tag->SetState(_T("font"), txt);
+		tag->SetState(_T("text"), &str);
 		tag->SetWindowRect(CRect(0, 0, sz.cx + 8, sz.cy + 8));
 		tags_list.Add(tag);
 	}
@@ -126,27 +125,6 @@ void CGuiLoader::LoadCtl()
 	// 关联滚动条
 	GET_CTL(cloud)->SetScroll(GET_CTL(scr_cloud));
 
-	// 预读取资源
-	CImage img_btn[9];
-	img_btn[0] = GET_IMG(file_lt)->Get();
-	img_btn[1] = GET_IMG(file_t)->Get();
-	img_btn[2] = GET_IMG(file_rt)->Get();
-	img_btn[3] = GET_IMG(file_l)->Get();
-	img_btn[4] = GET_IMG(file_c)->Get();
-	img_btn[5] = GET_IMG(file_r)->Get();
-	img_btn[6] = GET_IMG(file_lb)->Get();
-	img_btn[7] = GET_IMG(file_b)->Get();
-	img_btn[8] = GET_IMG(file_rb)->Get();
-	CImage img_foc[9];
-	img_foc[0] = GET_IMG(foc_lt)->Get();
-	img_foc[1] = GET_IMG(foc_t)->Get();
-	img_foc[2] = GET_IMG(foc_rt)->Get();
-	img_foc[3] = GET_IMG(foc_l)->Get();
-	//img_foc[4] = GET_IMG(foc_c)->Get();
-	img_foc[5] = GET_IMG(foc_r)->Get();
-	img_foc[6] = GET_IMG(foc_lb)->Get();
-	img_foc[7] = GET_IMG(foc_b)->Get();
-	img_foc[8] = GET_IMG(foc_rb)->Get();
 	// 文件列表
 	REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"))));
 	GET_CTL(files)->SetTrust(TRUE);
@@ -154,23 +132,23 @@ void CGuiLoader::LoadCtl()
 	GET_CTL(files)->SetState(_T("align_top"), (void*)FALSE);
 	GET_CTL(files)->SetState(_T("space"), (void*)4);
 	GET_CTL(files)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
-	GET_CTL(files)->SetState(_T("foc_image"), img_foc);
+	GET_CTL(files)->Execute(_T("foc_image"), _T("foc_lt,foc_t,foc_rt,foc_l,,foc_r,foc_lb,foc_b,foc_rb"));
 	// 加载文件
-	CListT<IGuiCtrl*> file_list;
+	IGuiCtrl::items_t file_list;
 	for(int i = 0; i < 40; ++i)
 	{
 		IGuiCtrl* file = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), GET_CTL(files)->GetGC()));
-		file->SetState(_T("image"), img_btn);
+		file->Execute(_T("image"), _T("file_lt,file_t,file_rt,file_l,file_c,file_r,file_lb,file_b,file_rb"));
 		file->SetState(_T("locate"), (void*)2);
 		file->SetState(_T("loc_off"), (void*)18);
 		file->SetState(_T("ico_off"), (void*)8);
 		file->SetState(_T("shake_ico"), (void*)1);
-		CText txt[8];
+		CText* txt = gcnew(gc, CText, 8);
 		txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 		txt[0].SetColor(ExRGBA(0, 0, 0, 255));
-		txt[0].SetString(_T("测试文件"));
-		for (int n = 1; n < _countof(txt); ++n) { txt[n] = txt[0]; }
-		file->SetState(_T("text"), txt);
+		for (int n = 1; n < 8; ++n) { txt[n] = txt[0]; }
+		file->SetState(_T("font"), txt);
+		file->SetState(_T("text"), &CString(_T("测试文件")));
 		file->SetWindowRect(CRect(0, 0, 80, 90));
 		file_list.Add(file);
 	}

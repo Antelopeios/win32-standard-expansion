@@ -45,7 +45,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	img_btn[8].Set(coder->Decode());
 	// 文字资源
 	CText txt_btn[8];
-	txt_btn[0].SetString(_T("Dark C.at"));
 	txt_btn[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 	txt_btn[0].SetColor(ExRGBA(0, 60, 116, 200));
 	for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
@@ -53,17 +52,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 创建按钮控件对象并设置
 	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton")));
 	btn->SetState(_T("image"), img_btn);
-	btn->SetState(_T("text"), txt_btn);
+	btn->SetState(_T("font"), txt_btn);
+	btn->SetState(_T("text"), &CString(_T("Dark C.at")));
 	btn->SetState(_T("locate"), (void*)4);
 	btn->SetState(_T("loc_off"), (void*)10);
 	btn->SetWindowRect(CRect(70, 100, 180, 140));
-	btn->SetEffect(ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"))));
+	//btn->SetEffect(ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"))));
 
 	// 创建图片控件对象并设置
 	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture")));
 	pic->SetState(_T("image"), &img_pic);
-	//CText text(_T("Dark C.at"), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 0, 255));
-	//pic->SetState(_T("text"), &text);
 	CRect rect(0, 0, img_pic.GetWidth(), img_pic.GetHeight());
 	pic->SetWindowRect(rect);
 	pic->SetEffect(ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"))));

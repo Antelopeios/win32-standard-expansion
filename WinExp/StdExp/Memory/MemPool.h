@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-29
-// Version:	1.3.0029.0451
+// Date:	2012-02-03
+// Version:	1.3.0030.1800
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -54,6 +54,7 @@
 //	- 1.3.0028.0218(2012-01-27) ^ 预先保存CMemPoolT中每个ObjPool的粒度大小,在需要时直接获取
 //	- 1.3.0029.0451(2012-01-29) ^ 采用统一类型的对象池作为CMemPoolT内部分级内存分配,简化CMemPoolT的内部实现
 //								+ 通过CMemPoolAllocT实现一个静态内存池分配器,并定义EXP_MEMPOOL_ALLOC作为其别称
+//	- 1.3.0030.1800(2012-02-03) + 添加EXP_BREAK_ALLOC宏,支持外部调试时自定义某次分配时中断
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -78,6 +79,12 @@ EXP_BEG
 #endif/*EXP_DUMPING_MEMLEAKS*/
 #endif/*_DEBUG*/
 #endif/*EXP_UNDUMPED_NAMESPACE*/
+
+#ifdef	EXP_DUMPING_MEMLEAKS
+#ifndef	EXP_BREAK_ALLOC
+#define	EXP_BREAK_ALLOC	-1
+#endif/*EXP_BREAK_ALLOC*/
+#endif/*EXP_DUMPING_MEMLEAKS*/
 
 //////////////////////////////////////////////////////////////////
 
@@ -339,6 +346,7 @@ public:
 		block->pPool = m_PoolList + mid;
 #ifdef	EXP_DUMPING_MEMLEAKS
 		block->nTime = ++m_nTime;
+		ExAssert(m_nTime != EXP_BREAK_ALLOC);
 #endif/*EXP_DUMPING_MEMLEAKS*/
 		m_UsedList.Push(block);
 		return PtrBlock(block);

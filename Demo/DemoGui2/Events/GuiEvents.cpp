@@ -24,13 +24,8 @@ public:
 			}
 			break;
 		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE || 
-				wParam == VK_DELETE)
-			{
-				GET_CTL(files)->SetVisible(FALSE);
-				GET_CTL(scr_files)->SetVisible(FALSE);
-				GET_CTL(cloud)->SetVisible(TRUE);
-			}
+			if (GET_CTL(files)->IsVisible())
+				GET_CTL(files)->SendMessage(nMessage, wParam, lParam);
 			break;
 		case WM_CLOSE:
 			board->DefProc(nMessage, wParam, lParam);
@@ -164,7 +159,7 @@ public:
 			break;
 		case WM_KILLFOCUS:
 			{
-				CString* edit = (CString*)ctrl->GetState(_T("edit"));
+				CString* edit = (CString*)ctrl->GetState(_T("text"));
 				if (edit->Empty())
 					GET_CTL(cover)->SetVisible(TRUE);
 			}
@@ -227,53 +222,13 @@ public:
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				if (GET_CTL(scr_cloud)->IsVisible())
-					rc_wnd.Right(rc_wnd.Right() - GUI()->ScrWidth());
 				ctrl->SetWindowRect(rc_wnd);
 			}
-			break;
-		case WM_SIZE:
-			{
-				LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
-				LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
-
-				IGuiBoard* wnd = ctrl->GetBoard();
-				ExAssert(wnd);
-				CRect rc_wnd;
-				wnd->GetClientRect(rc_wnd);
-
-				if (all_line > fra_line)
-				{
-					if(!GET_CTL(scr_cloud)->IsVisible())
-					{
-						GET_CTL(scr_cloud)->SetVisible(TRUE);
-						CRect rc;
-						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right() - GUI()->ScrWidth());
-						ctrl->SetWindowRect(rc);
-					}
-				}
-				else
-				{
-					if (GET_CTL(scr_cloud)->IsVisible())
-					{
-						GET_CTL(scr_cloud)->SetVisible(FALSE);
-						CRect rc;
-						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right());
-						ctrl->SetWindowRect(rc);
-					}
-				}
-			}
-			break;
-		case WM_MOUSEWHEEL:
-			GET_CTL(scr_cloud)->Send(ExDynCast<IGuiObject>(GET_CTL(scr_cloud)), nMessage, wParam, lParam);
 			break;
 		case WM_COMMAND:
 			if (wParam == BN_CLICKED)
 			{
 				GET_CTL(cloud)->SetVisible(FALSE);
-				GET_CTL(scr_cloud)->SetVisible(FALSE);
 				GET_CTL(files)->SetVisible(TRUE);
 			}
 			break;
@@ -339,47 +294,17 @@ public:
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				if (GET_CTL(scr_files)->IsVisible())
-					rc_wnd.Right(rc_wnd.Right() - GUI()->ScrWidth());
 				ctrl->SetWindowRect(rc_wnd);
 			}
 			break;
-		case WM_SIZE:
+		case WM_KEYDOWN:
+			if (wParam == VK_ESCAPE || 
+				wParam == VK_BACK || 
+				wParam == VK_DELETE)
 			{
-				LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
-				LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
-
-				IGuiBoard* wnd = ctrl->GetBoard();
-				ExAssert(wnd);
-				CRect rc_wnd;
-				wnd->GetClientRect(rc_wnd);
-
-				if (all_line > fra_line)
-				{
-					if(!GET_CTL(scr_files)->IsVisible())
-					{
-						GET_CTL(scr_files)->SetVisible(TRUE);
-						CRect rc;
-						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right() - GUI()->ScrWidth());
-						ctrl->SetWindowRect(rc);
-					}
-				}
-				else
-				{
-					if (GET_CTL(scr_files)->IsVisible())
-					{
-						GET_CTL(scr_files)->SetVisible(FALSE);
-						CRect rc;
-						ctrl->GetWindowRect(rc);
-						rc.Right(rc_wnd.Right());
-						ctrl->SetWindowRect(rc);
-					}
-				}
+				GET_CTL(files)->SetVisible(FALSE);
+				GET_CTL(cloud)->SetVisible(TRUE);
 			}
-			break;
-		case WM_MOUSEWHEEL:
-			GET_CTL(scr_files)->Send(ExDynCast<IGuiObject>(GET_CTL(scr_files)), nMessage, wParam, lParam);
 			break;
 		case WM_COMMAND:
 			if (wParam == BN_CLICKED)

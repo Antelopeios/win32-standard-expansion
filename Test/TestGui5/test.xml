@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <skin>
 <!--摘要定义-->
 <detail name="Test" author="木头云" home="http://dark-c.at" email="mark.lonr@tom.com" version="1.0" date="2011-05-31" />
 <!--资源定义-->
 <font name="1" face="微软雅黑" size="22" color="#a0a0a0" weight="bold" italic="false" underline="false" />
 <font name="2" color="#003c74c8" />
-<image name="bk" path="TestImg1/ground.png" />
+<font name="3" color="#808080ff" />
+<image name="bk" path="TestImg1/ground.jpg" />
 <image name="btn-t-l" path="TestGui1/btn_bg_cap_left.png" />
 <image name="btn-t" path="TestGui1/btn_bg_cap.png" />
 <image name="btn-t-r" path="TestGui1/btn_bg_cap_right.png" />
@@ -15,21 +16,32 @@
 <image name="btn-b-l" path="TestGui1/btn_bg_bottom_left.png" />
 <image name="btn-b" path="TestGui1/btn_bg_bottom.png" />
 <image name="btn-b-r" path="TestGui1/btn_bg_bottom_right.png" />
+<image name="scr_h" path="../Demo/DemoGui1/ui/scr_h_bg.png" />
+<image name="scr_h_sli_top" path="../Demo/DemoGui1/ui/scr_h_sli_top.png" />
+<image name="scr_h_sli_bottom" path="../Demo/DemoGui1/ui/scr_h_sli_bottom.png" />
+<image name="scr_h_sli" path="../Demo/DemoGui1/ui/scr_h_sli.png" />
+<image name="scr_h_ico" path="../Demo/DemoGui1/ui/scr_h_ico.png" />
+<image name="scr_h_up" path="../Demo/DemoGui1/ui/scr_h_up.png" />
+<image name="scr_h_dn" path="../Demo/DemoGui1/ui/scr_h_dn.png" />
 <!--样式表-->
 <style name="style-gnd" font="1" image="bk" />
 <style name="style-btn" font="2,2,2,2,2,2,2,2" image="btn-t-l,btn-t,btn-t-r,btn-l,btn,btn-r,btn-b-l,btn-b,btn-b-r" />
 <!--层定义-->
-<div name="wnd" class="CGuiWnd" rect="" pos="" layer="true" mask="" visible="true">
+<div name="wnd" class="CGuiWnd" rect="" pos="center" layer="true" mask="" visible="true">
 	<!--事件,每个层可以定义任意个事件-->
 	<event class="CCustomEvent" />
 	<!--嵌套层定义(控件)-->
 	<div name="gnd" class="CGuiPicture" style="style-gnd">
 		<event class="CCusPicEvent" />
 		<!--特效,每个层只能定义一个特效,后面的特效将会覆盖前面的特效-->
-		<effect class="CGuiFade" />
+		<!--<effect class="CGuiFade" />-->
 		<!--嵌套层定义(控件的子控件)-->
 		<div name="btn" class="CGuiButton" style="style-btn" text="Dark C.at" rect="70,100,180,140">
 			<event class="CCusBtnEvent" />
+		</div>
+		<div name="edit" class="CGuiEdit" font="2" empty_font="3" empty_text="现在的Edit里面什么都没有哦" rect="10,150,220,180"/>
+		<div name="scr_h" class="CGuiScroll" sli_blk_thr_sta="1" up_thr_sta="1" dn_thr_sta="1" sli_ori="true" sli_image="scr_h" sli_blk_image=",scr_h_sli_top,,,scr_h_sli,,,scr_h_sli_bottom," sli_blk_icon="scr_h_ico" up_image=",,,,scr_h_up,,,," dn_image=",,,,scr_h_dn,,,,">
+			<event class="CEvent_scr_h" />
 		</div>
 	</div>
 </div>

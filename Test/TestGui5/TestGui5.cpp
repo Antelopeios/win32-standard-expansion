@@ -22,7 +22,9 @@ protected:
 		CIOFile file(_T("TestGui5\\test.xml"));
 		if (file.Error() || file.Size() == 0) return 0;
 		CGuiSkin::Load(&file);
-		
+
+		ExGet(IGuiBoard, _T("wnd"))->CenterWindow();
+
 	/*	unsigned int tStart = 0, tEnd = 0;
 
 		CIOFile file(_T("TestGui5\\test.xml"));

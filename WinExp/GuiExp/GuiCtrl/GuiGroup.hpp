@@ -58,25 +58,47 @@ class CGuiGroup : public IGuiCtrlBase
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiGroup, IGuiCtrlBase)
 
-public:
-	typedef CArrayT<IGuiCtrl*> items_t;
-
 protected:
 	items_t m_ItemList;
 	DWORD m_StatusCount;
 	BOOL m_StyleBox;
+	CImage* m_ImgCac;
+
+	CGC gc;
 
 public:
 	CGuiGroup()
 		: m_ItemList(NULL)
 		, m_StatusCount(3)
 		, m_StyleBox(TRUE)
+		, m_ImgCac(NULL)
 	{}
 	~CGuiGroup()
 	{
 	}
 
 public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		if (key == _T("image"))
+			SetState(_T("image"), CGuiManagerT<CImage>::Get(val));
+		else
+		if (key == _T("sta_cnt"))
+			SetState(_T("sta_cnt"), (void*)_ttol(val));
+		else
+		if (key == _T("sty_box"))
+		{
+			CString temp(val);
+			temp.Lower();
+			if (temp == _T("false"))
+				SetState(_T("sty_box"), (void*)FALSE);
+			else
+			if (temp == _T("true"))
+				SetState(_T("sty_box"), (void*)TRUE);
+		}
+		return TRUE;
+	}
+
 	// »ñµÃ¿Ø¼þ×´Ì¬
 	void* GetState(const CString& sType)
 	{
@@ -105,6 +127,8 @@ public:
 				if (!item) continue;
 				AddComp(item);
 			}
+			gc.Clear();
+			SetState(_T("image"), m_ImgCac);
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
@@ -124,36 +148,28 @@ public:
 		{
 			CImage* img = (CImage*)pState;
 			if (!img || img->IsNull()) return FALSE;
-			if (m_ItemList.Empty()) return FALSE;
+			if (m_ItemList.Empty())
+			{
+				m_ImgCac = img;
+				return TRUE;
+			}
 			DWORD count = m_ItemList.GetCount();
 			LONG offset = img->GetWidth() / count;
 			CRect rc_img(0, 0, offset, img->GetHeight());
 			CRect rc_itm(0, 0, offset, img->GetHeight() / m_StatusCount);
 			CPoint pt_off(offset, 0);
-			if (m_StyleBox)
+			int c = m_StyleBox ? 9 : 1, 
+				n = m_StyleBox ? 4 : 0;
+			for(DWORD i = 0; i < count; ++i)
 			{
-				CImage tmp[9];
-				for(DWORD i = 0; i < count; ++i)
-				{
-					m_ItemList[i]->SetWindowRect(rc_itm);
-					tmp[4].Set(img->Clone(rc_img));
-					m_ItemList[i]->SetState(_T("image"), tmp);
-					rc_img.Offset(pt_off);
-					rc_itm.Offset(pt_off);
-				}
+				CImage* tmp = gcnew(gc, CImage, c);
+				m_ItemList[i]->SetWindowRect(rc_itm);
+				tmp[n].Set(img->Clone(rc_img));
+				m_ItemList[i]->SetState(_T("image"), tmp);
+				rc_img.Offset(pt_off);
+				rc_itm.Offset(pt_off);
 			}
-			else
-			{
-				CImage tmp;
-				for(DWORD i = 0; i < count; ++i)
-				{
-					m_ItemList[i]->SetWindowRect(rc_itm);
-					tmp.Set(img->Clone(rc_img));
-					m_ItemList[i]->SetState(_T("image"), &tmp);
-					rc_img.Offset(pt_off);
-					rc_itm.Offset(pt_off);
-				}
-			}
+			m_ImgCac = NULL;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		return FALSE;

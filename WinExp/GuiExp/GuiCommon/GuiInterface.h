@@ -208,12 +208,20 @@ public:
 		// 添加新对象
 		GetEvent().Add(pEvent, GetEvent().Head());
 	}
-	virtual void DelEvent(IGuiEvent* pEvent)
+	virtual void DelEvent(IGuiEvent* pEvent = NULL)
 	{
-		if (!pEvent) return ;
-		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(pEvent);
-		if (ite == GetEvent().Tail()) return;
+		evt_list_t::iterator_t ite;
+		if (pEvent)
+		{
+			// 定位对象
+			ite = FindEvent(pEvent);
+			if (ite == GetEvent().Tail()) return;
+		}
+		else
+		{
+			ite = GetEvent().Last();
+			pEvent = GetEvent().LastItem();
+		}
 		// 删除对象
 		GetEvent().Del(ite);
 		if (m_bTru && pEvent->IsTrust()) pEvent->Free();
@@ -223,7 +231,9 @@ public:
 		if (m_bTru)
 			for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 			{
-				if (!(*ite) || !(*ite)->IsTrust()) continue;
+				if (!(*ite) || 
+					!(*ite)->IsValid() || 
+					!(*ite)->IsTrust()) continue;
 				(*ite)->Free();
 			}
 		GetEvent().Clear();

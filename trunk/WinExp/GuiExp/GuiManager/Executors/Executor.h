@@ -54,11 +54,11 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-EXP_API pixel_t StringToColor(CString sColor);
-EXP_API int StringToArray(const CString s, CArrayT<CString> &sa, TCHAR cSpl);
-EXP_API CRect StringToRect(const CString& sRect);
-EXP_API BOOL ReleaseBinary(HGLOBAL hData);
-EXP_API HGLOBAL GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/);
+EXP_API pixel_t ExStringToColor(CString sColor);
+EXP_API int ExStringToArray(const CString s, CArrayT<CString> &sa, TCHAR cSpl = _T(','), BOOL bTrim = TRUE);
+EXP_API CRect ExStringToRect(const CString& sRect);
+EXP_API BOOL ExReleaseBinary(HGLOBAL hData);
+EXP_API HGLOBAL ExGetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance = NULL);
 
 //////////////////////////////////////////////////////////////////
 

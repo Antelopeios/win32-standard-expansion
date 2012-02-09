@@ -97,11 +97,11 @@ public:
 	// 获得属性
 	CText* GetText()
 	{
-		return (CText*)m_Ctrl->GetState(_T("text"));
+		return (CText*)m_Ctrl->GetState(_T("font"));
 	}
 	CString* GetEdit()
 	{
-		return (CString*)m_Ctrl->GetState(_T("edit"));
+		return (CString*)m_Ctrl->GetState(_T("text"));
 	}
 
 	// 获得显示的文本内容,迭代器返回范围上限
@@ -123,25 +123,26 @@ public:
 		m_Ctrl->GetClientRect(rect);
 
 		// 获得能显示的文本区域
-		CString::iterator_t ite1 = text->Head(), ite3 = text->Head();
+		CString str;
+		CString::iterator_t ite1 = str.Head(), ite3 = str.Head();
 		ite1->nIndx = show.Head()->Index();
 		ite3->nIndx = show.Tail()->Index();
-		ite2 = text->Head();
+		ite2 = str.Head();
 		ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
 
+		if (show.Empty()) return NULL;
 		CSize sz;
-		text->SetString(show);
-		if (text->Empty()) return NULL;
-		text->GetSize(sz);
+		str = show;
+		text->GetSize(str, sz);
 		if (sz.cx < rect.Width())
 			ite2->nIndx = ite3->nIndx;
 		else
 		do
 		{
-			text->SetString(show);
-			if (text->Empty()) break;
-			text->GetAt(ite2) = _T('\0');
-			text->GetSize(sz);
+			if (show.Empty()) break;
+			str = show;
+			str.GetAt(ite2) = _T('\0');
+			text->GetSize(str, sz);
 			if (sz.cx > rect.Width())
 				ite3->nIndx = ite2->nIndx;
 			else
@@ -151,7 +152,6 @@ public:
 				break;
 			ite2->nIndx = ((ite1->nIndx + ite3->nIndx) >> 1);
 		} while(ite2->nIndx > ite1->nIndx);
-		text->SetString(_T(""));
 
 		// 定位区域
 		show.GetAt(ite2->nIndx) = _T('\0');
@@ -223,36 +223,37 @@ public:
 		if (!edit) return;
 
 		// 拿到偏移量
+		CString str;
 		CSize sz_off;
 		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
 		if (m_iteOffset->Index() > edit->Head()->Index())
 		{
-			text->SetString(*edit);
-			text->GetAt(m_iteOffset->Index()) = _T('\0');
-			text->GetSize(sz_off);
+			str = *edit;
+			str.GetAt(m_iteOffset->Index()) = _T('\0');
+			text->GetSize(str, sz_off);
 		}
 		CPoint point(ptPos);
 		point.x += sz_off.cx;
 
 		// 搜索字符位置
 		if (!m_iteFlicker->InThis(edit)) m_iteFlicker = edit->Tail();
-		CString::iterator_t ite1 = text->Head(), ite2 = text->Head(), ite3 = text->Head();
+		CString::iterator_t ite1 = str.Head(), ite2 = str.Head(), ite3 = str.Head();
 		ite2->nIndx = m_iteFlicker->nIndx;
 		ite3->nIndx = edit->Tail()->nIndx;
 
+		if (edit->Empty()) return;
 		CSize sz;
-		text->SetString(*edit);
-		if (text->Empty()) return;
-		text->GetSize(sz);
+		str = *edit;
+		text->GetSize(str, sz);
 		if (sz.cx < point.x)
 			ite2->nIndx = ite3->nIndx;
 		else
 		do
 		{
-			text->SetString(*edit);
-			if (text->Empty()) break;
-			text->GetAt(ite2) = _T('\0');
-			text->GetSize(sz);
+			if (edit->Empty()) break;
+			str = *edit;
+			str.GetAt(ite2) = _T('\0');
+			text->GetSize(str, sz);
 			if (sz.cx > point.x)
 				ite3->nIndx = ite2->nIndx;
 			else
@@ -273,7 +274,6 @@ public:
 			m_iteFlicker->nIndx = ite2->nIndx;
 			m_iteSelect = m_iteFlicker;
 		}
-		text->SetString(_T(""));
 		CheckFlicker();
 	}
 	
@@ -517,29 +517,39 @@ public:
 	{
 		ExAssert(m_Ctrl);
 		if (!mem_img || mem_img->IsNull()) return;
+		CRect rect, clt_rct;
+		m_Ctrl->GetClipRect(rect);
+		m_Ctrl->GetClientRect(clt_rct);
 
 		// 获得属性
 		int no_foc = m_Ctrl->IsFocus() ? 0 : 1;
 
-		CText* text = (CText*)m_Ctrl->GetState(_T("text"));
-		CText tmp_text = (*text);
-		CString* edit = (CString*)m_Ctrl->GetState(_T("edit"));
-		CText* empt = (CText*)m_Ctrl->GetState(_T("empty_text"));
+		CText* text = (CText*)m_Ctrl->GetState(_T("font"));
+		if (!text) return;
+		CString* edit = (CString*)m_Ctrl->GetState(_T("text"));
+		CText* empt = (CText*)m_Ctrl->GetState(_T("empty_font"));
+		CString* empt_str = (CString*)m_Ctrl->GetState(_T("empty_text"));
+
+		CImage* image = (CImage*)m_Ctrl->GetState(_T("image"));
+		pixel_t pixel = (pixel_t)m_Ctrl->GetState(_T("color"));
 
 		pixel_t txt_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("txt_sel_color")))[no_foc];
 		pixel_t bkg_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("bkg_sel_color")))[no_foc];
 
-		CRect rect;
-		m_Ctrl->GetClipRect(rect);
+		// 绘背景
+		CImgDrawer::Fill(mem_img->Get(), rect, pixel);
+		if (image && !image->IsNull())
+			CImgDrawer::Draw(mem_img->Get(), image->Get(), rect, 
+				CPoint(), CSize(clt_rct.Width(), clt_rct.Height()));
 
 		// 拿到偏移量
 		CSize sz_off;
 		if (!m_iteOffset->InThis(edit)) m_iteOffset = edit->Head();
 		if (m_iteOffset->Index() > edit->Head()->Index())
 		{
-			tmp_text.SetString(*edit);
-			tmp_text[m_iteOffset->Index()] = _T('\0');
-			tmp_text.GetSize(sz_off);
+			CString tmp(*edit);
+			tmp[m_iteOffset->Index()] = _T('\0');
+			text->GetSize(tmp, sz_off);
 		}
 
 		// 定位选区
@@ -549,37 +559,37 @@ public:
 		CSize sz_hed, sz_sel;
 		if (ite1 != ite2)
 		{
-			tmp_text.SetString(*edit);
-			tmp_text[ite1->Index()] = _T('\0');
-			tmp_text.GetSize(sz_hed);
+			CString tmp(*edit);
+			tmp[ite1->Index()] = _T('\0');
+			text->GetSize(tmp, sz_hed);
 
-			tmp_text.SetString(*edit);
-			tmp_text[ite2->Index()] = _T('\0');
-			tmp_text.Del(tmp_text.Head(), ite1->Index());
-			tmp_text.GetSize(sz_sel);
+			tmp = *edit;
+			tmp[ite2->Index()] = _T('\0');
+			tmp.Del(tmp.Head(), ite1->Index());
+			text->GetSize(tmp, sz_sel);
 		}
 
 		// 绘文字
 		if (edit->Empty())
 		{
-			CImage txt_img(empt->GetImage());
-			if(!txt_img.IsNull())
-				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+			if (empt && empt_str)
+			{
+				CImage txt_img(empt->GetImage(*empt_str));
+				if(!txt_img.IsNull())
+					CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+			}
 		}
 		else
 		{
-			tmp_text.SetString(*edit);
-			CImage txt_img(tmp_text.GetImage());
+			CImage txt_img(text->GetImage(*edit));
 			if(!txt_img.IsNull())
 			{
+				txt_img.Set(txt_img.Clone());
 				CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
 				if (!sel_rc.IsEmpty())
 				{
-					CFilterFill filter(ExRevColor(txt_sel_color), 0xf, TRUE);
-					CImgFilter::Filter(txt_img, sel_rc, &filter);
-					filter.m_Const = ExRevColor(bkg_sel_color);
-					filter.m_ClrMask = txt_sel_color;
-					CImgFilter::Filter(txt_img, sel_rc, &filter);
+					CImgFilter::Filter(txt_img, sel_rc, &CFilterBrush(txt_sel_color, 0xf, TRUE));
+					CImgFilter::Filter(txt_img, sel_rc, &CFilterBrush(bkg_sel_color, 0xf, TRUE, txt_sel_color));
 				}
 				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 			}
@@ -589,14 +599,13 @@ public:
 		if (m_bFlicker && m_uFlicker)
 		{
 			// 获得光标高度
-			tmp_text.SetString(_T("lq"));
 			CSize sz_flk;
-			tmp_text.GetSize(sz_flk);
+			text->GetSize(_T("lq"), sz_flk);
 			// 获得文字宽度
-			tmp_text.SetString(*edit);
-			tmp_text.GetAt(m_iteFlicker->Index()) = _T('\0');
+			CString tmp(*edit);
+			if(!tmp.Empty()) tmp[m_iteFlicker->Index()] = _T('\0');
 			CSize sz_txt;
-			tmp_text.GetSize(sz_txt);
+			text->GetSize(tmp, sz_txt);
 			// 画线
 			CImgDrawer::Line
 				(
@@ -687,6 +696,7 @@ public:
 		case WM_PAINT:
 			ShowFlicker(m_Ctrl->IsFocus());
 			OnPaint((CImage*)lParam);
+			SetState(break_next);
 			break;
 		}
 	}

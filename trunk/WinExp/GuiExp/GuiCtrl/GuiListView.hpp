@@ -78,14 +78,11 @@ class CGuiListView : public CGuiPicture
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiListView, CGuiPicture)
 
-public:
-	typedef CListT<IGuiCtrl*> items_t;
-
 protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
 	LONG m_AllLine, m_FraLine;
-	CGuiButton* m_FocPic;
+	CGuiButton m_FocPic;
 	BOOL m_AlignTop;
 
 public:
@@ -94,20 +91,53 @@ public:
 		, m_AllLine(0)
 		, m_FraLine(0)
 		, m_AlignTop(TRUE)
-		, m_FocPic(NULL)
 	{
 		// 添加事件对象
 		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
-		m_FocPic = ExDynCast<CGuiButton>(ExGui(_T("CGuiButton"), GetGC()));
-		m_FocPic->SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
-		AddComp(m_FocPic);
+		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
+		AddComp(&m_FocPic);
 	}
 	~CGuiListView()
 	{
+		DelComp(&m_FocPic, FALSE);
 	}
 
 public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		CArrayT<CString> sa;
+		if (key.Left(4) == _T("foc_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.Execute(type, val);
+		}
+		else
+		if (key == _T("space"))
+			SetState(_T("space"), (void*)_ttol(val));
+		else
+		if (key == _T("all_line"))
+			SetState(_T("all_line"), (void*)_ttol(val));
+		else
+		if (key == _T("fra_line"))
+			SetState(_T("fra_line"), (void*)_ttol(val));
+		else
+		if (key == _T("align_top"))
+		{
+			CString temp(val);
+			temp.Lower();
+			if (temp == _T("false"))
+				SetState(_T("align_top"), (void*)FALSE);
+			else
+			if (temp == _T("true"))
+				SetState(_T("align_top"), (void*)TRUE);
+		}
+		else
+			return EXP_BASE::Execute(key, val);
+		return TRUE;
+	}
+
 	// 获得控件状态
 	void* GetState(const CString& sType)
 	{
@@ -115,11 +145,11 @@ public:
 		{
 			CString type(sType);
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic->GetState(type);
+			return m_FocPic.GetState(type);
 		}
 		else
 		if (sType == _T("foc"))
-			return (void*)(m_FocPic);
+			return (void*)(&m_FocPic);
 		else
 		if (sType == _T("items"))
 			return (void*)(&m_ItemList);
@@ -144,7 +174,7 @@ public:
 		if (type.Left(4) == _T("foc_"))
 		{
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic->SetState(type, pState);
+			return m_FocPic.SetState(type, pState);
 		}
 		else
 		if (sType == _T("items"))

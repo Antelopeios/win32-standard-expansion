@@ -121,12 +121,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// 打开文件并获取解码器
-	CIOFile file(_T("../TestImg1/ground.png"));
-	//CIOFile file(_T("ground.png"));
+	CIOFile file(_T("TestImg1/ground.png"));
+	//CIOFile file(_T("TestImg2/ground.png"));
 	CGC gc;
 	ICoderObject* coder = CImgAnalyzer::GetCoder(&file, &gc);
 	// 解码文件
-	imgShow = coder->Decode();
+	if (coder) imgShow = coder->Decode();
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -277,9 +277,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CRect(imgShow.GetWidth(), 0, imgShow.GetWidth() << 1, imgShow.GetHeight()), 
 				CPoint());
 
-			CText text(_T(""), (font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
-			text.Format(_T("%d fps, %d mspkf"), g_Frames, g_Frames ? 1000000 / g_Frames : 0);
-			CImage bmp_img(text.GetImage());
+			CText text((font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(255, 255, 255, 128));
+			CString str;
+			str.Format(_T("%d fps, %d mspkf"), g_Frames, g_Frames ? 1000000 / g_Frames : 0);
+			CImage bmp_img(text.GetImage(str));
 			if(!bmp_img.IsNull())
 				Render(mem_img, bmp_img, CRect(
 						rect.right - bmp_img.GetWidth() - 5, 

@@ -62,10 +62,103 @@ public:
 	{
 		Create(
 			xml.GetAttr(_T("text"), ite), 
-			StringToRect(xml.GetAttr(_T("rect"), ite)), SW_HIDE);
+			ExStringToRect(xml.GetAttr(_T("rect"), ite)), SW_HIDE);
 
-		CString t = xml.GetAttr(_T("pos"), ite); t.Lower();
+		CString t = xml.GetAttr(_T("style"), ite); t.Upper();
+		CArrayT<CString> sa;
+		ExStringToArray(t, sa);
+		for(int i = 0; i < (int)sa.GetCount(); ++i)
+		{
+			if (sa[i] == _T("WS_OVERLAPPED"))
+				ModifyStyle(0, WS_OVERLAPPED);
+			else
+			if (sa[i] == _T("WS_POPUP"))
+				ModifyStyle(0, WS_POPUP);
+			else
+			if (sa[i] == _T("WS_CHILD"))
+				ModifyStyle(0, WS_CHILD);
+			else
+			if (sa[i] == _T("WS_MINIMIZE"))
+				ModifyStyle(0, WS_MINIMIZE);
+			else
+			if (sa[i] == _T("WS_VISIBLE"))
+				ModifyStyle(0, WS_VISIBLE);
+			else
+			if (sa[i] == _T("WS_DISABLED"))
+				ModifyStyle(0, WS_DISABLED);
+			else
+			if (sa[i] == _T("WS_CLIPSIBLINGS"))
+				ModifyStyle(0, WS_CLIPSIBLINGS);
+			else
+			if (sa[i] == _T("WS_CLIPCHILDREN"))
+				ModifyStyle(0, WS_CLIPCHILDREN);
+			else
+			if (sa[i] == _T("WS_MAXIMIZE"))
+				ModifyStyle(0, WS_MAXIMIZE);
+			else
+			if (sa[i] == _T("WS_CAPTION"))
+				ModifyStyle(0, WS_CAPTION);
+			else
+			if (sa[i] == _T("WS_BORDER"))
+				ModifyStyle(0, WS_BORDER);
+			else
+			if (sa[i] == _T("WS_DLGFRAME"))
+				ModifyStyle(0, WS_DLGFRAME);
+			else
+			if (sa[i] == _T("WS_VSCROLL"))
+				ModifyStyle(0, WS_VSCROLL);
+			else
+			if (sa[i] == _T("WS_HSCROLL"))
+				ModifyStyle(0, WS_HSCROLL);
+			else
+			if (sa[i] == _T("WS_SYSMENU"))
+				ModifyStyle(0, WS_SYSMENU);
+			else
+			if (sa[i] == _T("WS_THICKFRAME"))
+				ModifyStyle(0, WS_THICKFRAME);
+			else
+			if (sa[i] == _T("WS_GROUP"))
+				ModifyStyle(0, WS_GROUP);
+			else
+			if (sa[i] == _T("WS_TABSTOP"))
+				ModifyStyle(0, WS_TABSTOP);
+			else
+			if (sa[i] == _T("WS_MINIMIZEBOX"))
+				ModifyStyle(0, WS_MINIMIZEBOX);
+			else
+			if (sa[i] == _T("WS_MAXIMIZEBOX"))
+				ModifyStyle(0, WS_MAXIMIZEBOX);
+			else
+			if (sa[i] == _T("WS_TILED"))
+				ModifyStyle(0, WS_TILED);
+			else
+			if (sa[i] == _T("WS_ICONIC"))
+				ModifyStyle(0, WS_ICONIC);
+			else
+			if (sa[i] == _T("WS_SIZEBOX"))
+				ModifyStyle(0, WS_SIZEBOX);
+			else
+			if (sa[i] == _T("WS_TILEDWINDOW"))
+				ModifyStyle(0, WS_TILEDWINDOW);
+			else
+			if (sa[i] == _T("WS_OVERLAPPEDWINDOW"))
+				ModifyStyle(0, WS_OVERLAPPEDWINDOW);
+			else
+			if (sa[i] == _T("WS_POPUPWINDOW"))
+				ModifyStyle(0, WS_POPUPWINDOW);
+			else
+			if (sa[i] == _T("WS_CHILDWINDOW"))
+				ModifyStyle(0, WS_CHILDWINDOW);
+		}
+
+		t = xml.GetAttr(_T("pos"), ite); t.Lower();
 		if (t == _T("center")) CenterWindow();
+
+		t = xml.GetAttr(_T("icon"), ite);
+		UINT i = _ttoi(t);
+		HICON ic_wnd = ::LoadIcon(::GetModuleHandle(NULL), MAKEINTRESOURCE(i));
+		SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
+		SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 
 		BOOL clr_key = FALSE; pixel_t key = ExRGB(255, 0, 255);
 		t = xml.GetAttr(_T("mask"), ite);
@@ -73,7 +166,7 @@ public:
 		{
 			t.Lower();
 			clr_key = TRUE;
-			key = StringToColor(t);
+			key = ExStringToColor(t);
 		}
 		t = xml.GetAttr(_T("layer"), ite); t.Lower();
 		if (t == _T("false"))

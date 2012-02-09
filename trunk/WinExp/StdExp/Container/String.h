@@ -233,7 +233,11 @@ public:
 
 	CStringT& SetString(const char* pString)
 	{
-		if (!pString) return (*this);
+		if (!pString)
+		{
+			Clear();
+			return (*this);
+		}
 		if (sizeof(type_t) == 1)
 		{
 			GetCStr(strlen((char*)pString)); /*由于函数参数逆序入栈,因此不能在参数中调用GetCStr*/
@@ -251,7 +255,11 @@ public:
 	}
 	CStringT& SetString(const wchar_t* pString)
 	{
-		if (!pString) return (*this);
+		if (!pString)
+		{
+			Clear();
+			return (*this);
+		}
 		if (sizeof(type_t) == 1)
 		{
 			char* tmp_str = NULL; int len = 0;
@@ -569,6 +577,15 @@ public:
 		}
 		return TRUE;
 	}
+
+	BOOL PushHead(const type_t& Item)
+	{ return Add(Item, Head()); }
+	BOOL PushLast(const type_t& Item)
+	{ return Add(Item); }
+	BOOL PopHead()
+	{ return Del(Head()); }
+	BOOL PopLast()
+	{ return Del(Last()); }
 
 	iterator_t Find(const type_t& tItem) const
 	{

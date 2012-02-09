@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<skin>
+<event name="items_topbar_btn" class="CEvent_items_topbar_btn" />
+
+<div name="main" class="CGuiWnd" rect="0,0,1000,750" pos="center" layer="true" mask="" visible="false" style="WS_POPUP,WS_SYSMENU,WS_MINIMIZEBOX,WS_MAXIMIZEBOX">
+	<event class="CEvent_wnd" />
+
+	<div name="banner" class="CGuiPicture" image="banner"><event class="CEvent_banner" /></div>
+	<div name="corner_lb" class="CGuiPicture" image="corner_lb"><event class="CEvent_corner_lb" /></div>
+	<div name="corner_rb" class="CGuiPicture" image="corner_rb"><event class="CEvent_corner_rb" /></div>
+	<div name="corner_rt" class="CGuiPicture" image="corner_rt"><event class="CEvent_corner_rt" /></div>
+	<div name="corner_lt" class="CGuiPicture" image="corner_lt"><event class="CEvent_corner_lt" /></div>
+	<div name="line_bottom" class="CGuiPicture" image="line_bottom"><event class="CEvent_line_bottom" /></div>
+	<div name="line_left" class="CGuiPicture" image="line_left"><event class="CEvent_line_left" /></div>
+	<div name="line_right" class="CGuiPicture" image="line_right"><event class="CEvent_line_right" /></div>
+	<div name="line_top" class="CGuiPicture" image="line_top"><event class="CEvent_line_top" /></div>
+	<div name="tag_bg" class="CGuiPicture" image="tag_bg"><event class="CEvent_tag_bg" /></div>
+	<div name="toolbar_bg" class="CGuiPicture" image="toolbar_bg"><event class="CEvent_toolbar_bg" /></div>
+
+	<div name="list" class="CGuiListView" image="list" foc_image="list_foc_lt,list_foc_top,list_foc_rt,list_foc_left,list_foc,list_foc_right,list_foc_lb,list_foc_bottom,list_foc_rb" space="15"><event class="CEvent_list" /></div>
+	<div name="scr_h" class="CGuiScroll" sli_blk_thr_sta="1" up_thr_sta="1" dn_thr_sta="1" sli_ori="true" sli_image="scr_h" sli_blk_image=",scr_h_sli_top,,,scr_h_sli,,,scr_h_sli_bottom," sli_blk_icon="scr_h_ico" up_image=",,,,scr_h_up,,,," dn_image=",,,,scr_h_dn,,,," scroll="list"><event class="CEvent_scr_h" /></div>
+
+	<div name="win_sysbtn_close" class="CGuiButton" image=",,,,win_sysbtn_close,,,," thr_sta="1"><event class="CEvent_win_sysbtn_close" /></div>
+	<div name="win_sysbtn_max" class="CGuiButton" image=",,,,win_sysbtn_max,,,," thr_sta="1"><event class="CEvent_win_sysbtn_max" /></div>
+	<div name="win_sysbtn_restore" class="CGuiButton" image=",,,,win_sysbtn_restore,,,," thr_sta="1"><event class="CEvent_win_sysbtn_restore" /></div>
+	<div name="win_sysbtn_min" class="CGuiButton" image=",,,,win_sysbtn_min,,,," thr_sta="1"><event class="CEvent_win_sysbtn_min" /></div>
+
+	<div name="gamesearch_charmap" class="CGuiGroup" image="gamesearch_charmap">
+		<items count="26" class="CGuiButton" thr_sta="1"/>
+		<event class="CEvent_gamesearch_charmap" />
+	</div>
+	<div name="toolbar_tools" class="CGuiGroup" image="toolbar_tools">
+		<items count="8" class="CGuiButton" thr_sta="1"/>
+		<event class="CEvent_toolbar_tools" />
+	</div>
+	<div name="topbar_btn" class="CGuiGroup" image="topbar_btn" status="3" sta_cnt="4" sty_box="false">
+		<items count="8" class="CGuiPushBtn" event="items_topbar_btn"/>
+		<event class="CEvent_topbar_btn" />
+	</div>
+
+	<div name="tag_qb" class="CGuiPushBtn" image="tag_qb" status="3"><event class="CEvent_tag_qb" /></div>
+	<div name="tag_zx" class="CGuiPushBtn" image="tag_zx"><event class="CEvent_tag_zx" /></div>
+	<div name="tag_wl" class="CGuiPushBtn" image="tag_wl"><event class="CEvent_tag_wl" /></div>
+	<div name="tag_dz" class="CGuiPushBtn" image="tag_dz"><event class="CEvent_tag_dz" /></div>
+	<div name="tag_wy" class="CGuiPushBtn" image="tag_wy"><event class="CEvent_tag_wy" /></div>
+	<div name="tag_dj" class="CGuiPushBtn" image="tag_dj"><event class="CEvent_tag_dj" /></div>
+
+	<div name="search_bg" class="CGuiPicture" image="search_bg"><event class="CEvent_search_bg" /></div>
+	<div name="search_button" class="CGuiPicture" image="search_button"><event class="CEvent_search_button" /></div>
+	<div name="google_bg" class="CGuiPicture" image="google_bg"><event class="CEvent_google_bg" /></div>
+	<div name="google_button" class="CGuiPicture" image="google_button"><event class="CEvent_google_button" /></div>
+</div>
+</skin>

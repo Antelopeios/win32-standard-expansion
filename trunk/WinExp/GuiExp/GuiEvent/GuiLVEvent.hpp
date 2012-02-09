@@ -107,7 +107,7 @@ public:
 		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
 		if (!ctrl) return;
 
-		typedef CListT<IGuiCtrl*> items_t;
+		typedef IGuiCtrl::items_t items_t;
 
 		// 处理消息
 		switch( nMessage )
@@ -250,9 +250,9 @@ public:
 	{
 		return (IGuiCtrl*)m_Ctrl->GetState(_T("foc"));
 	}
-	CListT<IGuiCtrl*>* GetItems()
+	IGuiCtrl::items_t* GetItems()
 	{
-		return (CListT<IGuiCtrl*>*)m_Ctrl->GetState(_T("items"));
+		return (IGuiCtrl::items_t*)(m_Ctrl->GetState(_T("items")));
 	}
 	LONG GetSpace()
 	{
@@ -268,7 +268,7 @@ public:
 	{
 		ExAssert(m_Ctrl);
 
-		typedef CListT<IGuiCtrl*> items_t;
+		typedef IGuiCtrl::items_t items_t;
 
 		// 获得属性
 		items_t* items = GetItems();
@@ -400,7 +400,7 @@ public:
 		case WM_SETFOCUS:
 			if (m_Ctrl == IGuiCtrl::GetFocus())
 			{
-				CListT<IGuiCtrl*>* items = GetItems();
+				IGuiCtrl::items_t* items = GetItems();
 				if (items->Empty()) break;
 				if(!m_FocItm)
 					m_FocItm = items->HeadItem();

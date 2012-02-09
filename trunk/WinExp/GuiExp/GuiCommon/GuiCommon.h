@@ -57,6 +57,8 @@
 
 //////////////////////////////////////////////////////////////////
 
+//#define EXP_BREAK_ALLOC	278
+
 // 关闭一些警告
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)

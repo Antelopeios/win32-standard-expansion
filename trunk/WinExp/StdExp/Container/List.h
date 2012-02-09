@@ -377,6 +377,15 @@ public:
 	}
 	BOOL Del(iterator_t& ite)
 	{ return Del(ite, ite); }
+
+	BOOL PushHead(const type_t& Item)
+	{ return Add(Item, Head()); }
+	BOOL PushLast(const type_t& Item)
+	{ return Add(Item); }
+	BOOL PopHead()
+	{ return Del(Head()); }
+	BOOL PopLast()
+	{ return Del(Last()); }
 };
 
 //////////////////////////////////////////////////////////////////

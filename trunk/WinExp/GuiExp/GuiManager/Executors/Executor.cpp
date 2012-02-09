@@ -55,7 +55,7 @@ EXP_IMPLEMENT_DYNAMIC_CLS(IExecutor, IBaseObject)
 //////////////////////////////////////////////////////////////////
 
 // 获得字符串颜色
-EXP_API pixel_t StringToColor(CString sColor)
+EXP_API pixel_t ExStringToColor(CString sColor)
 {
 	COLORREF clr = ExRGBA(0, 0, 0, 0);
 	if (sColor.Empty())
@@ -101,7 +101,7 @@ EXP_API pixel_t StringToColor(CString sColor)
 }
 
 // 获得字符串数组
-EXP_API int StringToArray(const CString s, CArrayT<CString> &sa, TCHAR cSpl)
+EXP_API int ExStringToArray(const CString s, CArrayT<CString> &sa, TCHAR cSpl/* = _T(',')*/, BOOL bTrim/* = TRUE*/)
 {
 	CString::iterator_t lst_pos, pos;
 	BOOL is_continue = FALSE;
@@ -123,18 +123,27 @@ EXP_API int StringToArray(const CString s, CArrayT<CString> &sa, TCHAR cSpl)
 	if (lst_pos != s.Tail())
 		sa.Add(s.Mid(lst_pos->Index(), s.GetLength() - lst_pos->Index()));
 
+	if (bTrim)
+		for(int i = 0; i < (int)sa.GetCount(); ++i)
+		{
+			sa[i].Trim(_T(' '));
+			sa[i].Trim(_T('\t'));
+			sa[i].Trim(_T('\n'));
+			sa[i].Trim(_T('\r'));
+		}
+
 	return (int)sa.GetCount();
 }
 
 // 获得字符串区域
-EXP_API CRect StringToRect(const CString& sRect)
+EXP_API CRect ExStringToRect(const CString& sRect)
 {
 	CRect rc(0, 0, 0, 0);
 	if (sRect.Empty()) return rc;
 	CString r(sRect);
 	r.Replace(_T(' '));
 	CArrayT<CString> sa;
-	if (StringToArray(r, sa, _T(',')) >= 4)
+	if (ExStringToArray(r, sa, _T(',')) >= 4)
 	{
 		rc.Set(
 			_tcstol(sa[0], NULL, 10), 
@@ -146,14 +155,14 @@ EXP_API CRect StringToRect(const CString& sRect)
 }
 
 // 获得资源
-EXP_API BOOL ReleaseBinary(HGLOBAL hData)
+EXP_API BOOL ExReleaseBinary(HGLOBAL hData)
 {
 	if (!hData) return TRUE;
 	// 释放资源内存块
 	UnlockResource(hData);
 	return FreeResource(hData);
 }
-EXP_API HGLOBAL GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/)
+EXP_API HGLOBAL ExGetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize, HMODULE hInstance/* = NULL*/)
 {
 	// 加载资源内存
 	HRSRC info = ::FindResource(hInstance, MAKEINTRESOURCE(nID), szType);
@@ -164,13 +173,13 @@ EXP_API HGLOBAL GetBinary(UINT nID, LPCTSTR szType, BYTE*& btBuff, DWORD& dwSize
 	dwSize = ::SizeofResource(hInstance, info);
 	if( dwSize == NULL )
 	{
-		ReleaseBinary(data);
+		ExReleaseBinary(data);
 		return NULL;
 	}
 	btBuff = (BYTE*)::LockResource(data);
 	if( btBuff == NULL )
 	{
-		ReleaseBinary(data);
+		ExReleaseBinary(data);
 		return NULL;
 	}
 	return data;
@@ -257,7 +266,7 @@ public:
 			CGuiManagerT<CText>::Reg(xml.GetAttr(_T("name"), ite), txt);
 		}
 		txt->Create(&lf);
-		txt->SetColor(StringToColor(xml.GetAttr(_T("color"), ite)));
+		txt->SetColor(ExStringToColor(xml.GetAttr(_T("color"), ite)));
 		return NULL;
 	}
 };
@@ -274,6 +283,34 @@ class _image : public IExecutor
 protected:
 	CGC gc;
 
+	void LoadImg(IFileObject*& file, CGC& exc_gc, CImage*& img, CGuiXML& xml, CGuiXML::iterator_t& ite)
+	{
+		ICoderObject* coder = CImgAnalyzer::GetCoder(file, &exc_gc);
+		if (coder)
+		{
+			if(!img)
+			{
+				img = gcnew(gc, CImage);
+				CGuiManagerT<CImage>::Reg(xml.GetAttr(_T("name"), ite), img);
+			}
+			img->Set(coder->Decode());
+		}
+	}
+
+	void LoadRes(IFileObject*& file, CGC& exc_gc, CImage*& img, CGuiXML& xml, CGuiXML::iterator_t& ite)
+	{
+		file = gcnew(exc_gc, CMemFile);
+		BYTE* buff = NULL; DWORD size = 0;
+		HGLOBAL hres = ExGetBinary(_ttoi(xml.GetAttr(_T("path"), ite)), 
+			_T("PNG"), buff, size, ::GetModuleHandle(NULL));
+		if (hres)
+		{
+			((CMemFile*)file)->Open(buff, size);
+			LoadImg(file, exc_gc, img, xml, ite);
+			ExReleaseBinary(hres);
+		}
+	}
+
 public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
@@ -283,39 +320,23 @@ public:
 		((CIOFile*)file)->Open(xml.GetAttr(_T("path"), ite));
 		if (file->Error())
 		{
-			file = gcnew(exc_gc, CMemFile);
-			BYTE* buff = NULL; DWORD size = 0;
-			HGLOBAL hres = GetBinary(_ttoi(xml.GetAttr(_T("path"), ite)), 
-				_T("PNG"), buff, size, ::GetModuleHandle(NULL));
-			if (hres)
+			CIOFile* xml_file = dynamic_cast<CIOFile*>(xml.GetFile());
+			if (xml_file)
 			{
-				((CMemFile*)file)->Open(buff, size);
-				ICoderObject* coder = CImgAnalyzer::GetCoder(file, &exc_gc);
-				if (coder)
-				{
-					if(!img)
-					{
-						img = gcnew(gc, CImage);
-						CGuiManagerT<CImage>::Reg(xml.GetAttr(_T("name"), ite), img);
-					}
-					img->Set(coder->Decode());
-				}
-				ReleaseBinary(hres);
+				CString path(xml_file->GetFileName());
+				path.GetAt(path.RevFind(_T('\\')) + 1) = _T('\0');
+				path += xml.GetAttr(_T("path"), ite);
+				((CIOFile*)file)->Open(path);
+				if (file->Error())
+					LoadRes(file, exc_gc, img, xml, ite);
+				else
+					LoadImg(file, exc_gc, img, xml, ite);
 			}
+			else
+				LoadRes(file, exc_gc, img, xml, ite);
 		}
 		else
-		{
-			ICoderObject* coder = CImgAnalyzer::GetCoder(file, &exc_gc);
-			if (coder)
-			{
-				if(!img)
-				{
-					img = gcnew(gc, CImage);
-					CGuiManagerT<CImage>::Reg(xml.GetAttr(_T("name"), ite), img);
-				}
-				img->Set(coder->Decode());
-			}
-		}
+			LoadImg(file, exc_gc, img, xml, ite);
 		return NULL;
 	}
 };
@@ -341,14 +362,21 @@ public:
 			sty = gcnew(gc, style_t);
 			CGuiManagerT<style_t>::Reg(xml.GetAttr(_T("name"), ite), sty);
 		}
+		else
+		{
+			sty->font.Clear();
+			sty->image.Clear();
+		}
 		CArrayT<CString> sa;
-		StringToArray(xml.GetAttr(_T("font"), ite), sa, _T(','));
+		ExStringToArray(xml.GetAttr(_T("font"), ite), sa);
 		for(DWORD i = 0; i < sa.GetCount(); ++i)
 			sty->font.Add(CGuiManagerT<CText>::Get(sa[i]));
-		StringToArray(xml.GetAttr(_T("color"), ite), sa, _T(','));
+		ExStringToArray(xml.GetAttr(_T("color"), ite), sa);
+		for(DWORD i = sty->color.GetCount(); i < sa.GetCount(); ++i)
+			sty->color.Add(pixel_t());
 		for(DWORD i = 0; i < sa.GetCount(); ++i)
-			sty->color.Add(StringToColor(sa[i]));
-		StringToArray(xml.GetAttr(_T("image"), ite), sa, _T(','));
+			sty->color[i] = ExStringToColor(sa[i]);
+		ExStringToArray(xml.GetAttr(_T("image"), ite), sa);
 		for(DWORD i = 0; i < sa.GetCount(); ++i)
 			sty->image.Add(CGuiManagerT<CImage>::Get(sa[i]));
 		return NULL;
@@ -414,6 +442,7 @@ public:
 				ctl = (IGuiCtrl*)ctl->Execute(xml, ite, parent);
 				if (ctl)
 				{
+					ctl->SetWindowRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
 					IGuiBase* pare = ExDynCast<IGuiBase>(parent);
 					if (pare)
 						pare->AddComp(ctl);
@@ -437,6 +466,40 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_div, IExecutor)
 
 //////////////////////////////////////////////////////////////////
 
+// 子项
+class _items : public IExecutor
+{
+	EXP_DECLARE_DYNCREATE_CLS(_items, IExecutor)
+
+public:
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+	{
+		IGuiCtrl* pre = ExDynCast<IGuiCtrl>(parent);
+		if (!pre) return NULL;
+		IGuiCtrl::items_t* items = (IGuiCtrl::items_t*)pre->GetState(_T("items"));
+		if (!items) return NULL;
+		CString t(xml.GetAttr(_T("count"), ite)), 
+				c(xml.GetAttr(_T("class"), ite)), 
+				e(xml.GetAttr(_T("event"), ite));
+		IGuiEvent* pe = CGuiManagerT<IGuiEvent>::Get(e);
+		for(int i = 0; i < _ttoi(t); ++i)
+		{
+			IGuiCtrl* ctl = ExDynCast<IGuiCtrl>(ExDynCreate(c));
+			if (!ctl) return NULL;
+			ctl = (IGuiCtrl*)ctl->Execute(xml, ite, parent);
+			if (!ctl) return NULL;
+			ctl->AddEvent(pe);
+			items->Add(ctl);
+		}
+		pre->SetState(_T("items"), items);
+		return NULL;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_items, IExecutor)
+
+//////////////////////////////////////////////////////////////////
+
 // 事件
 class _event : public IExecutor
 {
@@ -445,11 +508,13 @@ class _event : public IExecutor
 public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
+		CString name = xml.GetAttr(_T("name"), ite);
 		IGuiBase* pre = ExDynCast<IGuiBase>(parent);
-		if (!pre) return NULL;
+		if (!pre && name.Empty()) return NULL;
 		IGuiEvent* evt = ExDynCast<IGuiEvent>(ExDynCreate(xml.GetAttr(_T("class"), ite)));
 		if (!evt) return NULL;
-		pre->AddEvent(evt);
+		if (!name.Empty()) CGuiManagerT<IGuiEvent>::Reg(name, evt);
+		if (pre) pre->AddEvent(evt);
 		return NULL;
 	}
 };
@@ -466,11 +531,13 @@ class _effect : public IExecutor
 public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
+		CString name = xml.GetAttr(_T("name"), ite);
 		IGuiCtrl* pre = ExDynCast<IGuiCtrl>(parent);
-		if (!pre) return NULL;
+		if (!pre && name.Empty()) return NULL;
 		IGuiEffect* eff = ExDynCast<IGuiEffect>(ExDynCreate(xml.GetAttr(_T("class"), ite)));
 		if (!eff) return NULL;
-		pre->SetEffect(eff);
+		if (!name.Empty()) CGuiManagerT<IGuiEffect>::Reg(name, eff);
+		if (pre) pre->SetEffect(eff);
 		return NULL;
 	}
 };

@@ -62,12 +62,15 @@ class CGuiPicture : public IGuiCtrlBase
 
 protected:
 	pixel_t m_Color;
-	CImage m_Image;
-	CText m_Text;
+	CImage* m_Image;
+	CText* m_Text;
+	CString m_Str;
 
 public:
 	CGuiPicture()
 		: m_Color(0)
+		, m_Image(NULL)
+		, m_Text(NULL)
 	{
 		// 添加事件对象
 		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), GetGC()));
@@ -77,21 +80,44 @@ public:
 	}
 
 public:
-	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+	BOOL Execute(const CString& key, const CString& val)
 	{
-		style_t* sty = CGuiManagerT<style_t>::Get(xml.GetAttr(_T("style"), ite));
-		if (sty)
+		CArrayT<CString> sa;
+		if (key == _T("style"))
 		{
-			if(!sty->font.Empty())
-				SetState(_T("text"), sty->font[0]);
-			if(!sty->color.Empty())
-				SetState(_T("color"), (void*)sty->color[0]);
-			if(!sty->image.Empty())
-				SetState(_T("image"), sty->image[0]);
+			style_t* sty = CGuiManagerT<style_t>::Get(val);
+			if (sty)
+			{
+				if(!sty->font.Empty())
+					SetState(_T("font"), sty->font[0]);
+				if(!sty->color.Empty())
+					SetState(_T("color"), (void*)(sty->color[0]));
+				if(!sty->image.Empty())
+					SetState(_T("image"), sty->image[0]);
+			}
 		}
-		m_Text.SetString(xml.GetAttr(_T("text"), ite));
-		SetWindowRect(StringToRect(xml.GetAttr(_T("rect"), ite)));
-		return this;
+		else
+		if (key == _T("font"))
+		{
+			ExStringToArray(val, sa);
+			SetState(_T("font"), CGuiManagerT<CText>::Get(sa[0]));
+		}
+		else
+		if (key == _T("color"))
+		{
+			ExStringToArray(val, sa);
+			SetState(_T("color"), (void*)ExStringToColor(sa[0]));
+		}
+		else
+		if (key == _T("image"))
+		{
+			ExStringToArray(val, sa);
+			SetState(_T("image"), CGuiManagerT<CImage>::Get(sa[0]));
+		}
+		else
+		if (key == _T("text"))
+			SetState(_T("text"), (void*)&val);
+		return TRUE;
 	}
 
 	// 获得控件状态
@@ -101,10 +127,13 @@ public:
 			return (void*)m_Color;
 		else
 		if (sType == _T("image"))
-			return (void*)(&m_Image);
+			return (void*)m_Image;
+		else
+		if (sType == _T("font"))
+			return (void*)m_Text;
 		else
 		if (sType == _T("text"))
-			return (void*)(&m_Text);
+			return (void*)(&m_Str);
 		else
 			return EXP_BASE::GetState(sType);
 	}
@@ -112,19 +141,25 @@ public:
 	{
 		if (sType == _T("color"))
 		{
-			m_Color = (pixel_t)(LONG_PTR)pState;
+			m_Color = (pixel_t)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
 		{
-			m_Image = *(CImage*)pState;
+			m_Image = (CImage*)pState;
+			return EXP_BASE::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("font"))
+		{
+			m_Text = (CText*)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("text"))
 		{
-			m_Text = *(CText*)pState;
+			m_Str = *(CString*)pState;
 			return EXP_BASE::SetState(sType, pState);
 		}
 		return FALSE;

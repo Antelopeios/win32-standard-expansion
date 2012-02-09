@@ -84,10 +84,22 @@ public:
 public:
 	BOOL IsValid() { return EXP_MULT::IsValid(); }
 
+	virtual BOOL Execute(const CString& key, const CString& val)
+	{
+		return FALSE;
+	}
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
-		del(this);
-		return NULL;
+		CGuiXML::map_t::iterator_t it = ite->Val()->att.Head();
+		for(; it != ite->Val()->att.Tail(); ++it)
+			if(!Execute(it->Key(), it->Val())) break;
+		if (it == ite->Val()->att.Head())
+		{
+			del(this);
+			return NULL;
+		}
+		else
+			return this;
 	}
 
 	void InsEvent(IGuiEvent* pEvent)

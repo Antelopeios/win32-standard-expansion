@@ -887,6 +887,7 @@ public:
 						items_list.Add(btn);
 					}
 					GUI_CTL(list)->SetState(_T("items"), &items_list);
+					items_list.HeadItem()->SetFocus();
 				}
 				CRect rc_wnd;
 				IGuiBoard* wnd = ctrl->GetBoard();

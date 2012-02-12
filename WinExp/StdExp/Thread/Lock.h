@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-02-25
-// Version:	1.2.0011.0400
+// Date:	2012-02-12
+// Version:	1.2.0012.1500
 //
 // History:
 //	- 1.2.0011.0400(2011-02-25)	# 移除_LockPolicy宏,避免在使用ThreadModel::_LockPolicy时出现C3083错误
+//	- 1.2.0012.1500(2012-02-12)	^ 调整CLockerT的调用方式,让ExLock使用起来更加方便
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Lock_h__
@@ -98,11 +99,15 @@ private:
 	BOOL m_bRead;
 
 public:
-	CLockerT(mutex_t& lock, BOOL bRead = FALSE)
-		: m_Lock(lock), m_bRead(bRead)
-	{ m_Lock.Lock(m_bRead); }
+	CLockerT(mutex_t& lock)
+		: m_Lock(lock), m_bRead(FALSE)
+	{}
 	~CLockerT()
 	{ m_Lock.Unlock(m_bRead); }
+
+public:
+	void Lock(BOOL bRead = FALSE)
+	{ m_Lock.Lock(m_bRead = bRead); }
 };
 
 typedef CLockerT<> CLocker;
@@ -110,7 +115,8 @@ typedef CLockerT<> CLocker;
 //////////////////////////////////////////////////////////////////
 
 #define ExLock(mutex, is_read, mutex_t)	\
-	CLockerT<mutex_t> locker(mutex, is_read)
+	CLockerT<mutex_t> locker(mutex); \
+	locker.Lock(is_read)
 
 #define ExLockThis(policy_t)			\
 	static CLockT<policy_t>::lock_t lc;	\

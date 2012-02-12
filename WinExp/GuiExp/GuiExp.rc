@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中文(中华人民共和国) resources
+// 中文(简体，中国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -53,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,1201,2017
- PRODUCTVERSION 1,0,0,8
+ FILEVERSION 1,0,1202,917
+ PRODUCTVERSION 1,0,0,9
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -70,12 +68,12 @@ BEGIN
         BLOCK "080404b0"
         BEGIN
             VALUE "FileDescription", "GuiExp - 界面拓展库(GUI Expansion)"
-            VALUE "FileVersion", "1, 0, 1201, 2017"
+            VALUE "FileVersion", "1.0.1202.917"
             VALUE "InternalName", "GuiExp"
             VALUE "LegalCopyright", "Copyright (C) 2011 木头云"
             VALUE "OriginalFilename", "GuiExp.dll"
             VALUE "ProductName", "GuiExp - 界面拓展库(GUI Expansion)"
-            VALUE "ProductVersion", "1, 0, 0, 8"
+            VALUE "ProductVersion", "1.0.0.9"
         END
     END
     BLOCK "VarFileInfo"
@@ -84,7 +82,7 @@ BEGIN
     END
 END
 
-#endif    // 中文(中华人民共和国) resources
+#endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

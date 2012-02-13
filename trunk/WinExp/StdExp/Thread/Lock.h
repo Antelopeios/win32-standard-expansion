@@ -115,12 +115,12 @@ typedef CLockerT<> CLocker;
 //////////////////////////////////////////////////////////////////
 
 #define ExLock(mutex, is_read, mutex_t)	\
-	CLockerT<mutex_t> locker(mutex); \
+	EXP::CLockerT<mutex_t> locker(mutex); \
 	locker.Lock(is_read)
 
 #define ExLockThis(policy_t)			\
-	static CLockT<policy_t>::lock_t lc;	\
-	static CLockT<policy_t> mutex(lc);	\
+	static EXP::CLockT<policy_t>::lock_t lc;	\
+	static EXP::CLockT<policy_t> mutex(lc);	\
 	ExLock(mutex, FALSE, CLockT<policy_t>)
 
 //////////////////////////////////////////////////////////////////

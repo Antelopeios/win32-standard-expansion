@@ -53,6 +53,8 @@
 #include "Algorithm/Hash.h"
 #include "Algorithm/NonCopyable.h"
 #include "Algorithm/RTTI.h"
+#include "Algorithm/CRC.h"
+#include "Algorithm/Pack.h"
 
 //////////////////////////////////////////////////////////////////
 

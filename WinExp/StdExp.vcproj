@@ -196,6 +196,14 @@
 				Name="XZip"
 				>
 				<File
+					RelativePath=".\StdExp\Debugging\XZip\XUnzip.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StdExp\Debugging\XZip\XUnzip.h"
+					>
+				</File>
+				<File
 					RelativePath="StdExp\Debugging\XZip\XZip.cpp"
 					>
 				</File>
@@ -321,6 +329,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StdExp\Algorithm\CRC.h"
+				>
+			</File>
+			<File
 				RelativePath="StdExp\Algorithm\Finder.h"
 				>
 			</File>
@@ -330,6 +342,10 @@
 			</File>
 			<File
 				RelativePath="StdExp\Algorithm\NonCopyable.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StdExp\Algorithm\Pack.h"
 				>
 			</File>
 			<File

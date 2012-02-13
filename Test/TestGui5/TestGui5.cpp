@@ -21,7 +21,7 @@ protected:
 
 		CIOFile file(_T("TestGui5\\test.xml"));
 		if (file.Error() || file.Size() == 0) return 0;
-		CGuiSkin::Load(&file);
+		CGuiSkin::Parse(&file);
 
 		ExGet(IGuiBoard, _T("wnd"))->CenterWindow();
 

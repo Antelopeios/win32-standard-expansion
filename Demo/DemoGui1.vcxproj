@@ -71,7 +71,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)$(ProjectName)\ui" "$(TargetDir)ui\" /s  /y
+      <Command>copy "$(ProjectDir)$(ProjectName)\ui.ui" "$(TargetDir)ui.ui"
 xcopy "$(ProjectDir)$(ProjectName)\icon" "$(TargetDir)icon\" /s  /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -96,7 +96,7 @@ xcopy "$(ProjectDir)$(ProjectName)\icon" "$(TargetDir)icon\" /s  /y</Command>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)$(ProjectName)\ui" "$(TargetDir)ui\" /s  /y
+      <Command>copy "$(ProjectDir)$(ProjectName)\ui.ui" "$(TargetDir)ui.ui"
 xcopy "$(ProjectDir)$(ProjectName)\icon" "$(TargetDir)icon\" /s  /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

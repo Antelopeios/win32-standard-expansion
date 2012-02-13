@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-15
-// Version:	1.0.0001.1100
+// Date:	2012-02-13
+// Version:	1.0.0002.1628
+//
+// History:
+//	- 1.0.0002.1628(2012-02-13)	+ 添加zip解压缩相关算法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __XZipFile_h__
@@ -45,6 +48,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Debugging/XZip/XZip.h"
+#include "Debugging/XZip/XUnzip.h"
 #include "Memory/Memory.h"
 #include "Container/String.h"
 
@@ -54,46 +58,111 @@ EXP_BEG
 
 class CXZip
 {
-protected:
+public:
 	typedef HZIP zip_t;
+
+protected:
 	zip_t m_ZipFile;
 
 public:
-	CXZip(LPCTSTR sPath = NULL)
+	CXZip()
 		: m_ZipFile(NULL)
 	{
-		if (sPath) Open(sPath);
+	}
+	CXZip(LPCTSTR sPath)
+	{
+		this->CXZip::CXZip();
+		Open(sPath);
+	}
+	CXZip(BYTE* buff, DWORD size)
+	{
+		this->CXZip::CXZip();
+		Open(buff, size);
 	}
 	virtual ~CXZip()
 	{
-		if (m_ZipFile) Close();
+		Close();
 	}
 
 public:
+	EXP_INLINE BOOL IsClosed()
+	{
+		return (m_ZipFile == NULL);
+	}
 	BOOL Open(LPCTSTR sPath)
 	{
 		CString path(sPath);
 		if (path.Empty()) return FALSE;
-		m_ZipFile = CreateZip((LPTSTR)path, 0, ZIP_FILENAME);
-		return (m_ZipFile != NULL);
+
+		Close();
+
+		WIN32_FIND_DATA fd = {0};
+		HANDLE find = ::FindFirstFile(path, &fd);
+		if (find == INVALID_HANDLE_VALUE)
+		{	// 创建zip文件
+			m_ZipFile = CreateZip((LPTSTR)path, 0, ZIP_FILENAME);
+		}
+		else
+		{	// 打开zip文件
+			::FindClose(find);
+			m_ZipFile = OpenZip((LPTSTR)path, 0, ZIP_FILENAME);
+		}
+		return (!IsClosed());
+	}
+	BOOL Open(BYTE* buff, DWORD size)
+	{
+		Close();
+		m_ZipFile = OpenZip(buff, size, ZIP_MEMORY);
+		return (!IsClosed());
 	}
 	void Close()
 	{
-		if (m_ZipFile) CloseZip(m_ZipFile);
+		if (IsClosed()) return;
+		CloseZip(m_ZipFile);
 		m_ZipFile = NULL;
 	}
-	BOOL AddFile(LPCTSTR sPath)
+
+	BOOL ZipFile(LPCTSTR sPath)
 	{
+		if (IsClosed()) return FALSE;
 		CString path(sPath);
 		if (path.Empty()) return FALSE;
+
 		WIN32_FIND_DATA fd = {0};
 		HANDLE find = ::FindFirstFile(path, &fd);
 		if (find == INVALID_HANDLE_VALUE) return FALSE;
 		::FindClose(find);
-		// Trim path off file name
+
 		CString sFileName = path.Mid(path.RevFind(_T('\\'))->Index() + 1);
-		// Start a new file in Zip
 		return (ZR_OK == ZipAdd(m_ZipFile, sFileName, (LPTSTR)path, 0, ZIP_FILENAME));
+	}
+	BOOL UnzipFile(LPCTSTR sPath)
+	{
+		if (IsClosed()) return FALSE;
+		CString path(sPath);
+		if (path.Empty()) return FALSE;
+		if (path.LastItem() != _T('\\'))
+			path.PushLast(_T('\\'));
+
+	#ifdef _UNICODE
+		ZIPENTRYW ze;
+	#else
+		ZIPENTRY ze; 
+	#endif
+		ZRESULT zr = GetZipItem(m_ZipFile, -1, &ze);
+		if (zr != ZR_OK) return FALSE;
+
+		BOOL ret = FALSE;
+		int i = 0, count = ze.index;
+		for(; i < count; ++i)
+		{
+			ZRESULT zr = GetZipItem(m_ZipFile, i, &ze);
+			if (zr != ZR_OK) break;
+			zr = UnzipItem(m_ZipFile, ze.index, (void*)(LPCTSTR)(path + ze.name), 0, ZIP_FILENAME);
+			if (zr != ZR_OK) break;
+		}
+		if (i == count) ret = TRUE;
+		return ret;
 	}
 };
 

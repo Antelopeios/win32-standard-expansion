@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-31
-// Version:	1.0.0001.0945
+// Date:	2012-02-13
+// Version:	1.0.0002.1734
 //
 // History:
 //	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
 //	- 1.0.0001.0945(2012-01-31)	= GuiConfig改名为CGuiSkin
+//	- 1.0.0002.1734(2012-02-13)	+ 添加皮肤包加载功能
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiSkin_h__
@@ -63,8 +64,15 @@ protected:
 	static void Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent = NULL);
 
 public:
-	static BOOL Load(IFileObject* pFile);
-	static BOOL Load(const CString& script);
+	// 以下为皮肤脚本加载
+	static BOOL Parse(IFileObject* pFile);
+	static BOOL Parse(const CString& script);
+	// 以下为皮肤包的加载
+	static BOOL Load(CXZip& zip);
+	static BOOL Load(const CString& path);
+	static BOOL Load(BYTE* buff, DWORD size);
+	// 删除目录
+	static BOOL DelPath(LPCTSTR sPath);
 };
 
 //////////////////////////////////////////////////////////////////

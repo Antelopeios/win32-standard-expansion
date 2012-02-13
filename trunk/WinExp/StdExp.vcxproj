@@ -79,6 +79,8 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="StdExp\Algorithm\CRC.h" />
+    <ClInclude Include="StdExp\Algorithm\Pack.h" />
     <ClInclude Include="StdExp\Common\Common.h" />
     <ClInclude Include="StdExp\Common\LibStd.h" />
     <ClInclude Include="StdExp\Common\TargetVer.h" />
@@ -88,6 +90,7 @@
     <ClInclude Include="StdExp\Debugging\LogSystem.h" />
     <ClInclude Include="StdExp\Debugging\Trace.h" />
     <ClInclude Include="StdExp\Debugging\XZipFile.h" />
+    <ClInclude Include="StdExp\Debugging\XZip\XUnzip.h" />
     <ClInclude Include="StdExp\Debugging\XZip\XZip.h" />
     <ClInclude Include="StdExp\Thread\App.h" />
     <ClInclude Include="StdExp\Thread\Event.h" />
@@ -133,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdExp\Debugging\CrashHandler.cpp" />
+    <ClCompile Include="StdExp\Debugging\XZip\XUnzip.cpp" />
     <ClCompile Include="StdExp\Debugging\XZip\XZip.cpp" />
     <ClCompile Include="StdExp\Thread\App.cpp" />
     <ClCompile Include="StdExp\Algorithm\RTTI.cpp" />

@@ -8,23 +8,9 @@ protected:
 	CGC gc;
 
 protected:
-	void LoadRes()
+	void LoadGui()
 	{
-		CIOFile file(CString(GetPath()) + _T("ui\\ui_res.xml"));
-		if (file.Error() || file.Size() == 0) return;
-		CGuiSkin::Load(&file);
-	}
-	void LoadSty()
-	{
-		CIOFile file(CString(GetPath()) + _T("ui\\ui_sty.xml"));
-		if (file.Error() || file.Size() == 0) return;
-		CGuiSkin::Load(&file);
-	}
-	void LoadDiv()
-	{
-		CIOFile file(CString(GetPath()) + _T("ui\\ui_div.xml"));
-		if (file.Error() || file.Size() == 0) return;
-		CGuiSkin::Load(&file);
+		CGuiSkin::Load(CString(GetPath()) + _T("ui.ui"));
 	}
 	void LinkGui()
 	{
@@ -36,9 +22,7 @@ protected:
 public:
 	CGuiLoader()
 	{
-		LoadRes();
-		LoadSty();
-		LoadDiv();
+		LoadGui();
 		LinkGui();
 	}
 } g_GuiLoader;

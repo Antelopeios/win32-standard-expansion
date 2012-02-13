@@ -33,14 +33,16 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-31
-// Version:	1.0.0001.0945
+// Date:	2012-02-13
+// Version:	1.0.0002.1734
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
 #include "GuiSkin.h"
 #include "GuiManager/Executors/Executor.h"
 #include "GuiBoard/GuiBoard.h"
+
+#include <ShellApi.h>
 
 EXP_BEG
 
@@ -66,7 +68,7 @@ void CGuiSkin::Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent/* = NUL
 	for(; i != cld_lst.Tail(); ++i) Exec(xml, *i, ret);
 }
 
-BOOL CGuiSkin::Load(IFileObject* pFile)
+BOOL CGuiSkin::Parse(IFileObject* pFile)
 {
 	if (!pFile) return FALSE;
 	CGuiXML xml;
@@ -103,11 +105,69 @@ BOOL CGuiSkin::Load(IFileObject* pFile)
 	return TRUE;
 }
 
-BOOL CGuiSkin::Load(const CString& script)
+BOOL CGuiSkin::Parse(const CString& script)
 {
 	CStringT<char> s(script);
 	CMemFile file((BYTE*)s.GetCStr(), s.GetLength());
-	return Load(&file);
+	return Parse(&file);
+}
+
+BOOL CGuiSkin::DelPath(LPCTSTR sPath)
+{
+	// 创建文件对象
+	SHFILEOPSTRUCT lpsh = {0};
+	// 调整文件对象
+	lpsh.fFlags	= FOF_SILENT | FOF_NOCONFIRMATION;
+	lpsh.wFunc	= FO_DELETE;
+	lpsh.pFrom	= sPath;
+	lpsh.fAnyOperationsAborted = TRUE;
+	// 删除文件
+	return (SHFileOperation(&lpsh) == 0);
+}
+
+BOOL CGuiSkin::Load(CXZip& zip)
+{
+	if (zip.IsClosed()) return FALSE;
+	CString temp;
+	if(!::GetTempPath(MAX_PATH, temp.GetCStr(MAX_PATH)))
+		return FALSE;
+	// 随机目录名
+	ExRandomize();
+	CString path;
+	path.GetCStr(MAX_PATH);
+	path.Format(_T("%sGuiExp_Skin_%d"), (LPCTSTR)temp, 1000 + ExRandom(9000));
+	// 删除已存在目录
+	path[path.GetCount()] = _T('\0');
+	DelPath(path);
+	// 创建解压目录
+	::CreateDirectory(path, NULL);
+	// 解压文件
+	if(!zip.UnzipFile(path))
+		return FALSE;
+	// 加载皮肤
+	CIOFile ui_xml;
+	ui_xml.Open(path + _T("\\ui_res.xml"));
+	BOOL r1 = Parse(&ui_xml);
+	ui_xml.Open(path + _T("\\ui_sty.xml"));
+	BOOL r2 = Parse(&ui_xml);
+	ui_xml.Open(path + _T("\\ui_div.xml"));
+	BOOL r3 = Parse(&ui_xml);
+	ui_xml.Close();
+	// 删除解压目录
+	DelPath(path);
+	return (r1 || r2 || r3);
+}
+
+BOOL CGuiSkin::Load(const CString& path)
+{
+	CXZip zip(path);
+	return Load(zip);
+}
+
+BOOL CGuiSkin::Load(BYTE* buff, DWORD size)
+{
+	CXZip zip(buff, size);
+	return Load(zip);
 }
 
 //////////////////////////////////////////////////////////////////

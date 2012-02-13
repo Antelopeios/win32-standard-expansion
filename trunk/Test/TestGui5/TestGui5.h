@@ -92,7 +92,7 @@ public:
 		{
 		case BM_CLICK:
 			{
-				CGuiSkin::Load(_T("<image name=\"bk\" path=\"TestImg1/ground.png\" />"));
+				CGuiSkin::Parse(_T("<image name=\"bk\" path=\"TestImg1/ground.png\" />"));
 				ExGet(IGuiBoard, _T("wnd"))->SetLayered(TRUE, FALSE);
 				ExGet(IGuiCtrl, _T("btn"))->DelEvent();
 				ExGet(IGuiCtrl, _T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent2));
@@ -120,7 +120,7 @@ public:
 		{
 		case BM_CLICK:
 			{
-				CGuiSkin::Load(_T("<image name=\"bk\" path=\"TestImg1/ground.jpg\" />"));
+				CGuiSkin::Parse(_T("<image name=\"bk\" path=\"TestImg1/ground.jpg\" />"));
 				ExGet(IGuiBoard, _T("wnd"))->SetLayered(FALSE, FALSE);
 				ExGet(IGuiCtrl, _T("btn"))->DelEvent();
 				ExGet(IGuiCtrl, _T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent));

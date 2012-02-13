@@ -247,8 +247,8 @@ CString ICrashHandler::GetCrashZip(LPCTSTR sPath/* = NULL*/)
 	}
 	// 生成压缩包并压缩文件
 	CXZip zip(path);
-	zip.AddFile(GetCrashDmp());
-	zip.AddFile(GetCrashLog());
+	zip.ZipFile(GetCrashDmp());
+	zip.ZipFile(GetCrashLog());
 	return path;
 }
 

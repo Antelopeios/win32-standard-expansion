@@ -440,6 +440,12 @@ public:
 				if (ctl)
 				{
 					ctl->SetWindowRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
+					CString t = xml.GetAttr(_T("visible"), ite); t.Lower();
+					if (t == _T("false"))
+						ctl->SetVisible(FALSE);
+					else
+					if (t == _T("true"))
+						ctl->SetVisible(TRUE);
 					IGuiBase* pare = ExDynCast<IGuiBase>(parent);
 					if (pare)
 						pare->AddComp(ctl);

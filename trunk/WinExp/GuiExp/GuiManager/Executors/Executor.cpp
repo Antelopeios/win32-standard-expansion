@@ -35,9 +35,6 @@
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-01-30
 // Version:	1.0.0000.1058
-//
-// History:
-//	- 1.0.0000.1058(2012-01-30)	@ 开始构建Executor
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -66,20 +63,6 @@ EXP_API pixel_t ExStringToColor(CString sColor)
 		LPCTSTR c = ((LPCTSTR)sColor) + 1;
 		TCHAR str_rgb[4][3]	= {0};
 		UINT rgb[4]	= {0};
-		if (sColor.GetLength() >= 7)
-		{
-			memcpy(str_rgb[0], c + 0, sizeof(str_rgb[0]));
-			str_rgb[0][2] = _T('\0');
-			memcpy(str_rgb[1], c + 2, sizeof(str_rgb[1]));
-			str_rgb[1][2] = _T('\0');
-			memcpy(str_rgb[2], c + 4, sizeof(str_rgb[2]));
-			str_rgb[2][2] = _T('\0');
-			rgb[0] = _tcstol(str_rgb[0], NULL, 16);
-			rgb[1] = _tcstol(str_rgb[1], NULL, 16);
-			rgb[2] = _tcstol(str_rgb[2], NULL, 16);
-			rgb[3] = EXP_CM;
-		}
-		else
 		if (sColor.GetLength() >= 9)
 		{
 			memcpy(str_rgb[0], c + 0, sizeof(str_rgb[0]));
@@ -94,8 +77,22 @@ EXP_API pixel_t ExStringToColor(CString sColor)
 			rgb[1] = _tcstol(str_rgb[1], NULL, 16);
 			rgb[2] = _tcstol(str_rgb[2], NULL, 16);
 			rgb[3] = _tcstol(str_rgb[3], NULL, 16);
+			clr = ExRGBA(rgb[0], rgb[1], rgb[2], rgb[3]);
 		}
-		clr = ExRGBA(rgb[0], rgb[1], rgb[2], rgb[3]);
+		else
+		if (sColor.GetLength() >= 7)
+		{
+			memcpy(str_rgb[0], c + 0, sizeof(str_rgb[0]));
+			str_rgb[0][2] = _T('\0');
+			memcpy(str_rgb[1], c + 2, sizeof(str_rgb[1]));
+			str_rgb[1][2] = _T('\0');
+			memcpy(str_rgb[2], c + 4, sizeof(str_rgb[2]));
+			str_rgb[2][2] = _T('\0');
+			rgb[0] = _tcstol(str_rgb[0], NULL, 16);
+			rgb[1] = _tcstol(str_rgb[1], NULL, 16);
+			rgb[2] = _tcstol(str_rgb[2], NULL, 16);
+			clr = ExRGB(rgb[0], rgb[1], rgb[2]);
+		}
 	}
 	return clr;
 }

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-08
-// Version:	1.0.0000.0030
+// Date:	2012-02-15
+// Version:	1.0.0005.1430
 //////////////////////////////////////////////////////////////////
 
 #include "Common/Common.h"
@@ -49,6 +49,48 @@ BOOL IApp::m_IsSingle = TRUE;
 TCHAR IApp::m_Full[MAX_PATH] = {0};
 TCHAR IApp::m_Path[MAX_PATH] = {0};
 TCHAR IApp::m_Name[MAX_PATH] = {0};
+
+IApp g_App;
+
+IApp::IApp(BOOL bUIApp/* = TRUE*/, LPCTSTR sSingle/* = NULL*/, UINT nSingleID/* = 0*/)
+{
+	if (m_pThis)
+	{
+		if (this != &g_App)
+			m_pThis = this;
+		return;
+	}
+
+	::GetModuleFileName(NULL, m_Full, _countof(m_Full));
+	_tcscpy_s(m_Path, m_Full);
+	TCHAR* p_name = _tcsrchr(m_Path, _T('\\')) + 1;
+	_tcscpy_s(m_Name, p_name);
+	(*p_name) = _T('\0');
+
+	m_bUIThread = bUIApp;
+	m_hSync = ::GetModuleHandle(NULL);
+	m_nIDThread = ::GetCurrentProcessId();
+	m_pThis = this;
+
+	// 在程序初始化的时候判断自身是否已运行
+	TCHAR str_name[MAX_PATH];
+	if (sSingle && _tcslen(sSingle) > 0)
+		_tcscpy_s(str_name, sSingle);
+	else
+	if (nSingleID > 0)
+		::LoadString((HINSTANCE)m_hSync, nSingleID, str_name, _countof(str_name));
+	else
+	{
+		_tcscpy_s(str_name, m_Full);
+		while(p_name = _tcsrchr(str_name, _T('\\'))) (*p_name) = _T('_');
+	}
+	HANDLE mutex = ::CreateMutex(NULL, FALSE, str_name);
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		::CloseHandle(mutex);
+		m_IsSingle = FALSE; // 程序已经处于运行中
+	}
+}
 
 //////////////////////////////////////////////////////////////////
 

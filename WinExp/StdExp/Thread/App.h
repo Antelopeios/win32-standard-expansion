@@ -279,7 +279,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 #else /*EXP_USING_APP*/
 
-IApp g_App;
+EXP::IApp g_App;
 
 #endif/*EXP_USING_APP*/
 

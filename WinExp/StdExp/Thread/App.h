@@ -33,14 +33,16 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-30
-// Version:	1.0.0004.1008
+// Date:	2012-02-15
+// Version:	1.0.0005.1410
 //
 // History:
 //	- 1.0.0001.1030(2012-01-09)	+ IApp构造添加nSingleID参数,支持直接通过资源ID确定唯一性字符串
 //	- 1.0.0002.1400(2012-01-28)	= IThreadT放入App模块内实现
 //	- 1.0.0003.2209(2012-01-29)	+ 添加IApp::OnTerm(),与IApp::OnExit()语义相同
 //	- 1.0.0004.1008(2012-01-30)	+ IThreadT支持与IApp的OnInit(),OnTerm()语义相同的外部接口
+//	- 1.0.0005.1410(2012-02-15)	+ 当未定义EXP_USING_APP时,将自动定义g_App对象
+//								+ 添加ExApp(),可直接通过此接口获取App对象指针
 //////////////////////////////////////////////////////////////////
 
 #ifndef __App_h__
@@ -263,7 +265,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	return EXP::IApp::Run();
 }
 
-#else
+#else /*_CONSOLE*/
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,
@@ -275,7 +277,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 #endif/*_CONSOLE*/
 
+#else /*EXP_USING_APP*/
+
+IApp g_App;
+
 #endif/*EXP_USING_APP*/
+
+#define ExApp() EXP::IApp::GetApp()
 
 //////////////////////////////////////////////////////////////////
 

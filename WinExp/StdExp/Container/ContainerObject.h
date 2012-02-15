@@ -70,7 +70,7 @@ public:
 	typedef CIteratorT<node_t> iterator_t;
 	typedef CFinderT<container_t> finder_t;
 
-private:
+protected:
 	EXP_INLINE container_t* This()
 	{ return (container_t*)this; }
 	EXP_INLINE const container_t* This() const

@@ -62,6 +62,12 @@ interface ISingletonT
 public:
 	EXP_INLINE static TypeT& Instance()
 	{
+		static BOOL is_init = FALSE;
+		if(!is_init)
+		{
+			is_init = TRUE;
+			ISingletonT<CPtrManager, ModelT>::Instance();
+		}
 		static TypeT* instance = NULL;
 		if (instance == NULL)
 		{

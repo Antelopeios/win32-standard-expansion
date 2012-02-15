@@ -34,14 +34,14 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-02-15
-// Version:	1.0.0005.1410
+// Version:	1.0.0005.1430
 //
 // History:
 //	- 1.0.0001.1030(2012-01-09)	+ IApp构造添加nSingleID参数,支持直接通过资源ID确定唯一性字符串
 //	- 1.0.0002.1400(2012-01-28)	= IThreadT放入App模块内实现
 //	- 1.0.0003.2209(2012-01-29)	+ 添加IApp::OnTerm(),与IApp::OnExit()语义相同
 //	- 1.0.0004.1008(2012-01-30)	+ IThreadT支持与IApp的OnInit(),OnTerm()语义相同的外部接口
-//	- 1.0.0005.1410(2012-02-15)	+ 当未定义EXP_USING_APP时,将自动定义g_App对象
+//	- 1.0.0005.1430(2012-02-15)	+ 始终定义g_App对象
 //								+ 添加ExApp(),可直接通过此接口获取App对象指针
 //////////////////////////////////////////////////////////////////
 
@@ -175,7 +175,7 @@ private:
 	DWORD Suspend() { return 0; }
 	DWORD Resume() { return 0; }
 
-private:
+protected:
 	static IApp* m_pThis;
 public:
 	static int Run()
@@ -206,40 +206,7 @@ public:
 	EXP_INLINE static LPCTSTR GetCmdLine() { return ::GetCommandLine(); }
 
 public:
-	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/, UINT nSingleID = 0)
-	{
-		if (m_pThis) return;
-
-		::GetModuleFileName(NULL, m_Full, _countof(m_Full));
-		_tcscpy_s(m_Path, m_Full);
-		TCHAR* p_name = _tcsrchr(m_Path, _T('\\')) + 1;
-		_tcscpy_s(m_Name, p_name);
-		(*p_name) = _T('\0');
-
-		m_bUIThread = bUIApp;
-		m_hSync = ::GetModuleHandle(NULL);
-		m_nIDThread = ::GetCurrentProcessId();
-		m_pThis = this;
-
-		// 在程序初始化的时候判断自身是否已运行
-		TCHAR str_name[MAX_PATH];
-		if (sSingle && _tcslen(sSingle) > 0)
-			_tcscpy_s(str_name, sSingle);
-		else
-		if (nSingleID > 0)
-			::LoadString((HINSTANCE)m_hSync, nSingleID, str_name, _countof(str_name));
-		else
-		{
-			_tcscpy_s(str_name, m_Full);
-			while(p_name = _tcsrchr(str_name, _T('\\'))) (*p_name) = _T('_');
-		}
-		HANDLE mutex = ::CreateMutex(NULL, FALSE, str_name);
-		if (GetLastError() == ERROR_ALREADY_EXISTS)
-		{
-			::CloseHandle(mutex);
-			m_IsSingle = FALSE; // 程序已经处于运行中
-		}
-	}
+	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/, UINT nSingleID = 0);
 	~IApp()
 	{
 		m_hSync = NULL;
@@ -276,10 +243,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 }
 
 #endif/*_CONSOLE*/
-
-#else /*EXP_USING_APP*/
-
-EXP::IApp g_App;
 
 #endif/*EXP_USING_APP*/
 

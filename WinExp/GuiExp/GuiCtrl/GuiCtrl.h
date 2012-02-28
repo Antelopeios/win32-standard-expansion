@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-02
-// Version:	1.0.0018.1802
+// Date:	2012-02-22
+// Version:	1.0.0019.1200
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -60,6 +60,7 @@
 //	- 1.0.0016.1318(2011-08-31)	^ 当IGuiCtrl::SetScroll()传入的参数与当前m_Scroll相等,将不进行m_Scroll的刷新操作
 //	- 1.0.0017.2154(2011-09-22)	^ 当IGuiCtrl::SetScrollSize()传入的参数与当前m_szScroll相等,将不进行后续的消息发送
 //	- 1.0.0018.1802(2012-02-02)	+ 添加IGuiCtrl对效果对象的托管接口
+//	- 1.0.0019.1200(2012-02-22)	= 将IGuiCtrl改名为IGuiCtl
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -77,22 +78,22 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-EXP_INTERFACE IGuiCtrl : public IGuiBase
+EXP_INTERFACE IGuiCtl : public IGuiBase
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiCtl, IGuiBase)
 
 public:
-	typedef CArrayT<IGuiCtrl*> items_t;
+	typedef CArrayT<IGuiCtl*> items_t;
 
 protected:
-	static IGuiCtrl* m_Focus;
+	static IGuiCtl* m_Focus;
 	IGuiEffect* m_Effect;
 	BOOL m_bTruEff;
 	CSize m_szScroll;
-	IGuiCtrl* m_Scroll;
+	IGuiCtl* m_Scroll;
 
 public:
-	IGuiCtrl()
+	IGuiCtl()
 		: m_Effect(NULL)
 		, m_bTruEff(TRUE)
 		, m_Scroll(NULL)
@@ -104,11 +105,11 @@ protected:
 		EXP_BASE::Init(pComp);
 		if (IsVisible())
 		{
-			Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, 1);
+			SendMessage(WM_SHOWWINDOW, 1);
 			SetFocus();
 		}
 		else
-			Send(ExDynCast<IGuiObject>(this), WM_SHOWWINDOW, 0);
+			SendMessage(WM_SHOWWINDOW, 0);
 	}
 	void Fina()
 	{
@@ -119,14 +120,14 @@ protected:
 	}
 
 public:
-	void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		if (GetParent())
 			IGuiSender::Send(pGui, nMessage, wParam, lParam);
 	}
 	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		Send(ExDynCast<IGuiObject>(this), nMessage, wParam, lParam);
+		Send(this, nMessage, wParam, lParam);
 	}
 
 	// 获得控件状态
@@ -140,11 +141,11 @@ public:
 	{
 		m_bTruEff = bTru;
 	}
-	void SetEffect(IGuiEffect* pEff)
+	void SetEffect(void* p)
 	{
 		if (m_bTruEff && m_Effect)
 			del(m_Effect);
-		m_Effect = pEff;
+		m_Effect = ExDynCast<IGuiEffect>(p);
 		Refresh(FALSE);
 	}
 	IGuiEffect* GetEffect()
@@ -153,21 +154,21 @@ public:
 	}
 
 	// 获得绘图板
-	virtual IGuiBoard* GetBoard()
+	virtual IGuiWnd* GetWnd()
 	{
 		if (m_Pare)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
-			if (ctrl) return ctrl->GetBoard();
-			IGuiBoard* board = ExDynCast<IGuiBoard>(m_Pare);
-			if (board) return board;
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(m_Pare);
+			if (ctl) return ctl->GetWnd();
+			IGuiWnd* wnd = ExDynCast<IGuiWnd>(m_Pare);
+			if (wnd) return wnd;
 		}
 		return NULL;
 	}
 	virtual wnd_t GethWnd()
 	{
-		IGuiBoard* board = GetBoard();
-		return board ? board->GethWnd() : NULL;
+		IGuiWnd* wnd = GetWnd();
+		return wnd ? wnd->GethWnd() : NULL;
 	}
 
 	// 区域控制
@@ -208,20 +209,20 @@ public:
 			m_szScroll = sz;
 			CRect rc;
 			GetWindowRect(rc);
-			Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
+			SendMessage(WM_SIZE, SIZE_RESTORED, 
 				(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
 			Refresh(FALSE);
 		}
 		return TRUE;
 	}
-	IGuiCtrl* GetScroll() const
+	IGuiCtl* GetScroll() const
 	{
 		return m_Scroll;
 	}
-	void SetScroll(IGuiCtrl* pScroll)
+	void SetScroll(void* p)
 	{
-		IGuiCtrl* old_scr = m_Scroll;
-		m_Scroll = pScroll;
+		IGuiCtl* old_scr = m_Scroll;
+		m_Scroll = ExDynCast<IGuiCtl>(p);
 		if (m_Scroll && old_scr != m_Scroll)
 		{
 			m_Scroll->SetState(_T("main"), this);
@@ -241,57 +242,57 @@ public:
 	virtual BOOL IsVisible() const = 0;
 
 	// 判断有效性
-	static BOOL IsEffect(IGuiCtrl* pCtrl)
+	static BOOL IsEffect(IGuiCtl* pCtrl)
 	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
 
-	static IGuiCtrl* SetFocus(IGuiCtrl* pFoc)
+	static IGuiCtl* SetFocus(IGuiCtl* pFoc)
 	{
 		if (pFoc && !IsEffect(pFoc)) return NULL;
 		// 设置控件焦点
-		IGuiCtrl* old_fc = m_Focus;
+		IGuiCtl* old_fc = m_Focus;
 		m_Focus = pFoc;
 		if (old_fc == m_Focus) return NULL;
 		// 设置窗口焦点
 		if (m_Focus)
 		{
-			IGuiBoard* board = m_Focus->GetBoard();
-			if (board) board->SetFocus();
+			IGuiWnd* wnd = m_Focus->GetWnd();
+			if (wnd) wnd->SetFocus();
 		}
 		// 发送焦点改变消息
 		if (old_fc)
 		{
-			old_fc->Send(ExDynCast<IGuiObject>(old_fc), WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
+			old_fc->SendMessage(WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
 			old_fc->UpdateState();
 		}
 		if (m_Focus)
 		{
-			m_Focus->Send(ExDynCast<IGuiObject>(m_Focus), WM_SETFOCUS, 0, (LPARAM)old_fc);
+			m_Focus->SendMessage(WM_SETFOCUS, 0, (LPARAM)old_fc);
 			m_Focus->UpdateState();
 		}
 		return old_fc;
 	}
-	virtual IGuiCtrl* SetFocus()
+	virtual IGuiCtl* SetFocus()
 	{
 		return SetFocus(this);
 	}
-	static IGuiCtrl* GetFocus()
+	static IGuiCtl* GetFocus()
 	{
 		return m_Focus;
 	}
 	virtual BOOL IsFocus()
 	{
-		IGuiBoard* board = GetBoard();
-		if (board && !board->IsFocus())
+		IGuiWnd* wnd = GetWnd();
+		if (wnd && !wnd->IsFocus())
 			return FALSE;
 		if (!m_Focus) return FALSE;
-		IGuiCtrl* foc = m_Focus;
+		IGuiCtl* foc = m_Focus;
 		if (foc == this)
 			return IsEffect(this);
 		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-			if (!ctrl) continue;
-			if (ctrl->IsFocus()) return TRUE;
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+			if (!ctl) continue;
+			if (ctl->IsFocus()) return TRUE;
 		}
 		return FALSE;
 	}
@@ -300,9 +301,9 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-EXP_INTERFACE IGuiCtrlBase : public IGuiCtrl
+EXP_INTERFACE IGuiCtrlBase : public IGuiCtl
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtl)
 
 protected:
 	BOOL m_bEnable;		// 是否可用

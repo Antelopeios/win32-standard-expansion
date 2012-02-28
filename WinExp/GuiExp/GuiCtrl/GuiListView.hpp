@@ -68,7 +68,7 @@ public:
 	CGuiLVItem()
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVItemEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(ExGui(_T("CGuiLVItemEvent"), GetGC())); /*先让基类绘图*/
 	}
 };
 
@@ -93,7 +93,7 @@ public:
 		, m_AlignTop(TRUE)
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
 		AddComp(&m_FocPic);
@@ -183,7 +183,7 @@ public:
 			if (new_sta == NULL) return FALSE;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
-				IGuiCtrl* item = *ite;
+				IGuiCtl* item = *ite;
 				if (!item) continue;
 				items_t::iterator_t it = new_sta->Find(item);
 				if (it == new_sta->Tail()) DelComp(item);
@@ -191,11 +191,11 @@ public:
 			m_ItemList = *new_sta;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
-				IGuiCtrl* item = *ite;
+				IGuiCtl* item = *ite;
 				if (!item) continue;
 				AddComp(item);
 			}
-			Send(ExDynCast<IGuiObject>(this), WM_SIZE);
+			SendMessage(WM_SIZE);
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
@@ -233,7 +233,7 @@ public:
 			m_AlignTop = (BOOL)(LONG_PTR)pState;
 			if (old_sta != m_AlignTop)
 			{
-				Send(ExDynCast<IGuiObject>(this), WM_SIZE);
+				SendMessage(WM_SIZE);
 				return IGuiCtrlBase::SetState(sType, pState);
 			}
 			else

@@ -121,7 +121,7 @@ public:
 	EXP_INLINE CPointT operator-()
 	{ return CPointT(-x, -y); }
 
-	EXP_INLINE operator POINT()
+	EXP_INLINE operator POINT() const
 	{
 		POINT pt = {x, y};
 		return pt;

@@ -209,6 +209,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiExp\GuiBoard\GuiMenu.hpp"
+				>
+			</File>
+			<File
 				RelativePath="GuiExp\GuiBoard\GuiThunk.hpp"
 				>
 			</File>
@@ -270,6 +274,10 @@
 			</File>
 			<File
 				RelativePath="GuiExp\GuiEvent\GuiLVEvent.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiEvent\GuiMenuEvent.hpp"
 				>
 			</File>
 			<File

@@ -51,13 +51,13 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtrl, IGuiBase)
-IGuiCtrl* IGuiCtrl::m_Focus = NULL;
+EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtl, IGuiBase)
+IGuiCtl* IGuiCtl::m_Focus = NULL;
 
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtrl)
+EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtl)
 
 IGuiCtrlBase::IGuiCtrlBase()
 	: m_bEnable(TRUE)
@@ -102,17 +102,17 @@ BOOL IGuiCtrlBase::B2C(CRect& rc)
 {
 	if (!m_Pare) return FALSE;
 	if (!P2C(rc)) return FALSE;
-	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
-	if (ctrl) return ctrl->B2C(rc);
-	return ExDynCast<IGuiBoard>(m_Pare) ? TRUE : FALSE;
+	IGuiCtl* ctl = ExDynCast<IGuiCtl>(m_Pare);
+	if (ctl) return ctl->B2C(rc);
+	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
 BOOL IGuiCtrlBase::C2B(CRect& rc)
 {
 	if (!m_Pare) return FALSE;
 	if (!C2P(rc)) return FALSE;
-	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
-	if (ctrl) return ctrl->C2B(rc);
-	return ExDynCast<IGuiBoard>(m_Pare) ? TRUE : FALSE;
+	IGuiCtl* ctl = ExDynCast<IGuiCtl>(m_Pare);
+	if (ctl) return ctl->C2B(rc);
+	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
 BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 {
@@ -120,7 +120,7 @@ BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 	m_Rect = rc;
 	if (GetParent())
 	{
-		Send(ExDynCast<IGuiObject>(this), WM_SIZE, SIZE_RESTORED, 
+		SendMessage(WM_SIZE, SIZE_RESTORED, 
 			(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
 		Refresh(FALSE);
 	}
@@ -141,9 +141,9 @@ BOOL IGuiCtrlBase::GetRealRect(CRect& rc)
 {
 	if (!m_Pare) return FALSE;
 	if (!GetWindowRect(rc)) return FALSE;
-	IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(m_Pare);
-	if (ctrl) return ctrl->C2B(rc);
-	return ExDynCast<IGuiBoard>(m_Pare) ? TRUE : FALSE;
+	IGuiCtl* ctl = ExDynCast<IGuiCtl>(m_Pare);
+	if (ctl) return ctl->C2B(rc);
+	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
 BOOL IGuiCtrlBase::GetClientRect(CRect& rc)
 {
@@ -155,16 +155,16 @@ BOOL IGuiCtrlBase::GetClientRect(CRect& rc)
 // 刷新绘图
 void IGuiCtrlBase::Refresh(BOOL bSelf/* = TRUE*/)
 {
-	IGuiBoard* board = GetBoard();
-	if (!board) return;
+	IGuiWnd* wnd = GetWnd();
+	if (!wnd) return;
 	if (bSelf)
 	{
 		CRect rc;
 		GetRealRect(rc);
-		board->InvalidateRect(rc);
+		wnd->InvalidateRect(rc);
 	}
 	else
-		board->Invalidate();
+		wnd->Invalidate();
 }
 
 // 设置可用性

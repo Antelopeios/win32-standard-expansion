@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="TestGui5 - Skin"
-	ProjectGUID="{E487B861-2C79-4696-A6DE-E84A3CD5D5BB}"
-	RootNamespace="TestGui5"
+	Name="TestGui6 - Menu"
+	ProjectGUID="{A264B972-2016-4151-B1BE-2CC4CB6FF06A}"
+	RootNamespace="TestGui6"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -117,7 +117,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)WinExp\GuiExp&quot;;&quot;$(SolutionDir)WinExp\ImgExp&quot;;&quot;$(SolutionDir)WinExp\StdExp&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
@@ -175,7 +175,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="TestGui5\stdafx.cpp"
+				RelativePath=".\TestGui6\stdafx.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -195,7 +195,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="TestGui5\TestGui5.cpp"
+				RelativePath=".\TestGui6\TestGui6.cpp"
 				>
 			</File>
 		</Filter>
@@ -205,7 +205,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="TestGui5\stdafx.h"
+				RelativePath=".\TestGui6\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestGui6\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestGui6\TestGui6.h"
 				>
 			</File>
 		</Filter>
@@ -214,6 +222,18 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\TestGui6\small.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\TestGui6\TestGui6.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\TestGui6\TestGui6.rc"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -97,7 +97,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 EXP_INTERFACE IGuiComp;
-EXP_INTERFACE IGuiCtrl;
+EXP_INTERFACE IGuiCtl;
 
 // GUI 事件接口
 EXP_INTERFACE IGuiEvent : public IGuiObject
@@ -121,7 +121,7 @@ protected:
 
 protected:
 	// 鼠标离开检测的全局静态控件指针
-	static IGuiCtrl* s_MLMove;
+	static IGuiCtl* s_MLMove;
 
 public:
 	IGuiEvent()
@@ -190,41 +190,44 @@ public:
 	evt_list_t::iterator_t FindEvent(IGuiEvent* pEvent) { return GetEvent().Find(pEvent); }
 
 	// 组合接口
-	virtual void AddEvent(IGuiEvent* pEvent)
+	virtual void AddEvent(void* p)
 	{
-		if (!pEvent) return ;
+		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
+		if (!evt) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(evt);
 		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
-		GetEvent().Add(pEvent);
+		GetEvent().Add(evt);
 	}
-	virtual void InsEvent(IGuiEvent* pEvent)
+	virtual void InsEvent(void* p)
 	{
-		if (!pEvent) return ;
+		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
+		if (!evt) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(evt);
 		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
-		GetEvent().Add(pEvent, GetEvent().Head());
+		GetEvent().Add(evt, GetEvent().Head());
 	}
-	virtual void DelEvent(IGuiEvent* pEvent = NULL)
+	virtual void DelEvent(void* p = NULL)
 	{
+		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
 		evt_list_t::iterator_t ite;
-		if (pEvent)
+		if (evt)
 		{
 			// 定位对象
-			ite = FindEvent(pEvent);
+			ite = FindEvent(evt);
 			if (ite == GetEvent().Tail()) return;
 		}
 		else
 		{
 			ite = GetEvent().Last();
-			pEvent = GetEvent().LastItem();
+			evt = GetEvent().LastItem();
 		}
 		// 删除对象
 		GetEvent().Del(ite);
-		if (m_bTru && pEvent->IsTrust()) pEvent->Free();
+		if (m_bTru && evt->IsTrust()) evt->Free();
 	}
 	virtual void ClearEvent()
 	{
@@ -268,8 +271,10 @@ public:
 		return lrDef;
 	}
 	// 事件发送接口
-	virtual void Send(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	virtual void Send(void* p, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
+		IGuiObject* gui = ExDynCast<IGuiObject>(p);
+		if (!gui) return;
 		if (GetEvent().Empty()) return;
 		LRESULT ret = GetResult();
 		IGuiEvent::state_t sta = IGuiEvent::continue_next;
@@ -287,7 +292,7 @@ public:
 			}
 			if (!(*ite)) continue;
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
-			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			(*ite)->OnMessage(gui, nMessage, wParam, lParam);
 			if (!(*ite)->IsValid()) return;
 			sta = (*ite)->GetState();
 			LRESULT r = (*ite)->GetResult();
@@ -301,7 +306,7 @@ public:
 		if (*ite)
 		{
 			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
-			(*ite)->OnMessage(pGui, nMessage, wParam, lParam);
+			(*ite)->OnMessage(gui, nMessage, wParam, lParam);
 			LRESULT r = (*ite)->GetResult();
 			if (r != 0 && ret != r) ret = r;
 		}
@@ -350,47 +355,50 @@ public:
 	list_t& GetChildren() { return *m_Cldr; }
 
 	// 查找
-	list_t::iterator_t FindComp(IGuiComp* pComp) { return GetChildren().Find(pComp); }
+	list_t::iterator_t FindComp(void* p) { return GetChildren().Find(ExDynCast<IGuiComp>(p)); }
 
 	// 组合接口
-	virtual void AddComp(IGuiComp* pComp)
+	virtual void AddComp(void* p)
 	{
-		if (!pComp) return ;
+		IGuiComp* cmp = ExDynCast<IGuiComp>(p);
+		if (!cmp) return ;
 		// 定位对象
-		list_t::iterator_t ite = FindComp(pComp);
+		list_t::iterator_t ite = FindComp(cmp);
 		if (ite != GetChildren().Tail()) return;
 		// 添加新对象
-		if( pComp->m_Pare )
-			pComp->m_Pare->DelComp(pComp);
-		pComp->Init(this);
-		GetChildren().Add(pComp);
+		if (cmp->m_Pare)
+			cmp->m_Pare->DelComp(cmp);
+		cmp->Init(this);
+		GetChildren().Add(cmp);
 	}
-	virtual void InsComp(IGuiComp* pComp)
+	virtual void InsComp(void* p)
 	{
-		if (!pComp) return ;
+		IGuiComp* cmp = ExDynCast<IGuiComp>(p);
+		if (!cmp) return ;
 		// 定位对象
-		list_t::iterator_t ite = FindComp(pComp);
+		list_t::iterator_t ite = FindComp(cmp);
 		if (ite != GetChildren().Tail()) return;
 		// 添加新对象
-		if( pComp->m_Pare )
-			pComp->m_Pare->DelComp(pComp);
-		pComp->Init(this);
-		GetChildren().Add(pComp, GetChildren().Head());
+		if (cmp->m_Pare)
+			cmp->m_Pare->DelComp(cmp);
+		cmp->Init(this);
+		GetChildren().Add(cmp, GetChildren().Head());
 	}
-	virtual void DelComp(IGuiComp* pComp, BOOL bAutoTru = TRUE)
+	virtual void DelComp(void* p, BOOL bAutoTru = TRUE)
 	{
-		if (!pComp) return ;
+		IGuiComp* cmp = ExDynCast<IGuiComp>(p);
+		if (!cmp) return ;
 		// 定位对象
-		list_t::iterator_t ite = FindComp(pComp);
+		list_t::iterator_t ite = FindComp(cmp);
 		if (ite == GetChildren().Tail()) return;
 		// 删除对象
 		GetChildren().Del(ite);
-		pComp->Fina();
+		cmp->Fina();
 		if (bAutoTru && m_bTru)
 		{
-			if (IGuiEvent::s_MLMove == (IGuiCtrl*)pComp)
+			if (IGuiEvent::s_MLMove == (IGuiCtl*)cmp)
 				IGuiEvent::s_MLMove = NULL;
-			pComp->Free();
+			cmp->Free();
 		}
 	}
 	virtual void ClearComp()

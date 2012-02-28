@@ -94,7 +94,7 @@ public:
 		ZeroMemory(m_ColorSelTxt, sizeof(m_ColorSelTxt));
 		ZeroMemory(m_ColorSelBkg, sizeof(m_ColorSelBkg));
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiEditEvent"), GetGC()));
+		AddEvent(ExGui(_T("CGuiEditEvent"), GetGC()));
 		pixel_t pix[2] = {0};
 		pix[0] = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
 		pix[1] = ExRGBA(0, 0, 0, EXP_CM);
@@ -113,7 +113,7 @@ public:
 			SetState(_T("empty_text"), (void*)&val);
 		else
 		if (key == _T("empty_font"))
-			SetState(_T("empty_font"), CGuiManagerT<CText>::Get(val));
+			SetState(_T("empty_font"), ExGet<CText>(val));
 		else
 		if (key == _T("txt_sel_color"))
 		{

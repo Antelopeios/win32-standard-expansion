@@ -46,6 +46,17 @@
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
+// CGuiManagerT的显式实例化
+
+template class CGuiManagerT<void>;
+template class CGuiManagerT<CImage>;
+template class CGuiManagerT<CText>;
+template class CGuiManagerT<IGuiWnd>;
+template class CGuiManagerT<IGuiCtl>;
+template class CGuiManagerT<IGuiEvent>;
+template class CGuiManagerT<IGuiEffect>;
+
+//////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IExecutor, IBaseObject)
 
@@ -203,7 +214,7 @@ public:
 		m_Detail.email	 = xml.GetAttr(_T("email"),	  ite);
 		m_Detail.version = xml.GetAttr(_T("version"), ite);
 		m_Detail.date	 = xml.GetAttr(_T("date"),	  ite);
-		CGuiManagerT<detail_t>::Reg(_T("detail"), &m_Detail);
+		ExReg<detail_t>(_T("detail"), &m_Detail);
 		return NULL;
 	}
 };
@@ -256,11 +267,11 @@ public:
 		else
 		if (t == _T("true"))
 			lf.lfUnderline = TRUE;
-		CText* txt = CGuiManagerT<CText>::Get(xml.GetAttr(_T("name"), ite));
+		CText* txt = ExGet<CText>(xml.GetAttr(_T("name"), ite));
 		if(!txt)
 		{
 			txt = gcnew(gc, CText);
-			CGuiManagerT<CText>::Reg(xml.GetAttr(_T("name"), ite), txt);
+			ExReg<CText>(xml.GetAttr(_T("name"), ite), txt);
 		}
 		txt->Create(&lf);
 		txt->SetColor(ExStringToColor(xml.GetAttr(_T("color"), ite)));
@@ -288,7 +299,7 @@ protected:
 			if(!img)
 			{
 				img = gcnew(gc, CImage);
-				CGuiManagerT<CImage>::Reg(xml.GetAttr(_T("name"), ite), img);
+				ExReg<CImage>(xml.GetAttr(_T("name"), ite), img);
 			}
 			img->Set(coder->Decode());
 		}
@@ -312,7 +323,7 @@ public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
 		CGC exc_gc;
-		CImage* img = CGuiManagerT<CImage>::Get(xml.GetAttr(_T("name"), ite));
+		CImage* img = ExGet<CImage>(xml.GetAttr(_T("name"), ite));
 		IFileObject* file = gcnew(exc_gc, CIOFile);
 		((CIOFile*)file)->Open(xml.GetAttr(_T("path"), ite));
 		if (file->Error())
@@ -353,11 +364,11 @@ protected:
 public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
-		style_t* sty = CGuiManagerT<style_t>::Get(xml.GetAttr(_T("name"), ite));
+		style_t* sty = ExGet<style_t>(xml.GetAttr(_T("name"), ite));
 		if(!sty)
 		{
 			sty = gcnew(gc, style_t);
-			CGuiManagerT<style_t>::Reg(xml.GetAttr(_T("name"), ite), sty);
+			ExReg<style_t>(xml.GetAttr(_T("name"), ite), sty);
 		}
 		else
 		{
@@ -367,7 +378,7 @@ public:
 		CArrayT<CString> sa;
 		ExStringToArray(xml.GetAttr(_T("font"), ite), sa);
 		for(DWORD i = 0; i < sa.GetCount(); ++i)
-			sty->font.Add(CGuiManagerT<CText>::Get(sa[i]));
+			sty->font.Add(ExGet<CText>(sa[i]));
 		ExStringToArray(xml.GetAttr(_T("color"), ite), sa);
 		for(DWORD i = sty->color.GetCount(); i < sa.GetCount(); ++i)
 			sty->color.Add(pixel_t());
@@ -375,7 +386,7 @@ public:
 			sty->color[i] = ExStringToColor(sa[i]);
 		ExStringToArray(xml.GetAttr(_T("image"), ite), sa);
 		for(DWORD i = 0; i < sa.GetCount(); ++i)
-			sty->image.Add(CGuiManagerT<CImage>::Get(sa[i]));
+			sty->image.Add(ExGet<CImage>(sa[i]));
 		return NULL;
 	}
 };
@@ -409,34 +420,34 @@ public:
 	{
 		void* div = ExDynCreate(xml.GetAttr(_T("class"), ite));
 		if(!div) return NULL;
-		IGuiBoard* brd = ExDynCast<IGuiBoard>(div);
+		IGuiWnd* brd = ExDynCast<IGuiWnd>(div);
 		if (brd)
 		{
-			m_pNedDel = CGuiManagerT<IGuiBoard>::Get(xml.GetAttr(_T("name"), ite));
+			m_pNedDel = ExGet<IGuiWnd>(xml.GetAttr(_T("name"), ite));
 			if (m_pNedDel) m_DelLst.Replace(m_pNedDel);
-			brd = (IGuiBoard*)brd->Execute(xml, ite, parent);
+			brd = (IGuiWnd*)brd->Execute(xml, ite, parent);
 			if (brd)
 			{
-				IGuiBoard* pare = ExDynCast<IGuiBoard>(parent);
+				IGuiWnd* pare = ExDynCast<IGuiWnd>(parent);
 				if (pare) brd->SetParent(pare->GethWnd());
 				m_DelLst.Add(brd);
-				return CGuiManagerT<IGuiBoard>::Reg(xml.GetAttr(_T("name"), ite), brd);
+				return ExReg<IGuiWnd>(xml.GetAttr(_T("name"), ite), brd);
 			}
 			else
 				return NULL;
 		}
 		else
 		{
-			IGuiCtrl* ctl = ExDynCast<IGuiCtrl>(div);
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(div);
 			if (ctl)
 			{
-				m_pNedDel = CGuiManagerT<IGuiCtrl>::Get(xml.GetAttr(_T("name"), ite));
+				m_pNedDel = ExGet<IGuiCtl>(xml.GetAttr(_T("name"), ite));
 				CListT<void*>::iterator_t it = m_DelLst.Find(m_pNedDel);
 				if (it == m_DelLst.Tail())
 					m_pNedDel = NULL;
 				else
 					m_DelLst.Del(it);
-				ctl = (IGuiCtrl*)ctl->Execute(xml, ite, parent);
+				ctl = (IGuiCtl*)ctl->Execute(xml, ite, parent);
 				if (ctl)
 				{
 					ctl->SetWindowRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
@@ -451,7 +462,7 @@ public:
 						pare->AddComp(ctl);
 					else
 						m_DelLst.Add(ctl);
-					return CGuiManagerT<IGuiCtrl>::Reg(xml.GetAttr(_T("name"), ite), ctl);
+					return ExReg<IGuiCtl>(xml.GetAttr(_T("name"), ite), ctl);
 				}
 				else
 					return NULL;
@@ -477,19 +488,19 @@ class _items : public IExecutor
 public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
-		IGuiCtrl* pre = ExDynCast<IGuiCtrl>(parent);
+		IGuiCtl* pre = ExDynCast<IGuiCtl>(parent);
 		if (!pre) return NULL;
-		IGuiCtrl::items_t* items = (IGuiCtrl::items_t*)pre->GetState(_T("items"));
+		IGuiCtl::items_t* items = (IGuiCtl::items_t*)pre->GetState(_T("items"));
 		if (!items) return NULL;
 		CString t(xml.GetAttr(_T("count"), ite)), 
 				c(xml.GetAttr(_T("class"), ite)), 
 				e(xml.GetAttr(_T("event"), ite));
-		IGuiEvent* pe = CGuiManagerT<IGuiEvent>::Get(e);
+		IGuiEvent* pe = ExGet<IGuiEvent>(e);
 		for(int i = 0; i < _ttoi(t); ++i)
 		{
-			IGuiCtrl* ctl = ExDynCast<IGuiCtrl>(ExDynCreate(c));
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(ExDynCreate(c));
 			if (!ctl) return NULL;
-			ctl = (IGuiCtrl*)ctl->Execute(xml, ite, parent);
+			ctl = (IGuiCtl*)ctl->Execute(xml, ite, parent);
 			if (!ctl) return NULL;
 			ctl->AddEvent(pe);
 			items->Add(ctl);
@@ -516,7 +527,7 @@ public:
 		if (!pre && name.Empty()) return NULL;
 		IGuiEvent* evt = ExDynCast<IGuiEvent>(ExDynCreate(xml.GetAttr(_T("class"), ite)));
 		if (!evt) return NULL;
-		if (!name.Empty()) CGuiManagerT<IGuiEvent>::Reg(name, evt);
+		if (!name.Empty()) ExReg<IGuiEvent>(name, evt);
 		if (pre) pre->AddEvent(evt);
 		return NULL;
 	}
@@ -535,11 +546,11 @@ public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
 		CString name = xml.GetAttr(_T("name"), ite);
-		IGuiCtrl* pre = ExDynCast<IGuiCtrl>(parent);
+		IGuiCtl* pre = ExDynCast<IGuiCtl>(parent);
 		if (!pre && name.Empty()) return NULL;
 		IGuiEffect* eff = ExDynCast<IGuiEffect>(ExDynCreate(xml.GetAttr(_T("class"), ite)));
 		if (!eff) return NULL;
-		if (!name.Empty()) CGuiManagerT<IGuiEffect>::Reg(name, eff);
+		if (!name.Empty()) ExReg<IGuiEffect>(name, eff);
 		if (pre) pre->SetEffect(eff);
 		return NULL;
 	}

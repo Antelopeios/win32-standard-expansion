@@ -53,9 +53,9 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // 通用对象创建接口
-EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
+EXP_API void* ExGui(LPCTSTR sGuiType, CGC* pGC/* = NULL*/)
 {
-	return ExDynCast<IGuiObject>(ExDynCreate(sGuiType, pGC));
+	return ExDynCreate(sGuiType, pGC);
 }
 
 //////////////////////////////////////////////////////////////////

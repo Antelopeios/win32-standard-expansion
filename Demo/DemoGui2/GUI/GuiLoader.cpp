@@ -57,37 +57,37 @@ void CGuiLoader::LoadRes()
 void CGuiLoader::LoadCtl()
 {
 	// 内容打底
-	REG_CTL(ground, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"))));
+	REG_CTL(ground, ExGui<IGuiCtl>(_T("CGuiPicture")));
 	GET_CTL(ground)->SetState(_T("color"), (void*)ExRGBA(242, 242, 242, 255));
-	GET_CTL(ground)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_ground"))));
+	GET_CTL(ground)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_ground")));
 
 	// 搜索框打底
-	REG_CTL(bottom1, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"))));
+	REG_CTL(bottom1, ExGui<IGuiCtl>(_T("CGuiPicture")));
 	GET_CTL(bottom1)->SetState(_T("color"), (void*)ExRGBA(222, 222, 222, 255));
-	GET_CTL(bottom1)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom1"))));
-	REG_CTL(bottom2, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture"))));
+	GET_CTL(bottom1)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_bottom1")));
+	REG_CTL(bottom2, ExGui<IGuiCtl>(_T("CGuiPicture")));
 	GET_CTL(bottom2)->SetState(_T("color"), (void*)ExRGBA(255, 255, 255, 255));
-	GET_CTL(bottom2)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_bottom2"))));
+	GET_CTL(bottom2)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_bottom2")));
 	// 搜索框
-	REG_CTL(search, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"))));
+	REG_CTL(search, ExGui<IGuiCtl>(_T("CGuiEdit")));
 	GET_CTL(search)->SetState(_T("font"), GET_TXT(search));
-	GET_CTL(search)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_search"))));
+	GET_CTL(search)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_search")));
 	// 覆盖框
-	REG_CTL(cover, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit"))));
+	REG_CTL(cover, ExGui<IGuiCtl>(_T("CGuiEdit")));
 	GET_CTL(cover)->SetState(_T("text"), GET_TXT(cover));
 	GET_CTL(cover)->SetState(_T("edit"), &CString(_T("请输入待查询标签")));
 	GET_CTL(cover)->SetVisible(FALSE);
-	GET_CTL(cover)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cover"))));
+	GET_CTL(cover)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_cover")));
 
 	// 标签云
-	REG_CTL(cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"))));
+	REG_CTL(cloud, ExGui<IGuiCtl>(_T("CGuiListView")));
 	GET_CTL(cloud)->SetState(_T("align_top"), (void*)FALSE);
 	GET_CTL(cloud)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 	// 加载标签
-	IGuiCtrl::items_t tags_list;
+	IGuiCtl::items_t tags_list;
 	for(int i = 0; i < 40; ++i)
 	{
-		IGuiCtrl* tag = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
+		IGuiCtl* tag = ExGui<IGuiCtl>(_T("CGuiLVItem"));
 		tag->SetState(_T("thr_sta"), (void*)TRUE);
 		CText* txt = gcnew(gc, CText, 8);
 		txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
@@ -110,23 +110,23 @@ void CGuiLoader::LoadCtl()
 		tags_list.Add(tag);
 	}
 	GET_CTL(cloud)->SetState(_T("items"), &tags_list);
-	GET_CTL(cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_cloud"))));
+	GET_CTL(cloud)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_cloud")));
 	// 标签云滚动条
-	REG_CTL(scr_cloud, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"))));
-	ExDynCast<IGuiCtrl>(GET_CTL(scr_cloud)->GetState(_T("up")))->SetWindowRect(CRect());
-	ExDynCast<IGuiCtrl>(GET_CTL(scr_cloud)->GetState(_T("down")))->SetWindowRect(CRect());
+	REG_CTL(scr_cloud, ExGui<IGuiCtl>(_T("CGuiScroll")));
+	ExDynCast<IGuiCtl>(GET_CTL(scr_cloud)->GetState(_T("up")))->SetWindowRect(CRect());
+	ExDynCast<IGuiCtl>(GET_CTL(scr_cloud)->GetState(_T("down")))->SetWindowRect(CRect());
 	GET_CTL(scr_cloud)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
 	GET_CTL(scr_cloud)->SetState(_T("sli_ori"), (void*)TRUE);
 	GET_CTL(scr_cloud)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	pixel_t pix[8] = {0};
 	for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
 	GET_CTL(scr_cloud)->SetState(_T("sli_blk_color"), pix);
-	GET_CTL(scr_cloud)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_cloud"))));
+	GET_CTL(scr_cloud)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_scr_cloud")));
 	// 关联滚动条
 	GET_CTL(cloud)->SetScroll(GET_CTL(scr_cloud));
 
 	// 文件列表
-	REG_CTL(files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView"))));
+	REG_CTL(files, ExGui<IGuiCtl>(_T("CGuiListView")));
 	GET_CTL(files)->SetTrust(TRUE);
 	GET_CTL(files)->SetVisible(FALSE);
 	GET_CTL(files)->SetState(_T("align_top"), (void*)FALSE);
@@ -134,10 +134,10 @@ void CGuiLoader::LoadCtl()
 	GET_CTL(files)->SetState(_T("color"), (void*)ExRGBA(0, 0, 0, 0));
 	GET_CTL(files)->Execute(_T("foc_image"), _T("foc_lt,foc_t,foc_rt,foc_l,,foc_r,foc_lb,foc_b,foc_rb"));
 	// 加载文件
-	IGuiCtrl::items_t file_list;
+	IGuiCtl::items_t file_list;
 	for(int i = 0; i < 40; ++i)
 	{
-		IGuiCtrl* file = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem"), GET_CTL(files)->GetGC()));
+		IGuiCtl* file = ExGui<IGuiCtl>(_T("CGuiLVItem"), GET_CTL(files)->GetGC());
 		file->Execute(_T("image"), _T("file_lt,file_t,file_rt,file_l,file_c,file_r,file_lb,file_b,file_rb"));
 		file->SetState(_T("locate"), (void*)2);
 		file->SetState(_T("loc_off"), (void*)18);
@@ -153,17 +153,17 @@ void CGuiLoader::LoadCtl()
 		file_list.Add(file);
 	}
 	GET_CTL(files)->SetState(_T("items"), &file_list);
-	GET_CTL(files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_files"))));
+	GET_CTL(files)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_files")));
 	// 文件列表滚动条
-	REG_CTL(scr_files, ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll"))));
+	REG_CTL(scr_files, ExGui<IGuiCtl>(_T("CGuiScroll")));
 	GET_CTL(scr_files)->SetVisible(FALSE);
-	ExDynCast<IGuiCtrl>(GET_CTL(scr_files)->GetState(_T("up")))->SetWindowRect(CRect());
-	ExDynCast<IGuiCtrl>(GET_CTL(scr_files)->GetState(_T("down")))->SetWindowRect(CRect());
+	ExDynCast<IGuiCtl>(GET_CTL(scr_files)->GetState(_T("up")))->SetWindowRect(CRect());
+	ExDynCast<IGuiCtl>(GET_CTL(scr_files)->GetState(_T("down")))->SetWindowRect(CRect());
 	GET_CTL(scr_files)->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
 	GET_CTL(scr_files)->SetState(_T("sli_ori"), (void*)TRUE);
 	GET_CTL(scr_files)->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	GET_CTL(scr_files)->SetState(_T("sli_blk_color"), pix);
-	GET_CTL(scr_files)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_scr_files"))));
+	GET_CTL(scr_files)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_scr_files")));
 	// 关联滚动条
 	GET_CTL(files)->SetScroll(GET_CTL(scr_files));
 }
@@ -176,7 +176,7 @@ void CGuiLoader::LoadWnd()
 	HICON ic_wnd = ::LoadIcon(CGlobal::GetInstance(), MAKEINTRESOURCE(IDI_TAGGER));
 
 	// 创建窗口对象并设置
-	REG_WND(main, ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc)));
+	REG_WND(main, ExGui<IGuiWnd>(_T("CGuiWnd"), &gc));
 	GET_WND(main)->Create(_T("Tagger"), rc_wnd, SW_HIDE, 
 		/*WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX*/WS_OVERLAPPEDWINDOW);
 	GET_WND(main)->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
@@ -186,7 +186,7 @@ void CGuiLoader::LoadWnd()
 	GET_WND(main)->GetClientRect(rc_wnd);
 
 	// 事件关联
-	GET_WND(main)->AddEvent(ExDynCast<IGuiEvent>(ExGui(_T("CEvent_wnd"))));
+	GET_WND(main)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_wnd")));
 }
 
 // 关联对象

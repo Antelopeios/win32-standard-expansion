@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-31
-// Version:	1.0.0003.1801
+// Date:	2012-02-21
+// Version:	1.0.0004.1646
 //
 // History:
 //	- 1.0.0000.1622(2011-06-13)	@ 开始构建GuiManager接口
 //	- 1.0.0001.0527(2011-08-01)	= 将GuiManager改为模板形式,提供泛型化的界面元素管理
 //	- 1.0.0002.0128(2011-12-10)	+ GuiManager的Reg接口支持重复注册同一个key,第二次注册将会覆盖上次的注册
 //	- 1.0.0003.1801(2012-01-31)	+ 添加CGuiManagerT::Clear()
+//	- 1.0.0004.1646(2012-02-21)	= 调整并优化对外接口的调用方式
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiManager_h__
@@ -93,9 +94,25 @@ public:
 	}
 };
 
-#define ExReg(type, key, inf)	EXP::CGuiManagerT<type>::Reg(key, inf)
-#define ExGet(type, key)		EXP::CGuiManagerT<type>::Get(key)
-#define ExClr(type, is_del)		EXP::CGuiManagerT<type>::Clear(is_del)
+//////////////////////////////////////////////////////////////////
+
+template <typename TypeT>
+EXP_INLINE TypeT* ExReg(LPCTSTR c_key, void* inf)
+{
+	return EXP::CGuiManagerT<TypeT>::Reg(c_key, (TypeT*)(inf));
+}
+
+template <typename TypeT>
+EXP_INLINE TypeT* ExGet(LPCTSTR c_key)
+{
+	return EXP::CGuiManagerT<TypeT>::Get(c_key);
+}
+
+template <typename TypeT>
+EXP_INLINE void ExClr(BOOL bDel = TRUE)
+{
+	EXP::CGuiManagerT<TypeT>::Clear(bDel);
+}
 
 //////////////////////////////////////////////////////////////////
 

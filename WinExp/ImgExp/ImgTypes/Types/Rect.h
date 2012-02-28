@@ -211,7 +211,7 @@ public:
 	EXP_INLINE CRectT operator-(const CRectT& tRect)
 	{ return (CRectT(*this) -= tRect); }
 
-	EXP_INLINE operator RECT()
+	EXP_INLINE operator RECT() const
 	{
 		RECT rc = {pt1.x, pt1.y, pt2.x, pt2.y};
 		return rc;
@@ -243,10 +243,10 @@ public:
 		return Height();
 	}
 
-	EXP_INLINE CPointT<TypeT>& LeftTop() const		{ return pt1; }
+	EXP_INLINE CPointT<TypeT> LeftTop() const		{ return pt1; }
 	EXP_INLINE CPointT<TypeT> RightTop() const		{ return CPointT<TypeT>(pt2.x, pt1.y); }
 	EXP_INLINE CPointT<TypeT> LeftBottom() const	{ return CPointT<TypeT>(pt1.x, pt2.y); }
-	EXP_INLINE CPointT<TypeT>& RightBottom() const	{ return pt2; }
+	EXP_INLINE CPointT<TypeT> RightBottom() const	{ return pt2; }
 
 	EXP_INLINE CPointT<TypeT>& LeftTop(CPointT<TypeT>& pt)
 	{ return pt1 = pt; }

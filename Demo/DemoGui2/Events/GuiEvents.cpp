@@ -10,17 +10,17 @@ class CEvent_wnd : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
 		switch( nMessage )
 		{
 		case WM_SIZE:
-			for(IGuiBase::list_t::iterator_t ite = board->GetChildren().Head(); ite != board->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = wnd->GetChildren().Head(); ite != wnd->GetChildren().Tail(); ++ite)
 			{
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if (!ctrl) continue;
-				ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				if (!ctl) continue;
+				ctl->SendMessage(WM_SHOWWINDOW, 1);
 			}
 			break;
 		case WM_KEYDOWN:
@@ -28,7 +28,7 @@ public:
 				GET_CTL(files)->SendMessage(nMessage, wParam, lParam);
 			break;
 		case WM_CLOSE:
-			board->DefProc(nMessage, wParam, lParam);
+			wnd->DefProc(nMessage, wParam, lParam);
 			break;
 		case WM_DESTROY:
 			::PostQuitMessage(0);
@@ -48,8 +48,8 @@ class CEvent_ground : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -57,10 +57,10 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		}
@@ -78,8 +78,8 @@ class CEvent_bottom1 : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -87,12 +87,12 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Deflate(CPoint(1, 1));
 				rc_wnd.Height(20);
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		}
@@ -108,8 +108,8 @@ class CEvent_bottom2 : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -117,12 +117,12 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Deflate(CPoint(2, 2));
 				rc_wnd.Height(18);
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		}
@@ -140,8 +140,8 @@ class CEvent_search : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -149,17 +149,17 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Deflate(CPoint(4, 4));
 				rc_wnd.Height(16);
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		case WM_KILLFOCUS:
 			{
-				CString* edit = (CString*)ctrl->GetState(_T("text"));
+				CString* edit = (CString*)ctl->GetState(_T("text"));
 				if (edit->Empty())
 					GET_CTL(cover)->SetVisible(TRUE);
 			}
@@ -179,14 +179,14 @@ class CEvent_cover : public CEvent_search
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case WM_SETFOCUS:
 			{
-				ctrl->SetVisible(FALSE);
+				ctl->SetVisible(FALSE);
 				GET_CTL(search)->SetFocus();
 			}
 			break;
@@ -208,21 +208,21 @@ class CEvent_cloud : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				CRect rc_wnd;
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		case WM_COMMAND:
@@ -247,8 +247,8 @@ class CEvent_scr_cloud : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -256,13 +256,13 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
 				rc_wnd.Left(rc_wnd.Right() - GUI()->ScrWidth());
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		}
@@ -280,21 +280,21 @@ class CEvent_files : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				CRect rc_wnd;
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		case WM_KEYDOWN:
@@ -326,8 +326,8 @@ class CEvent_scr_files : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -335,13 +335,13 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
 
 				rc_wnd.Left(rc_wnd.Right() - GUI()->ScrWidth());
-				ctrl->SetWindowRect(rc_wnd);
+				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
 		}

@@ -136,7 +136,7 @@ public:
 	EXP_INLINE CSizeT operator-()
 	{ return CSizeT(-cx, -cy); }
 
-	EXP_INLINE operator SIZE()
+	EXP_INLINE operator SIZE() const
 	{
 		SIZE sz = {cx, cy};
 		return sz;

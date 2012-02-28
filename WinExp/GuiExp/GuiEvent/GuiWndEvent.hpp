@@ -92,7 +92,7 @@ protected:
 			// 给尚未离开的控件发送消息
 			if (s_MLMove)
 			{
-				s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+				s_MLMove->SendMessage(WM_MOUSELEAVE);
 				s_MLMove = NULL;
 			}
 			s_MLCheckWD = NULL;
@@ -101,8 +101,8 @@ protected:
 
 	// 消息转发
 	BOOL m_ShiftDown;
-	IGuiCtrl* m_pOldFoc;
-	LRESULT WndSend(IGuiBoard* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
+	IGuiCtl* m_pOldFoc;
+	LRESULT WndSend(IGuiWnd* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui) return NULL;
 		// 向控件转发消息
@@ -112,14 +112,14 @@ protected:
 			nMessage <= WM_NCMBUTTONDBLCLK || 
 			nMessage == WM_NCHITTEST)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(IGuiBase::GetCapture());
-			if (!ctrl)
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(IGuiBase::GetCapture());
+			if (!ctl)
 			{
 				POINT pt_tmp = {0};
 				::GetCursorPos(&pt_tmp);
 				CPoint pt(pt_tmp);
 				pGui->ScreenToClient(pt);
-				ctrl = ExDynCast<IGuiCtrl>(pGui->GetPtCtrl(pt));
+				ctl = ExDynCast<IGuiCtl>(pGui->GetPtCtrl(pt));
 			}
 			switch (nMessage)
 			{
@@ -128,11 +128,11 @@ protected:
 			case WM_NCMOUSEMOVE:
 				{
 					s_MLCheckWD = pGui->GethWnd();
-					IGuiCtrl* cur = ctrl;
+					IGuiCtl* cur = ctl;
 					if (cur == s_MLMove) break;
 					if (s_MLMove && s_MLMove->IsValid())
 					{
-						s_MLMove->Send(ExDynCast<IGuiObject>(s_MLMove), WM_MOUSELEAVE);
+						s_MLMove->SendMessage(WM_MOUSELEAVE);
 						if(!s_MLMove->IsValid()) return NULL;
 					}
 					s_MLMove = cur;
@@ -151,38 +151,38 @@ protected:
 			case WM_NCRBUTTONDBLCLK:
 			case WM_NCMBUTTONDOWN:
 			case WM_NCMBUTTONDBLCLK:
-				if (ctrl && ctrl->IsEnabled()) ctrl->SetFocus();
+				if (ctl && ctl->IsEnabled()) ctl->SetFocus();
 				break;
 			}
-			if (!ctrl || !ctrl->IsEnabled()) goto EndWndSend;
+			if (!ctl || !ctl->IsEnabled()) goto EndWndSend;
 			// 初始化返回值
-			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+			ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
-			ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
-			if(!ctrl->IsValid()) return NULL;
+			ctl->SendMessage(nMessage, wParam, lParam);
+			if(!ctl->IsValid()) return NULL;
 			// 判断返回值
-			lrDef = ctrl->GetResult(lrDef);
+			lrDef = ctl->GetResult(lrDef);
 		}
 		else
 		if (nMessage >= WM_KEYFIRST && 
 			nMessage <= WM_KEYLAST)
 		{
-			IGuiCtrl* ctrl = IGuiCtrl::GetFocus();
-			if (!ctrl || !ctrl->IsEnabled()) goto EndWndSend;
+			IGuiCtl* ctl = IGuiCtl::GetFocus();
+			if (!ctl || !ctl->IsEnabled()) goto EndWndSend;
 			// 初始化返回值
-			ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+			ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 			// 转发消息
-			ctrl->Send(ExDynCast<IGuiObject>(ctrl), nMessage, wParam, lParam);
-			if(!ctrl->IsValid()) return NULL;
+			ctl->SendMessage(nMessage, wParam, lParam);
+			if(!ctl->IsValid()) return NULL;
 			// 判断返回值
-			lrDef = ctrl->GetResult(lrDef);
+			lrDef = ctl->GetResult(lrDef);
 			// 处理焦点切换
 			if (WM_KEYDOWN == nMessage)
 			{
 				if (wParam == VK_TAB)
 				{
-					IGuiComp* comp = ctrl->GetParent();
-					IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctrl));
+					IGuiComp* comp = ctl->GetParent();
+					IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctl));
 					if (ite == comp->GetChildren().Tail()) goto EndWndSend;
 					if (m_ShiftDown)
 					{
@@ -190,7 +190,7 @@ protected:
 							ite = comp->GetChildren().Last();
 						else
 							--ite;
-						if (!IGuiCtrl::IsEffect(ExDynCast<IGuiCtrl>(*ite)))
+						if (!IGuiCtl::IsEffect(ExDynCast<IGuiCtl>(*ite)))
 						{
 							if (ite == comp->GetChildren().Head())
 								ite = comp->GetChildren().Last();
@@ -204,7 +204,7 @@ protected:
 							ite = comp->GetChildren().Head();
 						else
 							++ite;
-						if (!IGuiCtrl::IsEffect(ExDynCast<IGuiCtrl>(*ite)))
+						if (!IGuiCtl::IsEffect(ExDynCast<IGuiCtl>(*ite)))
 						{
 							if (ite == comp->GetChildren().Last())
 								ite = comp->GetChildren().Head();
@@ -212,7 +212,7 @@ protected:
 								++ite;
 						}
 					}
-					IGuiCtrl* next = ExDynCast<IGuiCtrl>(*ite);
+					IGuiCtl* next = ExDynCast<IGuiCtl>(*ite);
 					if (!next) goto EndWndSend;
 					next->SetFocus();
 				}
@@ -228,14 +228,14 @@ protected:
 		else
 		if (nMessage == WM_SETFOCUS)
 		{
-			IGuiCtrl::SetFocus(m_pOldFoc);
+			IGuiCtl::SetFocus(m_pOldFoc);
 			pGui->Invalidate();
 		}
 		else
 		if (nMessage == WM_KILLFOCUS)
 		{
 			m_ShiftDown = FALSE;
-			m_pOldFoc = IGuiCtrl::SetFocus(NULL);
+			m_pOldFoc = IGuiCtl::SetFocus(NULL);
 			pGui->Invalidate();
 		}
 		else
@@ -250,41 +250,41 @@ protected:
 		// 向控件转发消息
 		if (nMessage == WM_SIZE)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-			if (!ctrl || !ctrl->GetScroll() || !ctrl->IsVisible()) goto EndBaseSend;
-			LONG all_line = (LONG)(LONG_PTR)ctrl->GetState(_T("all_line"));
-			LONG fra_line = (LONG)(LONG_PTR)ctrl->GetState(_T("fra_line"));
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+			if (!ctl || !ctl->GetScroll() || !ctl->IsVisible()) goto EndBaseSend;
+			LONG all_line = (LONG)(LONG_PTR)ctl->GetState(_T("all_line"));
+			LONG fra_line = (LONG)(LONG_PTR)ctl->GetState(_T("fra_line"));
 			if (all_line > fra_line)
 			{
-				if(!ctrl->GetScroll()->IsVisible())
+				if(!ctl->GetScroll()->IsVisible())
 				{
-					ctrl->GetScroll()->SetVisible(TRUE);
+					ctl->GetScroll()->SetVisible(TRUE);
 					CRect rc, rc_scr;
-					ctrl->GetWindowRect(rc);
-					ctrl->GetScroll()->GetWindowRect(rc_scr);
+					ctl->GetWindowRect(rc);
+					ctl->GetScroll()->GetWindowRect(rc_scr);
 					rc.Right(rc.Right() - rc_scr.Width());
-					ctrl->SetWindowRect(rc);
+					ctl->SetWindowRect(rc);
 				}
 			}
 			else
 			{
-				if (ctrl->GetScroll()->IsVisible())
+				if (ctl->GetScroll()->IsVisible())
 				{
-					ctrl->GetScroll()->SetVisible(FALSE);
+					ctl->GetScroll()->SetVisible(FALSE);
 					CRect rc, rc_scr;
-					ctrl->GetWindowRect(rc);
-					ctrl->GetScroll()->GetWindowRect(rc_scr);
+					ctl->GetWindowRect(rc);
+					ctl->GetScroll()->GetWindowRect(rc_scr);
 					rc.Right(rc.Right() + rc_scr.Width());
-					ctrl->SetWindowRect(rc);
+					ctl->SetWindowRect(rc);
 				}
 			}
 		}
 		else
 		if (nMessage == WM_MOUSEWHEEL)
 		{
-			IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-			if (!ctrl || !ctrl->GetScroll() || !ctrl->IsVisible()) goto EndBaseSend;
-			ctrl->GetScroll()->SendMessage(nMessage, wParam, lParam);
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+			if (!ctl || !ctl->GetScroll() || !ctl->IsVisible()) goto EndBaseSend;
+			ctl->GetScroll()->SendMessage(nMessage, wParam, lParam);
 		}
 		else
 		if (nMessage >= WM_MOUSEFIRST && 
@@ -311,16 +311,16 @@ protected:
 			// 遍历控件列表
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if (!ctrl) continue;
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				if (!ctl) continue;
 				// 初始化返回值
-				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				if (ctrl->IsVisible())
+				if (ctl->IsVisible())
 				{
 					// 获取控件区域
 					CRect ctl_rct;
-					ctrl->GetWindowRect(ctl_rct);
+					ctl->GetWindowRect(ctl_rct);
 					CRect rect(ctl_rct), clp_rct;
 					pGui->GetClipBox(clp_rct);
 					rect.Inter(clp_rct);
@@ -328,23 +328,23 @@ protected:
 					{
 						// 设置剪切区
 						rect.Offset(-ctl_rct.pt1);
-						ctrl->SetClipBox(rect);
+						ctl->SetClipBox(rect);
 						// 创建控件图片
 						CImage ctl_img;
 						ctl_img.Create(rect.Width(), rect.Height());
 						// 控件绘图
-						IGuiEffect* eff = ctrl->GetEffect();
+						IGuiEffect* eff = ctl->GetEffect();
 						if (eff)
 						{
 							if (!eff->IsInit()) eff->Init(ctl_img);
-							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-							if(!ctrl->IsValid()) return NULL;
+							ctl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+							if(!ctl->IsValid()) return NULL;
 							eff->Show(*ite, ctl_img);
 						}
 						else
 						{
-							ctrl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-							if(!ctrl->IsValid()) return NULL;
+							ctl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
+							if(!ctl->IsValid()) return NULL;
 						}
 						// 覆盖全局绘图
 						ctl_rct.Inter(clp_rct);
@@ -355,41 +355,41 @@ protected:
 				else
 				{
 					// 停止特效
-					IGuiEffect* eff = ctrl->GetEffect();
+					IGuiEffect* eff = ctl->GetEffect();
 					if (eff) eff->KillTimer(pGui->GethWnd());
 				}
 				// 判断返回值
-				lrDef = ctrl->GetResult(lrDef);
+				lrDef = ctl->GetResult(lrDef);
 			}
 		}
 		else
 		if (nMessage == WM_SHOWWINDOW)
 		{
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-				if (ctrl && ctrl->GetScroll())
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+				if (ctl && ctl->GetScroll())
 				{
 					if (wParam)
 					{
 						CRect rc;
-						ctrl->GetWindowRect(rc);
-						ctrl->SendMessage(WM_SIZE, SIZE_RESTORED, ExMakeLong(rc.Width(), rc.Height()));
+						ctl->GetWindowRect(rc);
+						ctl->SendMessage(WM_SIZE, SIZE_RESTORED, ExMakeLong(rc.Width(), rc.Height()));
 					}
 					else
-						ctrl->GetScroll()->SetVisible(FALSE);
+						ctl->GetScroll()->SetVisible(FALSE);
 				}
 			else
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if (!ctrl || !ctrl->IsVisible()) continue;
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				if (!ctl || !ctl->IsVisible()) continue;
 				// 初始化返回值
-				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				ctrl->Send(*ite, nMessage, wParam, lParam);
-				if(!ctrl->IsValid()) return NULL;
+				ctl->Send(*ite, nMessage, wParam, lParam);
+				if(!ctl->IsValid()) return NULL;
 				// 判断返回值
-				lrDef = ctrl->GetResult(lrDef);
+				lrDef = ctl->GetResult(lrDef);
 			}
 		}
 		else
@@ -397,15 +397,15 @@ protected:
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if (!ctrl || !ctrl->IsEnabled()) continue;
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				if (!ctl || !ctl->IsEnabled()) continue;
 				// 初始化返回值
-				ctrl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				ctrl->Send(*ite, nMessage, wParam, lParam);
-				if(!ctrl->IsValid()) return NULL;
+				ctl->Send(*ite, nMessage, wParam, lParam);
+				if(!ctl->IsValid()) return NULL;
 				// 判断返回值
-				lrDef = ctrl->GetResult(lrDef);
+				lrDef = ctl->GetResult(lrDef);
 			}
 		}
 	EndBaseSend:
@@ -429,8 +429,8 @@ public:
 		if (!base) return;
 		// 筛选消息
 		LRESULT ret = 0;
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (board)
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (wnd)
 		{
 			switch( nMessage )
 			{
@@ -438,47 +438,47 @@ public:
 				// 鼠标离开事件检测定时器
 				if (s_MLCheckID == 0)
 					s_MLCheckID = ::SetTimer(NULL, 0, 100, MouseLeaveCheck);
-				ret = WndSend(board, nMessage, wParam, lParam);
+				ret = WndSend(wnd, nMessage, wParam, lParam);
 				break;
 			case WM_PAINT:
-				if (board->IsCusPaint())
+				if (wnd->IsCusPaint())
 				{
 					PAINTSTRUCT ps = {0};
-					HDC hdc = ::BeginPaint(board->GethWnd(), &ps);
+					HDC hdc = ::BeginPaint(wnd->GethWnd(), &ps);
 					// 获取缓存区域
 					CRect rect;
 					::GetClipBox(hdc, (LPRECT)&rect);
 				//	ExTrace(_T("%d, %d, %d, %d\n"), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
 					if (rect.IsNull())
-						board->GetClientRect(rect);
+						wnd->GetClientRect(rect);
 				//	else /*此段仅在调试时做断点使用*/
 				//	if (rect.pt1 != CPoint())
 				//		rect = rect;
-					board->SetClipBox(rect);
+					wnd->SetClipBox(rect);
 					// 构建绘图缓存
 					CImage mem_img;
 					mem_img.Create(rect.Width(), rect.Height());
-					if (board->IsColorKey())
-						CImgFilter::Filter(mem_img, rect, &CFilterBrush(board->GetColorKey()));
+					if (wnd->IsColorKey())
+						CImgFilter::Filter(mem_img, rect, &CFilterBrush(wnd->GetColorKey()));
 					// 覆盖控件绘图
-					ret = WndSend(board, nMessage, wParam, (LPARAM)&mem_img);
+					ret = WndSend(wnd, nMessage, wParam, (LPARAM)&mem_img);
 					// 覆盖缓存绘图
 					CGraph mem_grp;
 					mem_grp.Create();
 					mem_grp.SetObject(mem_img.Get());
-					board->LayeredWindow(hdc, mem_grp);
+					wnd->LayeredWindow(hdc, mem_grp);
 					mem_grp.Delete();
 					// 结束绘图
-					::EndPaint(board->GethWnd(), &ps);
+					::EndPaint(wnd->GethWnd(), &ps);
 				}
 				else
-					ret = board->DefProc(nMessage, wParam, lParam);
+					ret = wnd->DefProc(nMessage, wParam, lParam);
 				break;
 			case WM_ERASEBKGND:
-				ret = WndSend(board, nMessage, wParam, lParam);
+				ret = WndSend(wnd, nMessage, wParam, lParam);
 				break;
 			default:
-				ret = WndSend(board, nMessage, wParam, lParam, board->DefProc(nMessage, wParam, lParam));
+				ret = WndSend(wnd, nMessage, wParam, lParam, wnd->DefProc(nMessage, wParam, lParam));
 			}
 		}
 		else

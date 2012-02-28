@@ -130,7 +130,12 @@ EXP_END
 EXP_BEG
 
 // 通用对象创建接口
-EXP_API IGuiObject* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);
+EXP_API void* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL);
+template <typename TypeT>
+EXP_INLINE TypeT* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL)
+{
+	return ExDynCast<TypeT>(ExGui(sGuiType, pGC));
+}
 
 EXP_END
 

@@ -70,8 +70,8 @@ public:
 		, m_Ori(FALSE)
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiSliderEvent"), GetGC())); /*先让基类绘图*/
-		m_Slider.AddEvent((IGuiEvent*)ExGui(_T("CGuiSliBlkEvent"), m_Slider.GetGC()));
+		InsEvent(ExGui(_T("CGuiSliderEvent"), GetGC())); /*先让基类绘图*/
+		m_Slider.AddEvent(ExGui(_T("CGuiSliBlkEvent"), m_Slider.GetGC()));
 		// 添加控件对象
 		InsComp(&m_Slider);
 	}
@@ -85,9 +85,9 @@ public:
 	{
 		if (m_Pos > m_All - m_Fra) m_Pos = m_All - m_Fra;
 		if (m_Pos < 0) m_Pos = 0;
-		IGuiCtrl* pare = ExDynCast<IGuiCtrl>(GetParent());
+		IGuiCtl* pare = ExDynCast<IGuiCtl>(GetParent());
 		if (pare)
-			pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
+			pare->SendMessage(WM_COMMAND, SB_THUMBPOSITION);
 	}
 
 	BOOL Execute(const CString& key, const CString& val)
@@ -206,16 +206,16 @@ class CGuiScroll : public IGuiCtrlBase
 protected:
 	CGuiSlider m_Slider;
 	CGuiButton m_Up, m_Down;
-	IGuiCtrl* m_Main;
+	IGuiCtl* m_Main;
 
 public:
 	CGuiScroll()
 		: m_Main(NULL)
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiScrollEvent"), GetGC())); /*先让基类绘图*/
-		m_Up.InsEvent((IGuiEvent*)ExGui(_T("CGuiScrUpEvent"), m_Up.GetGC()));
-		m_Down.InsEvent((IGuiEvent*)ExGui(_T("CGuiScrDnEvent"), m_Down.GetGC()));
+		InsEvent(ExGui(_T("CGuiScrollEvent"), GetGC())); /*先让基类绘图*/
+		m_Up.InsEvent(ExGui(_T("CGuiScrUpEvent"), m_Up.GetGC()));
+		m_Down.InsEvent(ExGui(_T("CGuiScrDnEvent"), m_Down.GetGC()));
 		// 添加控件对象
 		InsComp(&m_Slider);
 		m_Up.SetWindowRect(CRect(0, 0, 20, 20));
@@ -235,7 +235,7 @@ public:
 	{
 		if (key == _T("scroll"))
 		{
-			IGuiCtrl* main = CGuiManagerT<IGuiCtrl>::Get(val);
+			IGuiCtl* main = ExGet<IGuiCtl>(val);
 			if (main) main->SetScroll(this);
 		}
 		else
@@ -302,8 +302,8 @@ public:
 		CString type(sType);
 		if (sType == _T("main"))
 		{
-			IGuiCtrl* old_sta = m_Main;
-			m_Main = (IGuiCtrl*)pState;
+			IGuiCtl* old_sta = m_Main;
+			m_Main = (IGuiCtl*)pState;
 			if (old_sta != m_Main)
 				return IGuiCtrlBase::SetState(sType, pState);
 			else

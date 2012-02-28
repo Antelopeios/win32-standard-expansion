@@ -50,24 +50,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
 
 	// 创建按钮控件对象并设置
-	IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiButton")));
+	IGuiCtl* btn = ExGui<IGuiCtl>(_T("CGuiButton"));
 	btn->SetState(_T("image"), img_btn);
 	btn->SetState(_T("font"), txt_btn);
 	btn->SetState(_T("text"), &CString(_T("Dark C.at")));
 	btn->SetState(_T("locate"), (void*)4);
 	btn->SetState(_T("loc_off"), (void*)10);
 	btn->SetWindowRect(CRect(70, 100, 180, 140));
-	//btn->SetEffect(ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"))));
+	//btn->SetEffect(ExGui(_T("CGuiFade")));
 
 	// 创建图片控件对象并设置
-	IGuiCtrl* pic = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPicture")));
+	IGuiCtl* pic = ExGui<IGuiCtl>(_T("CGuiPicture"));
 	pic->SetState(_T("image"), &img_pic);
 	CRect rect(0, 0, img_pic.GetWidth(), img_pic.GetHeight());
 	pic->SetWindowRect(rect);
-	pic->SetEffect(ExDynCast<IGuiEffect>(ExGui(_T("CGuiFade"))));
+	pic->SetEffect(ExGui(_T("CGuiFade")));
 
 	// 创建窗口对象并设置
-	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
+	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
 	wnd->Create(_T("Test"), /*CRect(0, 0, 500, 300)*/rect, SW_HIDE);
 	wnd->CenterWindow();
 	wnd->SetLayered();
@@ -80,7 +80,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	pic->AddComp(btn);
 	wnd->AddEvent(dbnew(CCustomEvent));
 
-	IGuiCtrl* itm = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiPushBtn")));
+	IGuiCtl* itm = ExGui<IGuiCtl>(_T("CGuiPushBtn"));
 	itm->Free();
 
 	// 主消息循环:

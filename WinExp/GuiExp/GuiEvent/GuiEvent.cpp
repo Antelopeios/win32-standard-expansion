@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-18
-// Version:	1.0.0000.1150
+// Date:	2012-02-21
+// Version:	1.0.0001.1750
+//
+// History:
+//	- 1.0.0001.1750(2012-02-21)	+ 添加CQuitEvent事件对象
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -47,5 +50,26 @@
 #include "GuiEvent/GuiEditEvent.hpp"
 #include "GuiEvent/GuiLVEvent.hpp"
 #include "GuiEvent/GuiScrollEvent.hpp"
+#include "GuiEvent/GuiMenuEvent.hpp"
+
+//////////////////////////////////////////////////////////////////
+
+class CQuitEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CQuitEvent, IGuiEvent)
+
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		switch( nMessage )
+		{
+		case WM_DESTROY:
+			::PostQuitMessage(0);
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CQuitEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////

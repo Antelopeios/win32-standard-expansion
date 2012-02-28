@@ -73,7 +73,7 @@ public:
 		, m_Text(NULL)
 	{
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiPictureEvent"), GetGC()));
+		AddEvent(ExGui(_T("CGuiPictureEvent"), GetGC()));
 	}
 	~CGuiPicture()
 	{
@@ -85,7 +85,7 @@ public:
 		CArrayT<CString> sa;
 		if (key == _T("style"))
 		{
-			style_t* sty = CGuiManagerT<style_t>::Get(val);
+			style_t* sty = ExGet<style_t>(val);
 			if (sty)
 			{
 				if(!sty->font.Empty())
@@ -100,7 +100,7 @@ public:
 		if (key == _T("font"))
 		{
 			ExStringToArray(val, sa);
-			SetState(_T("font"), CGuiManagerT<CText>::Get(sa[0]));
+			SetState(_T("font"), ExGet<CText>(sa[0]));
 		}
 		else
 		if (key == _T("color"))
@@ -112,7 +112,7 @@ public:
 		if (key == _T("image"))
 		{
 			ExStringToArray(val, sa);
-			SetState(_T("image"), CGuiManagerT<CImage>::Get(sa[0]));
+			SetState(_T("image"), ExGet<CImage>(sa[0]));
 		}
 		else
 		if (key == _T("text"))

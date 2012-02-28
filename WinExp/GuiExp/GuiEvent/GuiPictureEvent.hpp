@@ -64,8 +64,8 @@ class CGuiPictureEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		// 处理消息
 		switch( nMessage )
@@ -74,16 +74,16 @@ public:
 			if (lParam)
 			{
 				// 获得属性
-				CImage* image = (CImage*)ctrl->GetState(_T("image"));
-				pixel_t pixel = (pixel_t)ctrl->GetState(_T("color"));
-				CText* text = (CText*)ctrl->GetState(_T("font"));
-				CString* str = (CString*)ctrl->GetState(_T("text"));
+				CImage* image = (CImage*)ctl->GetState(_T("image"));
+				pixel_t pixel = (pixel_t)ctl->GetState(_T("color"));
+				CText* text = (CText*)ctl->GetState(_T("font"));
+				CString* str = (CString*)ctl->GetState(_T("text"));
 
 				CImage* mem_img = (CImage*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
 				CRect rect, clt_rct;
-				ctrl->GetClipRect(rect);
-				ctrl->GetClientRect(clt_rct);
+				ctl->GetClipRect(rect);
+				ctl->GetClientRect(clt_rct);
 
 				// 绘图
 				CImgDrawer::Fill(mem_img->Get(), rect, pixel);

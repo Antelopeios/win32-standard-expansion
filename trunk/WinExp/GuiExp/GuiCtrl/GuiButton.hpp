@@ -106,7 +106,7 @@ public:
 		ZeroMemory(m_Image, sizeof(m_Image));
 		ZeroMemory(m_Text, sizeof(m_Text));
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiButtonEvent"), GetGC()));
+		AddEvent(ExGui(_T("CGuiButtonEvent"), GetGC()));
 	}
 	~CGuiButton()
 	{}
@@ -117,7 +117,7 @@ public:
 		CArrayT<CString> sa;
 		if (key == _T("style"))
 		{
-			style_t* sty = CGuiManagerT<style_t>::Get(val);
+			style_t* sty = ExGet<style_t>(val);
 			if (sty)
 			{
 				if(!sty->font.Empty())
@@ -135,7 +135,7 @@ public:
 		{
 			ExStringToArray(val, sa);
 			for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
-				m_Text[i] = CGuiManagerT<CText>::Get(sa[i]);
+				m_Text[i] = ExGet<CText>(sa[i]);
 		}
 		else
 		if (key == _T("color"))
@@ -149,7 +149,7 @@ public:
 		{
 			ExStringToArray(val, sa);
 			for(int i = 0; i < (int)min(_countof(m_Image), sa.GetCount()); ++i)
-				m_Image[i] = CGuiManagerT<CImage>::Get(sa[i]);
+				m_Image[i] = ExGet<CImage>(sa[i]);
 		}
 		else
 		if (key == _T("text"))
@@ -171,7 +171,7 @@ public:
 			SetState(_T("thr_sta"), (void*)_ttoi(val));
 		else
 		if (key == _T("icon"))
-			SetState(_T("icon"), CGuiManagerT<CImage>::Get(val));
+			SetState(_T("icon"), ExGet<CImage>(val));
 		else
 		if (key == _T("ico_off"))
 			SetState(_T("ico_off"), (void*)_ttol(val));
@@ -374,7 +374,7 @@ public:
 		ZeroMemory(m_Color, sizeof(m_Color));
 		ZeroMemory(m_Text, sizeof(m_Text));
 		// 添加事件对象
-		AddEvent((IGuiEvent*)ExGui(_T("CGuiPushBtnEvent"), GetGC()));
+		AddEvent(ExGui(_T("CGuiPushBtnEvent"), GetGC()));
 	}
 	~CGuiPushBtn()
 	{}
@@ -385,7 +385,7 @@ public:
 		CArrayT<CString> sa;
 		if (key == _T("style"))
 		{
-			style_t* sty = CGuiManagerT<style_t>::Get(val);
+			style_t* sty = ExGet<style_t>(val);
 			if (sty)
 			{
 				if(!sty->font.Empty())
@@ -402,7 +402,7 @@ public:
 		{
 			ExStringToArray(val, sa);
 			for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
-				m_Text[i] = CGuiManagerT<CText>::Get(sa[i]);
+				m_Text[i] = ExGet<CText>(sa[i]);
 		}
 		else
 		if (key == _T("color"))
@@ -415,7 +415,7 @@ public:
 		if (key == _T("image"))
 		{
 			ExStringToArray(val, sa);
-			SetState(_T("image"), CGuiManagerT<CImage>::Get(sa[0]));
+			SetState(_T("image"), ExGet<CImage>(sa[0]));
 		}
 		else
 		if (key == _T("text"))

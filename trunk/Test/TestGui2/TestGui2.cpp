@@ -26,7 +26,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	CText txt_ept((font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(128, 128, 128, 255));
 
 	// 创建窗口对象并设置
-	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
+	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
 	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
@@ -36,7 +36,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->GetClientRect(rc_wnd);
 
 	// 创建控件
-	IGuiCtrl* edit = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiEdit")));
+	IGuiCtl* edit = ExGui<IGuiCtl>(_T("CGuiEdit"));
 	edit->SetWindowRect(rc_wnd);
 	edit->SetState(_T("font"), &txt_edt);
 	edit->SetState(_T("empty_font"), &txt_ept);

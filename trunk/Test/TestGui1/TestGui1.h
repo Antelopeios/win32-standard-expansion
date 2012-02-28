@@ -9,15 +9,15 @@ class CCustomEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
 		switch( nMessage )
 		{
 		case WM_KEYDOWN:
 			{
 				if (wParam == VK_ESCAPE) // ESC
-					board->PostMessage(WM_CLOSE);
+					wnd->PostMessage(WM_CLOSE);
 			}
 			break;
 		case WM_DESTROY:
@@ -34,8 +34,8 @@ class CCusPicEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -48,7 +48,7 @@ public:
 		case WM_KEYDOWN:
 			{
 				if (wParam == VK_RETURN) // Enter
-					ctrl->SetVisible(!ctrl->IsVisible());
+					ctl->SetVisible(!ctl->IsVisible());
 			}
 			break;
 		}
@@ -62,16 +62,16 @@ class CCusBtnEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case BM_CLICK:
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
-				IGuiCtrl* pic = ExDynCast<IGuiCtrl>(board->GetChildren().HeadItem());
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
+				IGuiCtl* pic = ExDynCast<IGuiCtl>(wnd->GetChildren().HeadItem());
 				if (!pic) return;
 				pixel_t pix = (pixel_t)pic->GetState(_T("color"));
 				if (pix)

@@ -54,7 +54,7 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 窗口对象接口
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiBoard, IGuiBase)
+EXP_IMPLEMENT_DYNAMIC_MULT(IGuiWnd, IGuiBase)
 
 //////////////////////////////////////////////////////////////////
 
@@ -63,7 +63,7 @@ EXP_IMPLEMENT_DYNAMIC_MULT(IGuiBoard, IGuiBase)
 #endif
 
 // GUI 窗口对象
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
+EXP_IMPLEMENT_DYNAMIC_MULT(IGuiBoardBase, IGuiWnd)
 const LPCTSTR IGuiBoardBase::s_ClassName = _T("GuiExp_Foundation");
 
 IGuiBoardBase::IGuiBoardBase(void)
@@ -111,16 +111,11 @@ BOOL IGuiBoardBase::Create(LPCTSTR sWndName, CRect& rcWnd,
 			wnd_t wndParent/* = NULL*/, UINT uStyle/* = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW*/)
 {
 	RegisterWndClass(s_ClassName, uStyle);
-	Attach
-		(
-		::CreateWindowEx
-			(
-			dwExStyle, s_ClassName, sWndName, dwStyle, 
-			rcWnd.Left(), rcWnd.Top(), rcWnd.Width(), rcWnd.Height(), 
-			wndParent, NULL, m_hIns, NULL
-			)
-		);
-	if( IsNull() ) return FALSE;
+	Attach(::CreateWindowEx(
+		dwExStyle, s_ClassName, sWndName, dwStyle, 
+		rcWnd.Left(), rcWnd.Top(), rcWnd.Width(), rcWnd.Height(), 
+		wndParent, NULL, m_hIns, NULL));
+	if (IsNull()) return FALSE;
 
 	ShowWindow(nCmdShow);
 	UpdateWindow();
@@ -222,16 +217,22 @@ void IGuiBoardBase::MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepa
 }
 void IGuiBoardBase::MoveWindow(CRect& lpRect, BOOL bRepaint/* = TRUE*/)
 {
-	if (IsNull()) return;
-	::MoveWindow
-		(
-		Get(), 
+	MoveWindow(
 		lpRect.Left(), 
 		lpRect.Top(), 
 		lpRect.Width(), 
 		lpRect.Height(), 
-		bRepaint
-		);
+		bRepaint);
+}
+void IGuiBoardBase::MoveWindow(int x, int y, BOOL bRepaint/* = TRUE*/)
+{
+	CRect rc;
+	GetWindowRect(rc);
+	MoveWindow(rc.MoveTo(CPoint(x, y)));
+}
+void IGuiBoardBase::MoveWindow(CPoint& lpPoint, BOOL bRepaint/* = TRUE*/)
+{
+	MoveWindow(lpPoint.x, lpPoint.y, bRepaint);
 }
 void IGuiBoardBase::CenterWindow(wnd_t hWndCenter/* = NULL*/)
 {
@@ -571,5 +572,6 @@ EXP_END
 
 #include "GuiBoard/GuiThunk.hpp"
 #include "GuiBoard/GuiWnd.hpp"
+#include "GuiBoard/GuiMenu.hpp"
 
 //////////////////////////////////////////////////////////////////

@@ -66,7 +66,7 @@ class CGuiEditEvent : public IGuiEvent
 protected:
 	BOOL m_ShiftDown, m_CtrlDown, m_MouseDown, m_bFlicker;
 	UINT_PTR m_uFlicker;
-	IGuiCtrl* m_Ctrl;
+	IGuiCtl* m_Ctrl;
 	CString::iterator_t m_iteFlicker, m_iteSelect, m_iteOffset;
 
 	typedef CMapT<UINT_PTR, CGuiEditEvent*> map_t;
@@ -381,7 +381,7 @@ public:
 				else
 					edit->Del(ite1, ite2->Index() - ite1->Index());
 				m_iteSelect = m_iteFlicker = ite1;
-				m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, EN_CHANGE);
+				m_Ctrl->SendMessage(WM_COMMAND, EN_CHANGE);
 			}
 			else
 			if (m_CtrlDown)
@@ -491,7 +491,7 @@ public:
 			else
 				edit->Del(ite1, ite2->Index() - ite1->Index());
 			m_iteSelect = m_iteFlicker = ite1;
-			m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, EN_CHANGE);
+			m_Ctrl->SendMessage(WM_COMMAND, EN_CHANGE);
 		}
 		else
 		if (cInput >= VK_SPACE)
@@ -505,7 +505,7 @@ public:
 			edit->Add(cInput, ite1);
 			++ite1; /*此处若在上面使用ite1++,当输入第一个字符之前edit为空,则++运算将被忽略*/
 			m_iteSelect = m_iteFlicker = ite1;
-			m_Ctrl->Send(ExDynCast<IGuiObject>(m_Ctrl), WM_COMMAND, EN_CHANGE);
+			m_Ctrl->SendMessage(WM_COMMAND, EN_CHANGE);
 		}
 
 		// 刷新界面
@@ -619,7 +619,7 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		m_Ctrl = ExDynCast<IGuiCtrl>(pGui);
+		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
 		if (!m_Ctrl) return;
 
 		// 处理消息
@@ -654,7 +654,7 @@ public:
 				POINT pt_tmp = {0};
 				::GetCursorPos(&pt_tmp); /*此处有可能移动到窗口外部,而lParam不支持负坐标*/
 				CPoint point(pt_tmp);
-				m_Ctrl->GetBoard()->ScreenToClient(point);
+				m_Ctrl->GetWnd()->ScreenToClient(point);
 				CRect rc_tmp(point, point);
 				m_Ctrl->B2C(rc_tmp);
 				point = rc_tmp.pt1;

@@ -82,7 +82,7 @@ public:
 		ite = items->Head(); \
 	else \
 		++ite; \
-	if (!IGuiCtrl::IsEffect(*ite)) \
+	if (!IGuiCtl::IsEffect(*ite)) \
 	{ \
 		if (ite == items->Last()) \
 			ite = items->Head(); \
@@ -95,7 +95,7 @@ public:
 		ite = items->Last(); \
 	else \
 		--ite; \
-	if (!IGuiCtrl::IsEffect(*ite)) \
+	if (!IGuiCtl::IsEffect(*ite)) \
 	{ \
 		if (ite == items->Head()) \
 			ite = items->Last(); \
@@ -104,34 +104,34 @@ public:
 	}
 //#define sub()
 
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
-		typedef IGuiCtrl::items_t items_t;
+		typedef IGuiCtl::items_t items_t;
 
 		// 处理消息
 		switch( nMessage )
 		{
 		case WM_KEYDOWN:
 			{
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				switch (wParam)
 				{
 				case VK_UP:
 					{
-						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
 						items_t* items = (items_t*)comp->GetState(_T("items"));
 
 						CRect rc_me, rc_it;
-						ctrl->GetWindowRect(rc_me);
+						ctl->GetWindowRect(rc_me);
 						LONG of_it = -1;
 
-						items_t::iterator_t ite = items->Find(ctrl);
+						items_t::iterator_t ite = items->Find(ctl);
 						sub(ite);
 
 						while(TRUE)
 						{
-							IGuiCtrl* it = (*ite);
+							IGuiCtl* it = (*ite);
 							it->GetWindowRect(rc_it);
 							if (rc_me.Top() != rc_it.Top())
 							{
@@ -158,19 +158,19 @@ public:
 					break;
 				case VK_DOWN:
 					{
-						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
 						items_t* items = (items_t*)comp->GetState(_T("items"));
 
 						CRect rc_me, rc_it;
-						ctrl->GetWindowRect(rc_me);
+						ctl->GetWindowRect(rc_me);
 						LONG of_it = -1;
 
-						items_t::iterator_t ite = items->Find(ctrl);
+						items_t::iterator_t ite = items->Find(ctl);
 						add(ite);
 
 						while(TRUE)
 						{
-							IGuiCtrl* it = (*ite);
+							IGuiCtl* it = (*ite);
 							it->GetWindowRect(rc_it);
 							if (rc_me.Top() != rc_it.Top())
 							{
@@ -197,18 +197,18 @@ public:
 					break;
 				case VK_LEFT:
 					{
-						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
 						items_t* items = (items_t*)comp->GetState(_T("items"));
-						items_t::iterator_t ite = items->Find(ctrl);
+						items_t::iterator_t ite = items->Find(ctl);
 						sub(ite);
 						(*ite)->SetFocus();
 					}
 					break;
 				case VK_RIGHT:
 					{
-						IGuiCtrl* comp = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
 						items_t* items = (items_t*)comp->GetState(_T("items"));
-						items_t::iterator_t ite = items->Find(ctrl);
+						items_t::iterator_t ite = items->Find(ctl);
 						add(ite);
 						(*ite)->SetFocus();
 					}
@@ -218,8 +218,8 @@ public:
 			break;
 		case WM_MOUSEWHEEL:
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), nMessage, wParam, lParam);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
+				pare->SendMessage(nMessage, wParam, lParam);
 			}
 			break;
 		}
@@ -235,8 +235,8 @@ class CGuiLVEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiLVEvent, IGuiEvent)
 
 protected:
-	IGuiCtrl* m_Ctrl;
-	IGuiCtrl* m_FocItm;
+	IGuiCtl* m_Ctrl;
+	IGuiCtl* m_FocItm;
 
 public:
 	CGuiLVEvent()
@@ -246,13 +246,13 @@ public:
 
 public:
 	// 获得属性
-	IGuiCtrl* GetFocPic()
+	IGuiCtl* GetFocPic()
 	{
-		return (IGuiCtrl*)m_Ctrl->GetState(_T("foc"));
+		return (IGuiCtl*)m_Ctrl->GetState(_T("foc"));
 	}
-	IGuiCtrl::items_t* GetItems()
+	IGuiCtl::items_t* GetItems()
 	{
-		return (IGuiCtrl::items_t*)(m_Ctrl->GetState(_T("items")));
+		return (IGuiCtl::items_t*)(m_Ctrl->GetState(_T("items")));
 	}
 	LONG GetSpace()
 	{
@@ -268,7 +268,7 @@ public:
 	{
 		ExAssert(m_Ctrl);
 
-		typedef IGuiCtrl::items_t items_t;
+		typedef IGuiCtl::items_t items_t;
 
 		// 获得属性
 		items_t* items = GetItems();
@@ -289,7 +289,7 @@ public:
 		{	// 向上对齐
 			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 			{
-				IGuiCtrl* item = *ite;
+				IGuiCtl* item = *ite;
 				if (!item) continue;
 				// 获取当前项的区域
 				item->GetWindowRect(itm_rc);
@@ -315,7 +315,7 @@ public:
 				items_t::iterator_t it = ite;
 				for(long w_itm = 0; it != items->Tail(); ++it)
 				{
-					IGuiCtrl* item = *it;
+					IGuiCtl* item = *it;
 					if (!item) continue;
 					// 获取当前项的区域
 					w_itm += space;
@@ -331,7 +331,7 @@ public:
 				it = ite;
 				for(long w_itm = 0; it != items->Tail(); ++it)
 				{
-					IGuiCtrl* item = *it;
+					IGuiCtl* item = *it;
 					if (!item) continue;
 					// 获取当前项的区域
 					w_itm += space;
@@ -359,7 +359,7 @@ public:
 		m_Ctrl->SetState(_T("fra_line"), (void*)rect.Height());
 		m_Ctrl->SetState(_T("all_line"), (void*)itm_rc.Bottom());
 	}
-	void ShowItem(IGuiCtrl* pItem)
+	void ShowItem(IGuiCtl* pItem)
 	{
 		if (!pItem) return;
 		ExAssert(m_Ctrl);
@@ -386,7 +386,7 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		m_Ctrl = ExDynCast<IGuiCtrl>(pGui);
+		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
 		if (!m_Ctrl) return;
 
 		// 处理消息
@@ -398,14 +398,14 @@ public:
 			FormatItems();
 			break;
 		case WM_SETFOCUS:
-			if (m_Ctrl == IGuiCtrl::GetFocus())
+			if (m_Ctrl == IGuiCtl::GetFocus())
 			{
-				IGuiCtrl::items_t* items = GetItems();
+				IGuiCtl::items_t* items = GetItems();
 				if (items->Empty()) break;
 				if(!m_FocItm)
 					m_FocItm = items->HeadItem();
 				if(!m_FocItm) break;
-				IGuiCtrl* pic = GetFocPic();
+				IGuiCtl* pic = GetFocPic();
 				if(!pic) break;
 
 				CRect foc_rct;
@@ -416,7 +416,7 @@ public:
 			}
 		case WM_KILLFOCUS:
 			{
-				IGuiCtrl* pic = GetFocPic();
+				IGuiCtl* pic = GetFocPic();
 				if(!pic) break;
 				pic->SetVisible(FALSE);
 			}
@@ -426,11 +426,11 @@ public:
 			if (wParam == VK_SPACE)
 				m_FocItm->SetFocus();
 			else
-				m_FocItm->Send(ExDynCast<IGuiObject>(m_FocItm), nMessage, wParam, lParam);
+				m_FocItm->SendMessage(nMessage, wParam, lParam);
 			break;
 		case WM_COMMAND:
 			if (BN_SETFOCUS == wParam)
-				ShowItem(m_FocItm = (IGuiCtrl*)lParam);
+				ShowItem(m_FocItm = (IGuiCtl*)lParam);
 			break;
 		}
 	}

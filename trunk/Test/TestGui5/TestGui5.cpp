@@ -9,11 +9,6 @@
 
 class CApp : public IApp
 {
-public:
-	CApp(BOOL bUIApp = TRUE)
-		: IApp(bUIApp)
-	{}
-
 protected:
 	DWORD OnInit()
 	{
@@ -23,7 +18,7 @@ protected:
 		if (file.Error() || file.Size() == 0) return 0;
 		CGuiSkin::Parse(&file);
 
-		ExGet(IGuiBoard, _T("wnd"))->CenterWindow();
+		ExGet<IGuiWnd>(_T("wnd"))->CenterWindow();
 
 	/*	unsigned int tStart = 0, tEnd = 0;
 

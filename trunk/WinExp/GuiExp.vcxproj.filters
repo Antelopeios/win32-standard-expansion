@@ -130,6 +130,12 @@
     <ClInclude Include="GuiExp\GuiManager\GuiSkin.h">
       <Filter>GuiManager</Filter>
     </ClInclude>
+    <ClInclude Include="GuiExp\GuiBoard\GuiMenu.hpp">
+      <Filter>GuiBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiMenuEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GuiExp\GuiExp.rc" />

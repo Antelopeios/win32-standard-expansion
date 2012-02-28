@@ -81,7 +81,7 @@ public:
 	BOOL Execute(const CString& key, const CString& val)
 	{
 		if (key == _T("image"))
-			SetState(_T("image"), CGuiManagerT<CImage>::Get(val));
+			SetState(_T("image"), ExGet<CImage>(val));
 		else
 		if (key == _T("sta_cnt"))
 			SetState(_T("sta_cnt"), (void*)_ttol(val));
@@ -115,7 +115,7 @@ public:
 			if (new_sta == NULL) return FALSE;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
-				IGuiCtrl* item = *ite;
+				IGuiCtl* item = *ite;
 				if (!item) continue;
 				items_t::iterator_t it = new_sta->Find(item);
 				if (it == new_sta->Tail()) DelComp(item);
@@ -123,7 +123,7 @@ public:
 			m_ItemList = *(items_t*)pState;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
-				IGuiCtrl* item = *ite;
+				IGuiCtl* item = *ite;
 				if (!item) continue;
 				AddComp(item);
 			}

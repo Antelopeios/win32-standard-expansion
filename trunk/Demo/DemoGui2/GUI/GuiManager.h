@@ -2,8 +2,8 @@
 
 //////////////////////////////////////////////////////////////////
 
-typedef CGuiManagerT<IGuiBoard> CWndManager;
-typedef CGuiManagerT<IGuiCtrl> CCtlManager;
+typedef CGuiManagerT<IGuiWnd> CWndManager;
+typedef CGuiManagerT<IGuiCtl> CCtlManager;
 typedef CGuiManagerT<CImage> CImgManager;
 typedef CGuiManagerT<CText> CTxtManager;
 

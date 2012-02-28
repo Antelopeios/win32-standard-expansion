@@ -9,15 +9,15 @@ class CCustomEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
 		switch( nMessage )
 		{
 		case WM_KEYDOWN:
 			{
 				if (wParam == VK_ESCAPE) // ESC
-					board->PostMessage(WM_CLOSE);
+					wnd->PostMessage(WM_CLOSE);
 			}
 			break;
 		case WM_DESTROY:
@@ -38,22 +38,25 @@ class CCusPicEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
 
 		switch( nMessage )
 		{
 		case WM_SHOWWINDOW:
-			if (wParam && ctrl && ::IsWindowVisible(ExGet(IGuiBoard, _T("wnd"))->GethWnd()))
 			{
-				ExGet(IGuiBoard, _T("wnd"))->ShowWindow(SW_HIDE);
-				CImage* img = (CImage*)ctrl->GetState(_T("image"));
-				CRect rc(0, 0, img->GetWidth(), img->GetHeight()), rect;
-				ExGet(IGuiBoard, _T("wnd"))->GetWindowRect(rect);
-				rect.Width(rc.Width());
-				rect.Height(rc.Height());
-				ExGet(IGuiBoard, _T("wnd"))->MoveWindow(rect);
-				ctrl->SetWindowRect(rc);
-				ExGet(IGuiBoard, _T("wnd"))->ShowWindow(SW_SHOW);
+				IGuiWnd* wnd = ExGet<IGuiWnd>(_T("wnd"));
+				if (wParam && ctl && ::IsWindowVisible(wnd->GethWnd()))
+				{
+					wnd->ShowWindow(SW_HIDE);
+					CImage* img = (CImage*)ctl->GetState(_T("image"));
+					CRect rc(0, 0, img->GetWidth(), img->GetHeight()), rect;
+					wnd->GetWindowRect(rect);
+					rect.Width(rc.Width());
+					rect.Height(rc.Height());
+					wnd->MoveWindow(rect);
+					ctl->SetWindowRect(rc);
+					wnd->ShowWindow(SW_SHOW);
+				}
 			}
 			break;
 		case WM_NCHITTEST:
@@ -65,8 +68,8 @@ public:
 			break;
 		case WM_KEYDOWN:
 			{
-				if (wParam == VK_RETURN && ctrl) // Enter
-					ctrl->SetVisible(!ctrl->IsVisible());
+				if (wParam == VK_RETURN && ctl) // Enter
+					ctl->SetVisible(!ctl->IsVisible());
 			}
 			break;
 		}
@@ -85,17 +88,17 @@ class CCusBtnEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case BM_CLICK:
 			{
 				CGuiSkin::Parse(_T("<image name=\"bk\" path=\"TestImg1/ground.png\" />"));
-				ExGet(IGuiBoard, _T("wnd"))->SetLayered(TRUE, FALSE);
-				ExGet(IGuiCtrl, _T("btn"))->DelEvent();
-				ExGet(IGuiCtrl, _T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent2));
+				ExGet<IGuiWnd>(_T("wnd"))->SetLayered(TRUE, FALSE);
+				ExGet<IGuiCtl>(_T("btn"))->DelEvent();
+				ExGet<IGuiCtl>(_T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent2));
 			}
 			break;
 		}
@@ -113,17 +116,17 @@ class CCusBtnEvent2 : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case BM_CLICK:
 			{
 				CGuiSkin::Parse(_T("<image name=\"bk\" path=\"TestImg1/ground.jpg\" />"));
-				ExGet(IGuiBoard, _T("wnd"))->SetLayered(FALSE, FALSE);
-				ExGet(IGuiCtrl, _T("btn"))->DelEvent();
-				ExGet(IGuiCtrl, _T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent));
+				ExGet<IGuiWnd>(_T("wnd"))->SetLayered(FALSE, FALSE);
+				ExGet<IGuiCtl>(_T("btn"))->DelEvent();
+				ExGet<IGuiCtl>(_T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent));
 			}
 			break;
 		}
@@ -141,8 +144,8 @@ class CEvent_scr_h : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -150,7 +153,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -160,7 +163,7 @@ public:
 				t = rc_wnd.Top();
 				r = rc_wnd.Right();
 				b = rc_wnd.Bottom();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}

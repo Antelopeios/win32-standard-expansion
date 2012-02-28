@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-02
-// Version:	1.0.0011.1802
+// Date:	2012-02-27
+// Version:	1.0.0013.1558
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -49,6 +49,8 @@
 //	- 1.0.0009.2008(2011-07-16)	= 调整SetLayered()接口,支持在非半透明图层化模式下设置透明色
 //	- 1.0.0010.1818(2011-08-26)	+ 添加控制是否窗口自绘的接口
 //	- 1.0.0011.1802(2012-02-02)	+ 添加IGuiBoard::SetParent()
+//	- 1.0.0012.1200(2012-02-22)	= 将IGuiBoard改名为IGuiWnd
+//	- 1.0.0013.1558(2012-02-27)	+ 添加支持仅移动窗口位置而不改变大小的MoveWindow方法
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -65,18 +67,32 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 窗口对象接口
-EXP_INTERFACE IGuiBoard : public IGuiBase
+EXP_INTERFACE IGuiWnd : public IGuiBase
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiBoard, IGuiBase)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiWnd, IGuiBase)
 
 public:
-	IGuiBoard(void) {}
-	virtual ~IGuiBoard(void) {}
+	IGuiWnd(void) {}
+	virtual ~IGuiWnd(void) {}
+
+	static BOOL GetDesktopRect(CRect& lpRect, const CPoint& pt = CPoint())
+	{
+		MONITORINFO info = {0};
+		info.cbSize = sizeof(MONITORINFO);
+		if (::GetMonitorInfo(::MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST), &info))
+		{
+			lpRect = info.rcMonitor;
+			return TRUE;
+		}
+		else
+			return FALSE;
+	}
 
 public:
 	virtual BOOL Create(LPCTSTR sWndName, CRect& rcWnd, 
 						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
 						wnd_t wndParent = NULL, UINT uStyle = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW) = 0;
+	virtual BOOL Create() = 0;
 	virtual BOOL IsNull() const = 0;
 
 	virtual BOOL Attach(wnd_t hWnd) = 0;
@@ -103,7 +119,7 @@ public:
 	virtual void Invalidate() = 0;
 	virtual void InvalidateRect(CRect& rcInv) = 0;
 	virtual void InvalidateRgn(HRGN hRgn) = 0;
-	virtual BOOL ShowWindow(int nCmdShow) = 0;
+	virtual BOOL ShowWindow(int nCmdShow = SW_SHOW) = 0;
 	virtual BOOL UpdateWindow() = 0;
 
 	// 窗口DC
@@ -118,6 +134,8 @@ public:
 	// 窗口移动
 	virtual void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE) = 0;
 	virtual void MoveWindow(CRect& lpRect, BOOL bRepaint = TRUE) = 0;
+	virtual void MoveWindow(int x, int y, BOOL bRepaint = TRUE) = 0;
+	virtual void MoveWindow(CPoint& lpPoint, BOOL bRepaint = TRUE) = 0;
 	virtual void CenterWindow(wnd_t hWndCenter = NULL) = 0;
 
 	// 窗口坐标转换
@@ -156,9 +174,9 @@ struct _GuiBoardAlloc
 };
 
 // GUI 窗口对象
-EXP_INTERFACE IGuiBoardBase : public IGuiBoard, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
+EXP_INTERFACE IGuiBoardBase : public IGuiWnd, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiBoard)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiWnd)
 
 	typedef ITypeObjectT<wnd_t, _GuiBoardAlloc> type_base_t;
 
@@ -185,6 +203,7 @@ public:
 	BOOL Create(LPCTSTR sWndName, CRect& rcWnd, 
 				int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
 				wnd_t wndParent = NULL, UINT uStyle = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW);
+	BOOL Create() { return Create(NULL, CRect(), SW_HIDE); }
 
 	BOOL IsNull() const;
 
@@ -213,6 +232,8 @@ public:
 	// 窗口移动
 	void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE);
 	void MoveWindow(CRect& lpRect, BOOL bRepaint = TRUE);
+	void MoveWindow(int x, int y, BOOL bRepaint = TRUE);
+	void MoveWindow(CPoint& lpPoint, BOOL bRepaint = TRUE);
 	void CenterWindow(wnd_t hWndCenter = NULL);
 
 	// 窗口坐标转换

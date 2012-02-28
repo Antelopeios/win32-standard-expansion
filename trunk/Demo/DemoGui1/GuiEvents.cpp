@@ -12,22 +12,22 @@ class CEvent_wnd : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
 		switch( nMessage )
 		{
 		case WM_SIZE:
-			for(IGuiBase::list_t::iterator_t ite = board->GetChildren().Head(); ite != board->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = wnd->GetChildren().Head(); ite != wnd->GetChildren().Tail(); ++ite)
 			{
-				IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-				if(!ctrl || ExDynCheck(_T("CGuiLVItem"), ExDynCast<IBaseObject>(ctrl))) continue;
-				if (ctrl->IsVisible())
-					ctrl->Send(ExDynCast<IGuiObject>(ctrl), WM_SHOWWINDOW, 1);
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				if(!ctl || ExDynCheck(_T("CGuiLVItem"), ExDynCast<IBaseObject>(ctl))) continue;
+				if (ctl->IsVisible())
+					ctl->SendMessage(WM_SHOWWINDOW, 1);
 			}
 			{
-				IGuiCtrl* ctrl = ::IsZoomed(board->GethWnd()) ? GUI_CTL(win_sysbtn_max) : GUI_CTL(win_sysbtn_restore);
-				ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+				IGuiCtl* ctl = ::IsZoomed(wnd->GethWnd()) ? GUI_CTL(win_sysbtn_max) : GUI_CTL(win_sysbtn_restore);
+				ctl->SendMessage(BM_CLICK);
 			}
 			break;
 		case WM_DESTROY:
@@ -56,8 +56,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -69,24 +69,24 @@ public:
 			break;
 		//case WM_NCLBUTTONDOWN:
 		//	{
-		//		IGuiBoard* wnd = ctrl->GetBoard();
+		//		IGuiWnd* wnd = ctl->GetWnd();
 		//		ExAssert(wnd);
 		//		m_bZoomed = ::IsZoomed(wnd->GethWnd());
 		//	}
 		//	break;
 		//case WM_NCLBUTTONDBLCLK:
 		//	{
-		//		IGuiBoard* wnd = ctrl->GetBoard();
+		//		IGuiWnd* wnd = ctl->GetWnd();
 		//		ExAssert(wnd);
-		//		ctrl = m_bZoomed ? GUI_CTL(win_sysbtn_restore) : GUI_CTL(win_sysbtn_max);
-		//		ctrl->Send(ExDynCast<IGuiObject>(ctrl), BM_CLICK);
+		//		ctl = m_bZoomed ? GUI_CTL(win_sysbtn_restore) : GUI_CTL(win_sysbtn_max);
+		//		ctl->SendMessage(BM_CLICK);
 		//	}
 		//	break;
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -96,7 +96,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = t + GUI_IMG(banner)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -122,8 +122,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -131,7 +131,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -140,7 +140,7 @@ public:
 				t = rc_wnd.Bottom() - GUI_IMG(corner_lb)->GetHeight();
 				r = l + GUI_IMG(corner_lb)->GetWidth();
 				b = t + GUI_IMG(corner_lb)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -149,7 +149,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -167,13 +167,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -198,8 +198,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -207,7 +207,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -216,7 +216,7 @@ public:
 				t = rc_wnd.Bottom() - GUI_IMG(corner_rb)->GetHeight();
 				r = l + GUI_IMG(corner_rb)->GetWidth();
 				b = t + GUI_IMG(corner_rb)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -225,7 +225,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -243,13 +243,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -274,8 +274,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -283,7 +283,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -292,7 +292,7 @@ public:
 				t = rc_wnd.Top();
 				r = l + GUI_IMG(corner_rt)->GetWidth();
 				b = t + GUI_IMG(corner_rt)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -301,7 +301,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -319,13 +319,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENESW));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -350,8 +350,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -359,7 +359,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -368,7 +368,7 @@ public:
 				t = rc_wnd.Top();
 				r = l + GUI_IMG(corner_lt)->GetWidth();
 				b = t + GUI_IMG(corner_lt)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -377,7 +377,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -395,13 +395,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENWSE));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -426,8 +426,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -435,7 +435,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -444,7 +444,7 @@ public:
 				t = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(corner_rb)->GetWidth();
 				b = t + GUI_IMG(line_bottom)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -453,7 +453,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -468,13 +468,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -499,8 +499,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -508,7 +508,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -517,7 +517,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(corner_lt)->GetHeight();
 				r = l + GUI_IMG(line_left)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(corner_lb)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -526,7 +526,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -541,13 +541,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -572,8 +572,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -581,7 +581,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -590,7 +590,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(corner_rt)->GetHeight();
 				r = l + GUI_IMG(line_right)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(corner_rb)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -599,7 +599,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -614,13 +614,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZEWE));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -645,8 +645,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -654,7 +654,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 
@@ -663,7 +663,7 @@ public:
 				t = rc_wnd.Top();
 				r = rc_wnd.Right() - GUI_IMG(corner_rt)->GetWidth();
 				b = t + GUI_IMG(line_top)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_MOUSEMOVE:
@@ -672,7 +672,7 @@ public:
 			if (m_MouseDown)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetWindowRect(rc_wnd);
 
@@ -687,13 +687,13 @@ public:
 			break;
 		case WM_LBUTTONDOWN:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MouseDown = TRUE;
 			break;
 		case WM_LBUTTONUP:
 			::SetCursor(::LoadCursor(NULL, IDC_SIZENS));
 			m_MouseDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		}
 	}
@@ -710,8 +710,8 @@ class CEvent_tag_bg : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -719,7 +719,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -729,7 +729,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + 115;
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = t + GUI_IMG(tag_bg)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -747,8 +747,8 @@ class CEvent_toolbar_bg : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -756,7 +756,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -768,7 +768,7 @@ public:
 					GUI_IMG(toolbar_bg)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = t + GUI_IMG(toolbar_bg)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -786,7 +786,7 @@ class CEvent_list : public IGuiEvent
 protected:
 	CGC gc;
 
-	IGuiCtrl* m_OldBtn;
+	IGuiCtl* m_OldBtn;
 
 	CListT<CImage*> m_list_ico;
 	CListT<CString> m_list_str;
@@ -847,8 +847,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -858,12 +858,12 @@ public:
 				if(!m_Loaded)
 				{
 					m_Loaded = TRUE;
-					IGuiCtrl::items_t items_list;
+					IGuiCtl::items_t items_list;
 					CListT<CImage*>::iterator_t ite_ico = m_list_ico.Head();
 					CListT<CString>::iterator_t ite_str = m_list_str.Head();
 					for(; ite_ico != m_list_ico.Tail() && ite_str != m_list_str.Tail(); ++ite_ico, ++ite_str)
 					{
-						IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
+						IGuiCtl* btn = ExGui<IGuiCtl>(_T("CGuiLVItem"));
 						btn->Execute(_T("image"), _T("\
 							list_cor_lt,\
 							list_item_top,\
@@ -890,7 +890,7 @@ public:
 					items_list.HeadItem()->SetFocus();
 				}
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -900,13 +900,13 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case WM_COMMAND:
 			if (wParam == BN_CLICKED)
 			{
-				IGuiCtrl* btn = (IGuiCtrl*)lParam;
+				IGuiCtl* btn = (IGuiCtl*)lParam;
 				if (m_OldBtn == btn) break;
 
 				CText* text = ((CText**)btn->GetState(_T("font")))[0];
@@ -926,7 +926,7 @@ public:
 			else
 			if (wParam == BN_KILLFOCUS)
 			{
-				IGuiCtrl* btn = (IGuiCtrl*)lParam;
+				IGuiCtl* btn = (IGuiCtl*)lParam;
 				if (m_OldBtn != btn) break;
 
 				CText* text = ((CText**)btn->GetState(_T("font")))[0];
@@ -959,8 +959,8 @@ class CEvent_scr_h : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -968,7 +968,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -979,7 +979,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -997,8 +997,8 @@ class CEvent_win_sysbtn_close : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1006,7 +1006,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1018,14 +1018,14 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
 				r = l + GUI_IMG(win_sysbtn_close)->GetWidth();
 				b = t + GUI_IMG(win_sysbtn_close)->GetHeight() / 3;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
-				board->PostMessage(WM_CLOSE);
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
+				wnd->PostMessage(WM_CLOSE);
 			}
 			break;
 		}
@@ -1043,8 +1043,8 @@ class CEvent_win_sysbtn_max : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1052,7 +1052,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1065,32 +1065,32 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
 				r = l + GUI_IMG(win_sysbtn_max)->GetWidth();
 				b = t + GUI_IMG(win_sysbtn_max)->GetHeight() / 3;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			// 判断窗口
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
-				ctrl->SetVisible(!::IsZoomed(board->GethWnd()));
-				GUI_CTL(win_sysbtn_restore)->SetVisible(::IsZoomed(board->GethWnd()));
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
+				ctl->SetVisible(!::IsZoomed(wnd->GethWnd()));
+				GUI_CTL(win_sysbtn_restore)->SetVisible(::IsZoomed(wnd->GethWnd()));
 			}
 			break;
 		case BM_CLICK:
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
 				// 先最大化窗口
-				if (!::IsZoomed(board->GethWnd()))
-					board->ShowWindow(SW_SHOWMAXIMIZED);
+				if (!::IsZoomed(wnd->GethWnd()))
+					wnd->ShowWindow(SW_SHOWMAXIMIZED);
 				// 重新设置窗口大小
 				RECT rect;
-				::GetWindowRect(board->GethWnd(), &rect);
+				::GetWindowRect(wnd->GethWnd(), &rect);
 				HMONITOR monitor = ::MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
 				MONITORINFO mi = {0};
 				mi.cbSize = sizeof(mi);
 				::GetMonitorInfo(monitor, &mi);
 				if (memcmp(&rect, &(mi.rcWork), sizeof(RECT)) != 0)
-					board->MoveWindow(CRect(mi.rcWork));
+					wnd->MoveWindow(CRect(mi.rcWork));
 			}
 			break;
 		}
@@ -1108,8 +1108,8 @@ class CEvent_win_sysbtn_restore : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1117,7 +1117,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1130,23 +1130,23 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
 				r = l + GUI_IMG(win_sysbtn_restore)->GetWidth();
 				b = t + GUI_IMG(win_sysbtn_restore)->GetHeight() / 3;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			// 判断窗口
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
-				ctrl->SetVisible(::IsZoomed(board->GethWnd()));
-				GUI_CTL(win_sysbtn_max)->SetVisible(!::IsZoomed(board->GethWnd()));
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
+				ctl->SetVisible(::IsZoomed(wnd->GethWnd()));
+				GUI_CTL(win_sysbtn_max)->SetVisible(!::IsZoomed(wnd->GethWnd()));
 			}
 			break;
 		case BM_CLICK:
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
 				// 还原窗口
-				if (::IsZoomed(board->GethWnd()))
-					board->ShowWindow(SW_SHOWNORMAL);
+				if (::IsZoomed(wnd->GethWnd()))
+					wnd->ShowWindow(SW_SHOWNORMAL);
 			}
 			break;
 		}
@@ -1164,8 +1164,8 @@ class CEvent_win_sysbtn_min : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1173,7 +1173,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1191,15 +1191,15 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() - 1;
 				r = l + GUI_IMG(win_sysbtn_min)->GetWidth();
 				b = t + GUI_IMG(win_sysbtn_min)->GetHeight() / 3;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
 			{
-				IGuiBoard* board = ctrl->GetBoard();
-				if (!board) return;
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (!wnd) return;
 				// 最小化窗口
-				board->ShowWindow(SW_SHOWMINIMIZED);
+				wnd->ShowWindow(SW_SHOWMINIMIZED);
 			}
 			break;
 		}
@@ -1221,8 +1221,8 @@ public:
 	CEvent_topbar_btn() : m_Loaded(FALSE) {}
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1232,12 +1232,12 @@ public:
 				if(!m_Loaded)
 				{
 					m_Loaded = TRUE;
-					IGuiCtrl::items_t* items = (IGuiCtrl::items_t*)ctrl->GetState(_T("items"));
+					IGuiCtl::items_t* items = (IGuiCtl::items_t*)ctl->GetState(_T("items"));
 					items->GetAt(0)->SendMessage(BM_CLICK);
 				}
 
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1251,7 +1251,7 @@ public:
 					GUI_IMG(topbar_btn)->GetHeight() / 4 - 8;
 				r = l + GUI_IMG(topbar_btn)->GetWidth();
 				b = t + GUI_IMG(topbar_btn)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1269,21 +1269,21 @@ class CEvent_items_topbar_btn : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
 		case BM_CLICK:
 			{
-				IGuiComp* pare = ctrl->GetParent();	
+				IGuiComp* pare = ctl->GetParent();	
 				for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
 				{
-					IGuiCtrl* c = ExDynCast<IGuiCtrl>(*ite);
-					if (c == ctrl) continue;
+					IGuiCtl* c = ExDynCast<IGuiCtl>(*ite);
+					if (c == ctl) continue;
 					c->SetState(_T("status"), (void*)0);
 				}
-				ctrl->SetState(_T("status"), (void*)3);
+				ctl->SetState(_T("status"), (void*)3);
 			}
 			break;
 		}
@@ -1301,8 +1301,8 @@ class CEvent_gamesearch_charmap : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1310,7 +1310,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1325,7 +1325,7 @@ public:
 					GUI_IMG(gamesearch_charmap)->GetHeight() / 3 - 2;
 				r = l + GUI_IMG(gamesearch_charmap)->GetWidth();
 				b = t + GUI_IMG(gamesearch_charmap)->GetHeight() / 3;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1343,8 +1343,8 @@ class CEvent_toolbar_tools : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1352,7 +1352,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1366,7 +1366,7 @@ public:
 					GUI_IMG(toolbar_tools)->GetHeight() / 3;
 				r = l + GUI_IMG(toolbar_tools)->GetWidth();
 				b = t + GUI_IMG(toolbar_tools)->GetHeight() / 3;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1384,8 +1384,8 @@ class CEvent_search_bg : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1393,7 +1393,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1406,7 +1406,7 @@ public:
 					GUI_IMG(search_bg)->GetHeight() - 3;
 				r = l + GUI_IMG(search_bg)->GetWidth();
 				b = t + GUI_IMG(search_bg)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1424,8 +1424,8 @@ class CEvent_search_button : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1433,7 +1433,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1447,7 +1447,7 @@ public:
 					GUI_IMG(search_button)->GetHeight() - 3;
 				r = l + GUI_IMG(search_button)->GetWidth();
 				b = t + GUI_IMG(search_button)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1465,8 +1465,8 @@ class CEvent_google_bg : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1474,7 +1474,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1487,7 +1487,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + 120;
 				r = l + GUI_IMG(google_bg)->GetWidth();
 				b = t + GUI_IMG(google_bg)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1505,8 +1505,8 @@ class CEvent_google_button : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1514,7 +1514,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1526,7 +1526,7 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + 120;
 				r = l + GUI_IMG(google_button)->GetWidth();
 				b = t + GUI_IMG(google_button)->GetHeight();
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		}
@@ -1544,8 +1544,8 @@ class CEvent_tag_qb : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1553,7 +1553,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1566,7 +1566,7 @@ public:
 					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
 				r = l + GUI_IMG(tag_qb)->GetWidth();
 				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
@@ -1594,8 +1594,8 @@ class CEvent_tag_zx : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1603,7 +1603,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1619,7 +1619,7 @@ public:
 					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
 				r = l + GUI_IMG(tag_qb)->GetWidth();
 				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
@@ -1647,8 +1647,8 @@ class CEvent_tag_wl : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1656,7 +1656,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1672,7 +1672,7 @@ public:
 					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
 				r = l + GUI_IMG(tag_qb)->GetWidth();
 				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
@@ -1700,8 +1700,8 @@ class CEvent_tag_dz : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1709,7 +1709,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1725,7 +1725,7 @@ public:
 					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
 				r = l + GUI_IMG(tag_qb)->GetWidth();
 				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
@@ -1753,8 +1753,8 @@ class CEvent_tag_wy : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1762,7 +1762,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1778,7 +1778,7 @@ public:
 					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
 				r = l + GUI_IMG(tag_qb)->GetWidth();
 				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:
@@ -1806,8 +1806,8 @@ class CEvent_tag_dj : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		switch( nMessage )
 		{
@@ -1815,7 +1815,7 @@ public:
 			if (wParam)
 			{
 				CRect rc_wnd;
-				IGuiBoard* wnd = ctrl->GetBoard();
+				IGuiWnd* wnd = ctl->GetWnd();
 				ExAssert(wnd);
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Inflate(CPoint(1, 1));
@@ -1831,7 +1831,7 @@ public:
 					GUI_IMG(tag_qb)->GetHeight() / 4 + 115;
 				r = l + GUI_IMG(tag_qb)->GetWidth();
 				b = t + GUI_IMG(tag_qb)->GetHeight() / 4;
-				ctrl->SetWindowRect(CRect(l, t, r, b));
+				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;
 		case BM_CLICK:

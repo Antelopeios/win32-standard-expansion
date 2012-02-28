@@ -59,7 +59,7 @@ void CGuiSkin::Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent/* = NUL
 	if (exc)
 	{
 		ret = exc->Execute(xml, ite, parent);
-		IGuiBoard* brd = ExDynCast<IGuiBoard>(ret);
+		IGuiWnd* brd = ExDynCast<IGuiWnd>(ret);
 		if (brd) m_NewDiv.Add(brd);
 		if (exc->m_pNedDel) m_NedDel.Add(exc->m_pNedDel);
 	}
@@ -82,7 +82,7 @@ BOOL CGuiSkin::Parse(IFileObject* pFile)
 	{
 		for(CArrayT<void*>::iterator_t ite = m_LstDiv.Head(); ite != m_LstDiv.Tail(); ++ite)
 		{
-			IGuiBoard* brd = (IGuiBoard*)(*ite);
+			IGuiWnd* brd = (IGuiWnd*)(*ite);
 			if (::IsWindowVisible(brd->GethWnd()))
 				brd->SendMessage(WM_SHOWWINDOW, 1);
 		}
@@ -91,7 +91,7 @@ BOOL CGuiSkin::Parse(IFileObject* pFile)
 	{
 		for(CArrayT<void*>::iterator_t ite = m_NewDiv.Head(); ite != m_NewDiv.Tail(); ++ite)
 		{
-			IGuiBoard* brd = (IGuiBoard*)(*ite);
+			IGuiWnd* brd = (IGuiWnd*)(*ite);
 			if (::IsWindowVisible(brd->GethWnd()))
 				brd->SendMessage(WM_SHOWWINDOW, 1);
 		}

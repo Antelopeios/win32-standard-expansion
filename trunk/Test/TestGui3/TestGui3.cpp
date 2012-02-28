@@ -57,7 +57,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	for(int i = 1; i < _countof(txt_btn); ++i) txt_btn[i] = txt_btn[0];
 
 	// 创建窗口对象并设置
-	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
+	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
 	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
@@ -67,11 +67,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->GetClientRect(rc_wnd);
 
 	// 创建列表控件
-	IGuiCtrl* list = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiListView")));
-	IGuiCtrl::items_t items;
+	IGuiCtl* list = ExGui<IGuiCtl>(_T("CGuiListView"));
+	IGuiCtl::items_t items;
 	for(int i = 0; i < 100; ++i)
 	{
-		IGuiCtrl* btn = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiLVItem")));
+		IGuiCtl* btn = ExGui<IGuiCtl>(_T("CGuiLVItem"));
 		btn->SetState(_T("icon"), &img_pic);
 		//btn->SetState(_T("glow"), (void*)1);
 		btn->SetState(_T("image"), img_btn);

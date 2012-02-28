@@ -75,7 +75,7 @@ public:
 		: m_GC(NULL)
 	{
 		// 添加事件对象
-		InsEvent((IGuiEvent*)ExGui(_T("CGuiWndEvent"), GetGC()));
+		InsEvent(ExGui(_T("CGuiWndEvent"), GetGC()));
 	}
 	virtual ~IGuiBase(void)
 	{
@@ -102,17 +102,18 @@ public:
 			return this;
 	}
 
-	void InsEvent(IGuiEvent* pEvent)
+	void InsEvent(void* p)
 	{
-		if (!pEvent) return ;
+		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
+		if (!evt) return ;
 		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(pEvent);
+		evt_list_t::iterator_t ite = FindEvent(evt);
 		if (ite != GetEvent().Tail()) return;
 		// 添加新对象
 		if (GetEvent().Empty())
-			GetEvent().Add(pEvent, GetEvent().Head());
+			GetEvent().Add(evt, GetEvent().Head());
 		else
-			GetEvent().Add(pEvent, GetEvent().Head() + 1);
+			GetEvent().Add(evt, GetEvent().Head() + 1);
 	}
 
 	virtual CGC* GetGC() { return m_GC; }

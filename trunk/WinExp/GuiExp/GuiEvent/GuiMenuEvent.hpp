@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,21 +28,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiFade - 淡入淡出效果
+// GuiMenuEvent - 菜单事件逻辑
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-09
-// Version:	1.0.0001.1616
+// Date:	2012-02-27
+// Version:	1.0.0000.1100
 //
 // History:
-//	- 1.0.0000.0935(2011-05-24)	@ 构建完CGuiFade的第一个版本
-//	- 1.0.0001.1616(2011-06-09)	# 修正当多个渐变对象同时执行时会因静态的alpha值而产生冲突的问题
+//	- 1.0.0000.1100(2012-02-27)	@ 开始构建GuiMenuEvent
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiFade_hpp__
-#define __GuiFade_hpp__
+#ifndef __GuiMenuEvent_hpp__
+#define __GuiMenuEvent_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -52,41 +51,48 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiFade : public IGuiEffectBase
+class CGuiMenuEvent : public IGuiEvent
 {
-	EXP_DECLARE_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
-
-protected:
-	int m_Alpha;
+	EXP_DECLARE_DYNCREATE_CLS(CGuiMenuEvent, IGuiEvent)
 
 public:
-	CGuiFade()
-		: m_Alpha(0)
-	{}
-
-protected:
-	BOOL Overlap(IGuiCtl* pCtrl, CImage& tNew, CImage& tOld)
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		if (!pCtrl) return FALSE;
-		if (m_Alpha >= EXP_CM) m_Alpha = 0;
-		if (m_Alpha > EXP_CM - 25) m_Alpha = EXP_CM;
-		//ExTrace(_T("0x%08X fade alpha: %d\n"), pCtrl, m_Alpha);
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
-		CImage tmp_old(tOld.Clone());
-		CImgDrawer::Cover(tmp_old, tNew, m_Alpha);
-		CImgDrawer::Cover(tNew, tmp_old);
-
-		m_Alpha += 25;
-		return (m_Alpha < EXP_CM);
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_MOUSEACTIVATE:
+			{
+				SetResult(MA_NOACTIVATE);
+				SetState(return_next);
+			}
+			break;
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+			{
+				CPoint pt(ExLoWord(lParam), ExHiWord(lParam));
+				CRect rc;
+				wnd->GetClientRect(rc);
+				if(!rc.PtInRect(pt))
+				{
+					::ShowWindow(wnd->GethWnd(), SW_HIDE);
+					::ReleaseCapture();
+				}
+			}
+			break;
+		}
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiFade, IGuiEffectBase)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiMenuEvent, IGuiEvent)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiFade_hpp__*/
+#endif/*__GuiMenuEvent_hpp__*/

@@ -82,7 +82,7 @@ public:
 	{}
 
 protected:
-	virtual BOOL Overlap(IGuiCtrl* pCtrl, CImage& tNew, CImage& tOld) = 0;
+	virtual BOOL Overlap(IGuiCtl* pCtrl, CImage& tNew, CImage& tOld) = 0;
 
 public:
 	void Init(CImage& tImg)
@@ -96,21 +96,21 @@ public:
 
 	void Show(IGuiObject* pGui, CImage& tImg)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
-		IGuiBoard* board = ctrl->GetBoard();
-		if (!board) return;
-		if (ctrl->IsUpdated())
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
+		IGuiWnd* wnd = ctl->GetWnd();
+		if (!wnd) return;
+		if (ctl->IsUpdated())
 		{
 			CImgDrawer::Cover(tImg, m_imgCac);
-			SetTimer(board->GethWnd());
+			SetTimer(wnd->GethWnd());
 		}
 		else
-		if (m_IsRunning && !Overlap(ctrl, tImg, m_imgCac))
+		if (m_IsRunning && !Overlap(ctl, tImg, m_imgCac))
 		{
-			KillTimer(board->GethWnd());
+			KillTimer(wnd->GethWnd());
 			m_imgCac.Set(tImg.Clone());
-			board->Invalidate();
+			wnd->Invalidate();
 		}
 	}
 

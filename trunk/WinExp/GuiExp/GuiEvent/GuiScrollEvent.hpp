@@ -69,8 +69,8 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		// 处理消息
 		switch( nMessage )
@@ -82,33 +82,33 @@ public:
 				CPoint pt;
 				::GetCursorPos((LPPOINT)&pt);
 				pt -= m_MPoint;
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION, (LPARAM)&pt);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
+				pare->SendMessage(WM_COMMAND, SB_THUMBPOSITION, (LPARAM)&pt);
 			}
 			break;
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
-			ctrl->SetCapture();
+			ctl->SetCapture();
 			m_MDown = TRUE;
 			::GetCursorPos((LPPOINT)&m_MPoint);
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBTRACK);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
+				pare->SendMessage(WM_COMMAND, SB_THUMBTRACK);
 			}
 			break;
 		case WM_LBUTTONUP:
 		case WM_NCLBUTTONUP:
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_ENDSCROLL);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
+				pare->SendMessage(WM_COMMAND, SB_ENDSCROLL);
 			}
 			m_MDown = FALSE;
-			ctrl->ReleaseCapture();
+			ctl->ReleaseCapture();
 			break;
 		case WM_MOUSEWHEEL:
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), nMessage, wParam, lParam);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
+				pare->SendMessage(nMessage, wParam, lParam);
 			}
 			break;
 		}
@@ -122,7 +122,7 @@ class CGuiSliderEvent : public IGuiEvent /*滚动条滑槽*/
 	EXP_DECLARE_DYNCREATE_CLS(CGuiSliderEvent, IGuiEvent)
 
 protected:
-	IGuiCtrl* m_Ctrl;
+	IGuiCtl* m_Ctrl;
 
 public:
 	CGuiSliderEvent()
@@ -131,9 +131,9 @@ public:
 
 public:
 	// 获得属性
-	IGuiCtrl* GetSlider()
+	IGuiCtl* GetSlider()
 	{
-		return (IGuiCtrl*)m_Ctrl->GetState(_T("slider"));
+		return (IGuiCtl*)m_Ctrl->GetState(_T("slider"));
 	}
 	BOOL GetOri()
 	{
@@ -156,7 +156,7 @@ public:
 	void Format()
 	{
 		ExAssert(m_Ctrl);
-		IGuiCtrl* sli = GetSlider();
+		IGuiCtl* sli = GetSlider();
 		if (!sli) return;
 
 		BOOL ori = GetOri();
@@ -186,7 +186,7 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		m_Ctrl = ExDynCast<IGuiCtrl>(pGui);
+		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
 		if (!m_Ctrl) return;
 
 		static LONG s_pos = 0;
@@ -222,32 +222,32 @@ public:
 					LONG off = pt->x * all / rect.Width();
 					m_Ctrl->SetState(_T("pos"), (void*)(s_pos + off));
 				}
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(m_Ctrl->GetParent());
+				pare->SendMessage(WM_COMMAND, wParam, lParam);
 			}
 			else
 			if (wParam == SB_THUMBTRACK)
 			{
 				s_pos = GetPos();
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(m_Ctrl->GetParent());
+				pare->SendMessage(WM_COMMAND, wParam, lParam);
 			}
 			else
 			if (wParam == SB_ENDSCROLL)
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, wParam, lParam);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(m_Ctrl->GetParent());
+				pare->SendMessage(WM_COMMAND, wParam, lParam);
 			}
 			break;
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 			{
-				IGuiCtrl* sli = GetSlider();
+				IGuiCtl* sli = GetSlider();
 				if (!sli) break;
 				CRect rect, rc_pt;
 				sli->GetWindowRect(rect);
 				::GetCursorPos((LPPOINT)&(rc_pt.pt1));
-				m_Ctrl->GetBoard()->ScreenToClient(rc_pt.pt1);
+				m_Ctrl->GetWnd()->ScreenToClient(rc_pt.pt1);
 				m_Ctrl->B2C(rc_pt);
 				rc_pt.pt1 -= CPoint((rect.Left() + rect.Right()) >> 1, (rect.Top() + rect.Bottom()) >> 1);
 				m_Ctrl->GetClientRect(rect);
@@ -263,14 +263,14 @@ public:
 					LONG off = rc_pt.pt1.x * all / rect.Width();
 					m_Ctrl->SetState(_T("pos"), (void*)(GetPos() + off));
 				}
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), WM_COMMAND, SB_THUMBPOSITION);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(m_Ctrl->GetParent());
+				pare->SendMessage(WM_COMMAND, SB_THUMBPOSITION);
 			}
 			break;
 		case WM_MOUSEWHEEL:
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(m_Ctrl->GetParent());
-				pare->Send(ExDynCast<IGuiObject>(pare), nMessage, wParam, lParam);
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(m_Ctrl->GetParent());
+				pare->SendMessage(nMessage, wParam, lParam);
 			}
 			break;
 		}
@@ -294,8 +294,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		// 处理消息
 		switch( nMessage )
@@ -303,10 +303,10 @@ public:
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 			{
-				ctrl->SetCapture();
+				ctl->SetCapture();
 				ExRandomize();
 				m_TimerId = 10001 + ExRandom(89999);
-				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				IGuiWnd* wnd = ExDynCast<IGuiWnd>(ctl->GetWnd());
 				::SetTimer(wnd->GethWnd(), m_TimerId, 40, NULL);
 			}
 			break;
@@ -314,16 +314,16 @@ public:
 		case WM_NCLBUTTONUP:
 			if (m_TimerId)
 			{
-				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				IGuiWnd* wnd = ExDynCast<IGuiWnd>(ctl->GetWnd());
 				::KillTimer(wnd->GethWnd(), m_TimerId);
 				m_TimerId = 0;
-				ctrl->ReleaseCapture();
+				ctl->ReleaseCapture();
 			}
 			break;
 		case WM_TIMER:
 			if (m_TimerId == wParam)
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
 				LONG pos = (LONG)(LONG_PTR)pare->GetState(_T("sli_pos"));
 				pare->SetState(_T("sli_pos"), (void*)(pos - WHEEL_DELTA));
 			}
@@ -349,8 +349,8 @@ public:
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(pGui);
-		if (!ctrl) return;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
 
 		// 处理消息
 		switch( nMessage )
@@ -358,10 +358,10 @@ public:
 		case WM_LBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 			{
-				ctrl->SetCapture();
+				ctl->SetCapture();
 				ExRandomize();
 				m_TimerId = 10001 + ExRandom(89999);
-				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				IGuiWnd* wnd = ExDynCast<IGuiWnd>(ctl->GetWnd());
 				::SetTimer(wnd->GethWnd(), m_TimerId, 40, NULL);
 			}
 			break;
@@ -369,16 +369,16 @@ public:
 		case WM_NCLBUTTONUP:
 			if (m_TimerId)
 			{
-				IGuiBoard* wnd = ExDynCast<IGuiBoard>(ctrl->GetBoard());
+				IGuiWnd* wnd = ExDynCast<IGuiWnd>(ctl->GetWnd());
 				::KillTimer(wnd->GethWnd(), m_TimerId);
 				m_TimerId = 0;
-				ctrl->ReleaseCapture();
+				ctl->ReleaseCapture();
 			}
 			break;
 		case WM_TIMER:
 			if (m_TimerId == wParam)
 			{
-				IGuiCtrl* pare = ExDynCast<IGuiCtrl>(ctrl->GetParent());
+				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
 				LONG pos = (LONG)(LONG_PTR)pare->GetState(_T("sli_pos"));
 				pare->SetState(_T("sli_pos"), (void*)(pos + WHEEL_DELTA));
 			}
@@ -394,7 +394,7 @@ class CGuiScrollEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiScrollEvent, IGuiEvent)
 
 protected:
-	IGuiCtrl* m_Ctrl;
+	IGuiCtl* m_Ctrl;
 
 public:
 	CGuiScrollEvent()
@@ -403,21 +403,21 @@ public:
 
 public:
 	// 获得属性
-	IGuiCtrl* GetMain()
+	IGuiCtl* GetMain()
 	{
-		return (IGuiCtrl*)m_Ctrl->GetState(_T("main"));
+		return (IGuiCtl*)m_Ctrl->GetState(_T("main"));
 	}
-	IGuiCtrl* GetSlider()
+	IGuiCtl* GetSlider()
 	{
-		return (IGuiCtrl*)m_Ctrl->GetState(_T("slider"));
+		return (IGuiCtl*)m_Ctrl->GetState(_T("slider"));
 	}
-	IGuiCtrl* GetUp()
+	IGuiCtl* GetUp()
 	{
-		return (IGuiCtrl*)m_Ctrl->GetState(_T("up"));
+		return (IGuiCtl*)m_Ctrl->GetState(_T("up"));
 	}
-	IGuiCtrl* GetDn()
+	IGuiCtl* GetDn()
 	{
-		return (IGuiCtrl*)m_Ctrl->GetState(_T("down"));
+		return (IGuiCtl*)m_Ctrl->GetState(_T("down"));
 	}
 	BOOL GetOri()
 	{
@@ -432,11 +432,11 @@ public:
 	void Format()
 	{
 		ExAssert(m_Ctrl);
-		IGuiCtrl* sli = GetSlider();
+		IGuiCtl* sli = GetSlider();
 		if (!sli) return;
-		IGuiCtrl* up = GetUp();
+		IGuiCtl* up = GetUp();
 		if (!sli) return;
-		IGuiCtrl* dn = GetDn();
+		IGuiCtl* dn = GetDn();
 		if (!sli) return;
 		BOOL ori = GetOri();
 
@@ -467,7 +467,7 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		m_Ctrl = ExDynCast<IGuiCtrl>(pGui);
+		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
 		if (!m_Ctrl) return;
 
 		// 处理消息
@@ -488,7 +488,7 @@ public:
 		case WM_COMMAND:
 			if (wParam == SB_THUMBPOSITION)
 			{
-				IGuiCtrl* main = GetMain();
+				IGuiCtl* main = GetMain();
 				if (!main) break;
 				LONG pos = GetPos();
 				CSize scr_sz;

@@ -23,7 +23,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HICON ic_wnd = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTGUI4));
 
 	// 创建窗口对象并设置
-	IGuiBoard* wnd = ExDynCast<IGuiBoard>(ExGui(_T("CGuiWnd"), &gc));
+	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
 	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
@@ -36,7 +36,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	pixel_t pix[8] = {0};
 
-	IGuiCtrl* scroll1 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll")));
+	IGuiCtl* scroll1 = ExGui<IGuiCtl>(_T("CGuiScroll"));
 	scroll1->SetWindowRect(CRect(10, 230, 475, 250));
 	scroll1->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, 255));
@@ -48,7 +48,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	scroll1->SetState(_T("up_color"), pix);
 	scroll1->SetState(_T("dn_color"), pix);
 
-	IGuiCtrl* scroll2 = ExDynCast<IGuiCtrl>(ExGui(_T("CGuiScroll")));
+	IGuiCtl* scroll2 = ExGui<IGuiCtl>(_T("CGuiScroll"));
 	scroll2->SetWindowRect(CRect(455, 10, 475, 225));
 	scroll2->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 	CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, 255));

@@ -9,15 +9,15 @@ class CCustomEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
 		switch( nMessage )
 		{
 		case WM_KEYDOWN:
 			{
 				if (wParam == VK_ESCAPE) // ESC
-					board->PostMessage(WM_CLOSE);
+					wnd->PostMessage(WM_CLOSE);
 			}
 			break;
 		case WM_DESTROY:
@@ -34,20 +34,20 @@ class CFillEvent : public IGuiEvent
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBoard* board = ExDynCast<IGuiBoard>(pGui);
-		if (!board) return;
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
+		if (!wnd) return;
 
 		switch( nMessage )
 		{
 		case WM_SIZE:
 			{
 				CRect rect;
-				board->GetClientRect(rect);
-				for(IGuiBase::list_t::iterator_t ite = board->GetChildren().Head(); ite != board->GetChildren().Tail(); ++ite)
+				wnd->GetClientRect(rect);
+				for(IGuiBase::list_t::iterator_t ite = wnd->GetChildren().Head(); ite != wnd->GetChildren().Tail(); ++ite)
 				{
-					IGuiCtrl* ctrl = ExDynCast<IGuiCtrl>(*ite);
-					if (!ctrl) continue;
-					ctrl->SetRealRect(rect);
+					IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+					if (!ctl) continue;
+					ctl->SetRealRect(rect);
 				}
 			}
 			break;

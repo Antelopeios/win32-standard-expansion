@@ -33,14 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-03
-// Version:	1.0.0003.1752
-//
-// History:
-//	- 1.0.0001.1010(2011-06-17)	= 将IGuiCtrlBase接口定义移动到GuiCtrl.cpp中
-//	- 1.0.0002.1528(2011-07-01)	+ IGuiCtrlBase::SetWindowRect()将在改变控件大小时发送WM_SIZE消息
-//								+ IGuiCtrlBase::SetVisible()将在改变控件可视状态时发送WM_SHOWWINDOW消息
-//	- 1.0.0003.1752(2011-08-03)	= 当没有父窗口时,IGuiCtrlBase::SetWindowRect()不应当向自身发送消息
+// Date:	2012-02-29
+// Version:	1.0.0020.1723
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -152,6 +146,45 @@ BOOL IGuiCtrlBase::GetClientRect(CRect& rc)
 	return TRUE;
 }
 
+BOOL IGuiCtrlBase::SetAllRect(const CSize& sz)
+{
+	if (m_AllRect == sz) return TRUE;
+	m_AllRect = sz;
+	if (GetParent())
+	{
+		if (GetScroll(TRUE))
+			GetScroll(TRUE)->SetState(_T("sli_all"), (void*)m_AllRect.cy);
+		if (GetScroll(FALSE))
+			GetScroll(FALSE)->SetState(_T("sli_all"), (void*)m_AllRect.cx);
+		Refresh();
+	}
+	return TRUE;
+}
+BOOL IGuiCtrlBase::GetAllRect(CSize& sz)
+{
+	sz = m_AllRect;
+	return TRUE;
+}
+BOOL IGuiCtrlBase::SetFraRect(const CSize& sz)
+{
+	if (m_FraRect == sz) return TRUE;
+	m_FraRect = sz;
+	if (GetParent())
+	{
+		if (GetScroll(TRUE))
+			GetScroll(TRUE)->SetState(_T("sli_fra"), (void*)m_FraRect.cy);
+		if (GetScroll(FALSE))
+			GetScroll(FALSE)->SetState(_T("sli_fra"), (void*)m_FraRect.cx);
+		Refresh();
+	}
+	return TRUE;
+}
+BOOL IGuiCtrlBase::GetFraRect(CSize& sz)
+{
+	sz = m_FraRect;
+	return TRUE;
+}
+
 // 刷新绘图
 void IGuiCtrlBase::Refresh(BOOL bSelf/* = TRUE*/)
 {
@@ -206,6 +239,8 @@ EXP_END
 #include "GuiCtrl/GuiPicture.hpp"
 #include "GuiCtrl/GuiButton.hpp"
 #include "GuiCtrl/GuiEdit.hpp"
+#include "GuiCtrl/GuiList.hpp"
+#include "GuiCtrl/GuiListCtrl.hpp"
 #include "GuiCtrl/GuiListView.hpp"
 #include "GuiCtrl/GuiGroup.hpp"
 #include "GuiCtrl/GuiScroll.hpp"

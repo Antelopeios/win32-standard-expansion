@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-06
-// Version:	1.0.0011.1154
+// Date:	2012-02-29
+// Version:	1.0.0012.1740
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -52,6 +52,7 @@
 //	- 1.0.0009.1035(2011-09-01)	# 修正焦点列表项自动滚动功能存在的小bug,同时回滚上一项更新
 //	- 1.0.0010.1709(2011-09-05)	# 修正当列表项为空时,格式化列表项的函数不会刷新all_line与fra_line属性的问题
 //	- 1.0.0011.1154(2011-09-06)	# 修正当列表项为空时,由于没有将焦点指针置空,导致向列表发送按键消息时崩溃
+//	- 1.0.0012.1740(2012-02-29)	= 配合底层滚动条控制机制的修改,调整GuiLVEvent中具体的逻辑实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -235,7 +236,7 @@ class CGuiLVEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiLVEvent, IGuiEvent)
 
 protected:
-	IGuiCtl* m_Ctrl;
+	IGuiCtrlBase* m_Ctrl;
 	IGuiCtl* m_FocItm;
 
 public:
@@ -356,8 +357,8 @@ public:
 
 		// 设置滚动区域
 		itm_rc.pt2.y += (scr_sz.cy + space);
-		m_Ctrl->SetState(_T("fra_line"), (void*)rect.Height());
-		m_Ctrl->SetState(_T("all_line"), (void*)itm_rc.Bottom());
+		m_Ctrl->SetFraRect(CSize(0, rect.Height()));
+		m_Ctrl->SetAllRect(CSize(0, itm_rc.Bottom()));
 	}
 	void ShowItem(IGuiCtl* pItem)
 	{
@@ -386,7 +387,7 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
+		m_Ctrl = ExDynCast<IGuiCtrlBase>(pGui);
 		if (!m_Ctrl) return;
 
 		// 处理消息

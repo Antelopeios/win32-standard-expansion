@@ -245,6 +245,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiExp\GuiCtrl\GuiList.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiCtrl\GuiListCtrl.hpp"
+				>
+			</File>
+			<File
 				RelativePath="GuiExp\GuiCtrl\GuiListView.hpp"
 				>
 			</File>

@@ -77,10 +77,7 @@ public:
 				CRect rc;
 				wnd->GetClientRect(rc);
 				if(!rc.PtInRect(pt))
-				{
-					::ShowWindow(wnd->GethWnd(), SW_HIDE);
-					::ReleaseCapture();
-				}
+					wnd->ShowWindow(SW_HIDE);
 			}
 			break;
 		}

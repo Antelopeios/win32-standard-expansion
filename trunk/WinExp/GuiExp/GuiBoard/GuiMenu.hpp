@@ -107,7 +107,7 @@ public:
 	{
 		if (nCmdShow == SW_HIDE)
 		{
-			::ReleaseCapture();
+			ReleaseCapture();
 			return EXP_BASE::ShowWindow(SW_HIDE);
 		}
 		CRect rc_pop, rc_wnd, rc_dsk;
@@ -140,7 +140,7 @@ public:
 				rc_wnd.Offset(CPoint(0, min(-(rc_wnd.Height() - rc_pop.Height()), rc_dsk.Bottom() - rc_wnd.Bottom())));
 		}
 		// 设置鼠标绑定
-		::SetCapture(GethWnd());
+		SetCapture();
 		// 调整窗口状态
 		return ::SetWindowPos(GethWnd(), HWND_TOPMOST, 
 			rc_wnd.Left(), rc_wnd.Top(), rc_wnd.Width(), rc_wnd.Height(), 

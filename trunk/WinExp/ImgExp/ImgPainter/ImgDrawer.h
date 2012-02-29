@@ -52,6 +52,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ImgPainter/ImgFilter.h"
+#include "ImgPainter/ImgRenderer.h"
 #include "ImgTypes/ImgTypes.h"
 
 #pragma comment(lib, "msimg32.lib")

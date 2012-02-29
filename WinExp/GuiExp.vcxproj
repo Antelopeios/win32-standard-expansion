@@ -117,6 +117,8 @@
     <ClInclude Include="GuiExp\GuiCtrl\GuiCtrl.h" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiEdit.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiGroup.hpp" />
+    <ClInclude Include="GuiExp\GuiCtrl\GuiList.hpp" />
+    <ClInclude Include="GuiExp\GuiCtrl\GuiListCtrl.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiListView.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiPicture.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiScroll.hpp" />

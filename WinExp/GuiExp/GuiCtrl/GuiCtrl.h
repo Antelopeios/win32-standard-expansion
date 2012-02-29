@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-22
-// Version:	1.0.0019.1200
+// Date:	2012-02-29
+// Version:	1.0.0020.1723
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -61,6 +61,7 @@
 //	- 1.0.0017.2154(2011-09-22)	^ 当IGuiCtrl::SetScrollSize()传入的参数与当前m_szScroll相等,将不进行后续的消息发送
 //	- 1.0.0018.1802(2012-02-02)	+ 添加IGuiCtrl对效果对象的托管接口
 //	- 1.0.0019.1200(2012-02-22)	= 将IGuiCtrl改名为IGuiCtl
+//	- 1.0.0020.1723(2012-02-29)	% 修改并完善滚动条控制机制,并支持水平与垂直两种模式的滚动条
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -90,14 +91,15 @@ protected:
 	IGuiEffect* m_Effect;
 	BOOL m_bTruEff;
 	CSize m_szScroll;
-	IGuiCtl* m_Scroll;
+	IGuiCtl* (m_Scroll[2]);
 
 public:
 	IGuiCtl()
 		: m_Effect(NULL)
 		, m_bTruEff(TRUE)
-		, m_Scroll(NULL)
-	{}
+	{
+		m_Scroll[1] = m_Scroll[0] = NULL;
+	}
 
 protected:
 	void Init(IGuiComp* pComp)
@@ -181,6 +183,8 @@ public:
 	virtual BOOL SetRealRect(const CRect& rc) = 0;
 	virtual BOOL GetRealRect(CRect& rc) = 0;
 	virtual BOOL GetClientRect(CRect& rc) = 0;
+	virtual BOOL GetAllRect(CSize& sz) = 0;
+	virtual BOOL GetFraRect(CSize& sz) = 0;
 	BOOL GetClipRect(CRect& rc)
 	{
 		CRect rc_clp;
@@ -196,12 +200,16 @@ public:
 	}
 	BOOL SetScrollSize(const CSize& sz, BOOL bWheel = FALSE)
 	{
-		if (m_Scroll && bWheel)
+		if ((m_Scroll[0] || m_Scroll[1]) && bWheel)
 		{
-			m_Scroll->Send(
-				ExDynCast<IGuiObject>(m_Scroll), WM_MOUSEWHEEL, 
-				ExMakeLong(m_szScroll.cx - sz.cx, m_szScroll.cy - sz.cy), 
-				ExMakeLong(-1, -1));
+			if (m_Scroll[0])
+				m_Scroll[0]->SendMessage(WM_MOUSEWHEEL, 
+					ExMakeLong(m_szScroll.cx - sz.cx, m_szScroll.cy - sz.cy), 
+					ExMakeLong(-1, -1));
+			if (m_Scroll[1])
+				m_Scroll[1]->SendMessage(WM_MOUSEWHEEL, 
+					ExMakeLong(m_szScroll.cx - sz.cx, m_szScroll.cy - sz.cy), 
+					ExMakeLong(-1, -1));
 		}
 		else
 		{
@@ -215,17 +223,18 @@ public:
 		}
 		return TRUE;
 	}
-	IGuiCtl* GetScroll() const
+	IGuiCtl* GetScroll(BOOL bLine = TRUE) const
 	{
-		return m_Scroll;
+		return m_Scroll[bLine ? 0 : 1];
 	}
-	void SetScroll(void* p)
+	void SetScroll(void* p, BOOL bLine = TRUE)
 	{
-		IGuiCtl* old_scr = m_Scroll;
-		m_Scroll = ExDynCast<IGuiCtl>(p);
-		if (m_Scroll && old_scr != m_Scroll)
+		int inx = bLine ? 0 : 1;
+		IGuiCtl* old_scr = m_Scroll[inx];
+		m_Scroll[inx] = ExDynCast<IGuiCtl>(p);
+		if (m_Scroll[inx] && old_scr != m_Scroll[inx])
 		{
-			m_Scroll->SetState(_T("main"), this);
+			m_Scroll[inx]->SetState(_T("main"), this);
 			SetScrollSize(m_szScroll, TRUE);
 		}
 	}
@@ -313,6 +322,9 @@ protected:
 
 	BOOL m_Updated;
 
+	// 窗口区域
+	CSize m_AllRect, m_FraRect;
+
 public:
 	IGuiCtrlBase();
 
@@ -333,6 +345,11 @@ public:
 	BOOL SetRealRect(const CRect& rc);
 	BOOL GetRealRect(CRect& rc);
 	BOOL GetClientRect(CRect& rc);
+
+	virtual BOOL SetAllRect(const CSize& sz);
+	BOOL GetAllRect(CSize& sz);
+	virtual BOOL SetFraRect(const CSize& sz);
+	BOOL GetFraRect(CSize& sz);
 
 	// 刷新绘图
 	void Refresh(BOOL bSelf = TRUE);

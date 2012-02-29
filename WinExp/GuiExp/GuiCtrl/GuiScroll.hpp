@@ -95,9 +95,6 @@ public:
 		if (key == _T("all"))
 			SetState(_T("all"), (void*)_ttol(val));
 		else
-		if (key == _T("fra"))
-			SetState(_T("fra"), (void*)_ttol(val));
-		else
 		if (key == _T("pos"))
 			SetState(_T("pos"), (void*)_ttol(val));
 		else
@@ -146,7 +143,7 @@ public:
 		if (sType == _T("ori"))
 			return (void*)m_Ori;
 		else
-			return CGuiPicture::GetState(sType);
+			return EXP_BASE::GetState(sType);
 	}
 	BOOL SetState(const CString& sType, void* pState)
 	{
@@ -193,7 +190,7 @@ public:
 			return m_Slider.SetState(type, pState);
 		}
 		else
-			return CGuiPicture::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState);
 	}
 };
 

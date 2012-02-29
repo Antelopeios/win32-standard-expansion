@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-28
-// Version:	1.0.0017.1653
+// Date:	2012-02-29
+// Version:	1.0.0018.2324
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -60,6 +60,7 @@
 //	- 1.0.0015.1234(2011-09-23)	+ 添加shake_ico属性,支持点击时晃动图标及文字
 //	- 1.0.0016.1710(2011-10-21)	+ 添加关闭缓存时的绘图逻辑
 //	- 1.0.0017.1653(2012-02-28)	^ 优化并简化按钮相关事件逻辑的实现
+//	- 1.0.0018.2324(2012-02-29)	^ 将GuiButtonEvent中文字折行处理的相关逻辑交给底层完成
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -133,6 +134,10 @@ protected:
 				CPoint(rect.Right(), rect.Bottom()));
 			break;
 		}
+		if (txt_rct.Left() < rect.Left()) txt_rct.Left(rect.Left());
+		if (txt_rct.Top() < rect.Top()) txt_rct.Top(rect.Top());
+		if (txt_rct.Right() > rect.Right()) txt_rct.Right(rect.Right());
+		if (txt_rct.Bottom() > rect.Bottom()) txt_rct.Bottom(rect.Bottom());
 	}
 
 	BOOL FmtTxtRect(const CRect& rect, CText* text, CString* str, DWORD locate, LONG loc_off, CRect& img_rct)
@@ -144,52 +149,14 @@ protected:
 		if (txt_clp.cx == 0 || txt_clp.cy == 0) return FALSE;
 
 	//	ExTrace(_T("0x%08x\n"), this);
-		GetTxtRect(rect, txt_clp, locate, loc_off, img_rct);
+		GetTxtRect(CRect(rect).Deflate(CPoint(2, 2)), txt_clp, locate, loc_off, img_rct);
 		if (m_txtTmp == (*text) && m_LocOld == locate && m_OffOld == loc_off) return TRUE;
 		m_txtTmp = (*text);
 		m_LocOld = locate;
 		m_OffOld = loc_off;
 
 		// 绘制缓存
-		CString clp_str(*str), clp_lne(*str);
-		m_imgClp.Create(img_rct.Width(), img_rct.Height());
-		LONG txt_off = 0;
-		do
-		{
-			// 计算剪切文本
-			text->GetSize(clp_str, txt_clp);
-			if (txt_clp.cx == 0 || txt_clp.cy == 0) break;
-			if (txt_clp.cx > img_rct.Width() - 4)
-			{
-				// 计算下一行是否显示高度不够
-				if (txt_off + ((txt_clp.cy + 2) << 1) <= img_rct.Height() - 2)
-				{
-					do
-					{
-						clp_str.LastItem() = 0;
-						text->GetSize(clp_str, txt_clp);
-					} while (!clp_str.Empty() && txt_clp.cx > img_rct.Width() - 4);
-				}
-				else
-				{
-					CString tmp(clp_str);
-					do
-					{
-						tmp.LastItem() = 0;
-						clp_str = tmp;
-						clp_str += _T("...");
-						text->GetSize(clp_str, txt_clp);
-					} while (!tmp.Empty() && txt_clp.cx > img_rct.Width() - 4);
-				}
-			}
-			// 覆盖剪切文本
-			CImage img_tmp(text->GetImage(clp_str));
-			CImgDrawer::Cover(m_imgClp, img_tmp, CRect(0, txt_off, img_rct.Width(), txt_off + txt_clp.cy));
-			// 折行
-			clp_lne = ((LPCTSTR)clp_lne) + clp_str.GetLength();
-			clp_str = clp_lne;
-			txt_off += (txt_clp.cy + 2);
-		} while(txt_off + txt_clp.cy <= img_rct.Height() - 4);
+		m_imgClp = text->GetImage(*str, img_rct);
 
 		return TRUE;
 	}

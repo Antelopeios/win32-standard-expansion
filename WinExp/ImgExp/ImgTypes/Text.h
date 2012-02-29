@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-03
-// Version:	1.0.0006.1331
+// Date:	2012-02-29
+// Version:	1.0.0007.2327
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
@@ -44,6 +44,7 @@
 //	- 1.0.0004.1610(2011-08-10)	^ 使用缓存机制优化CText::GetImage()的效率
 //	- 1.0.0005.1742(2011-08-12)	^ 简化CText::GetSize()接口,可支持省略tGrp参数
 //	- 1.0.0006.1331(2012-02-03)	- 将CString与CText分离
+//	- 1.0.0007.2327(2012-02-29)	+ 添加新的GetImage()接口,支持输出特定区域的折行文本
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -58,6 +59,7 @@
 #include "ImgTypes/Image.h"
 #include "ImgTypes/Font.h"
 #include "ImgPainter/ImgFilter.h"
+#include "ImgPainter/ImgDrawer.h"
 
 EXP_BEG
 
@@ -130,13 +132,13 @@ public:
 		if (grp_tmp) ::DeleteDC(grp_tmp);
 	}
 
-	image_t GetImage(const CString& s)
+	image_t GetImage(const CString& sStr)
 	{
-		if (s == _T("")) return NULL;
-		if (m_MemStr == s && 
+		if (sStr == _T("")) return NULL;
+		if (m_MemStr == sStr && 
 			m_MemFnt == (CFont)(*this) && 
 			m_MemClr == m_Color) return m_MemImg;
-		m_MemStr = s;
+		m_MemStr = sStr;
 		m_MemFnt = (CFont)(*this);
 		m_MemClr = m_Color;
 		// 创建临时画板
@@ -166,6 +168,52 @@ public:
 		tmp_grp.Delete();
 		CImgFilter::Filter(m_MemImg, &CFilterPreMul());
 		return m_MemImg;
+	}
+	image_t GetImage(const CString& sStr, const CRect& rcImg, const int nSpace = 2, const CString& sClp = _T("..."))
+	{
+		CString clp_str(sStr), clp_lne(sStr);
+		CImage img_clp;
+		img_clp.SetTrust(FALSE);
+		img_clp.Create(rcImg.Width(), rcImg.Height());
+		CSize txt_clp;
+		LONG txt_off = 0;
+		do
+		{
+			// 计算剪切文本
+			GetSize(clp_str, txt_clp);
+			if (txt_clp.cx == 0 || txt_clp.cy == 0) break;
+			if (txt_clp.cx > rcImg.Width())
+			{
+				// 计算下一行是否显示高度不够
+				if (txt_off + ((txt_clp.cy + nSpace) << 1) <= rcImg.Height())
+				{
+					do
+					{
+						clp_str.LastItem() = 0;
+						GetSize(clp_str, txt_clp);
+					} while (!clp_str.Empty() && txt_clp.cx > rcImg.Width());
+				}
+				else
+				{
+					CString tmp(clp_str);
+					do
+					{
+						tmp.LastItem() = 0;
+						clp_str = tmp;
+						clp_str += sClp;
+						GetSize(clp_str, txt_clp);
+					} while (!tmp.Empty() && txt_clp.cx > rcImg.Width());
+				}
+			}
+			// 覆盖剪切文本
+			CImage img_tmp(GetImage(clp_str));
+			CImgDrawer::Cover(img_clp, img_tmp, CRect(0, txt_off, rcImg.Width(), txt_off + txt_clp.cy));
+			// 折行
+			clp_lne = ((LPCTSTR)clp_lne) + clp_str.GetLength();
+			clp_str = clp_lne;
+			txt_off += (txt_clp.cy + nSpace);
+		} while(txt_off + txt_clp.cy <= rcImg.Height());
+		return img_clp;
 	}
 };
 

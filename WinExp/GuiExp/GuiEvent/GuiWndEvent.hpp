@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-15
-// Version:	1.0.0015.2236
+// Date:	2012-02-29
+// Version:	1.0.0016.1724
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -55,6 +55,8 @@
 //	- 1.0.0013.1958(2011-07-16)	^ 采用剪切区方式优化WM_PAINT时所有内存缓冲位图的效率
 //	- 1.0.0014.1538(2011-08-04)	= 由于WM_COMMAND与WM_NOTIFY消息是子控件发给父控件的消息,因此不再向下转发这两个消息
 //	- 1.0.0015.2236(2011-08-15)	# 修正当某个控件不可见或无法拥有焦点时,焦点切换将被卡在它前一个控件那里无法继续的问题
+//	- 1.0.0016.1724(2012-02-29)	^ 将CGuiWndEvent::BaseSend()中与控件相关的部分独立
+//								% 调整并完善CGuiWndEvent中的滚动条控制逻辑
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -99,7 +101,7 @@ protected:
 		}
 	}
 
-	// 消息转发
+	// 窗口消息转发
 	BOOL m_ShiftDown;
 	IGuiCtl* m_pOldFoc;
 	LRESULT WndSend(IGuiWnd* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
@@ -243,50 +245,94 @@ protected:
 	EndWndSend:
 		return lrDef;
 	}
-	// 基础全局消息转发
-	LRESULT BaseSend(IGuiBase* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
+	// 控件消息转发
+	LRESULT CtlSend(IGuiBase* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
-		if (!pGui) return 0;
+		if (!pGui) return NULL;
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
 		// 向控件转发消息
 		if (nMessage == WM_SIZE)
 		{
-			IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-			if (!ctl || !ctl->GetScroll() || !ctl->IsVisible()) goto EndBaseSend;
-			LONG all_line = (LONG)(LONG_PTR)ctl->GetState(_T("all_line"));
-			LONG fra_line = (LONG)(LONG_PTR)ctl->GetState(_T("fra_line"));
-			if (all_line > fra_line)
+			if (!ctl || !ctl->IsVisible()) goto EndCtlSend;
+			CSize all_line, fra_line;
+			ctl->GetAllRect(all_line);
+			ctl->GetFraRect(fra_line);
+			if (ctl->GetScroll(TRUE))
 			{
-				if(!ctl->GetScroll()->IsVisible())
+				IGuiCtl* scr = ctl->GetScroll(TRUE);
+				if (all_line.cy > fra_line.cy)
 				{
-					ctl->GetScroll()->SetVisible(TRUE);
-					CRect rc, rc_scr;
-					ctl->GetWindowRect(rc);
-					ctl->GetScroll()->GetWindowRect(rc_scr);
-					rc.Right(rc.Right() - rc_scr.Width());
-					ctl->SetWindowRect(rc);
+					if(!scr->IsVisible())
+					{
+						scr->SetVisible(TRUE);
+						CRect rc, rc_scr;
+						ctl->GetWindowRect(rc);
+						scr->GetWindowRect(rc_scr);
+						rc.Right(rc.Right() - rc_scr.Width());
+						ctl->SetWindowRect(rc);
+					}
+				}
+				else
+				{
+					if (scr->IsVisible())
+					{
+						scr->SetVisible(FALSE); 
+						CRect rc, rc_scr;
+						ctl->GetWindowRect(rc);
+						scr->GetWindowRect(rc_scr);
+						rc.Right(rc.Right() + rc_scr.Width());
+						ctl->SetWindowRect(rc);
+					}
 				}
 			}
-			else
+			if (ctl->GetScroll(FALSE))
 			{
-				if (ctl->GetScroll()->IsVisible())
+				IGuiCtl* scr = ctl->GetScroll(FALSE);
+				if (all_line.cx > fra_line.cx)
 				{
-					ctl->GetScroll()->SetVisible(FALSE);
-					CRect rc, rc_scr;
-					ctl->GetWindowRect(rc);
-					ctl->GetScroll()->GetWindowRect(rc_scr);
-					rc.Right(rc.Right() + rc_scr.Width());
-					ctl->SetWindowRect(rc);
+					if(!scr->IsVisible())
+					{
+						scr->SetVisible(TRUE);
+						CRect rc, rc_scr;
+						ctl->GetWindowRect(rc);
+						scr->GetWindowRect(rc_scr);
+						rc.Bottom(rc.Bottom() - rc_scr.Height());
+						ctl->SetWindowRect(rc);
+					}
+				}
+				else
+				{
+					if (scr->IsVisible())
+					{
+						scr->SetVisible(FALSE); 
+						CRect rc, rc_scr;
+						ctl->GetWindowRect(rc);
+						scr->GetWindowRect(rc_scr);
+						rc.Bottom(rc.Bottom() + rc_scr.Height());
+						ctl->SetWindowRect(rc);
+					}
 				}
 			}
 		}
 		else
 		if (nMessage == WM_MOUSEWHEEL)
 		{
-			IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-			if (!ctl || !ctl->GetScroll() || !ctl->IsVisible()) goto EndBaseSend;
-			ctl->GetScroll()->SendMessage(nMessage, wParam, lParam);
+			if (!ctl || !ctl->IsVisible()) goto EndCtlSend;
+			if (ctl->GetScroll(TRUE))
+				ctl->GetScroll(TRUE)->SendMessage(nMessage, wParam, lParam);
+			if (ctl->GetScroll(FALSE))
+				ctl->GetScroll(FALSE)->SendMessage(nMessage, wParam, lParam);
 		}
 		else
+			lrDef = BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
+	EndCtlSend:
+		return lrDef;
+	}
+	// 基础全局消息转发
+	LRESULT BaseSend(IGuiBase* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
+	{
+		if (!pGui) return 0;
+		// 向控件转发消息
 		if (nMessage >= WM_MOUSEFIRST && 
 			nMessage <= WM_MOUSELAST || 
 			nMessage >= WM_NCMOUSEMOVE && 
@@ -365,23 +411,23 @@ protected:
 		else
 		if (nMessage == WM_SHOWWINDOW)
 		{
-				IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-				if (ctl && ctl->GetScroll())
+			IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+			if (ctl && ctl->GetScroll())
+			{
+				if (wParam)
 				{
-					if (wParam)
-					{
-						CRect rc;
-						ctl->GetWindowRect(rc);
-						ctl->SendMessage(WM_SIZE, SIZE_RESTORED, ExMakeLong(rc.Width(), rc.Height()));
-					}
-					else
-						ctl->GetScroll()->SetVisible(FALSE);
+					CRect rc;
+					ctl->GetWindowRect(rc);
+					ctl->SendMessage(WM_SIZE, SIZE_RESTORED, ExMakeLong(rc.Width(), rc.Height()));
 				}
+				else
+					ctl->GetScroll()->SetVisible(FALSE);
+			}
 			else
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
 			{
-				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				ctl = ExDynCast<IGuiCtl>(*ite);
 				if (!ctl || !ctl->IsVisible()) continue;
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
@@ -482,7 +528,7 @@ public:
 			}
 		}
 		else
-			ret = BaseSend(base, nMessage, wParam, lParam);
+			ret = CtlSend(base, nMessage, wParam, lParam);
 		SetResult(ret);
 	}
 };

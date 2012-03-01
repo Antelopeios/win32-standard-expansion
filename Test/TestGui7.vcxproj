@@ -11,18 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1E78F0C0-6762-4EB5-866E-63C1DDA6A0A6}</ProjectGuid>
-    <RootNamespace>GuiExp</RootNamespace>
+    <ProjectName>TestGui7 - List</ProjectName>
+    <ProjectGuid>{F71216DC-2A4F-4221-BB5F-270624E20573}</ProjectGuid>
+    <RootNamespace>TestGui7</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -36,7 +37,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)!)Build\$(FrameworkVersion)\Bin\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)!)Build\$(FrameworkVersion)\Temp\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
@@ -55,15 +56,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>GuiExp;ImgExp;StdExp</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;EXP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)WinExp\GuiExp;$(SolutionDir)WinExp\ImgExp;$(SolutionDir)WinExp\StdExp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -76,14 +76,13 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>GuiExp;ImgExp;StdExp</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;EXP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)WinExp\GuiExp;$(SolutionDir)WinExp\ImgExp;$(SolutionDir)WinExp\StdExp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -95,53 +94,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GuiExp\GuiCommon\GuiBase.cpp" />
-    <ClCompile Include="GuiExp\GuiCommon\GuiCommon.cpp" />
-    <ClCompile Include="GuiExp\GuiCommon\GuiInterface.cpp" />
-    <ClCompile Include="GuiExp\GuiBoard\GuiBoard.cpp" />
-    <ClCompile Include="GuiExp\GuiCtrl\GuiCtrl.cpp" />
-    <ClCompile Include="GuiExp\GuiEvent\GuiEvent.cpp" />
-    <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp" />
-    <ClCompile Include="GuiExp\GuiManager\Executors\Executor.cpp" />
-    <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp" />
+    <ClCompile Include="TestGui7\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TestGui7\TestGui7.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GuiExp\GuiBoard\GuiMenu.hpp" />
-    <ClInclude Include="GuiExp\GuiCommon\GuiBase.h" />
-    <ClInclude Include="GuiExp\GuiCommon\GuiCommon.h" />
-    <ClInclude Include="GuiExp\GuiCommon\GuiInterface.h" />
-    <ClInclude Include="GuiExp\GuiBoard\GuiBoard.h" />
-    <ClInclude Include="GuiExp\GuiBoard\GuiThunk.hpp" />
-    <ClInclude Include="GuiExp\GuiBoard\GuiWnd.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiButton.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiCtrl.h" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiEdit.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiGroup.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiList.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiListCtrl.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiListView.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiPicture.hpp" />
-    <ClInclude Include="GuiExp\GuiCtrl\GuiScroll.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiButtonEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiEditEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiLCEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiListEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiLVEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiMenuEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiPictureEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEffect\GuiEffectBase.hpp" />
-    <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp" />
-    <ClInclude Include="GuiExp\GuiManager\Executors\Executor.h" />
-    <ClInclude Include="GuiExp\GuiManager\GuiSkin.h" />
-    <ClInclude Include="GuiExp\GuiManager\GuiManager.h" />
-    <ClInclude Include="GuiExp\GuiManager\GuiXML.h" />
-    <ClInclude Include="GuiExp\GuiExp.h" />
-    <ClInclude Include="GuiExp\resource.h" />
+    <ClInclude Include="TestGui7\Resource.h" />
+    <ClInclude Include="TestGui7\stdafx.h" />
+    <ClInclude Include="TestGui7\TestGui7.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GuiExp\GuiExp.rc" />
+    <None Include="TestGui7\small.ico" />
+    <None Include="TestGui7\TestGui7.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TestGui7\TestGui7.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

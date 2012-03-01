@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0012.1740
+// Date:	2012-03-01
+// Version:	1.0.0013.1237
 //
 // History:
 //	- 1.0.0000.1125(2011-07-01)	@ 开始构建GuiLVEvent
@@ -53,6 +53,7 @@
 //	- 1.0.0010.1709(2011-09-05)	# 修正当列表项为空时,格式化列表项的函数不会刷新all_line与fra_line属性的问题
 //	- 1.0.0011.1154(2011-09-06)	# 修正当列表项为空时,由于没有将焦点指针置空,导致向列表发送按键消息时崩溃
 //	- 1.0.0012.1740(2012-02-29)	= 配合底层滚动条控制机制的修改,调整GuiLVEvent中具体的逻辑实现
+//	- 1.0.0013.1237(2012-03-01)	^ 将GuiLVEvent中的通用逻辑放入GuiListEvent中实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiLVEvent_hpp__
@@ -66,45 +67,13 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiLVItemEvent : public IGuiEvent /*CGuiListView内部使用的列表项*/
+class CGuiLVItemEvent : public CGuiListItemEvent /*CGuiListView内部使用的列表项*/
 {
-	EXP_DECLARE_DYNCREATE_CLS(CGuiLVItemEvent, IGuiEvent)
+	EXP_DECLARE_DYNCREATE_CLS(CGuiLVItemEvent, CGuiListItemEvent)
 
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-#pragma push_macro("add")
-#undef add
-#pragma push_macro("sub")
-#undef sub
-
-#define add(ite) \
-	if (ite == items->Last()) \
-		ite = items->Head(); \
-	else \
-		++ite; \
-	if (!IGuiCtl::IsEffect(*ite)) \
-	{ \
-		if (ite == items->Last()) \
-			ite = items->Head(); \
-		else \
-			++ite; \
-	}
-//#define add()
-#define sub(ite) \
-	if (ite == items->Head()) \
-		ite = items->Last(); \
-	else \
-		--ite; \
-	if (!IGuiCtl::IsEffect(*ite)) \
-	{ \
-		if (ite == items->Head()) \
-			ite = items->Last(); \
-		else \
-			--ite; \
-	}
-//#define sub()
-
 		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
 		if (!ctl) return;
 
@@ -118,84 +87,6 @@ public:
 				IGuiWnd* wnd = ctl->GetWnd();
 				switch (wParam)
 				{
-				case VK_UP:
-					{
-						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
-						items_t* items = (items_t*)comp->GetState(_T("items"));
-
-						CRect rc_me, rc_it;
-						ctl->GetWindowRect(rc_me);
-						LONG of_it = -1;
-
-						items_t::iterator_t ite = items->Find(ctl);
-						sub(ite);
-
-						while(TRUE)
-						{
-							IGuiCtl* it = (*ite);
-							it->GetWindowRect(rc_it);
-							if (rc_me.Top() != rc_it.Top())
-							{
-								LONG temp = abs(rc_me.Left() - rc_it.Left());
-								if (of_it >= 0 && of_it < temp)
-								{
-									add(ite);
-									it = (*ite);
-									it->SetFocus();
-									break;
-								}
-								else
-								if (temp == 0)
-								{
-									it = (*ite);
-									it->SetFocus();
-									break;
-								}
-								of_it = temp;
-							}
-							sub(ite);
-						}
-					}
-					break;
-				case VK_DOWN:
-					{
-						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
-						items_t* items = (items_t*)comp->GetState(_T("items"));
-
-						CRect rc_me, rc_it;
-						ctl->GetWindowRect(rc_me);
-						LONG of_it = -1;
-
-						items_t::iterator_t ite = items->Find(ctl);
-						add(ite);
-
-						while(TRUE)
-						{
-							IGuiCtl* it = (*ite);
-							it->GetWindowRect(rc_it);
-							if (rc_me.Top() != rc_it.Top())
-							{
-								LONG temp = abs(rc_me.Left() - rc_it.Left());
-								if (of_it >= 0 && of_it < temp)
-								{
-									sub(ite);
-									it = (*ite);
-									it->SetFocus();
-									break;
-								}
-								else
-								if (temp == 0)
-								{
-									it = (*ite);
-									it->SetFocus();
-									break;
-								}
-								of_it = temp;
-							}
-							add(ite);
-						}
-					}
-					break;
 				case VK_LEFT:
 					{
 						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
@@ -214,56 +105,31 @@ public:
 						(*ite)->SetFocus();
 					}
 					break;
+				default:
+					EXP_BASE::OnMessage(pGui, nMessage, wParam, lParam);
 				}
 			}
 			break;
-		case WM_MOUSEWHEEL:
-			{
-				IGuiCtl* pare = ExDynCast<IGuiCtl>(ctl->GetParent());
-				pare->SendMessage(nMessage, wParam, lParam);
-			}
-			break;
+		default:
+			EXP_BASE::OnMessage(pGui, nMessage, wParam, lParam);
 		}
-#pragma pop_macro("sub")
-#pragma pop_macro("add")
 	}
 };
 
+#pragma pop_macro("sub")
+#pragma pop_macro("add")
+
 //////////////////////////////////////////////////////////////////
 
-class CGuiLVEvent : public IGuiEvent
+class CGuiLVEvent : public CGuiListEvent
 {
-	EXP_DECLARE_DYNCREATE_CLS(CGuiLVEvent, IGuiEvent)
-
-protected:
-	IGuiCtrlBase* m_Ctrl;
-	IGuiCtl* m_FocItm;
+	EXP_DECLARE_DYNCREATE_CLS(CGuiLVEvent, CGuiListEvent)
 
 public:
 	CGuiLVEvent()
-		: m_Ctrl(NULL)
-		, m_FocItm(NULL)
 	{}
 
 public:
-	// 获得属性
-	IGuiCtl* GetFocPic()
-	{
-		return (IGuiCtl*)m_Ctrl->GetState(_T("foc"));
-	}
-	IGuiCtl::items_t* GetItems()
-	{
-		return (IGuiCtl::items_t*)(m_Ctrl->GetState(_T("items")));
-	}
-	LONG GetSpace()
-	{
-		return (LONG)(LONG_PTR)m_Ctrl->GetState(_T("space"));
-	}
-	CImage* GetFocImage()
-	{
-		return (CImage*)m_Ctrl->GetState(_T("foc_image"));
-	}
-
 	// 格式化列表项的位置
 	void FormatItems()
 	{
@@ -360,87 +226,12 @@ public:
 		m_Ctrl->SetFraRect(CSize(0, rect.Height()));
 		m_Ctrl->SetAllRect(CSize(0, itm_rc.Bottom()));
 	}
-	void ShowItem(IGuiCtl* pItem)
-	{
-		if (!pItem) return;
-		ExAssert(m_Ctrl);
-
-		CSize scr_sz;
-		m_Ctrl->GetScrollSize(scr_sz);
-		CRect scr_rc;
-		m_Ctrl->GetClientRect(scr_rc);
-		CRect itm_rc;
-		pItem->GetWindowRect(itm_rc);
-
-		LONG off1 = 0, off2 = 0;
-		if (scr_rc.Top() > itm_rc.Top())
-			off1 = itm_rc.Top() - scr_rc.Top();
-		if (scr_rc.Bottom() < itm_rc.Bottom())
-			off2 = itm_rc.Bottom() - scr_rc.Bottom();
-		scr_sz.cy += 
-			(off1 && off2 ? 
-			(abs(off1) < abs(off2) ? off1 : off2) : 
-			(off1 ? off1 : off2));
-		m_Ctrl->SetScrollSize(scr_sz, TRUE);
-	}
-
-	// 消息响应
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		m_Ctrl = ExDynCast<IGuiCtrlBase>(pGui);
-		if (!m_Ctrl) return;
-
-		// 处理消息
-		switch( nMessage )
-		{
-		case WM_SHOWWINDOW:
-			if (!wParam) break;
-		case WM_SIZE:
-			FormatItems();
-			break;
-		case WM_SETFOCUS:
-			if (m_Ctrl == IGuiCtl::GetFocus())
-			{
-				IGuiCtl::items_t* items = GetItems();
-				if (items->Empty()) break;
-				if(!m_FocItm)
-					m_FocItm = items->HeadItem();
-				if(!m_FocItm) break;
-				IGuiCtl* pic = GetFocPic();
-				if(!pic) break;
-
-				CRect foc_rct;
-				m_FocItm->GetWindowRect(foc_rct);
-				pic->SetWindowRect(foc_rct);
-				pic->SetVisible(TRUE);
-				break;
-			}
-		case WM_KILLFOCUS:
-			{
-				IGuiCtl* pic = GetFocPic();
-				if(!pic) break;
-				pic->SetVisible(FALSE);
-			}
-			break;
-		case WM_KEYDOWN:
-			if (!m_FocItm) break;
-			if (wParam == VK_SPACE)
-				m_FocItm->SetFocus();
-			else
-				m_FocItm->SendMessage(nMessage, wParam, lParam);
-			break;
-		case WM_COMMAND:
-			if (BN_SETFOCUS == wParam)
-				ShowItem(m_FocItm = (IGuiCtl*)lParam);
-			break;
-		}
-	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiLVItemEvent, IGuiEvent)
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiLVEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiLVItemEvent, CGuiListItemEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiLVEvent, CGuiListEvent)
 
 //////////////////////////////////////////////////////////////////
 

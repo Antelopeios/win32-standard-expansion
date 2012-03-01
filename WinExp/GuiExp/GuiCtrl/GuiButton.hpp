@@ -78,11 +78,11 @@ public:
 protected:
 	status_t m_Status;	// 按钮状态
 	locate_t m_Locate;	// 文字位置
-	LONG m_LocOff;		// 文字位置偏移(m_Locate == center时无效)
+	LONG m_LocOff;		// 文字位置偏移
 
 	CImage* m_Icon;
 	BOOL m_bGlow;		// 是否绘制图标外发光
-	LONG m_IcoOff;		// 图标位置偏移(m_Locate == center时无效)
+	LONG m_IcoOff;		// 图标位置偏移
 	int m_ShakeIco;		// 图标点击摇晃
 
 	int m_ThreeSta;		// 是否是三态按钮

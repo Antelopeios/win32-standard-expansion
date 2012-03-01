@@ -879,9 +879,9 @@ public:
 							txt_btn,txt_btn,txt_btn,txt_btn"));
 						btn->SetState(_T("icon"), *ite_ico);
 						btn->SetState(_T("text"), &(*ite_str));
-						btn->SetState(_T("locate"), (void*)2);
-						btn->SetState(_T("loc_off"), (void*)18);
-						btn->SetState(_T("ico_off"), (void*)8);
+						btn->SetState(_T("locate"), (void*)1);
+						btn->SetState(_T("loc_off"), (void*)5);
+						btn->SetState(_T("ico_off"), (void*)5);
 						btn->SetState(_T("shake_ico"), (void*)1);
 						btn->SetWindowRect(CRect(0, 0, 80, 90));
 						items_list.Add(btn);
@@ -920,7 +920,6 @@ public:
 				if (txt_clp.cx <= ((rc_btn.Width() - 4) << 1)) break;
 				rc_btn.pt2.y += 14;
 				btn->SetWindowRect(rc_btn);
-				btn->SetState(_T("loc_off"), (void*)32);
 				m_OldBtn = btn;
 			}
 			else
@@ -940,7 +939,6 @@ public:
 				if (txt_clp.cx <= ((rc_btn.Width() - 4) << 1)) break;
 				rc_btn.pt2.y -= 14;
 				btn->SetWindowRect(rc_btn);
-				btn->SetState(_T("loc_off"), (void*)18);
 				m_OldBtn = NULL;
 			}
 			break;

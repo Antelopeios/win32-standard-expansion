@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-02
-// Version:	1.0.0019.1802
+// Date:	2012-03-01
+// Version:	1.0.0020.1110
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -64,6 +64,7 @@
 //								= IGuiSender与IGuiComp默认托管所有子对象
 //	- 1.0.0019.1802(2012-02-02)	+ 添加IGuiObject::IsValid()
 //								# 修正某事件处理在跳过后面的事件之后,其返回值仍然有可能被后面未响应事件的默认返回值覆盖的问题
+//	- 1.0.0020.1110(2012-03-01)	+ 添加IGuiSender::PopEvent()与IGuiComp::PopComp(),方便删除事件与组合对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -210,24 +211,32 @@ public:
 		// 添加新对象
 		GetEvent().Add(evt, GetEvent().Head());
 	}
-	virtual void DelEvent(void* p = NULL)
+	virtual void DelEvent(void* p)
 	{
 		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
-		evt_list_t::iterator_t ite;
-		if (evt)
-		{
-			// 定位对象
-			ite = FindEvent(evt);
-			if (ite == GetEvent().Tail()) return;
-		}
-		else
-		{
-			ite = GetEvent().Last();
-			evt = GetEvent().LastItem();
-		}
+		if (!evt) return;
+		// 定位对象
+		evt_list_t::iterator_t ite = FindEvent(evt);
+		if (ite == GetEvent().Tail()) return;
 		// 删除对象
 		GetEvent().Del(ite);
 		if (m_bTru && evt->IsTrust()) evt->Free();
+	}
+	virtual void PopEvent(BOOL bLast = TRUE)
+	{
+		if (GetEvent().Empty()) return;
+		IGuiEvent* evt = NULL;
+		if (bLast)
+		{
+			evt = GetEvent().LastItem();
+			GetEvent().PopLast();
+		}
+		else
+		{
+			evt = GetEvent().HeadItem();
+			GetEvent().PopHead();
+		}
+		if (m_bTru && evt && evt->IsTrust()) evt->Free();
 	}
 	virtual void ClearEvent()
 	{
@@ -395,6 +404,27 @@ public:
 		GetChildren().Del(ite);
 		cmp->Fina();
 		if (bAutoTru && m_bTru)
+		{
+			if (IGuiEvent::s_MLMove == (IGuiCtl*)cmp)
+				IGuiEvent::s_MLMove = NULL;
+			cmp->Free();
+		}
+	}
+	virtual void PopComp(BOOL bLast = TRUE, BOOL bAutoTru = TRUE)
+	{
+		if (GetChildren().Empty()) return;
+		IGuiComp* cmp = NULL;
+		if (bLast)
+		{
+			cmp = GetChildren().LastItem();
+			GetChildren().PopLast();
+		}
+		else
+		{
+			cmp = GetChildren().HeadItem();
+			GetChildren().PopHead();
+		}
+		if (bAutoTru && m_bTru && cmp)
 		{
 			if (IGuiEvent::s_MLMove == (IGuiCtl*)cmp)
 				IGuiEvent::s_MLMove = NULL;

@@ -78,10 +78,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		btn->SetState(_T("font"), txt_btn);
 		btn->SetState(_T("text"), &CString(_T("Dark C.at")));
 		CSize sz;
-		//txt_btn->GetSize(sz);
-		btn->SetState(_T("locate"), (void*)2);
-		btn->SetState(_T("loc_off"), (void*)5);
-		btn->SetWindowRect(CRect(0, 0, 70, 70/*sz.cx + 8, sz.cy*/));
+		btn->SetState(_T("loc_off"), (void*)2);
+		btn->SetState(_T("ico_off"), (void*)2);
+		btn->SetWindowRect(CRect(0, 0, 70, 70));
 		items.Add(btn);
 	}
 	list->SetState(_T("items"), &items);

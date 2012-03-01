@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0016.1724
+// Date:	2012-03-01
+// Version:	1.0.0017.1601
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -57,6 +57,7 @@
 //	- 1.0.0015.2236(2011-08-15)	# 修正当某个控件不可见或无法拥有焦点时,焦点切换将被卡在它前一个控件那里无法继续的问题
 //	- 1.0.0016.1724(2012-02-29)	^ 将CGuiWndEvent::BaseSend()中与控件相关的部分独立
 //								% 调整并完善CGuiWndEvent中的滚动条控制逻辑
+//	- 1.0.0017.1601(2012-03-01)	- 不再在GuiWndEvent的滚动条逻辑中自动控制滚动条关联窗口的大小
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -263,26 +264,12 @@ protected:
 				if (all_line.cy > fra_line.cy)
 				{
 					if(!scr->IsVisible())
-					{
 						scr->SetVisible(TRUE);
-						CRect rc, rc_scr;
-						ctl->GetWindowRect(rc);
-						scr->GetWindowRect(rc_scr);
-						rc.Right(rc.Right() - rc_scr.Width());
-						ctl->SetWindowRect(rc);
-					}
 				}
 				else
 				{
 					if (scr->IsVisible())
-					{
-						scr->SetVisible(FALSE); 
-						CRect rc, rc_scr;
-						ctl->GetWindowRect(rc);
-						scr->GetWindowRect(rc_scr);
-						rc.Right(rc.Right() + rc_scr.Width());
-						ctl->SetWindowRect(rc);
-					}
+						scr->SetVisible(FALSE);
 				}
 			}
 			if (ctl->GetScroll(FALSE))
@@ -291,26 +278,12 @@ protected:
 				if (all_line.cx > fra_line.cx)
 				{
 					if(!scr->IsVisible())
-					{
 						scr->SetVisible(TRUE);
-						CRect rc, rc_scr;
-						ctl->GetWindowRect(rc);
-						scr->GetWindowRect(rc_scr);
-						rc.Bottom(rc.Bottom() - rc_scr.Height());
-						ctl->SetWindowRect(rc);
-					}
 				}
 				else
 				{
 					if (scr->IsVisible())
-					{
 						scr->SetVisible(FALSE); 
-						CRect rc, rc_scr;
-						ctl->GetWindowRect(rc);
-						scr->GetWindowRect(rc_scr);
-						rc.Bottom(rc.Bottom() + rc_scr.Height());
-						ctl->SetWindowRect(rc);
-					}
 				}
 			}
 		}

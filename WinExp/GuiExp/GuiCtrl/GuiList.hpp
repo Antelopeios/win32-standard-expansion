@@ -48,180 +48,135 @@
 #endif // _MSC_VER > 1000
 
 EXP_BEG
+	
+//////////////////////////////////////////////////////////////////
+
+class CGuiListItem : public CGuiButton /*CGuiList内部使用的列表项*/
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiListItem, CGuiButton)
+
+public:
+	CGuiListItem()
+	{
+		// 添加事件对象
+		InsEvent(ExGui(_T("CGuiListItemEvent"), GetGC())); /*先让基类绘图*/
+	}
+};
 
 //////////////////////////////////////////////////////////////////
 
-//class CGuiList : public CGuiPicture
-//{
-//	EXP_DECLARE_DYNCREATE_MULT(CGuiList, CGuiPicture)
-//
-//protected:
-//	items_t m_ItemList;
-//	LONG m_Space;	// 项间距
-//	LONG m_AllLine, m_FraLine;
-//	CGuiButton m_FocPic;
-//
-//public:
-//	CGuiListView()
-//		: m_Space(0)
-//		, m_AllLine(0)
-//		, m_FraLine(0)
-//	{
-//		// 添加事件对象
-//		InsEvent(ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
-//		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
-//		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
-//		AddComp(&m_FocPic);
-//	}
-//	~CGuiListView()
-//	{
-//		DelComp(&m_FocPic, FALSE);
-//	}
-//
-//public:
-//	BOOL Execute(const CString& key, const CString& val)
-//	{
-//		CArrayT<CString> sa;
-//		if (key.Left(4) == _T("foc_"))
-//		{
-//			CString type(key);
-//			type.TrimLeft(_T("foc_"));
-//			return m_FocPic.Execute(type, val);
-//		}
-//		else
-//		if (key == _T("space"))
-//			SetState(_T("space"), (void*)_ttol(val));
-//		else
-//		if (key == _T("all_line"))
-//			SetState(_T("all_line"), (void*)_ttol(val));
-//		else
-//		if (key == _T("fra_line"))
-//			SetState(_T("fra_line"), (void*)_ttol(val));
-//		else
-//		if (key == _T("align_top"))
-//		{
-//			CString temp(val);
-//			temp.Lower();
-//			if (temp == _T("false"))
-//				SetState(_T("align_top"), (void*)FALSE);
-//			else
-//			if (temp == _T("true"))
-//				SetState(_T("align_top"), (void*)TRUE);
-//		}
-//		else
-//			return EXP_BASE::Execute(key, val);
-//		return TRUE;
-//	}
-//
-//	// 获得控件状态
-//	void* GetState(const CString& sType)
-//	{
-//		if (sType.Left(4) == _T("foc_"))
-//		{
-//			CString type(sType);
-//			type.TrimLeft(_T("foc_"));
-//			return m_FocPic.GetState(type);
-//		}
-//		else
-//		if (sType == _T("foc"))
-//			return (void*)(&m_FocPic);
-//		else
-//		if (sType == _T("items"))
-//			return (void*)(&m_ItemList);
-//		else
-//		if (sType == _T("space"))
-//			return (void*)m_Space;
-//		else
-//		if (sType == _T("all_line"))
-//			return (void*)m_AllLine;
-//		else
-//		if (sType == _T("fra_line"))
-//			return (void*)m_FraLine;
-//		else
-//		if (sType == _T("align_top"))
-//			return (void*)m_AlignTop;
-//		else
-//			return EXP_BASE::GetState(sType);
-//	}
-//	BOOL SetState(const CString& sType, void* pState)
-//	{
-//		CString type(sType);
-//		if (type.Left(4) == _T("foc_"))
-//		{
-//			type.TrimLeft(_T("foc_"));
-//			return m_FocPic.SetState(type, pState);
-//		}
-//		else
-//		if (sType == _T("items"))
-//		{
-//			items_t* new_sta = (items_t*)pState;
-//			if (new_sta == NULL) return FALSE;
-//			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
-//			{
-//				IGuiCtl* item = *ite;
-//				if (!item) continue;
-//				items_t::iterator_t it = new_sta->Find(item);
-//				if (it == new_sta->Tail()) DelComp(item);
-//			}
-//			m_ItemList = *new_sta;
-//			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
-//			{
-//				IGuiCtl* item = *ite;
-//				if (!item) continue;
-//				AddComp(item);
-//			}
-//			SendMessage(WM_SIZE);
-//			return IGuiCtrlBase::SetState(sType, pState);
-//		}
-//		else
-//		if (sType == _T("space"))
-//		{
-//			LONG old_sta = m_Space;
-//			m_Space = (LONG)(LONG_PTR)pState;
-//			if (old_sta != m_Space)
-//				return IGuiCtrlBase::SetState(sType, pState);
-//			else
-//				return TRUE;
-//		}
-//		else
-//		if (sType == _T("all_line"))
-//		{
-//			LONG old_sta = m_AllLine;
-//			m_AllLine = (LONG)(LONG_PTR)pState;
-//			if (old_sta != m_AllLine && GetScroll())
-//				GetScroll()->SetState(_T("sli_all"), (void*)m_AllLine);
-//			return TRUE;
-//		}
-//		else
-//		if (sType == _T("fra_line"))
-//		{
-//			LONG old_sta = m_FraLine;
-//			m_FraLine = (LONG)(LONG_PTR)pState;
-//			if (old_sta != m_FraLine && GetScroll())
-//				GetScroll()->SetState(_T("sli_fra"), (void*)m_FraLine);
-//			return TRUE;
-//		}
-//		else
-//		if (sType == _T("align_top"))
-//		{
-//			BOOL old_sta = m_AlignTop;
-//			m_AlignTop = (BOOL)(LONG_PTR)pState;
-//			if (old_sta != m_AlignTop)
-//			{
-//				SendMessage(WM_SIZE);
-//				return IGuiCtrlBase::SetState(sType, pState);
-//			}
-//			else
-//				return TRUE;
-//		}
-//		else
-//			return EXP_BASE::SetState(sType, pState);
-//	}
-//};
-//
-////////////////////////////////////////////////////////////////////
-//
-//EXP_IMPLEMENT_DYNCREATE_MULT(CGuiList, CGuiPicture)
+class CGuiList : public CGuiPicture
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiList, CGuiPicture)
+
+protected:
+	items_t m_ItemList;
+	LONG m_Space;	// 项间距
+	CGuiButton m_FocPic;
+
+public:
+	CGuiList()
+		: m_Space(0)
+	{
+		// 添加事件对象
+		InsEvent(ExGui(_T("CGuiListEvent"), GetGC())); /*先让基类绘图*/
+		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
+		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
+		AddComp(&m_FocPic);
+	}
+	~CGuiList()
+	{
+		DelComp(&m_FocPic, FALSE);
+	}
+
+public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		CArrayT<CString> sa;
+		if (key.Left(4) == _T("foc_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.Execute(type, val);
+		}
+		else
+		if (key == _T("space"))
+			SetState(_T("space"), (void*)_ttol(val));
+		else
+			return EXP_BASE::Execute(key, val);
+		return TRUE;
+	}
+
+	// 获得控件状态
+	void* GetState(const CString& sType)
+	{
+		if (sType.Left(4) == _T("foc_"))
+		{
+			CString type(sType);
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.GetState(type);
+		}
+		else
+		if (sType == _T("foc"))
+			return (void*)(&m_FocPic);
+		else
+		if (sType == _T("items"))
+			return (void*)(&m_ItemList);
+		else
+		if (sType == _T("space"))
+			return (void*)m_Space;
+		else
+			return EXP_BASE::GetState(sType);
+	}
+	BOOL SetState(const CString& sType, void* pState)
+	{
+		CString type(sType);
+		if (type.Left(4) == _T("foc_"))
+		{
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.SetState(type, pState);
+		}
+		else
+		if (sType == _T("items"))
+		{
+			items_t* new_sta = (items_t*)pState;
+			if (new_sta == NULL) return FALSE;
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				items_t::iterator_t it = new_sta->Find(item);
+				if (it == new_sta->Tail()) DelComp(item);
+			}
+			m_ItemList = *new_sta;
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				AddComp(item);
+			}
+			SendMessage(WM_SIZE);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("space"))
+		{
+			LONG old_sta = m_Space;
+			m_Space = (LONG)(LONG_PTR)pState;
+			if (old_sta != m_Space)
+				return IGuiCtrlBase::SetState(sType, pState);
+			else
+				return TRUE;
+		}
+		else
+			return EXP_BASE::SetState(sType, pState);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiListItem, CGuiButton)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiList, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////
 

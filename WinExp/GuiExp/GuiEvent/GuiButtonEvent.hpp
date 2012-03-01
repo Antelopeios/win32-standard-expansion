@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0018.2324
+// Date:	2012-03-01
+// Version:	1.0.0019.1807
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -61,6 +61,7 @@
 //	- 1.0.0016.1710(2011-10-21)	+ 添加关闭缓存时的绘图逻辑
 //	- 1.0.0017.1653(2012-02-28)	^ 优化并简化按钮相关事件逻辑的实现
 //	- 1.0.0018.2324(2012-02-29)	^ 将GuiButtonEvent中文字折行处理的相关逻辑交给底层完成
+//	- 1.0.0019.1807(2012-03-01)	^ 简化GuiButtonEvent文字与图标的绘图区域处理逻辑
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -85,6 +86,7 @@ protected:
 	CImage m_imgClp;
 	DWORD m_LocOld;
 	LONG m_OffOld;
+	CRect m_rcImg;
 	CImage m_IconOld, m_IconTmp;
 	
 protected:
@@ -93,54 +95,51 @@ protected:
 		IGuiCtl* pare = ExDynCast<IGuiCtl>(pCtl->GetParent());
 		if (pare) pare->SendMessage(WM_COMMAND, nMsg, (LPARAM)pCtl);
 	}
-	
-	void GetTxtRect(const CRect& rect, const CSize& txt_clp, DWORD locate, LONG loc_off, CRect& txt_rct)
+
+	void GetTxtRect(const CRect& rect, const CSize& txt_sz, DWORD locate, LONG loc_off, CRect& txt_rct, CImage* icon = NULL)
 	{
+		CSize ico_sz;
+		if (icon && !icon->IsNull())
+		{
+			ico_sz.cx = icon->GetWidth();
+			ico_sz.cy = icon->GetHeight();
+		}
 		switch(locate)
 		{
 		case 0:	// center
-			txt_rct.Set(
-				CPoint(
-					rect.Left() + (rect.Width() - txt_clp.cx) / 2, 
-					rect.Top() + (rect.Height() - txt_clp.cy) / 2), 
-				CPoint(rect.Right(), rect.Bottom()));
+			txt_rct.Left(rect.Left() + ((rect.Width() - txt_sz.cx) / 2));
+			txt_rct.Top(rect.Top() + ((rect.Height() - txt_sz.cy + (ico_sz.cy + loc_off)) / 2));
+			txt_rct.Bottom(rect.Bottom());
 			break;
 		case 1:	// top
-			txt_rct.Set(
-				CPoint(
-					rect.Left() + (rect.Width() - txt_clp.cx) / 2, 
-					rect.Top() + loc_off), 
-				CPoint(rect.Right(), rect.Bottom()));
+			txt_rct.Left(rect.Left() + ((rect.Width() - txt_sz.cx) / 2));
+			txt_rct.Top(rect.Top() + ico_sz.cy + loc_off);
+			txt_rct.Bottom(rect.Bottom());
 			break;
 		case 2:	// bottom
-			txt_rct.Set(
-				CPoint(
-					rect.Left() + (rect.Width() - txt_clp.cx) / 2, 
-					rect.Bottom() - txt_clp.cy - loc_off), 
-				CPoint(rect.Right(), rect.Bottom()));
+			txt_rct.Left(rect.Left() + ((rect.Width() - txt_sz.cx) / 2));
+			txt_rct.Top(rect.Bottom() - txt_sz.cy - (ico_sz.cy + loc_off));
+			txt_rct.Height(txt_sz.cy);
 			break;
 		case 3:	// left
-			txt_rct.Set(
-				CPoint(
-					rect.Left() + loc_off, 
-					rect.Top() + (rect.Height() - txt_clp.cy) / 2), 
-				CPoint(rect.Right(), rect.Bottom()));
+			txt_rct.Left(rect.Left() + ico_sz.cx + loc_off);
+			txt_rct.Top(rect.Top() + ((rect.Height() - txt_sz.cy) / 2));
+			txt_rct.Height(txt_sz.cy);
 			break;
 		case 4:	// right
-			txt_rct.Set(
-				CPoint(
-					rect.Right() - txt_clp.cx - loc_off, 
-					rect.Top() + (rect.Height() - txt_clp.cy) / 2), 
-				CPoint(rect.Right(), rect.Bottom()));
+			txt_rct.Left(rect.Right() - txt_sz.cx - (ico_sz.cx + loc_off));
+			txt_rct.Top(rect.Top() + ((rect.Height() - txt_sz.cy) / 2));
+			txt_rct.Height(txt_sz.cy);
 			break;
 		}
+		txt_rct.Width(txt_sz.cx);
 		if (txt_rct.Left() < rect.Left()) txt_rct.Left(rect.Left());
 		if (txt_rct.Top() < rect.Top()) txt_rct.Top(rect.Top());
 		if (txt_rct.Right() > rect.Right()) txt_rct.Right(rect.Right());
 		if (txt_rct.Bottom() > rect.Bottom()) txt_rct.Bottom(rect.Bottom());
 	}
 
-	BOOL FmtTxtRect(const CRect& rect, CText* text, CString* str, DWORD locate, LONG loc_off, CRect& img_rct)
+	BOOL FmtTxtRect(const CRect& rect, CText* text, CString* str, DWORD locate, LONG loc_off, CRect& img_rct, CImage* icon = NULL)
 	{
 		if (!text || !str) return FALSE;
 
@@ -149,15 +148,45 @@ protected:
 		if (txt_clp.cx == 0 || txt_clp.cy == 0) return FALSE;
 
 	//	ExTrace(_T("0x%08x\n"), this);
-		GetTxtRect(CRect(rect).Deflate(CPoint(2, 2)), txt_clp, locate, loc_off, img_rct);
-		if (m_txtTmp == (*text) && m_LocOld == locate && m_OffOld == loc_off) return TRUE;
+		GetTxtRect(CRect(rect).Deflate(CPoint(2, 2)), txt_clp, locate, loc_off, img_rct, icon);
+		if (m_txtTmp == (*text) && m_LocOld == locate && m_OffOld == loc_off && m_rcImg == img_rct) return TRUE;
 		m_txtTmp = (*text);
 		m_LocOld = locate;
 		m_OffOld = loc_off;
+		m_rcImg = img_rct;
 
 		// 绘制缓存
 		m_imgClp = text->GetImage(*str, img_rct);
 
+		return TRUE;
+	}
+
+	BOOL GetIcoRect(const CRect& txt_rct, CImage* icon, DWORD locate, LONG loc_off, CRect& ico_rct)
+	{
+		if (!icon || icon->IsNull()) return FALSE;
+		CSize ico_sz(icon->GetWidth(), icon->GetHeight());
+		switch(locate)
+		{
+		case 0:	// center
+		case 1:	// top
+			ico_rct.Left(txt_rct.Left() + ((txt_rct.Width() - ico_sz.cx) / 2));
+			ico_rct.Top(txt_rct.Top() - loc_off - ico_sz.cy);
+			break;
+		case 2:	// bottom
+			ico_rct.Left(txt_rct.Left() + ((txt_rct.Width() - ico_sz.cx) / 2));
+			ico_rct.Top(txt_rct.Bottom() + loc_off);
+			break;
+		case 3:	// left
+			ico_rct.Left(txt_rct.Left() - loc_off - ico_sz.cx);
+			ico_rct.Top(txt_rct.Top() + ((txt_rct.Height() - ico_sz.cy) / 2));
+			break;
+		case 4:	// right
+			ico_rct.Left(txt_rct.Right() + loc_off);
+			ico_rct.Top(txt_rct.Top() + ((txt_rct.Height() - ico_sz.cy) / 2));
+			break;
+		}
+		ico_rct.Width(ico_sz.cx);
+		ico_rct.Height(ico_sz.cy);
 		return TRUE;
 	}
 
@@ -337,6 +366,17 @@ protected:
 		sz_img[8].Set(
 			sz_res[8].cx, 
 			sz_res[8].cy);
+
+		// 绘图
+		CRect rc_tmp;
+		CImgDrawer::Fill(mem_img->Get(), rect, pixel);
+		for(int i = 0; i < _countof(rc_mem); ++i)
+		{
+			if(!image[i]) continue;
+			CImgDrawer::Draw(mem_img->Get(), *(image[i]), rc_mem[i], 
+				CPoint(0, image[i]->GetHeight() * status / sta_tim), sz_img[i]);
+		}
+
 		// 图标阴影
 		LONG radius = 0;
 		if (glow)
@@ -366,90 +406,21 @@ protected:
 			icon = &m_IconTmp;
 		}
 
-		// 绘图
-		CRect rc_tmp;
-		CImgDrawer::Fill(mem_img->Get(), rect, pixel);
-		for(int i = 0; i < _countof(rc_mem); ++i)
-		{
-			if(!image[i]) continue;
-			CImgDrawer::Draw(mem_img->Get(), *(image[i]), rc_mem[i], 
-				CPoint(0, image[i]->GetHeight() * status / sta_tim), sz_img[i]);
-		}
-
 		// 绘文字
 		DWORD locate = (DWORD)pCtl->GetState(_T("locate"));
 		LONG loc_off = (LONG)pCtl->GetState(_T("loc_off"));
+		LONG ico_off = (LONG)pCtl->GetState(_T("ico_off"));
 		CRect img_rct;
-		if (FmtTxtRect(rect, text, str, locate, loc_off, img_rct))
+		if (FmtTxtRect(rect, text, str, locate, loc_off + ico_off, img_rct, icon))
 		{
 			if (shake_ico != 0 && (status == 2 || status == 6)) img_rct.Offset(CPoint(1, 1));
 			CImgDrawer::Draw(mem_img->Get(), m_imgClp, img_rct);
 		}
 
 		// 绘图标
-		if (!icon || icon->IsNull()) return;
-		loc_off = (LONG)pCtl->GetState(_T("ico_off")) - radius;
-		CRect icon_rct;
-		switch(locate)
-		{
-		case 0:	// center
-			icon_rct.Set
-				(
-				CPoint
-					(
-					rect.Left() + (rect.Width() - icon->GetWidth()) / 2, 
-					rect.Top() + (rect.Height() - icon->GetHeight()) / 2
-					), 
-				CPoint(rect.Right(), rect.Bottom())
-				);
-			break;
-		case 1:	// top
-			icon_rct.Set
-				(
-				CPoint
-					(
-					rect.Left() + (rect.Width() - icon->GetWidth()) / 2, 
-					rect.Bottom() - icon->GetHeight() - loc_off
-					), 
-				CPoint(rect.Right(), rect.Bottom())
-				);
-			break;
-		case 2:	// bottom
-			icon_rct.Set
-				(
-				CPoint
-					(
-					rect.Left() + (rect.Width() - icon->GetWidth()) / 2, 
-					rect.Top() + loc_off
-					), 
-				CPoint(rect.Right(), rect.Bottom())
-				);
-			break;
-		case 3:	// left
-			icon_rct.Set
-				(
-				CPoint
-					(
-					rect.Right() - icon->GetWidth() - loc_off, 
-					rect.Top() + (rect.Height() - icon->GetHeight()) / 2
-					), 
-				CPoint(rect.Right(), rect.Bottom())
-				);
-			break;
-		case 4:	// right
-			icon_rct.Set
-				(
-				CPoint
-					(
-					rect.Left() + loc_off, 
-					rect.Top() + (rect.Height() - icon->GetHeight()) / 2
-					), 
-				CPoint(rect.Right(), rect.Bottom())
-				);
-			break;
-		}
-		if (shake_ico != 0 && (status == 2 || status == 6)) icon_rct.Offset(CPoint(1, 1));
-		CImgDrawer::Draw(mem_img->Get(), icon->Get(), icon_rct);
+		CRect ico_rct;
+		if (GetIcoRect(img_rct, icon, locate, loc_off, ico_rct))
+			CImgDrawer::Draw(mem_img->Get(), icon->Get(), ico_rct);
 	}
 
 public:

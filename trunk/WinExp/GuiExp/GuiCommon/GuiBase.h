@@ -115,6 +115,29 @@ public:
 		else
 			GetEvent().Add(evt, GetEvent().Head() + 1);
 	}
+	void PopEvent(BOOL bLast = TRUE)
+	{
+		if (GetEvent().Empty()) return;
+		IGuiEvent* evt = NULL;
+		if (bLast)
+		{
+			evt = GetEvent().LastItem();
+			GetEvent().PopLast();
+		}
+		else
+		if (GetEvent().GetCount() == 1)
+		{
+			evt = GetEvent().HeadItem();
+			GetEvent().PopHead();
+		}
+		else
+		{
+			evt_list_t::iterator_t ite = GetEvent().Head() + 1;
+			evt = *ite;
+			GetEvent().Del(ite);
+		}
+		if (IGuiSender::m_bTru && evt && evt->IsTrust()) evt->Free();
+	}
 
 	virtual CGC* GetGC() { return m_GC; }
 

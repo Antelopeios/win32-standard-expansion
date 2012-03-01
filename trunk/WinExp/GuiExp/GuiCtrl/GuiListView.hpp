@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0010.1740
+// Date:	2012-03-01
+// Version:	1.0.0011.1239
 //
 // History:
 //	- 1.0.0000.1543(2011-06-30)	@ 开始构建GuiListView
@@ -47,7 +47,8 @@
 //	- 1.0.0007.1623(2011-08-26)	# 修正当GuiListView在运行过程中修改列表项时,不会自动格式化列表项位置的问题
 //	- 1.0.0008.2317(2011-08-30)	+ GuiListView添加align_top属性,支持列表项上对齐/下对齐调整
 //	- 1.0.0009.1517(2011-09-28)	# 修正当外部销毁控件对象时,GuiListView因内部对象析构顺序问题导致的内存访问异常
-//	- 1.0.0012.1740(2012-02-29)	- 将有关滚动条控制的相关属性从GuiListView中移除,统一交由底层完成
+//	- 1.0.0010.1740(2012-02-29)	- 将有关滚动条控制的相关属性从GuiListView中移除,统一交由底层完成
+//	- 1.0.0011.1239(2012-03-01)	= 将基类由CGuiPicture调整为CGuiList,部分属性将在CGuiList中实现
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiListView_hpp__
@@ -75,46 +76,28 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiListView : public CGuiPicture
+class CGuiListView : public CGuiList
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiListView, CGuiPicture)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiListView, CGuiList)
 
 protected:
-	items_t m_ItemList;
-	LONG m_Space;	// 项间距
-	CGuiButton m_FocPic;
 	BOOL m_AlignTop;
 
 public:
 	CGuiListView()
-		: m_Space(0)
-		, m_AlignTop(TRUE)
+		: m_AlignTop(TRUE)
 	{
 		// 添加事件对象
+		PopEvent(FALSE);
 		InsEvent(ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
-		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
-		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
-		AddComp(&m_FocPic);
 	}
 	~CGuiListView()
 	{
-		DelComp(&m_FocPic, FALSE);
 	}
 
 public:
 	BOOL Execute(const CString& key, const CString& val)
 	{
-		CArrayT<CString> sa;
-		if (key.Left(4) == _T("foc_"))
-		{
-			CString type(key);
-			type.TrimLeft(_T("foc_"));
-			return m_FocPic.Execute(type, val);
-		}
-		else
-		if (key == _T("space"))
-			SetState(_T("space"), (void*)_ttol(val));
-		else
 		if (key == _T("align_top"))
 		{
 			CString temp(val);
@@ -133,22 +116,6 @@ public:
 	// 获得控件状态
 	void* GetState(const CString& sType)
 	{
-		if (sType.Left(4) == _T("foc_"))
-		{
-			CString type(sType);
-			type.TrimLeft(_T("foc_"));
-			return m_FocPic.GetState(type);
-		}
-		else
-		if (sType == _T("foc"))
-			return (void*)(&m_FocPic);
-		else
-		if (sType == _T("items"))
-			return (void*)(&m_ItemList);
-		else
-		if (sType == _T("space"))
-			return (void*)m_Space;
-		else
 		if (sType == _T("align_top"))
 			return (void*)m_AlignTop;
 		else
@@ -157,44 +124,6 @@ public:
 	BOOL SetState(const CString& sType, void* pState)
 	{
 		CString type(sType);
-		if (type.Left(4) == _T("foc_"))
-		{
-			type.TrimLeft(_T("foc_"));
-			return m_FocPic.SetState(type, pState);
-		}
-		else
-		if (sType == _T("items"))
-		{
-			items_t* new_sta = (items_t*)pState;
-			if (new_sta == NULL) return FALSE;
-			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
-			{
-				IGuiCtl* item = *ite;
-				if (!item) continue;
-				items_t::iterator_t it = new_sta->Find(item);
-				if (it == new_sta->Tail()) DelComp(item);
-			}
-			m_ItemList = *new_sta;
-			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
-			{
-				IGuiCtl* item = *ite;
-				if (!item) continue;
-				AddComp(item);
-			}
-			SendMessage(WM_SIZE);
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("space"))
-		{
-			LONG old_sta = m_Space;
-			m_Space = (LONG)(LONG_PTR)pState;
-			if (old_sta != m_Space)
-				return IGuiCtrlBase::SetState(sType, pState);
-			else
-				return TRUE;
-		}
-		else
 		if (sType == _T("align_top"))
 		{
 			BOOL old_sta = m_AlignTop;
@@ -215,7 +144,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiLVItem, CGuiButton)
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiListView, CGuiPicture)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiListView, CGuiList)
 
 //////////////////////////////////////////////////////////////////
 

@@ -281,6 +281,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiExp\GuiEvent\GuiLCEvent.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiEvent\GuiListEvent.hpp"
+				>
+			</File>
+			<File
 				RelativePath="GuiExp\GuiEvent\GuiLVEvent.hpp"
 				>
 			</File>

@@ -900,6 +900,12 @@ public:
 				t = rc_wnd.Top() + GUI_IMG(line_top)->GetHeight() + GUI_IMG(banner)->GetHeight();
 				r = rc_wnd.Right() - GUI_IMG(line_right)->GetWidth();
 				b = rc_wnd.Bottom() - GUI_IMG(line_bottom)->GetHeight() - GUI_IMG(toolbar_bg)->GetHeight();
+				if (GUI_CTL(scr_h)->IsVisible())
+				{
+					CRect rc_scr;
+					GUI_CTL(scr_h)->GetWindowRect(rc_scr);
+					r -= rc_scr.Width();
+				}
 				ctl->SetWindowRect(CRect(l, t, r, b));
 			}
 			break;

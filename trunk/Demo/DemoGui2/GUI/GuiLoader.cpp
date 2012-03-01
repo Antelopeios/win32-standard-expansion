@@ -89,6 +89,8 @@ void CGuiLoader::LoadCtl()
 	{
 		IGuiCtl* tag = ExGui<IGuiCtl>(_T("CGuiLVItem"));
 		tag->SetState(_T("thr_sta"), (void*)TRUE);
+		tag->SetState(_T("loc_off"), (void*)0);
+		tag->SetState(_T("ico_off"), (void*)0);
 		CText* txt = gcnew(gc, CText, 8);
 		txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 		LOGFONT lf = {0};
@@ -139,9 +141,9 @@ void CGuiLoader::LoadCtl()
 	{
 		IGuiCtl* file = ExGui<IGuiCtl>(_T("CGuiLVItem"), GET_CTL(files)->GetGC());
 		file->Execute(_T("image"), _T("file_lt,file_t,file_rt,file_l,file_c,file_r,file_lb,file_b,file_rb"));
-		file->SetState(_T("locate"), (void*)2);
-		file->SetState(_T("loc_off"), (void*)18);
-		file->SetState(_T("ico_off"), (void*)8);
+		file->SetState(_T("locate"), (void*)1);
+		file->SetState(_T("loc_off"), (void*)5);
+		file->SetState(_T("ico_off"), (void*)5);
 		file->SetState(_T("shake_ico"), (void*)1);
 		CText* txt = gcnew(gc, CText, 8);
 		txt[0].SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));

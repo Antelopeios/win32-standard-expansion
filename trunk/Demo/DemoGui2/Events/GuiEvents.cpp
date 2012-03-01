@@ -221,7 +221,12 @@ public:
 				CRect rc_wnd;
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
-
+				if (GET_CTL(scr_cloud)->IsVisible())
+				{
+					CRect rc_scr;
+					GET_CTL(scr_cloud)->GetWindowRect(rc_scr);
+					rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
+				}
 				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
@@ -293,7 +298,12 @@ public:
 				CRect rc_wnd;
 				wnd->GetClientRect(rc_wnd);
 				rc_wnd.Top(22);
-
+				if (GET_CTL(scr_files)->IsVisible())
+				{
+					CRect rc_scr;
+					GET_CTL(scr_files)->GetWindowRect(rc_scr);
+					rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
+				}
 				ctl->SetWindowRect(rc_wnd);
 			}
 			break;

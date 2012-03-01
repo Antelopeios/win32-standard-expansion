@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-03-01
-// Version:	1.0.0019.1807
+// Version:	1.0.0019.2016
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -61,7 +61,8 @@
 //	- 1.0.0016.1710(2011-10-21)	+ 添加关闭缓存时的绘图逻辑
 //	- 1.0.0017.1653(2012-02-28)	^ 优化并简化按钮相关事件逻辑的实现
 //	- 1.0.0018.2324(2012-02-29)	^ 将GuiButtonEvent中文字折行处理的相关逻辑交给底层完成
-//	- 1.0.0019.1807(2012-03-01)	^ 简化GuiButtonEvent文字与图标的绘图区域处理逻辑
+//	- 1.0.0019.2016(2012-03-01)	^ 简化GuiButtonEvent文字与图标的绘图区域处理逻辑
+//								# 修正当GuiButton的文字内容发生变化时,文字绘制却不会变化的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -87,6 +88,7 @@ protected:
 	DWORD m_LocOld;
 	LONG m_OffOld;
 	CRect m_rcImg;
+	CString m_StrTmp;
 	CImage m_IconOld, m_IconTmp;
 	
 protected:
@@ -141,19 +143,23 @@ protected:
 
 	BOOL FmtTxtRect(const CRect& rect, CText* text, CString* str, DWORD locate, LONG loc_off, CRect& img_rct, CImage* icon = NULL)
 	{
-		if (!text || !str) return FALSE;
-
 		CSize txt_clp;
-		text->GetSize(*str, txt_clp);
-		if (txt_clp.cx == 0 || txt_clp.cy == 0) return FALSE;
-
-	//	ExTrace(_T("0x%08x\n"), this);
+		if (text && str)
+			text->GetSize(*str, txt_clp);
 		GetTxtRect(CRect(rect).Deflate(CPoint(2, 2)), txt_clp, locate, loc_off, img_rct, icon);
-		if (m_txtTmp == (*text) && m_LocOld == locate && m_OffOld == loc_off && m_rcImg == img_rct) return TRUE;
+
+		if (!text || !str) return FALSE;
+		if (m_txtTmp == (*text) && 
+			m_LocOld == locate && 
+			m_OffOld == loc_off && 
+			m_rcImg == img_rct && 
+			m_StrTmp == *str) return TRUE;
+
 		m_txtTmp = (*text);
 		m_LocOld = locate;
 		m_OffOld = loc_off;
 		m_rcImg = img_rct;
+		m_StrTmp = (*str);
 
 		// 绘制缓存
 		m_imgClp = text->GetImage(*str, img_rct);

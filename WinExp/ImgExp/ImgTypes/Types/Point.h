@@ -95,13 +95,13 @@ public:
 	{
 		return Set(tPoint.x, tPoint.y);
 	}
-	EXP_INLINE BOOL operator==(const CPointT& tPoint)
+	EXP_INLINE BOOL operator==(const CPointT& tPoint) const
 	{ return ((x == tPoint.x) && (y == tPoint.y)); }
-	EXP_INLINE BOOL operator==(POINT& tPoint)
+	EXP_INLINE BOOL operator==(POINT& tPoint) const
 	{ return ((x == tPoint.x) && (y == tPoint.y)); }
-	EXP_INLINE BOOL operator!=(const CPointT& tPoint)
+	EXP_INLINE BOOL operator!=(const CPointT& tPoint) const
 	{ return !((*this) == tPoint); }
-	EXP_INLINE BOOL operator!=(POINT& tPoint)
+	EXP_INLINE BOOL operator!=(POINT& tPoint) const
 	{ return !((*this) == tPoint); }
 
 	EXP_INLINE CPointT& operator+=(const CPointT& tPoint)
@@ -113,12 +113,12 @@ public:
 		return Offset(-tPoint.x, -tPoint.y);
 	}
 
-	EXP_INLINE CPointT operator+(const CPointT& tPoint)
+	EXP_INLINE CPointT operator+(const CPointT& tPoint) const
 	{ return CPointT(x + tPoint.x, y + tPoint.y); }
-	EXP_INLINE CPointT operator-(const CPointT& tPoint)
+	EXP_INLINE CPointT operator-(const CPointT& tPoint) const
 	{ return CPointT(x - tPoint.x, y - tPoint.y); }
 
-	EXP_INLINE CPointT operator-()
+	EXP_INLINE CPointT operator-() const
 	{ return CPointT(-x, -y); }
 
 	EXP_INLINE operator POINT() const

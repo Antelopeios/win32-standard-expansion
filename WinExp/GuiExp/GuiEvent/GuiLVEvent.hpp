@@ -145,13 +145,10 @@ public:
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
-		CSize scr_sz;
-		m_Ctrl->GetScrollSize(scr_sz);
 
 		// 遍历列表项
 		LONG all_line = 0;
-		CRect itm_rc, him_rc/*保存最高的itm*/, 
-			old_rc(scr_sz.cx, space - scr_sz.cy, scr_sz.cx, space - scr_sz.cy);
+		CRect itm_rc, him_rc/*保存最高的itm*/, old_rc(0, space, 0, space);
 		if (b_top)
 		{	// 向上对齐
 			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
@@ -162,7 +159,7 @@ public:
 				item->GetWindowRect(itm_rc);
 				// 调整区域
 				itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
-				if (itm_rc.Right() > rect.Right() && itm_rc.Left() > scr_sz.cx + space)
+				if (itm_rc.Right() > rect.Right() && itm_rc.Left() > space)
 				{
 					itm_rc.MoveTo(CPoint(rect.Left() + space, him_rc.Bottom() + space));
 					him_rc = itm_rc;
@@ -214,7 +211,7 @@ public:
 					old_rc.Right(itm_rc.Right());
 				}
 				// 起点移动一行
-				old_rc.MoveTo(CPoint(scr_sz.cx, old_rc.Bottom() + space));
+				old_rc.MoveTo(CPoint(0, old_rc.Bottom() + space));
 				old_rc.Width(0);
 				// 迭代器指向下一行
 				ite = it;
@@ -222,7 +219,7 @@ public:
 		}
 
 		// 设置滚动区域
-		itm_rc.pt2.y += (scr_sz.cy + space);
+		itm_rc.pt2.y += space;
 		m_Ctrl->SetFraRect(CSize(0, rect.Height()));
 		m_Ctrl->SetAllRect(CSize(0, itm_rc.Bottom()));
 	}

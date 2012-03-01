@@ -82,7 +82,7 @@ public:
 	}
 
 public:
-	BOOL IsValid() { return EXP_MULT::IsValid(); }
+	BOOL IsValid() const { return EXP_MULT::IsValid(); }
 
 	virtual BOOL Execute(const CString& key, const CString& val)
 	{
@@ -139,13 +139,15 @@ public:
 		if (IGuiSender::m_bTru && evt && evt->IsTrust()) evt->Free();
 	}
 
-	virtual CGC* GetGC() { return m_GC; }
+	virtual CGC* GetGC() const { return m_GC; }
 
-	virtual BOOL GetRealRect(CRect& rc) = 0;
+	virtual BOOL GetWindowRect(CRect& rc) const = 0;
+	virtual BOOL GetClientRect(CRect& rc) const = 0;
+	virtual BOOL GetRealRect(CRect& rc) const = 0;
 
 	void SetClipBox(const CRect& rc)
 	{ m_rcClip = rc; }
-	void GetClipBox(CRect& rc)
+	void GetClipBox(CRect& rc) const
 	{ rc = m_rcClip; }
 
 	virtual BOOL IsVisible() const = 0;
@@ -179,7 +181,7 @@ public:
 
 	void Free() { EXP_MULT::Free(); }
 
-	virtual wnd_t GethWnd() = 0;
+	virtual wnd_t GethWnd() const = 0;
 
 	// 设置事件捕获
 	void SetCapture()

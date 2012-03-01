@@ -243,12 +243,10 @@ public:
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
-		CSize scr_sz;
-		m_Ctrl->GetScrollSize(scr_sz);
 
 		// 遍历列表项
 		LONG all_line = 0;
-		CSize old_sz(scr_sz.cx, -scr_sz.cy);
+		CSize old_sz;
 		CRect itm_rc;
 		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 		{
@@ -266,7 +264,7 @@ public:
 		}
 
 		// 设置滚动区域
-		old_sz.cy += (scr_sz.cy + space);
+		old_sz.cy += space;
 		m_Ctrl->SetFraRect(CSize(0, rect.Height()));
 		m_Ctrl->SetAllRect(CSize(0, old_sz.cy));
 	}
@@ -274,23 +272,8 @@ public:
 	{
 		if (!pItem) return;
 		ExAssert(m_Ctrl);
-
 		CSize scr_sz;
-		m_Ctrl->GetScrollSize(scr_sz);
-		CRect scr_rc;
-		m_Ctrl->GetClientRect(scr_rc);
-		CRect itm_rc;
-		pItem->GetWindowRect(itm_rc);
-
-		LONG off1 = 0, off2 = 0;
-		if (scr_rc.Top() > itm_rc.Top())
-			off1 = itm_rc.Top() - scr_rc.Top();
-		if (scr_rc.Bottom() < itm_rc.Bottom())
-			off2 = itm_rc.Bottom() - scr_rc.Bottom();
-		scr_sz.cy += 
-			(off1 && off2 ? 
-			(abs(off1) < abs(off2) ? off1 : off2) : 
-			(off1 ? off1 : off2));
+		pItem->GetDisplaySize(scr_sz);
 		m_Ctrl->SetScrollSize(scr_sz, TRUE);
 	}
 

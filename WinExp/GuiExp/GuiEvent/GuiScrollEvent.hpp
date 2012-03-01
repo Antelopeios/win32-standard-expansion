@@ -481,7 +481,12 @@ public:
 			break;
 		case WM_MOUSEWHEEL:
 			{
-				short scr_cnt = (short)ExHiWord(wParam);
+				short scr_cnt = 0;
+				BOOL ori = GetOri();
+				if (ori)
+					scr_cnt = (short)ExHiWord(wParam);
+				else
+					scr_cnt = (short)ExLoWord(wParam);
 				m_Ctrl->SetState(_T("sli_pos"), (void*)(GetPos() - scr_cnt));
 			}
 			break;
@@ -492,7 +497,6 @@ public:
 				if (!main) break;
 				LONG pos = GetPos();
 				CSize scr_sz;
-				main->GetScrollSize(scr_sz);
 				BOOL ori = GetOri();
 				if (ori)
 					scr_sz.cy = pos;

@@ -108,12 +108,12 @@ public:
 	virtual BOOL PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
 
 	// 窗口属性修改
-	virtual DWORD GetStyle() = 0;
-	virtual DWORD GetExStyle() = 0;
+	virtual DWORD GetStyle() const = 0;
+	virtual DWORD GetExStyle() const = 0;
 	virtual BOOL ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0) = 0;
 	virtual BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE) = 0;
 	virtual LONG SetWindowLong(int nIndex, LONG dwNewLong) = 0;
-	virtual LONG GetWindowLong(int nIndex) = 0;
+	virtual LONG GetWindowLong(int nIndex) const = 0;
 
 	// 窗口刷新
 	virtual void Invalidate() = 0;
@@ -123,13 +123,11 @@ public:
 	virtual BOOL UpdateWindow() = 0;
 
 	// 窗口DC
-	virtual graph_t GetDC() = 0;
+	virtual graph_t GetDC() const = 0;
 	virtual BOOL ReleaseDC(graph_t hdc) = 0;
 
 	// 获得窗口大小
-	virtual BOOL GetWindowRect(CRect& lpRect) = 0;
-	virtual BOOL GetClientRect(CRect& lpRect) = 0;
-	virtual BOOL GetRealRect(CRect& rc) { return GetClientRect(rc); }
+	virtual BOOL GetRealRect(CRect& rc) const { return GetClientRect(rc); }
 
 	// 窗口移动
 	virtual void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE) = 0;
@@ -139,25 +137,25 @@ public:
 	virtual void CenterWindow(wnd_t hWndCenter = NULL) = 0;
 
 	// 窗口坐标转换
-	virtual void ClientToScreen(CPoint& lpPoint) = 0;
-	virtual void ClientToScreen(CRect& lpRect) = 0;
-	virtual void ScreenToClient(CPoint& lpPoint) = 0;
-	virtual void ScreenToClient(CRect& lpRect) = 0;
+	virtual void ClientToScreen(CPoint& lpPoint) const = 0;
+	virtual void ClientToScreen(CRect& lpRect) const = 0;
+	virtual void ScreenToClient(CPoint& lpPoint) const = 0;
+	virtual void ScreenToClient(CRect& lpRect) const = 0;
 
 	// 窗口关系控制
-	virtual wnd_t GetParent() = 0;
+	virtual wnd_t GetParent() const = 0;
 	virtual wnd_t SetParent(wnd_t wndParent = NULL) = 0;
 
 	// 设置焦点
 	virtual wnd_t SetFocus() = 0;
 	static wnd_t GetFocus() { return (wnd_t)::GetFocus(); }
-	virtual BOOL IsFocus() = 0;
+	virtual BOOL IsFocus() const = 0;
 
 	// 窗口图层化
 	virtual void SetLayered(BOOL bLayered = TRUE, BOOL bColorKey = TRUE, pixel_t crKey = ExRGB(255, 0, 255)) = 0;
-	virtual BOOL IsLayered() = 0;
-	virtual BOOL IsColorKey() = 0;
-	virtual pixel_t GetColorKey() = 0;
+	virtual BOOL IsLayered() const = 0;
+	virtual BOOL IsColorKey() const = 0;
+	virtual pixel_t GetColorKey() const = 0;
 	virtual void LayeredWindow(HDC hDC, HDC tGrp) = 0;
 };
 
@@ -211,7 +209,7 @@ public:
 
 	BOOL Attach(wnd_t hWnd);
 	wnd_t Detach();
-	wnd_t GethWnd();
+	wnd_t GethWnd() const;
 
 	// 窗口消息
 	LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
@@ -222,12 +220,12 @@ public:
 	BOOL IsCusPaint() const;
 
 	// 窗口属性修改
-	DWORD GetStyle();
-	DWORD GetExStyle();
+	DWORD GetStyle() const;
+	DWORD GetExStyle() const;
 	BOOL ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);
 	BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE);
 	LONG SetWindowLong(int nIndex, LONG dwNewLong);
-	LONG GetWindowLong(int nIndex);
+	LONG GetWindowLong(int nIndex) const;
 
 	// 窗口移动
 	void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE);
@@ -237,10 +235,10 @@ public:
 	void CenterWindow(wnd_t hWndCenter = NULL);
 
 	// 窗口坐标转换
-	void ClientToScreen(CPoint& lpPoint);
-	void ClientToScreen(CRect& lpRect);
-	void ScreenToClient(CPoint& lpPoint);
-	void ScreenToClient(CRect& lpRect);
+	void ClientToScreen(CPoint& lpPoint) const;
+	void ClientToScreen(CRect& lpRect) const;
+	void ScreenToClient(CPoint& lpPoint) const;
+	void ScreenToClient(CRect& lpRect) const;
 
 	// 窗口刷新
 	void Invalidate();
@@ -251,26 +249,26 @@ public:
 	BOOL IsVisible() const;
 
 	// 窗口DC
-	graph_t GetDC();
+	graph_t GetDC() const;
 	BOOL ReleaseDC(graph_t hdc);
 
 	// 获得窗口大小
-	BOOL GetWindowRect(CRect& lpRect);
-	BOOL GetClientRect(CRect& lpRect);
+	BOOL GetWindowRect(CRect& lpRect) const;
+	BOOL GetClientRect(CRect& lpRect) const;
 
 	// 窗口关系控制
-	wnd_t GetParent();
+	wnd_t GetParent() const;
 	wnd_t SetParent(wnd_t wndParent = NULL);
 
 	// 设置焦点
 	wnd_t SetFocus();
-	BOOL IsFocus();
+	BOOL IsFocus() const;
 
 	// 窗口图层化
 	void SetLayered(BOOL bLayered = TRUE, BOOL bColorKey = TRUE, pixel_t crKey = ExRGB(255, 0, 255));
-	BOOL IsLayered();
-	BOOL IsColorKey();
-	pixel_t GetColorKey();
+	BOOL IsLayered() const;
+	BOOL IsColorKey() const;
+	pixel_t GetColorKey() const;
 	void LayeredWindow(HDC hDC, HDC tGrp);
 };
 

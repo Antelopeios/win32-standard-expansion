@@ -149,12 +149,12 @@ public:
 		return (*this);
 	}
 
-	EXP_INLINE BOOL IsEmpty()
+	EXP_INLINE BOOL IsEmpty() const
 	{ return (pt1.x >= pt2.x || pt1.y >= pt2.y); }
-	EXP_INLINE BOOL IsNull()
+	EXP_INLINE BOOL IsNull() const
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
-	EXP_INLINE BOOL PtInRect(const CPointT<TypeT>& Pt, BOOL bEgSide = TRUE)
+	EXP_INLINE BOOL PtInRect(const CPointT<TypeT>& Pt, BOOL bEgSide = TRUE) const
 	{
 		if (bEgSide)
 			return (Pt.x >= pt1.x && Pt.x < pt2.x && 
@@ -173,16 +173,16 @@ public:
 		return Set(CPointT<TypeT>(tRect.left, tRect.top), 
 				   CPointT<TypeT>(tRect.right, tRect.bottom));
 	}
-	EXP_INLINE BOOL operator==(const CRectT& tRect)
+	EXP_INLINE BOOL operator==(const CRectT& tRect) const
 	{ return ((pt1 == tRect.pt1) && (pt2 == tRect.pt2)); }
-	EXP_INLINE BOOL operator==(RECT& tRect)
+	EXP_INLINE BOOL operator==(RECT& tRect) const
 	{
 		return ((pt1 == CPointT<TypeT>(tRect.left, tRect.top)) && 
 				(pt2 == CPointT<TypeT>(tRect.right, tRect.bottom)));
 	}
-	EXP_INLINE BOOL operator!=(const CRectT& tRect)
+	EXP_INLINE BOOL operator!=(const CRectT& tRect) const
 	{ return !((*this) == tRect); }
-	EXP_INLINE BOOL operator!=(RECT& tRect)
+	EXP_INLINE BOOL operator!=(RECT& tRect) const
 	{ return !((*this) == tRect); }
 
 	EXP_INLINE CRectT& operator+=(const CPointT<TypeT>& Pt)
@@ -202,13 +202,13 @@ public:
 		return Deflate(tRect);
 	}
 
-	EXP_INLINE CRectT operator+(const CPointT<TypeT>& Pt)
+	EXP_INLINE CRectT operator+(const CPointT<TypeT>& Pt) const
 	{ return (CRectT(*this) += Pt); }
-	EXP_INLINE CRectT operator-(const CPointT<TypeT>& Pt)
+	EXP_INLINE CRectT operator-(const CPointT<TypeT>& Pt) const
 	{ return (CRectT(*this) -= Pt); }
-	EXP_INLINE CRectT operator+(const CRectT& tRect)
+	EXP_INLINE CRectT operator+(const CRectT& tRect) const
 	{ return (CRectT(*this) += tRect); }
-	EXP_INLINE CRectT operator-(const CRectT& tRect)
+	EXP_INLINE CRectT operator-(const CRectT& tRect) const
 	{ return (CRectT(*this) -= tRect); }
 
 	EXP_INLINE operator RECT() const

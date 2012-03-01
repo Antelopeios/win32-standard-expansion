@@ -91,7 +91,7 @@ public:
 	virtual ~IGuiObject() { m_bFree = TRUE; }
 
 public:
-	BOOL IsValid() { return (!m_bFree); }
+	BOOL IsValid() const { return (!m_bFree); }
 	virtual void Free() { del(this); }
 };
 
@@ -183,9 +183,9 @@ public:
 public:
 	// 是否对子容器做托管
 	void SetTrustEvent(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
-	BOOL IsTrustEvent() { return m_bTru; }
+	BOOL IsTrustEvent() const { return m_bTru; }
 	// 获得内部对象
-	evt_list_t& GetEvent() { return *m_CldrEvt; }
+	evt_list_t& GetEvent() const { return *m_CldrEvt; }
 
 	// 查找
 	evt_list_t::iterator_t FindEvent(IGuiEvent* pEvent) { return GetEvent().Find(pEvent); }
@@ -360,8 +360,8 @@ public:
 	void SetTrust(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
 	BOOL IsTrust() { return m_bTru; }
 	// 获得内部对象
-	IGuiComp* GetParent() { return m_Pare; }
-	list_t& GetChildren() { return *m_Cldr; }
+	IGuiComp* GetParent() const { return m_Pare; }
+	list_t& GetChildren() const { return *m_Cldr; }
 
 	// 查找
 	list_t::iterator_t FindComp(void* p) { return GetChildren().Find(ExDynCast<IGuiComp>(p)); }

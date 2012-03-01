@@ -84,7 +84,7 @@ EXP_INTERFACE IGuiCtl : public IGuiBase
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtl, IGuiBase)
 
 public:
-	typedef CArrayT<IGuiCtl*> items_t;
+	typedef CListT<IGuiCtl*> items_t;
 
 protected:
 	static IGuiCtl* m_Focus;
@@ -156,7 +156,8 @@ public:
 	}
 
 	// 获得绘图板
-	virtual IGuiWnd* GetWnd()
+	IGuiBase* GetParent() const { return ExDynCast<IGuiBase>(m_Pare); }
+	IGuiWnd* GetWnd() const
 	{
 		if (m_Pare)
 		{
@@ -167,25 +168,26 @@ public:
 		}
 		return NULL;
 	}
-	virtual wnd_t GethWnd()
+	wnd_t GethWnd() const
 	{
 		IGuiWnd* wnd = GetWnd();
 		return wnd ? wnd->GethWnd() : NULL;
 	}
 
 	// 区域控制
-	virtual BOOL P2C(CRect& rc) = 0;
-	virtual BOOL C2P(CRect& rc) = 0;
-	virtual BOOL B2C(CRect& rc) = 0;
-	virtual BOOL C2B(CRect& rc) = 0;
+	virtual BOOL GetRect(CRect& rc) const = 0;
+	virtual BOOL SetRect(const CRect& rc) = 0;
+
+	virtual BOOL P2C(CRect& rc) const = 0;
+	virtual BOOL C2P(CRect& rc) const = 0;
+	virtual BOOL B2C(CRect& rc) const = 0;
+	virtual BOOL C2B(CRect& rc) const = 0;
 	virtual BOOL SetWindowRect(const CRect& rc) = 0;
-	virtual BOOL GetWindowRect(CRect& rc) = 0;
 	virtual BOOL SetRealRect(const CRect& rc) = 0;
-	virtual BOOL GetRealRect(CRect& rc) = 0;
-	virtual BOOL GetClientRect(CRect& rc) = 0;
-	virtual BOOL GetAllRect(CSize& sz) = 0;
-	virtual BOOL GetFraRect(CSize& sz) = 0;
-	BOOL GetClipRect(CRect& rc)
+	virtual BOOL GetAllRect(CSize& sz) const = 0;
+	virtual BOOL GetFraRect(CSize& sz) const = 0;
+
+	BOOL GetClipRect(CRect& rc) const
 	{
 		CRect rc_clp;
 		GetClipBox(rc_clp);
@@ -193,6 +195,7 @@ public:
 		rc.Offset(-rc_clp.pt1);
 		return TRUE;
 	}
+
 	BOOL GetScrollSize(CSize& sz) const
 	{
 		sz = m_szScroll;
@@ -204,11 +207,11 @@ public:
 		{
 			if (m_Scroll[0])
 				m_Scroll[0]->SendMessage(WM_MOUSEWHEEL, 
-					ExMakeLong(m_szScroll.cx - sz.cx, m_szScroll.cy - sz.cy), 
+					ExMakeLong(-sz.cx, -sz.cy), 
 					ExMakeLong(-1, -1));
 			if (m_Scroll[1])
 				m_Scroll[1]->SendMessage(WM_MOUSEWHEEL, 
-					ExMakeLong(m_szScroll.cx - sz.cx, m_szScroll.cy - sz.cy), 
+					ExMakeLong(-sz.cx, -sz.cy), 
 					ExMakeLong(-1, -1));
 		}
 		else
@@ -235,8 +238,47 @@ public:
 		if (m_Scroll[inx] && old_scr != m_Scroll[inx])
 		{
 			m_Scroll[inx]->SetState(_T("main"), this);
-			SetScrollSize(m_szScroll, TRUE);
+			SetScrollSize(CSize(), TRUE);
 		}
+	}
+
+	// 判断是否可视(如控件在父控件窗口外)
+	BOOL IsDisplayed() const
+	{
+		CRect rc_slf;
+		if (!GetWindowRect(rc_slf)) return FALSE;
+		CRect rc_prt;
+		if (!GetParent()->GetClientRect(rc_prt)) return FALSE;
+		return (!rc_slf.Inter(rc_prt).IsEmpty());
+	}
+	BOOL GetDisplaySize(CSize& sz) const
+	{
+		sz.CSizeT::CSizeT();
+		CRect rc_slf;
+		if (!GetWindowRect(rc_slf)) return FALSE;
+		CRect rc_prt;
+		if (!GetParent()->GetClientRect(rc_prt)) return FALSE;
+		CRect rc_int(rc_slf);
+		if (rc_int.Inter(rc_prt) != rc_slf)
+		{
+			if (rc_int.Left() == rc_slf.Left() || 
+				rc_int.Right() == rc_slf.Right())
+			{
+				if (rc_int.Left() > rc_slf.Left())
+					sz.cx = rc_int.Left() - rc_slf.Left();
+				if (rc_int.Right() < rc_slf.Right())
+					sz.cx = rc_int.Right() - rc_slf.Right();
+			}
+			if (rc_int.Top() == rc_slf.Top() || 
+				rc_int.Bottom() == rc_slf.Bottom())
+			{
+				if (rc_int.Top() > rc_slf.Top())
+					sz.cy = rc_int.Top() - rc_slf.Top();
+				if (rc_int.Bottom() < rc_slf.Bottom())
+					sz.cy = rc_int.Bottom() - rc_slf.Bottom();
+			}
+		}
+		return TRUE;
 	}
 
 	// 刷新绘图
@@ -251,7 +293,7 @@ public:
 	virtual BOOL IsVisible() const = 0;
 
 	// 判断有效性
-	static BOOL IsEffect(IGuiCtl* pCtrl)
+	static BOOL IsEffect(const IGuiCtl* pCtrl)
 	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
 
 	static IGuiCtl* SetFocus(IGuiCtl* pFoc)
@@ -288,7 +330,7 @@ public:
 	{
 		return m_Focus;
 	}
-	virtual BOOL IsFocus()
+	virtual BOOL IsFocus() const
 	{
 		IGuiWnd* wnd = GetWnd();
 		if (wnd && !wnd->IsFocus())
@@ -336,20 +378,23 @@ public:
 	BOOL IsUpdated();
 
 	// 区域控制
-	BOOL P2C(CRect& rc);
-	BOOL C2P(CRect& rc);
-	BOOL B2C(CRect& rc);
-	BOOL C2B(CRect& rc);
+	BOOL GetRect(CRect& rc) const;
+	BOOL SetRect(const CRect& rc);
+
+	BOOL P2C(CRect& rc) const;
+	BOOL C2P(CRect& rc) const;
+	BOOL B2C(CRect& rc) const;
+	BOOL C2B(CRect& rc) const;
 	BOOL SetWindowRect(const CRect& rc);
-	BOOL GetWindowRect(CRect& rc);
+	BOOL GetWindowRect(CRect& rc) const;
 	BOOL SetRealRect(const CRect& rc);
-	BOOL GetRealRect(CRect& rc);
-	BOOL GetClientRect(CRect& rc);
+	BOOL GetRealRect(CRect& rc) const;
+	BOOL GetClientRect(CRect& rc) const;
 
 	virtual BOOL SetAllRect(const CSize& sz);
-	BOOL GetAllRect(CSize& sz);
+	BOOL GetAllRect(CSize& sz) const;
 	virtual BOOL SetFraRect(const CSize& sz);
-	BOOL GetFraRect(CSize& sz);
+	BOOL GetFraRect(CSize& sz) const;
 
 	// 刷新绘图
 	void Refresh(BOOL bSelf = TRUE);

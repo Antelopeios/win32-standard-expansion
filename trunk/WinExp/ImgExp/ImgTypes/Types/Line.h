@@ -107,20 +107,20 @@ public:
 		pt2 = pt1 + pt;
 	}
 
-	EXP_INLINE BOOL IsEmpty()
+	EXP_INLINE BOOL IsEmpty() const
 	{ return (pt1.x == pt2.x || pt1.y == pt2.y); }
-	EXP_INLINE BOOL IsNull()
+	EXP_INLINE BOOL IsNull() const
 	{ return (pt1.x == 0 && pt2.x == 0 && pt1.y == 0 && pt2.y == 0); }
 
 	// 求两点距离
-	EXP_INLINE TypeT Length()
+	EXP_INLINE TypeT Length() const
 	{
 		TypeT dif_x = (pt1.x - pt2.x), dif_y = (pt1.y - pt2.y);
 		return (TypeT)sqrt((double)(dif_x * dif_x + dif_y * dif_y));
 	}
 
 	// 求斜率
-	EXP_INLINE BOOL K(_OT_ TypeT& k)
+	EXP_INLINE BOOL K(_OT_ TypeT& k) const
 	{
 		TypeT div = pt2.x - pt1.x;
 		if (ExIsZero(div)) return FALSE;
@@ -129,7 +129,7 @@ public:
 	}
 
 	// 点与直线的关系
-	EXP_INLINE int PtInLine(const CPointT<TypeT>& Pt)
+	EXP_INLINE int PtInLine(const CPointT<TypeT>& Pt) const
 	{
 		TypeT a = pt2.y - pt1.y;
 		TypeT b = pt1.x - pt2.x;
@@ -145,7 +145,7 @@ public:
 	}
 
 	// 求交点
-	EXP_INLINE BOOL InterLine(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
+	EXP_INLINE BOOL InterLine(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt) const
 	{
 		TypeT b1 = pt1.x - pt2.x, b2 = tLine.pt1.x - tLine.pt2.x;
 		if (ExIsZero(b1) && ExIsZero(b2)) return FALSE;
@@ -157,7 +157,7 @@ public:
 		Pt.y = (a1 * c2 - a2 * c1) / div;
 		return TRUE;
 	}
-	EXP_INLINE BOOL InterSect(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt)
+	EXP_INLINE BOOL InterSect(_IN_ const CLineT& tLine, _OT_ CPointT<TypeT>& Pt) const
 	{
 		CPointT<TypeT> pt;
 		if(!InterLine(tLine, pt)) return FALSE;
@@ -209,8 +209,11 @@ public:
 		Set(tLine.pt1, tLine.pt2);
 		return (*this);
 	}
-	EXP_INLINE BOOL operator==(const CLineT& tLine)
+
+	EXP_INLINE BOOL operator==(const CLineT& tLine) const
 	{ return ((pt1 == tLine.pt1) && (pt2 == tLine.pt2)); }
+	EXP_INLINE BOOL operator!=(const CLineT& tLine) const
+	{ return !((*this) == tLine); }
 
 	EXP_INLINE CLineT& operator+=(const CPointT<TypeT>& Pt)
 	{
@@ -223,9 +226,9 @@ public:
 		return (*this);
 	}
 
-	EXP_INLINE CLineT operator+(const CPointT<TypeT>& Pt)
+	EXP_INLINE CLineT operator+(const CPointT<TypeT>& Pt) const
 	{ return (CLineT(*this) += Pt); }
-	EXP_INLINE CLineT operator-(const CPointT<TypeT>& Pt)
+	EXP_INLINE CLineT operator-(const CPointT<TypeT>& Pt) const
 	{ return (CLineT(*this) -= Pt); }
 };
 

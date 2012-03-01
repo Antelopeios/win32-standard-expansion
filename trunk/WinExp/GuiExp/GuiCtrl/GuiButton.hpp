@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-23
-// Version:	1.0.0008.1216
+// Date:	2012-03-01
+// Version:	1.0.0009.2025
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -48,6 +48,7 @@
 //								# 加上icon相关属性的初始化操作
 //	- 1.0.0007.1513(2011-09-22)	= CGuiButton按钮状态改为8态
 //	- 1.0.0008.1216(2011-09-23)	+ 添加shake_ico属性,支持点击时晃动图标及文字
+//	- 1.0.0009.2025(2012-03-01) + GuiButton支持通过字符串匹配对应的locate属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -159,7 +160,27 @@ public:
 			SetState(_T("status"), (void*)_ttol(val));
 		else
 		if (key == _T("locate"))
-			SetState(_T("locate"), (void*)_ttol(val));
+		{
+			int loc_i = _ttol(val);
+			if (loc_i == 0 && val != _T("0"))
+			{
+				if (val == _T("center"))
+					loc_i = (int)center;
+				else
+				if (val == _T("top"))
+					loc_i = (int)top;
+				else
+				if (val == _T("bottom"))
+					loc_i = (int)bottom;
+				else
+				if (val == _T("left"))
+					loc_i = (int)left;
+				else
+				if (val == _T("right"))
+					loc_i = (int)right;
+			}
+			SetState(_T("locate"), (void*)loc_i);
+		}
 		else
 		if (key == _T("loc_off"))
 			SetState(_T("loc_off"), (void*)_ttol(val));
@@ -425,7 +446,27 @@ public:
 			SetState(_T("status"), (void*)_ttol(val));
 		else
 		if (key == _T("locate"))
-			SetState(_T("locate"), (void*)_ttol(val));
+		{
+			int loc_i = _ttol(val);
+			if (loc_i == 0 && val != _T("0"))
+			{
+				if (val == _T("center"))
+					loc_i = (int)center;
+				else
+				if (val == _T("top"))
+					loc_i = (int)top;
+				else
+				if (val == _T("bottom"))
+					loc_i = (int)bottom;
+				else
+				if (val == _T("left"))
+					loc_i = (int)left;
+				else
+				if (val == _T("right"))
+					loc_i = (int)right;
+			}
+			SetState(_T("locate"), (void*)loc_i);
+		}
 		else
 		if (key == _T("loc_off"))
 			SetState(_T("loc_off"), (void*)_ttol(val));

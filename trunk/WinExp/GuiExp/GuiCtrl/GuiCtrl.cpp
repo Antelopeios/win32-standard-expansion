@@ -82,17 +82,31 @@ BOOL IGuiCtrlBase::IsUpdated()
 }
 
 // ÇøÓò¿ØÖÆ
-BOOL IGuiCtrlBase::P2C(CRect& rc)
+BOOL IGuiCtrlBase::GetRect(CRect& rc) const
 {
-	rc.Offset(-(m_Rect.pt1));
+	rc = m_Rect;
 	return TRUE;
 }
-BOOL IGuiCtrlBase::C2P(CRect& rc)
+BOOL IGuiCtrlBase::SetRect(const CRect& rc)
 {
-	rc.Offset(m_Rect.pt1);
+	m_Rect = rc;
 	return TRUE;
 }
-BOOL IGuiCtrlBase::B2C(CRect& rc)
+BOOL IGuiCtrlBase::P2C(CRect& rc) const
+{
+	CRect rc_wnd;
+	if (!GetWindowRect(rc_wnd)) return FALSE;
+	rc.Offset(-(rc_wnd.pt1));
+	return TRUE;
+}
+BOOL IGuiCtrlBase::C2P(CRect& rc) const
+{
+	CRect rc_wnd;
+	if (!GetWindowRect(rc_wnd)) return FALSE;
+	rc.Offset(rc_wnd.pt1);
+	return TRUE;
+}
+BOOL IGuiCtrlBase::B2C(CRect& rc) const
 {
 	if (!m_Pare) return FALSE;
 	if (!P2C(rc)) return FALSE;
@@ -100,7 +114,7 @@ BOOL IGuiCtrlBase::B2C(CRect& rc)
 	if (ctl) return ctl->B2C(rc);
 	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
-BOOL IGuiCtrlBase::C2B(CRect& rc)
+BOOL IGuiCtrlBase::C2B(CRect& rc) const
 {
 	if (!m_Pare) return FALSE;
 	if (!C2P(rc)) return FALSE;
@@ -111,7 +125,7 @@ BOOL IGuiCtrlBase::C2B(CRect& rc)
 BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 {
 	if (m_Rect == rc) return TRUE;
-	m_Rect = rc;
+	SetRect(rc);
 	if (GetParent())
 	{
 		SendMessage(WM_SIZE, SIZE_RESTORED, 
@@ -120,10 +134,21 @@ BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 	}
 	return TRUE;
 }
-BOOL IGuiCtrlBase::GetWindowRect(CRect& rc)
+BOOL IGuiCtrlBase::GetWindowRect(CRect& rc) const
 {
-	rc = m_Rect;
-	return TRUE;
+	IGuiBase* pare = GetParent();
+	if (!pare) return FALSE;
+	IGuiCtl* ctl = ExDynCast<IGuiCtl>(pare);
+	if (ctl)
+	{
+		if (!GetRect(rc)) return FALSE;
+		CSize scr_sz;
+		if (!ctl->GetScrollSize(scr_sz)) return FALSE;
+		rc.Offset(-CPoint(scr_sz.cx, scr_sz.cy));
+		return TRUE;
+	}
+	else
+		return GetRect(rc);
 }
 BOOL IGuiCtrlBase::SetRealRect(const CRect& rc)
 {
@@ -131,7 +156,7 @@ BOOL IGuiCtrlBase::SetRealRect(const CRect& rc)
 	if (!B2C(rc_tmp)) return FALSE;
 	return SetWindowRect(rc_tmp);
 }
-BOOL IGuiCtrlBase::GetRealRect(CRect& rc)
+BOOL IGuiCtrlBase::GetRealRect(CRect& rc) const
 {
 	if (!m_Pare) return FALSE;
 	if (!GetWindowRect(rc)) return FALSE;
@@ -139,7 +164,7 @@ BOOL IGuiCtrlBase::GetRealRect(CRect& rc)
 	if (ctl) return ctl->C2B(rc);
 	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
-BOOL IGuiCtrlBase::GetClientRect(CRect& rc)
+BOOL IGuiCtrlBase::GetClientRect(CRect& rc) const
 {
 	if (!GetWindowRect(rc)) return FALSE;
 	rc.MoveTo(CPoint());
@@ -160,7 +185,7 @@ BOOL IGuiCtrlBase::SetAllRect(const CSize& sz)
 	}
 	return TRUE;
 }
-BOOL IGuiCtrlBase::GetAllRect(CSize& sz)
+BOOL IGuiCtrlBase::GetAllRect(CSize& sz) const
 {
 	sz = m_AllRect;
 	return TRUE;
@@ -179,7 +204,7 @@ BOOL IGuiCtrlBase::SetFraRect(const CSize& sz)
 	}
 	return TRUE;
 }
-BOOL IGuiCtrlBase::GetFraRect(CSize& sz)
+BOOL IGuiCtrlBase::GetFraRect(CSize& sz) const
 {
 	sz = m_FraRect;
 	return TRUE;

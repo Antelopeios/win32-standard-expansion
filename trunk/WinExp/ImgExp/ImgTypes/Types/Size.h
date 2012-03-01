@@ -102,13 +102,13 @@ public:
 		return (*this);
 	}
 
-	EXP_INLINE BOOL operator==(const CSizeT& tSize)
+	EXP_INLINE BOOL operator==(const CSizeT& tSize) const
 	{ return ((cx == tSize.cx) && (cy == tSize.cy)); }
-	EXP_INLINE BOOL operator==(SIZE& tSize)
+	EXP_INLINE BOOL operator==(SIZE& tSize) const
 	{ return ((cx == tSize.cx) && (cy == tSize.cy)); }
-	EXP_INLINE BOOL operator!=(const CSizeT& tSize)
+	EXP_INLINE BOOL operator!=(const CSizeT& tSize) const
 	{ return !((*this) == tSize); }
-	EXP_INLINE BOOL operator!=(SIZE& tSize)
+	EXP_INLINE BOOL operator!=(SIZE& tSize) const
 	{ return !((*this) == tSize); }
 
 	EXP_INLINE CSizeT& operator+=(const CSizeT& tSize)
@@ -124,16 +124,16 @@ public:
 		return (*this);
 	}
 
-	EXP_INLINE CSizeT& operator+(const CSizeT& tSize)
+	EXP_INLINE CSizeT& operator+(const CSizeT& tSize) const
 	{
 		return CSizeT(cx + tSize.cx, cy + tSize.cy);
 	}
-	EXP_INLINE CSizeT& operator-(const CSizeT& tSize)
+	EXP_INLINE CSizeT& operator-(const CSizeT& tSize) const
 	{
 		return CSizeT(cx - tSize.cx, cy - tSize.cy);
 	}
 
-	EXP_INLINE CSizeT operator-()
+	EXP_INLINE CSizeT operator-() const
 	{ return CSizeT(-cx, -cy); }
 
 	EXP_INLINE operator SIZE() const

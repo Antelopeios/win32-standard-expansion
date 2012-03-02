@@ -498,7 +498,7 @@ public:
 		IGuiEvent* pe = ExGet<IGuiEvent>(e);
 		for(int i = 0; i < _ttoi(t); ++i)
 		{
-			IGuiCtl* ctl = ExDynCast<IGuiCtl>(ExDynCreate(c));
+			IGuiCtl* ctl = ExGui<IGuiCtl>(c);
 			if (!ctl) return NULL;
 			ctl = (IGuiCtl*)ctl->Execute(xml, ite, parent);
 			if (!ctl) return NULL;

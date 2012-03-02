@@ -209,6 +209,7 @@ public:
 
 	CListT& SetList(block_t* pList)
 	{
+		if (pList == m_pHead) return (*this);
 		Clear();
 		AddList(pList);
 		return (*this);

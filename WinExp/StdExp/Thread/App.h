@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-15
-// Version:	1.0.0005.1430
+// Date:	2012-03-02
+// Version:	1.0.0006.2200
 //
 // History:
 //	- 1.0.0001.1030(2012-01-09)	+ IApp构造添加nSingleID参数,支持直接通过资源ID确定唯一性字符串
@@ -43,6 +43,7 @@
 //	- 1.0.0004.1008(2012-01-30)	+ IThreadT支持与IApp的OnInit(),OnTerm()语义相同的外部接口
 //	- 1.0.0005.1430(2012-02-15)	+ 始终定义g_App对象
 //								+ 添加ExApp(),可直接通过此接口获取App对象指针
+//	- 1.0.0006.2200(2012-03-02)	^ 彻底移除内部自动定义的g_App,优化内部逻辑,采用懒汉模式在需要时自动构建全局App对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __App_h__
@@ -182,47 +183,82 @@ private:
 	DWORD Suspend() { return 0; }
 	DWORD Resume() { return 0; }
 
-protected:
-	static IApp* m_pThis;
 public:
-	static int Run()
-	{
-		return (int)ProxyProc(m_pThis);
-	}
-	static MSG* GetMSG()
-	{
-		if (m_pThis)
-			return m_pThis->IThread::GetMSG();
-		else
-			return NULL;
-	}
+	static int Run() { return (int)ProxyProc(GetApp()); }
+	static MSG* GetMSG() { return GetApp()->IThread::GetMSG(); }
+
+	BOOL m_IsSingle;
+	TCHAR m_Full[MAX_PATH];
+	TCHAR m_Path[MAX_PATH];
+	TCHAR m_Name[MAX_PATH];
 
 public:
 	// App对象
-	EXP_INLINE static IApp* GetApp() { return m_pThis; }
+	EXP_INLINE static IApp* GetApp()
+	{
+		IApp*& app = EXP_SINGLETON<IApp*>::Instance();
+		if (!app) app = &(EXP_SINGLETON<IApp>::Instance());
+		return app;
+	}
 
 	// 进程句柄
-	EXP_INLINE static HINSTANCE GetInstance() { return (HINSTANCE)m_pThis->GetHandle(); }
+	EXP_INLINE static HINSTANCE GetInstance() { return (HINSTANCE)GetApp()->GetHandle(); }
 
 	// 自身是否已运行
-	static BOOL m_IsSingle;
-	EXP_INLINE static BOOL IsSingle() { return m_IsSingle; }
+	EXP_INLINE static BOOL IsSingle() { return GetApp()->m_IsSingle; }
 
 	// 进程路径及进程名
-	static TCHAR m_Full[MAX_PATH];
-	static TCHAR m_Path[MAX_PATH];
-	static TCHAR m_Name[MAX_PATH];
-	EXP_INLINE static LPCTSTR GetFull() { return m_Full; }
-	EXP_INLINE static LPCTSTR GetPath() { return m_Path; }
-	EXP_INLINE static LPCTSTR GetName() { return m_Name; }
+	EXP_INLINE static LPCTSTR GetFull() { return GetApp()->m_Full; }
+	EXP_INLINE static LPCTSTR GetPath() { return GetApp()->m_Path; }
+	EXP_INLINE static LPCTSTR GetName() { return GetApp()->m_Name; }
 
 	// 进程参数
 	EXP_INLINE static LPCTSTR GetCmdLine() { return ::GetCommandLine(); }
 
 public:
-	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/, UINT nSingleID = 0);
+	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/, UINT nSingleID = 0)
+		: m_IsSingle(FALSE)
+	{
+		IApp*& app = EXP_SINGLETON<IApp*>::Instance();
+		if (app) return;
+		app = this;
+
+		m_bUIThread = bUIApp;
+		m_hSync = ::GetModuleHandle(NULL);
+		m_nIDThread = ::GetCurrentProcessId();
+
+		::GetModuleFileName(NULL, m_Full, _countof(m_Full));
+		_tcscpy_s(m_Path, m_Full);
+		TCHAR* p_name = _tcsrchr(m_Path, _T('\\')) + 1;
+		_tcscpy_s(m_Name, p_name);
+		(*p_name) = _T('\0');
+
+		// 在程序初始化的时候判断自身是否已运行
+		TCHAR str_name[MAX_PATH];
+		if (sSingle && _tcslen(sSingle) > 0)
+			_tcscpy_s(str_name, sSingle);
+		else
+		if (nSingleID > 0)
+			::LoadString((HINSTANCE)m_hSync, nSingleID, str_name, _countof(str_name));
+		else
+		{
+			_tcscpy_s(str_name, m_Full);
+			while(p_name = _tcsrchr(str_name, _T('\\'))) (*p_name) = _T('_');
+		}
+		HANDLE mutex = ::CreateMutex(NULL, FALSE, str_name);
+		if (GetLastError() == ERROR_ALREADY_EXISTS)
+		{
+			::CloseHandle(mutex);
+			m_IsSingle = FALSE; // 程序已经处于运行中
+		}
+	}
+
 	~IApp()
 	{
+		/*
+			在基类析构之前先将句柄置空
+			防止基类析构时的自动销毁
+		*/
 		m_hSync = NULL;
 	}
 

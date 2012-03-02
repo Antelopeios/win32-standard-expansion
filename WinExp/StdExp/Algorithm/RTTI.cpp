@@ -31,7 +31,7 @@
 // RTTI - 运行时类型识别
 //
 // Author:	木头云
-// Home:	http://hi.baidu.com/markl22222
+// Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-07-07
 // Version:	1.0.0000.0058

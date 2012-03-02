@@ -198,9 +198,6 @@
     <ClCompile Include="StdExp\Debugging\XZip\XZip.cpp">
       <Filter>Debugging\XZip</Filter>
     </ClCompile>
-    <ClCompile Include="StdExp\Thread\App.cpp">
-      <Filter>Thread</Filter>
-    </ClCompile>
     <ClCompile Include="StdExp\Algorithm\RTTI.cpp">
       <Filter>Algorithm</Filter>
     </ClCompile>

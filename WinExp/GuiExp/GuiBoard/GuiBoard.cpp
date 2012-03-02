@@ -137,15 +137,22 @@ int IGuiBoardBase::RunModalLoop()
 	m_IsModalLoop = TRUE;
 
 	MSG* p_msg = IApp::GetMSG();
-	while(m_IsModalLoop && ::PeekMessage(p_msg, NULL, NULL, NULL, PM_NOREMOVE))
+	while(m_IsModalLoop)
 	{
-		if(!::GetMessage(p_msg, NULL, NULL, NULL))
+		for(;!::PeekMessage(p_msg, NULL, NULL, NULL, PM_NOREMOVE););
+
+		do
 		{
-			::PostQuitMessage(0);
-			return -1;
-		}
-		::TranslateMessage(p_msg);
-		::DispatchMessage(p_msg);
+			if(!::GetMessage(p_msg, NULL, NULL, NULL))
+			{
+				::PostQuitMessage(0);
+				return -1;
+			}
+			::TranslateMessage(p_msg);
+			::DispatchMessage(p_msg);
+		} while(m_IsModalLoop && ::PeekMessage(p_msg, NULL, NULL, NULL, PM_NOREMOVE));
+
+		Sleep(5);
 	}
 
 	return m_ModalResult;
@@ -306,14 +313,6 @@ void IGuiBoardBase::CenterWindow(wnd_t hWndCenter/* = NULL*/)
 			hWndCenter = ::GetParent(Get());
 		else
 			hWndCenter = ::GetWindow(Get(), GW_OWNER);
-		if (hWndCenter != NULL)
-		{
-			// let parent determine alternate center window
-			wnd_t hWndTemp =
-				(wnd_t)::SendMessage(hWndCenter, 0x036B/*WM_QUERYCENTERWND*/, 0, 0);
-			if (hWndTemp != NULL)
-				hWndCenter = hWndTemp;
-		}
 	}
 
 	// get coordinates of the window relative to its parent

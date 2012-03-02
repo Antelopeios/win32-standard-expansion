@@ -69,8 +69,15 @@ public:
 		{
 		case WM_SHOWWINDOW:
 			if (wParam)
-			{
 				wnd->CenterWindow();
+			break;
+		case WM_KEYDOWN:
+			{
+				if (wParam == VK_RETURN) // Enter
+					wnd->EndModal(1);
+				else
+				if (wParam == VK_ESCAPE) // ESC
+					wnd->EndModal(0);
 			}
 			break;
 		}
@@ -92,20 +99,21 @@ public:
 		case BM_CLICK:
 			{
 				IGuiWnd* wnd = ctl->GetWnd();
-				if (!wnd) return;
-				IGuiCtl* pic = ExDynCast<IGuiCtl>(wnd->GetChildren().HeadItem());
-				if (!pic) return;
-				pixel_t pix = (pixel_t)pic->GetState(_T("color"));
-				if (pix)
-					pix = 0;
-				else
-					pix = ExRGBA(99, 66, 33, 128);
-				pic->SetState(_T("color"), (void*)pix);
-
+				if (!wnd) break;
 				IGuiWnd* mod_wnd = ExGui<IGuiWnd>(_T("CGuiWnd"));
 				mod_wnd->AddEvent(dbnew(CModWndEvent));
 				mod_wnd->Create(_T(""), CRect(0, 0, 100, 100), SW_HIDE, WS_POPUP, NULL, wnd->GethWnd());
-				mod_wnd->DoModal();
+				if (mod_wnd->DoModal())
+				{
+					IGuiCtl* pic = ExDynCast<IGuiCtl>(wnd->GetChildren().HeadItem());
+					if (!pic) return;
+					pixel_t pix = (pixel_t)pic->GetState(_T("color"));
+					if (pix)
+						pix = 0;
+					else
+						pix = ExRGBA(99, 66, 33, 128);
+					pic->SetState(_T("color"), (void*)pix);
+				}
 				del(mod_wnd);
 			}
 			break;

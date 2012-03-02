@@ -192,7 +192,7 @@ public:
 	static MSG* GetMSG()
 	{
 		if (m_pThis)
-			return m_pThis->GetMSG();
+			return m_pThis->IThread::GetMSG();
 		else
 			return NULL;
 	}

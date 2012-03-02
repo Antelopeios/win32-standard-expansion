@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-13
-// Version:	1.0.0002.1734
+// Date:	2012-03-02
+// Version:	1.0.0003.1130
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -76,6 +76,14 @@ BOOL CGuiSkin::Parse(IFileObject* pFile)
 	xml.SetFile(pFile);
 	if (!xml.Decode()) return FALSE;
 	// 开始解析脚本
+	CGuiXML::iterator_t xml_ite = xml.GetRoot();
+	while(xml.GetNode(_T("include"), xml_ite))
+	{
+		CString path(pFile->GetFileName());
+		if(!path.Empty()) _tcsrchr(path, _T('\\'))[1] = _T('\0');
+		path += xml.GetVal(xml_ite);
+		LoadFile(path);
+	}
 	Exec(xml, xml.GetRoot());
 	// 发送全局消息
 	if (m_NewDiv.Empty())
@@ -112,25 +120,18 @@ BOOL CGuiSkin::Parse(const CString& script)
 	return Parse(&file);
 }
 
-BOOL CGuiSkin::DelPath(LPCTSTR sPath)
+BOOL CGuiSkin::LoadFile(const CString& path)
 {
-	// 创建文件对象
-	SHFILEOPSTRUCT lpsh = {0};
-	// 调整文件对象
-	lpsh.fFlags	= FOF_SILENT | FOF_NOCONFIRMATION;
-	lpsh.wFunc	= FO_DELETE;
-	lpsh.pFrom	= sPath;
-	lpsh.fAnyOperationsAborted = TRUE;
-	// 删除文件
-	return (SHFileOperation(&lpsh) == 0);
+	CIOFile file(path);
+	return Parse(&file);
 }
 
 BOOL CGuiSkin::Load(CXZip& zip)
 {
 	if (zip.IsClosed()) return FALSE;
+	// 获得临时文件夹
 	CString temp;
-	if(!::GetTempPath(MAX_PATH, temp.GetCStr(MAX_PATH)))
-		return FALSE;
+	if(!::GetTempPath(MAX_PATH, temp.GetCStr(MAX_PATH))) return FALSE;
 	// 随机目录名
 	ExRandomize();
 	CString path;
@@ -142,17 +143,15 @@ BOOL CGuiSkin::Load(CXZip& zip)
 	// 创建解压目录
 	::CreateDirectory(path, NULL);
 	// 解压文件
-	if(!zip.UnzipFile(path))
-		return FALSE;
+	if(!zip.UnzipFile(path)) return FALSE;
 	// 加载皮肤
-	CIOFile ui_xml;
-	ui_xml.Open(path + _T("\\ui_res.xml"));
-	BOOL r1 = Parse(&ui_xml);
-	ui_xml.Open(path + _T("\\ui_sty.xml"));
-	BOOL r2 = Parse(&ui_xml);
-	ui_xml.Open(path + _T("\\ui_div.xml"));
-	BOOL r3 = Parse(&ui_xml);
-	ui_xml.Close();
+	BOOL r1 = TRUE, r2 = TRUE, r3 = TRUE;
+	if(!LoadFile(path + _T("\\ui.xml")))
+	{
+		r1 = LoadFile(path + _T("\\ui_res.xml"));
+		r2 = LoadFile(path + _T("\\ui_sty.xml"));
+		r3 = LoadFile(path + _T("\\ui_div.xml"));
+	}
 	// 删除解压目录
 	DelPath(path);
 	return (r1 || r2 || r3);
@@ -168,6 +167,19 @@ BOOL CGuiSkin::Load(BYTE* buff, DWORD size)
 {
 	CXZip zip(buff, size);
 	return Load(zip);
+}
+
+BOOL CGuiSkin::DelPath(LPCTSTR sPath)
+{
+	// 创建文件对象
+	SHFILEOPSTRUCT lpsh = {0};
+	// 调整文件对象
+	lpsh.fFlags	= FOF_SILENT | FOF_NOCONFIRMATION;
+	lpsh.wFunc	= FO_DELETE;
+	lpsh.pFrom	= sPath;
+	lpsh.fAnyOperationsAborted = TRUE;
+	// 删除文件
+	return (SHFileOperation(&lpsh) == 0);
 }
 
 //////////////////////////////////////////////////////////////////

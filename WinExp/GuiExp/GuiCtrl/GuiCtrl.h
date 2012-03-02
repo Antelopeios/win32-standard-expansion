@@ -265,17 +265,17 @@ public:
 				rc_int.Right() == rc_slf.Right())
 			{
 				if (rc_int.Left() > rc_slf.Left())
-					sz.cx = rc_int.Left() - rc_slf.Left();
+					sz.cx = rc_slf.Left() - rc_int.Left();
 				if (rc_int.Right() < rc_slf.Right())
-					sz.cx = rc_int.Right() - rc_slf.Right();
+					sz.cx = rc_slf.Right() - rc_int.Right();
 			}
 			if (rc_int.Top() == rc_slf.Top() || 
 				rc_int.Bottom() == rc_slf.Bottom())
 			{
 				if (rc_int.Top() > rc_slf.Top())
-					sz.cy = rc_int.Top() - rc_slf.Top();
+					sz.cy = rc_slf.Top() - rc_int.Top();
 				if (rc_int.Bottom() < rc_slf.Bottom())
-					sz.cy = rc_int.Bottom() - rc_slf.Bottom();
+					sz.cy = rc_slf.Bottom() - rc_int.Bottom();
 			}
 		}
 		return TRUE;

@@ -33,13 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-13
-// Version:	1.0.0002.1734
+// Date:	2012-03-02
+// Version:	1.0.0003.1130
 //
 // History:
 //	- 1.0.0000.1714(2011-05-31)	@ 开始构建GuiConfig
 //	- 1.0.0001.0945(2012-01-31)	= GuiConfig改名为CGuiSkin
 //	- 1.0.0002.1734(2012-02-13)	+ 添加皮肤包加载功能
+//	- 1.0.0003.1130(2012-03-02)	+ 添加CGuiSkin::LoadFile(),支持直接通过路径加载文件
+//								+ 脚本中添加include关键字,支持在一个脚本中包含其他脚本
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiSkin_h__
@@ -67,6 +69,8 @@ public:
 	// 以下为皮肤脚本加载
 	static BOOL Parse(IFileObject* pFile);
 	static BOOL Parse(const CString& script);
+	// 以下为脚本文件加载
+	static BOOL LoadFile(const CString& path);
 	// 以下为皮肤包的加载
 	static BOOL Load(CXZip& zip);
 	static BOOL Load(const CString& path);

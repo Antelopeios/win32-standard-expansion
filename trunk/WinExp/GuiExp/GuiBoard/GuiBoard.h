@@ -95,6 +95,12 @@ public:
 	virtual BOOL Create() = 0;
 	virtual BOOL IsNull() const = 0;
 
+	virtual BOOL IsModalLoop() = 0;
+	virtual int RunModalLoop() = 0;
+	virtual void EndModalLoop(int nResult) = 0;
+	virtual int DoModal() = 0;
+	virtual void EndModal(int nResult) = 0;
+
 	virtual BOOL Attach(wnd_t hWnd) = 0;
 	virtual wnd_t Detach() = 0;
 
@@ -188,6 +194,9 @@ protected:
 	BOOL m_bColorKey;
 	pixel_t m_crKey;
 
+	int m_ModalResult;
+	BOOL m_IsModalLoop;
+
 public:
 	IGuiBoardBase(void);
 	IGuiBoardBase(wnd_t hWnd);
@@ -204,6 +213,12 @@ public:
 	BOOL Create() { return Create(NULL, CRect(), SW_HIDE); }
 
 	BOOL IsNull() const;
+	
+	BOOL IsModalLoop();
+	int RunModalLoop();
+	void EndModalLoop(int nResult);
+	int DoModal();
+	void EndModal(int nResult);
 
 	wnd_t operator=(wnd_t tType);
 
@@ -244,7 +259,7 @@ public:
 	void Invalidate();
 	void InvalidateRect(CRect& rcInv);
 	void InvalidateRgn(HRGN hRgn);
-	BOOL ShowWindow(int nCmdShow);
+	BOOL ShowWindow(int nCmdShow = SW_SHOW);
 	BOOL UpdateWindow();
 	BOOL IsVisible() const;
 

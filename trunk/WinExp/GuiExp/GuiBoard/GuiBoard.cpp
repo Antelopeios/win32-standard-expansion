@@ -72,15 +72,12 @@ IGuiBoardBase::IGuiBoardBase(void)
 	, m_bLayered(FALSE)
 	, m_bColorKey(FALSE)
 	, m_crKey(ExRGB(255, 0, 255))
+	, m_ModalResult(0)
+	, m_IsModalLoop(FALSE)
 {}
 IGuiBoardBase::IGuiBoardBase(wnd_t hWnd)
-	: m_hIns(::GetModuleHandle(NULL))
-	, type_base_t(hWnd)
-	, m_bPaint(TRUE)
-	, m_bLayered(FALSE)
-	, m_bColorKey(FALSE)
-	, m_crKey(ExRGB(255, 0, 255))
-{}
+	: type_base_t(hWnd)
+{ this->IGuiBoardBase::IGuiBoardBase(); }
 IGuiBoardBase::~IGuiBoardBase(void)
 {}
 
@@ -126,6 +123,69 @@ BOOL IGuiBoardBase::Create(LPCTSTR sWndName, CRect& rcWnd,
 BOOL IGuiBoardBase::IsNull() const
 {
 	return type_base_t::IsNull();
+}
+
+BOOL IGuiBoardBase::IsModalLoop()
+{
+	return m_IsModalLoop;
+}
+int IGuiBoardBase::RunModalLoop()
+{
+	ExAssert(::IsWindow(Get()));
+	ExAssert(!IsModalLoop());
+
+	m_IsModalLoop = TRUE;
+
+	MSG* p_msg = IApp::GetMSG();
+	while(m_IsModalLoop && ::PeekMessage(p_msg, NULL, NULL, NULL, PM_NOREMOVE))
+	{
+		if(!::GetMessage(p_msg, NULL, NULL, NULL))
+		{
+			::PostQuitMessage(0);
+			return -1;
+		}
+		::TranslateMessage(p_msg);
+		::DispatchMessage(p_msg);
+	}
+
+	return m_ModalResult;
+}
+void IGuiBoardBase::EndModalLoop(int nResult)
+{
+	ExAssert(::IsWindow(Get()));
+	m_ModalResult = nResult;
+	if (m_IsModalLoop)
+	{
+		m_IsModalLoop = FALSE;
+		PostMessage(WM_NULL);
+	}
+}
+int IGuiBoardBase::DoModal()
+{
+	if (IsNull()) Create();
+	ShowWindow();
+
+	wnd_t pare = GetParent();
+	BOOL set_enabled = FALSE;
+	if (pare && pare != ::GetDesktopWindow() && ::IsWindowEnabled(pare))
+	{
+		::EnableWindow(pare, FALSE);
+		set_enabled = TRUE;
+	}
+
+	ExVerify(RunModalLoop() == m_ModalResult);
+
+	if (set_enabled)
+		::EnableWindow(pare, TRUE);
+	if (pare != NULL && ::GetActiveWindow() == Get())
+		::SetActiveWindow(pare);
+
+	Delete();
+	return m_ModalResult;
+}
+void IGuiBoardBase::EndModal(int nResult)
+{
+	EndModalLoop(nResult);
 }
 
 wnd_t IGuiBoardBase::operator=(wnd_t tType)
@@ -323,12 +383,7 @@ void IGuiBoardBase::CenterWindow(wnd_t hWndCenter/* = NULL*/)
 		yTop = rcArea.Top();
 
 	// map screen coordinates to child coordinates
-	::SetWindowPos
-		(
-		Get(), NULL, 
-		xLeft, yTop, -1, -1,
-		SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
-		);
+	::SetWindowPos(Get(), NULL, xLeft, yTop, -1, -1, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 // ´°¿Ú×ø±ê×ª»»

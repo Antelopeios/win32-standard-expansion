@@ -153,6 +153,8 @@ public:
 		rFile.CopyTo(*this);
 		return (*this);
 	}
+
+	virtual LPCTSTR GetFileName() { return NULL; }
 };
 
 typedef IFileObject::CFileSeeker CFileSeeker;

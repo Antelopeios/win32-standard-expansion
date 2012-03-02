@@ -66,7 +66,7 @@ public:
 	{ Close(); }
 
 public:
-	BOOL IsClosed()
+	BOOL IsClosed() const
 	{ return (!m_hSync || m_hSync == INVALID_HANDLE_VALUE); }
 	BOOL Close()
 	{
@@ -106,8 +106,8 @@ public:
 	static DWORD Wait(ISyncObject (&Syncs)[SizeT], BOOL bWaitAll, DWORD dwWaitTime = INFINITE)
 	{ return Wait(Syncs, SizeT, bWaitAll, dwWaitTime); }
 
-	HANDLE GetHandle() { return m_hSync; }
-	operator HANDLE()  { return GetHandle(); }
+	HANDLE GetHandle() const { return m_hSync; }
+	operator HANDLE() { return GetHandle(); }
 };
 
 //////////////////////////////////////////////////////////////////

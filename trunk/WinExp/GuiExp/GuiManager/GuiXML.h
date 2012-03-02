@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-02
-// Version:	1.0.0008.1802
+// Date:	2012-03-02
+// Version:	1.0.0009.1121
 //
 // History:
 //	- 1.0.0000.1420(2011-06-10)	@ 开始构建GuiXML
@@ -49,6 +49,8 @@
 //	- 1.0.0006.1256(2011-10-10)	+ CGuiXML支持UTF-8格式的xml解析
 //	- 1.0.0007.1617(2012-01-08)	# 修正若干CGuiXML内部编码转换的错误
 //	- 1.0.0008.1802(2012-02-02)	+ 添加CGuiXML::SetDefEnc()与CGuiXML::GetDefEnc()
+//	- 1.0.0009.1121(2012-03-02)	+ 在CGuiXML中添加项名称与值的控制接口
+//								= CGuiXML::AddAttr()改为CGuiXML::SetAttr()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiXML_h__
@@ -72,6 +74,8 @@ public:
 		CString val; // 值
 		map_t	att; // 属性
 		CString tmp; // 临时存储
+
+		BOOL IsValid() const { return (!nam.Empty()); }
 	} node_t;
 	typedef CTreeT<node_t*> tree_t;
 	typedef tree_t::iterator_t iterator_t;
@@ -459,7 +463,7 @@ protected:
 public:
 	EXP_INLINE void SetFile(IFileObject* pFile)
 	{ m_pFile = pFile; }
-	EXP_INLINE IFileObject* GetFile()
+	EXP_INLINE IFileObject* GetFile() const
 	{ return m_pFile; }
 
 	EXP_INLINE void SetDefEnc(const CString& enc)
@@ -647,11 +651,12 @@ public:
 		return ret;
 	}
 
-	iterator_t GetRoot()
+	iterator_t GetRoot() const
 	{
 		return m_xData.Head();
 	}
-	BOOL GetNode(_IN_ LPCTSTR sName, _IN_OT_ iterator_t& rIte)
+
+	BOOL GetNode(_IN_ LPCTSTR sName, _IN_OT_ iterator_t& rIte) const
 	{
 		if (!sName) return FALSE;
 		if (rIte == iterator_t())
@@ -665,7 +670,7 @@ public:
 		}
 		return FALSE;
 	}
-	CString GetAttr(_IN_ LPCTSTR sAttr, _IN_ iterator_t& rIte)
+	CString GetAttr(_IN_ LPCTSTR sAttr, _IN_ iterator_t& rIte) const
 	{
 		if (!sAttr) return _T("");
 		if (rIte == m_xData.Head() || 
@@ -674,15 +679,29 @@ public:
 		if (ite_att == (*rIte)->att.Tail()) return _T("");
 		return ite_att->Val();
 	}
+	CString GetName(_IN_ iterator_t& rIte) const
+	{
+		if (rIte == m_xData.Head() || 
+			rIte == m_xData.Tail()) return _T("");
+		return (*rIte)->nam;
+	}
+	CString GetVal(_IN_ iterator_t& rIte) const
+	{
+		if (rIte == m_xData.Head() || 
+			rIte == m_xData.Tail()) return _T("");
+		return (*rIte)->val;
+	}
 
 	BOOL AddNode(const node_t& node, iterator_t& ite)
 	{
+		if(!node.IsValid()) return FALSE;
 		node_t* p = gcnew(m_GC, node_t);
 		(*p) = node;
 		return m_xData.Add(p, ite);
 	}
 	BOOL AddNode(LPCTSTR sName, iterator_t& ite)
 	{
+		if (CString(sName).Empty()) return FALSE;
 		node_t* p = gcnew(m_GC, node_t);
 		p->nam = sName;
 		return m_xData.Add(p, ite);
@@ -692,9 +711,9 @@ public:
 		return m_xData.Del(ite);
 	}
 
-	BOOL AddAttr(LPCTSTR key, LPCTSTR val, iterator_t& ite)
+	BOOL SetAttr(LPCTSTR key, LPCTSTR val, iterator_t& ite)
 	{
-		if (!key) return FALSE;
+		if (CString(key).Empty()) return FALSE;
 		if (ite == m_xData.Head() || 
 			ite == m_xData.Tail()) return FALSE;
 		(*ite)->att[key] = val;
@@ -702,10 +721,27 @@ public:
 	}
 	BOOL DelAttr(LPCTSTR key, iterator_t& ite)
 	{
-		if (!key) return FALSE;
+		if (CString(key).Empty()) return FALSE;
 		if (ite == m_xData.Head() || 
 			ite == m_xData.Tail()) return FALSE;
 		return (*ite)->att.Del(key);
+	}
+
+	BOOL SetName(LPCTSTR sName, iterator_t& ite)
+	{
+		if (CString(sName).Empty()) return FALSE;
+		if (ite == m_xData.Head() || 
+			ite == m_xData.Tail()) return FALSE;
+		(*ite)->nam = sName;
+		return TRUE;
+	}
+	BOOL SetVal(LPCTSTR sVal, iterator_t& ite)
+	{
+		if (CString(sVal).Empty()) return FALSE;
+		if (ite == m_xData.Head() || 
+			ite == m_xData.Tail()) return FALSE;
+		(*ite)->val = sVal;
+		return TRUE;
 	}
 };
 

@@ -94,13 +94,13 @@ BOOL CData::AddRet(tsk_t& task)
 			m_Data.AddNode(_T("link"), ite);
 			if (ret.type == file)
 			{
-				m_Data.AddAttr(_T("file"), ret.name, ite);
-				m_Data.AddAttr(_T("tag"), *ret_it, ite);
+				m_Data.SetAttr(_T("file"), ret.name, ite);
+				m_Data.SetAttr(_T("tag"), *ret_it, ite);
 			}
 			else
 			{
-				m_Data.AddAttr(_T("tag"), ret.name, ite);
-				m_Data.AddAttr(_T("file"), *ret_it, ite);
+				m_Data.SetAttr(_T("tag"), ret.name, ite);
+				m_Data.SetAttr(_T("file"), *ret_it, ite);
 			}
 		}
 	}
@@ -116,13 +116,13 @@ BOOL CData::AddRet(tsk_t& task)
 			m_Data.AddNode(_T("link"), ite);
 			if (ret.type == file)
 			{
-				m_Data.AddAttr(_T("file"), ret.name, ite);
-				m_Data.AddAttr(_T("tag"), *ret_it, ite);
+				m_Data.SetAttr(_T("file"), ret.name, ite);
+				m_Data.SetAttr(_T("tag"), *ret_it, ite);
 			}
 			else
 			{
-				m_Data.AddAttr(_T("tag"), ret.name, ite);
-				m_Data.AddAttr(_T("file"), *ret_it, ite);
+				m_Data.SetAttr(_T("tag"), ret.name, ite);
+				m_Data.SetAttr(_T("file"), *ret_it, ite);
 			}
 		}
 /*		ret_t::lnk_list_t::iterator_t tsk_it = task.rest.link.Head();
@@ -262,13 +262,13 @@ BOOL CData::SetRet(tsk_t& task)
 		m_Data.AddNode(_T("link"), it);
 		if (task.rest.type == file)
 		{
-			m_Data.AddAttr(_T("file"), task.name, it);
-			m_Data.AddAttr(_T("tag"), tag_name, it);
+			m_Data.SetAttr(_T("file"), task.name, it);
+			m_Data.SetAttr(_T("tag"), tag_name, it);
 		}
 		else
 		{
-			m_Data.AddAttr(_T("file"), file_name, it);
-			m_Data.AddAttr(_T("tag"), task.name, it);
+			m_Data.SetAttr(_T("file"), file_name, it);
+			m_Data.SetAttr(_T("tag"), task.name, it);
 		}
 	}
 	task.rest.name = task.name;

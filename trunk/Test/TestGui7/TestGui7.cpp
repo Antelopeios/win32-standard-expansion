@@ -87,6 +87,8 @@ protected:
 				_T("font,font,font,font,font,font,font,font"));
 			btn->SetState(_T("text"), &CString(_T("Dark C.at Dark C.at Dark C.at")));
 			btn->SetState(_T("locate"), (void*)3);
+			btn->SetState(_T("loc_off"), (void*)5);
+			btn->SetState(_T("ico_off"), (void*)5);
 			btn->SetState(_T("shake_ico"), (void*)TRUE);
 			btn->SetWindowRect(CRect(0, 0, 0, 70));
 			items.Add(btn);

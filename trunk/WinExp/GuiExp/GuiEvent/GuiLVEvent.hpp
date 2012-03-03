@@ -156,7 +156,7 @@ public:
 				IGuiCtl* item = *ite;
 				if (!item) continue;
 				// 获取当前项的区域
-				item->GetWindowRect(itm_rc);
+				item->GetRect(itm_rc);
 				// 调整区域
 				itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Top()));
 				if (itm_rc.Right() > rect.Right() && itm_rc.Left() > space)
@@ -165,7 +165,7 @@ public:
 					him_rc = itm_rc;
 				}
 				// 设置当前项区域
-				item->SetWindowRect(itm_rc);
+				item->SetRect(itm_rc);
 				// 存储区域
 				old_rc = itm_rc;
 				if (itm_rc.Height() > him_rc.Height())
@@ -199,13 +199,13 @@ public:
 					if (!item) continue;
 					// 获取当前项的区域
 					w_itm += space;
-					item->GetWindowRect(itm_rc);
+					item->GetRect(itm_rc);
 					w_itm += itm_rc.Width();
 					if (w_itm > rect.Right() && it != ite) break;
 					// 调整区域
 					itm_rc.MoveTo(CPoint(old_rc.Right() + space, old_rc.Bottom() - itm_rc.Height()));
 					// 设置当前项区域
-					item->SetWindowRect(itm_rc);
+					item->SetRect(itm_rc);
 					// 存储区域
 					old_rc.Left(itm_rc.Left());
 					old_rc.Right(itm_rc.Right());

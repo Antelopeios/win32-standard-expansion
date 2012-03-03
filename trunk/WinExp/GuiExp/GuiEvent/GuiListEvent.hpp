@@ -253,12 +253,12 @@ public:
 			IGuiCtl* item = *ite;
 			if (!item) continue;
 			// 获取当前项的区域
-			item->GetWindowRect(itm_rc);
+			item->GetRect(itm_rc);
 			// 调整区域
 			itm_rc.MoveTo(CPoint(old_sz.cx, old_sz.cy + space));
 			itm_rc.Width(rect.Width());
 			// 设置当前项区域
-			item->SetWindowRect(itm_rc);
+			item->SetRect(itm_rc);
 			// 存储区域
 			old_sz.cy = itm_rc.Bottom();
 		}

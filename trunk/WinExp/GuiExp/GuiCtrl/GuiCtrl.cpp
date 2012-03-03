@@ -124,20 +124,30 @@ BOOL IGuiCtrlBase::C2B(CRect& rc) const
 }
 BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 {
-	if (m_Rect == rc) return TRUE;
-	SetRect(rc);
-	if (GetParent())
+	IGuiBase* pare = GetParent();
+	if (!pare) return SetRect(rc);
+	IGuiCtl* ctl = ExDynCast<IGuiCtl>(pare);
+	if (ctl)
 	{
-		SendMessage(WM_SIZE, SIZE_RESTORED, 
-			(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
-		Refresh(FALSE);
+		CSize scr_sz;
+		if (!ctl->GetScrollSize(scr_sz)) return FALSE;
+		CRect rect(rc);
+		rect.Offset(CPoint(scr_sz.cx, scr_sz.cy));
+		if (!SetRect(rect)) return FALSE;
 	}
+	else
+	{
+		if (!SetRect(rc)) return FALSE;
+	}
+	SendMessage(WM_SIZE, SIZE_RESTORED, 
+		(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
+	Refresh(FALSE);
 	return TRUE;
 }
 BOOL IGuiCtrlBase::GetWindowRect(CRect& rc) const
 {
 	IGuiBase* pare = GetParent();
-	if (!pare) return FALSE;
+	if (!pare) return GetRect(rc);
 	IGuiCtl* ctl = ExDynCast<IGuiCtl>(pare);
 	if (ctl)
 	{

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-01
-// Version:	1.0.0020.1110
+// Date:	2012-03-03
+// Version:	1.0.0021.1830
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -65,6 +65,7 @@
 //	- 1.0.0019.1802(2012-02-02)	+ 添加IGuiObject::IsValid()
 //								# 修正某事件处理在跳过后面的事件之后,其返回值仍然有可能被后面未响应事件的默认返回值覆盖的问题
 //	- 1.0.0020.1110(2012-03-01)	+ 添加IGuiSender::PopEvent()与IGuiComp::PopComp(),方便删除事件与组合对象
+//	- 1.0.0021.1830(2012-03-03)	= 调整IGuiComp::GetChildren()为IGuiComp::GetComp()
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -361,10 +362,10 @@ public:
 	BOOL IsTrust() { return m_bTru; }
 	// 获得内部对象
 	IGuiComp* GetParent() const { return m_Pare; }
-	list_t& GetChildren() const { return *m_Cldr; }
+	list_t& GetComp() const { return *m_Cldr; }
 
 	// 查找
-	list_t::iterator_t FindComp(void* p) { return GetChildren().Find(ExDynCast<IGuiComp>(p)); }
+	list_t::iterator_t FindComp(void* p) { return GetComp().Find(ExDynCast<IGuiComp>(p)); }
 
 	// 组合接口
 	virtual void AddComp(void* p)
@@ -373,12 +374,12 @@ public:
 		if (!cmp) return ;
 		// 定位对象
 		list_t::iterator_t ite = FindComp(cmp);
-		if (ite != GetChildren().Tail()) return;
+		if (ite != GetComp().Tail()) return;
 		// 添加新对象
 		if (cmp->m_Pare)
 			cmp->m_Pare->DelComp(cmp);
 		cmp->Init(this);
-		GetChildren().Add(cmp);
+		GetComp().Add(cmp);
 	}
 	virtual void InsComp(void* p)
 	{
@@ -386,12 +387,12 @@ public:
 		if (!cmp) return ;
 		// 定位对象
 		list_t::iterator_t ite = FindComp(cmp);
-		if (ite != GetChildren().Tail()) return;
+		if (ite != GetComp().Tail()) return;
 		// 添加新对象
 		if (cmp->m_Pare)
 			cmp->m_Pare->DelComp(cmp);
 		cmp->Init(this);
-		GetChildren().Add(cmp, GetChildren().Head());
+		GetComp().Add(cmp, GetComp().Head());
 	}
 	virtual void DelComp(void* p, BOOL bAutoTru = TRUE)
 	{
@@ -399,9 +400,9 @@ public:
 		if (!cmp) return ;
 		// 定位对象
 		list_t::iterator_t ite = FindComp(cmp);
-		if (ite == GetChildren().Tail()) return;
+		if (ite == GetComp().Tail()) return;
 		// 删除对象
-		GetChildren().Del(ite);
+		GetComp().Del(ite);
 		cmp->Fina();
 		if (bAutoTru && m_bTru)
 		{
@@ -412,17 +413,17 @@ public:
 	}
 	virtual void PopComp(BOOL bLast = TRUE, BOOL bAutoTru = TRUE)
 	{
-		if (GetChildren().Empty()) return;
+		if (GetComp().Empty()) return;
 		IGuiComp* cmp = NULL;
 		if (bLast)
 		{
-			cmp = GetChildren().LastItem();
-			GetChildren().PopLast();
+			cmp = GetComp().LastItem();
+			GetComp().PopLast();
 		}
 		else
 		{
-			cmp = GetChildren().HeadItem();
-			GetChildren().PopHead();
+			cmp = GetComp().HeadItem();
+			GetComp().PopHead();
 		}
 		if (bAutoTru && m_bTru && cmp)
 		{
@@ -433,13 +434,13 @@ public:
 	}
 	virtual void ClearComp()
 	{
-		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
+		for(list_t::iterator_t ite = GetComp().Head(); ite != GetComp().Tail(); ++ite)
 		{
 			if (!(*ite)) continue;
 			(*ite)->Fina();
 			if (m_bTru) (*ite)->Free();
 		}
-		GetChildren().Clear();
+		GetComp().Clear();
 	}
 };
 

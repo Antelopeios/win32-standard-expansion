@@ -118,7 +118,7 @@ EXP_INLINE void ExClr(BOOL bDel = TRUE)
 
 EXP_END
 
-#include "GuiManager/Executors/Executor.h"
+#include "GuiManager/GuiExecutor.h"
 #include "GuiManager/GuiSkin.h"
 
 //////////////////////////////////////////////////////////////////

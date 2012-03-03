@@ -39,8 +39,10 @@
 
 #include "GuiCommon/GuiCommon.h"
 #include "GuiSkin.h"
-#include "GuiManager/Executors/Executor.h"
 #include "GuiBoard/GuiBoard.h"
+#include "GuiCtrl/GuiCtrl.h"
+#include "GuiManager/GuiExecutor.h"
+#include "GuiManager/GuiExecutor.hpp"
 
 #include <ShellApi.h>
 
@@ -54,7 +56,7 @@ CArrayT<void*> CGuiSkin::m_LstDiv;
 
 void CGuiSkin::Exec(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent/* = NULL*/)
 {
-	IExecutor* exc = CExecutor::Get((*ite)->nam);
+	IExecutor* exc = CExecutor::Get(xml.GetName(ite));
 	void* ret = NULL;
 	if (exc)
 	{

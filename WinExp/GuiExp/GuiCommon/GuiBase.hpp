@@ -35,13 +35,10 @@
 // E-Mail:	mark.lonr@tom.com
 // Date:	2011-06-08
 // Version:	1.0.0002.0047
-//
-// History:
-//	- 1.0.0002.0047(2011-06-08)	@ µ•∂¿ µœ÷IGuiBase
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
-#include "GuiBase.h"
+#ifndef __GuiBase_hpp__
+#define __GuiBase_hpp__
 
 EXP_BEG
 
@@ -53,3 +50,5 @@ IGuiBase* IGuiBase::s_pCapture = NULL;
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiBase_hpp__*/

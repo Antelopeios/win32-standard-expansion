@@ -37,11 +37,12 @@
 // Version:	1.0.0000.1058
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
-#include "Executor.h"
-#include "GuiManager/GuiManager.h"
-#include "GuiBoard/GuiBoard.h"
-#include "GuiCtrl/GuiCtrl.h"
+#ifndef __GuiExecutor_hpp__
+#define __GuiExecutor_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
 
 EXP_BEG
 
@@ -561,3 +562,5 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_effect, IExecutor)
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+
+#endif/*__GuiExecutor_hpp__*/

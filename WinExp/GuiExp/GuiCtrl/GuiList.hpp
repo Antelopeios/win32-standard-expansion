@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0000.1537
+// Date:	2012-03-03
+// Version:	1.0.0001.2237
 //
 // History:
 //	- 1.0.0000.1537(2012-02-29)	@ 开始构建GuiList
+//	- 1.0.0001.2237(2012-03-03)	+ 为集合型控件添加insert,delete与clear属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiList_hpp__
@@ -155,6 +156,42 @@ public:
 				if (!item) continue;
 				AddComp(item);
 			}
+			SendMessage(WM_SIZE);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("insert"))
+		{
+			set_ins_t* ins = (set_ins_t*)pState;
+			if (!ins || !ins->p_ite || !ins->p_itm) return FALSE;
+			items_t::iterator_t ite = *(items_t::iterator_t*)ins->p_ite;
+			IGuiCtl* item = (IGuiCtl*)ins->p_itm;
+			AddComp(item);
+			m_ItemList.Add(item, ite);
+			SendMessage(WM_SIZE);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("delete"))
+		{
+			items_t::iterator_t ite = *(items_t::iterator_t*)pState;
+			IGuiCtl* item = *ite;
+			if (!item) return FALSE;
+			DelComp(item);
+			m_ItemList.Del(ite);
+			SendMessage(WM_SIZE);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("clear"))
+		{
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				DelComp(item);
+			}
+			m_ItemList.Clear();
 			SendMessage(WM_SIZE);
 			return IGuiCtrlBase::SetState(sType, pState);
 		}

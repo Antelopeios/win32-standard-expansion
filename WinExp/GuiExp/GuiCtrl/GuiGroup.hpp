@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-28
-// Version:	1.0.0003.1517
+// Date:	2012-03-03
+// Version:	1.0.0004.2237
 //
 // History:
 //	- 1.0.0000.0940(2011-07-07)	@ 开始构建GuiGroup
 //	- 1.0.0001.1752(2011-07-11)	^ 优化GuiGroup的外部调用属性
 //	- 1.0.0002.1532(2011-07-21)	= 将CGuiGroup内部items_t结构由指针改为对象,减轻调用复杂度
 //	- 1.0.0003.1517(2011-09-28)	# 修正当外部销毁控件对象时,GuiGroup因内部对象析构顺序问题导致的内存访问异常
+//	- 1.0.0004.2237(2012-03-03)	+ 为集合型控件添加insert,delete与clear属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiGroup_hpp__
@@ -132,6 +133,44 @@ public:
 			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
+		if (sType == _T("insert"))
+		{
+			set_ins_t* ins = (set_ins_t*)pState;
+			if (!ins || !ins->p_ite || !ins->p_itm) return FALSE;
+			items_t::iterator_t ite = *(items_t::iterator_t*)ins->p_ite;
+			IGuiCtl* item = (IGuiCtl*)ins->p_itm;
+			AddComp(item);
+			m_ItemList.Add(item, ite);
+			gc.Clear();
+			SetState(_T("image"), m_ImgCac);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("delete"))
+		{
+			items_t::iterator_t ite = *(items_t::iterator_t*)pState;
+			IGuiCtl* item = *ite;
+			if (!item) return FALSE;
+			DelComp(item);
+			m_ItemList.Del(ite);
+			gc.Clear();
+			SetState(_T("image"), m_ImgCac);
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
+		if (sType == _T("clear"))
+		{
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				DelComp(item);
+			}
+			m_ItemList.Clear();
+			gc.Clear();
+			return IGuiCtrlBase::SetState(sType, pState);
+		}
+		else
 		if (sType == _T("sta_cnt"))
 		{
 			m_StatusCount = (DWORD)(LONG_PTR)pState;
@@ -160,12 +199,13 @@ public:
 			CPoint pt_off(offset, 0);
 			int c = m_StyleBox ? 9 : 1, 
 				n = m_StyleBox ? 4 : 0;
-			for(DWORD i = 0; i < count; ++i)
+			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
+				IGuiCtl* item = *ite;
 				CImage* tmp = gcnew(gc, CImage, c);
-				m_ItemList[i]->SetWindowRect(rc_itm);
+				item->SetWindowRect(rc_itm);
 				tmp[n].Set(img->Clone(rc_img));
-				m_ItemList[i]->SetState(_T("image"), tmp);
+				item->SetState(_T("image"), tmp);
 				rc_img.Offset(pt_off);
 				rc_itm.Offset(pt_off);
 			}

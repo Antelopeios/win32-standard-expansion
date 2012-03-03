@@ -105,7 +105,7 @@ public:
 				mod_wnd->Create(_T(""), CRect(0, 0, 100, 100), SW_HIDE, WS_POPUP, NULL, wnd->GethWnd());
 				if (mod_wnd->DoModal())
 				{
-					IGuiCtl* pic = ExDynCast<IGuiCtl>(wnd->GetChildren().HeadItem());
+					IGuiCtl* pic = ExDynCast<IGuiCtl>(wnd->GetComp().HeadItem());
 					if (!pic) return;
 					pixel_t pix = (pixel_t)pic->GetState(_T("color"));
 					if (pix)

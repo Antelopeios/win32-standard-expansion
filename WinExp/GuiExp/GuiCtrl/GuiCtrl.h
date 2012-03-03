@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-03
-// Version:	1.0.0021.2237
+// Date:	2012-03-04
+// Version:	1.0.0022.0034
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -64,6 +64,7 @@
 //	- 1.0.0020.1723(2012-02-29)	% 修改并完善滚动条控制机制,并支持水平与垂直两种模式的滚动条
 //	- 1.0.0021.2237(2012-03-03)	+ 添加itree_t树型集合,为需要树型集合的控件做准备
 //								+ 添加set_ins_t,用于方便控制集合的插入操作,并为集合型控件添加insert,delete与clear属性
+//	- 1.0.0022.0034(2012-03-04)	# 当调用IGuiCtl::SetWindowRect()的时候应该考虑滚动偏移,否则会导致控件位置的显示异常
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -228,7 +229,7 @@ public:
 			if (m_szScroll == sz) return TRUE;
 			m_szScroll = sz;
 			CRect rc;
-			GetWindowRect(rc);
+			GetRect(rc);
 			SendMessage(WM_SIZE, SIZE_RESTORED, 
 				(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
 			Refresh(FALSE);

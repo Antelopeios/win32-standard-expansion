@@ -451,7 +451,7 @@ public:
 				ctl = (IGuiCtl*)ctl->Execute(xml, ite, parent);
 				if (ctl)
 				{
-					ctl->SetWindowRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
+					ctl->SetRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
 					CString t = xml.GetAttr(_T("visible"), ite); t.Lower();
 					if (t == _T("false"))
 						ctl->SetVisible(FALSE);

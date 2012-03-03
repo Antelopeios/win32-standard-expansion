@@ -41,8 +41,8 @@
 //	- 1.0.0001.1518(2012-02-14)	# 修正ExStringToColor中的若干错误
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Executor_h__
-#define __Executor_h__
+#ifndef __GuiExecutor_h__
+#define __GuiExecutor_h__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -142,4 +142,4 @@ public:
 
 EXP_END
 
-#endif/*__Executor_h__*/
+#endif/*__GuiExecutor_h__*/

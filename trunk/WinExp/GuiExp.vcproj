@@ -173,11 +173,11 @@
 			Name="GuiCommon"
 			>
 			<File
-				RelativePath="GuiExp\GuiCommon\GuiBase.cpp"
+				RelativePath="GuiExp\GuiCommon\GuiBase.h"
 				>
 			</File>
 			<File
-				RelativePath="GuiExp\GuiCommon\GuiBase.h"
+				RelativePath=".\GuiExp\GuiCommon\GuiBase.hpp"
 				>
 			</File>
 			<File
@@ -329,6 +329,14 @@
 			Name="GuiManager"
 			>
 			<File
+				RelativePath=".\GuiExp\GuiManager\GuiExecutor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiManager\GuiExecutor.hpp"
+				>
+			</File>
+			<File
 				RelativePath="GuiExp\GuiManager\GuiManager.h"
 				>
 			</File>
@@ -344,18 +352,6 @@
 				RelativePath="GuiExp\GuiManager\GuiXML.h"
 				>
 			</File>
-			<Filter
-				Name="Executors"
-				>
-				<File
-					RelativePath=".\GuiExp\GuiManager\Executors\Executor.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GuiExp\GuiManager\Executors\Executor.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<File
 			RelativePath="GuiExp\GuiExp.h"

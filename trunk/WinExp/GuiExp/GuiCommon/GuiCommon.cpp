@@ -48,6 +48,8 @@
 #pragma comment(lib, "StdExp.lib")
 #pragma comment(lib, "ImgExp.lib")
 
+#include "GuiCommon/GuiBase.hpp"
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////

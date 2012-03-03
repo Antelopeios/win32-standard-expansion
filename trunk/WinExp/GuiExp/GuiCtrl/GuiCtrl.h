@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0020.1723
+// Date:	2012-03-03
+// Version:	1.0.0021.2237
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -62,6 +62,8 @@
 //	- 1.0.0018.1802(2012-02-02)	+ 添加IGuiCtrl对效果对象的托管接口
 //	- 1.0.0019.1200(2012-02-22)	= 将IGuiCtrl改名为IGuiCtl
 //	- 1.0.0020.1723(2012-02-29)	% 修改并完善滚动条控制机制,并支持水平与垂直两种模式的滚动条
+//	- 1.0.0021.2237(2012-03-03)	+ 添加itree_t树型集合,为需要树型集合的控件做准备
+//								+ 添加set_ins_t,用于方便控制集合的插入操作,并为集合型控件添加insert,delete与clear属性
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -85,6 +87,13 @@ EXP_INTERFACE IGuiCtl : public IGuiBase
 
 public:
 	typedef CListT<IGuiCtl*> items_t;
+	typedef CTreeT<IGuiCtl*> itree_t;
+
+	struct set_ins_t
+	{
+		void* p_ite;
+		void* p_itm;
+	};
 
 protected:
 	static IGuiCtl* m_Focus;
@@ -339,7 +348,7 @@ public:
 		IGuiCtl* foc = m_Focus;
 		if (foc == this)
 			return IsEffect(this);
-		for(list_t::iterator_t ite = GetChildren().Head(); ite != GetChildren().Tail(); ++ite)
+		for(list_t::iterator_t ite = GetComp().Head(); ite != GetComp().Tail(); ++ite)
 		{
 			IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
 			if (!ctl) continue;

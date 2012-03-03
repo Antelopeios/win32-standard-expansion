@@ -18,7 +18,7 @@ public:
 		switch( nMessage )
 		{
 		case WM_SIZE:
-			for(IGuiBase::list_t::iterator_t ite = wnd->GetChildren().Head(); ite != wnd->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = wnd->GetComp().Head(); ite != wnd->GetComp().Tail(); ++ite)
 			{
 				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
 				if(!ctl || ExDynCheck(_T("CGuiLVItem"), ExDynCast<IBaseObject>(ctl))) continue;
@@ -1281,7 +1281,7 @@ public:
 		case BM_CLICK:
 			{
 				IGuiComp* pare = ctl->GetParent();	
-				for(IGuiComp::list_t::iterator_t ite = pare->GetChildren().Head(); ite != pare->GetChildren().Tail(); ++ite)
+				for(IGuiComp::list_t::iterator_t ite = pare->GetComp().Head(); ite != pare->GetComp().Tail(); ++ite)
 				{
 					IGuiCtl* c = ExDynCast<IGuiCtl>(*ite);
 					if (c == ctl) continue;

@@ -186,31 +186,31 @@ protected:
 				{
 					IGuiComp* comp = ctl->GetParent();
 					IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctl));
-					if (ite == comp->GetChildren().Tail()) goto EndWndSend;
+					if (ite == comp->GetComp().Tail()) goto EndWndSend;
 					if (m_ShiftDown)
 					{
-						if (ite == comp->GetChildren().Head())
-							ite = comp->GetChildren().Last();
+						if (ite == comp->GetComp().Head())
+							ite = comp->GetComp().Last();
 						else
 							--ite;
 						if (!IGuiCtl::IsEffect(ExDynCast<IGuiCtl>(*ite)))
 						{
-							if (ite == comp->GetChildren().Head())
-								ite = comp->GetChildren().Last();
+							if (ite == comp->GetComp().Head())
+								ite = comp->GetComp().Last();
 							else
 								--ite;
 						}
 					}
 					else
 					{
-						if (ite == comp->GetChildren().Last())
-							ite = comp->GetChildren().Head();
+						if (ite == comp->GetComp().Last())
+							ite = comp->GetComp().Head();
 						else
 							++ite;
 						if (!IGuiCtl::IsEffect(ExDynCast<IGuiCtl>(*ite)))
 						{
-							if (ite == comp->GetChildren().Last())
-								ite = comp->GetChildren().Head();
+							if (ite == comp->GetComp().Last())
+								ite = comp->GetComp().Head();
 							else
 								++ite;
 						}
@@ -328,7 +328,7 @@ protected:
 			CImage* mem_img = (CImage*)lParam;
 			if (!mem_img || mem_img->IsNull()) goto EndBaseSend;
 			// 遍历控件列表
-			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
 				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
 				if (!ctl) continue;
@@ -398,7 +398,7 @@ protected:
 			}
 			else
 		//	ExTrace(_T("0x%04X\n"), nMessage);
-			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
 				ctl = ExDynCast<IGuiCtl>(*ite);
 				if (!ctl || !ctl->IsVisible()) continue;
@@ -414,7 +414,7 @@ protected:
 		else
 		{
 		//	ExTrace(_T("0x%04X\n"), nMessage);
-			for(IGuiBase::list_t::iterator_t ite = pGui->GetChildren().Head(); ite != pGui->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
 				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
 				if (!ctl || !ctl->IsEnabled()) continue;

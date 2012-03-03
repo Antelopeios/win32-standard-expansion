@@ -90,9 +90,9 @@ public:
 	}
 	void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint)
 	{
-		if(!GetChildren().Empty())
+		if(!GetComp().Empty())
 		{
-			IGuiCtl* grd = ExDynCast<IGuiCtl>(GetChildren().HeadItem());
+			IGuiCtl* grd = ExDynCast<IGuiCtl>(GetComp().HeadItem());
 			if (grd)
 			{
 				CRect rc;

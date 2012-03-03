@@ -159,15 +159,15 @@ public:
 		GetRealRect(rc);
 		if (rc.PtInRect(pt))
 		{
-			if (GetChildren().Empty()) return this;
-			for(list_t::iterator_t ite = GetChildren().Last(); ite != GetChildren().Head(); --ite)
+			if (GetComp().Empty()) return this;
+			for(list_t::iterator_t ite = GetComp().Last(); ite != GetComp().Head(); --ite)
 			{
 				IGuiBase* base = ExDynCast<IGuiBase>(*ite);
 				if (!base) continue;
 				base = base->GetPtCtrl(pt);
 				if (base) return base;
 			}
-			IGuiBase* base = ExDynCast<IGuiBase>(GetChildren().HeadItem());
+			IGuiBase* base = ExDynCast<IGuiBase>(GetComp().HeadItem());
 			if (base)
 			{
 				base = base->GetPtCtrl(pt);

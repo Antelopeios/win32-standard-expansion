@@ -16,7 +16,7 @@ public:
 		switch( nMessage )
 		{
 		case WM_SIZE:
-			for(IGuiBase::list_t::iterator_t ite = wnd->GetChildren().Head(); ite != wnd->GetChildren().Tail(); ++ite)
+			for(IGuiBase::list_t::iterator_t ite = wnd->GetComp().Head(); ite != wnd->GetComp().Tail(); ++ite)
 			{
 				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
 				if (!ctl) continue;

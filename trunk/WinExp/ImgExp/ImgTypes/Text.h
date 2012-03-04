@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0007.2327
+// Date:	2012-03-04
+// Version:	1.0.0008.2050
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
@@ -45,6 +45,7 @@
 //	- 1.0.0005.1742(2011-08-12)	^ 简化CText::GetSize()接口,可支持省略tGrp参数
 //	- 1.0.0006.1331(2012-02-03)	- 将CString与CText分离
 //	- 1.0.0007.2327(2012-02-29)	+ 添加新的GetImage()接口,支持输出特定区域的折行文本
+//	- 1.0.0008.2050(2012-03-04)	# 尝试用黑/白文字图层混合的方式计算实际的文字图层,修正某些字体输出效果不理想的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -145,7 +146,6 @@ public:
 		CGraph tmp_grp;
 		tmp_grp.Create();
 		tmp_grp.SetObject(Get());
-		::SetBkMode(tmp_grp, TRANSPARENT);
 		// 获得文字区域
 		CSize sz;
 		GetSize(m_MemStr, sz, tmp_grp);
@@ -156,17 +156,51 @@ public:
 			tmp_grp.Delete();
 			return NULL;
 		}
-		tmp_grp.SetObject(m_MemImg.Get());
-		// 绘制文字
+		// 文字图层处理
+		CImage w_img; w_img.Create(sz.cx, sz.cy);
+		CImage b_img; b_img.Create(sz.cx, sz.cy);
 		CRect rc(0, 0, sz.cx, sz.cy);
-		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(ExRGBA(0, 0, 0, EXP_CM)));
-		::DrawText(tmp_grp, m_MemStr, (int)m_MemStr.GetLength(), &(RECT)rc, DT_LEFT | DT_TOP);
-		CImgFilter::Filter(m_MemImg, rc, &CFilterInverse(0xf));
-		if (m_Color != ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM))
-		CImgFilter::Filter(m_MemImg, rc, &CFilterBrush(m_Color, 0xf, TRUE, ExRGBA(EXP_CM, EXP_CM, EXP_CM, 0)));
+		pixel_t w_bk = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), b_bk = ExRGBA(0, 0, 0, EXP_CM);
+		::SetBkMode(tmp_grp, OPAQUE);
+		::SetTextColor(tmp_grp, ExRGB(ExGetR(m_Color), ExGetG(m_Color), ExGetB(m_Color)));
+		// 白色背景
+		tmp_grp.SetObject(w_img.Get());
+		::SetBkColor(tmp_grp, ExRGB(ExGetR(w_bk), ExGetG(w_bk), ExGetB(w_bk)));
+		::TextOut(tmp_grp, 0, 0, m_MemStr, (int)m_MemStr.GetLength());
+		// 黑色背景
+		tmp_grp.SetObject(b_img.Get());
+		::SetBkColor(tmp_grp, ExRGB(ExGetR(b_bk), ExGetG(b_bk), ExGetB(b_bk)));
+		::TextOut(tmp_grp, 0, 0, m_MemStr, (int)m_MemStr.GetLength());
+		// 计算前景色
+		pixel_t* p_w = w_img.GetPixels();
+		pixel_t* p_b = b_img.GetPixels();
+		pixel_t* p_s = m_MemImg.GetPixels();
+		for(int y = 0; y < sz.cy; ++y)
+		{
+			for(int x = 0; x < sz.cx; ++x)
+			{
+				int inx = y * sz.cx + x;
+				pixel_t w_p = p_w[inx], b_p = p_b[inx];
+				// 获得位图像素
+				chann_t w_r = ExGetR(w_p);
+				chann_t w_g = ExGetG(w_p);
+				chann_t w_b = ExGetB(w_p);
+				chann_t b_r = ExGetR(b_p);
+				chann_t b_g = ExGetG(b_p);
+				chann_t b_b = ExGetB(b_p);
+				// 计算Alpha通道
+				chann_t a = EXP_CM + (b_r - w_r);
+				// 获得源像素
+				p_s[inx] = ExRGBA(
+					a ? (EXP_CM * b_r) / a : 0, 
+					a ? (EXP_CM * b_g) / a : 0, 
+					a ? (EXP_CM * b_b) / a : 0, 
+					a * EXP_CM / ExGetA(m_Color));
+			}
+		}
+		CImgFilter::Filter(m_MemImg, &CFilterPreMul());
 		// 清理内存并返回
 		tmp_grp.Delete();
-		CImgFilter::Filter(m_MemImg, &CFilterPreMul());
 		return m_MemImg;
 	}
 	image_t GetImage(const CString& sStr, const CRect& rcImg, const int nSpace = 2, const CString& sClp = _T("..."))

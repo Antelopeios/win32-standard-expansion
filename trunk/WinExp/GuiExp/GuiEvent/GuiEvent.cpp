@@ -33,12 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-02
-// Version:	1.0.0002.1630
-//
-// History:
-//	- 1.0.0001.1750(2012-02-21)	+ 添加CQuitEvent事件对象
-//	- 1.0.0002.1630(2012-03-02)	+ 添加CMoveEvent事件对象
+// Date:	2012-03-04
+// Version:	1.0.0003.1647
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -54,53 +50,6 @@
 #include "GuiEvent/GuiLVEvent.hpp"
 #include "GuiEvent/GuiScrollEvent.hpp"
 #include "GuiEvent/GuiMenuEvent.hpp"
-
-EXP_BEG
-
-//////////////////////////////////////////////////////////////////
-
-class CQuitEvent : public IGuiEvent
-{
-	EXP_DECLARE_DYNCREATE_CLS(CQuitEvent, IGuiEvent)
-
-public:
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		switch( nMessage )
-		{
-		case WM_DESTROY:
-			::PostQuitMessage(0);
-			break;
-		}
-	}
-};
-
-EXP_IMPLEMENT_DYNCREATE_CLS(CQuitEvent, IGuiEvent)
+#include "GuiEvent/GuiEvent.hpp"
 
 //////////////////////////////////////////////////////////////////
-
-class CMoveEvent : public IGuiEvent
-{
-	EXP_DECLARE_DYNCREATE_CLS(CMoveEvent, IGuiEvent)
-
-public:
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		switch( nMessage )
-		{
-		case WM_NCHITTEST:
-			{
-				LRESULT hit_test = GetResult();
-				SetResult((hit_test == HTCLIENT) ? HTCAPTION : hit_test);
-				SetState(return_next);
-			}
-			break;
-		}
-	}
-};
-
-EXP_IMPLEMENT_DYNCREATE_CLS(CMoveEvent, IGuiEvent)
-
-//////////////////////////////////////////////////////////////////
-
-EXP_END

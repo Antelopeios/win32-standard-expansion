@@ -76,13 +76,16 @@ public:
 	IGuiWnd(void) {}
 	virtual ~IGuiWnd(void) {}
 
-	static BOOL GetDesktopRect(CRect& lpRect, const CPoint& pt = CPoint())
+	static BOOL GetDesktopRect(CRect& rc, const CPoint& pt = CPoint(), BOOL bWork = FALSE)
 	{
 		MONITORINFO info = {0};
 		info.cbSize = sizeof(MONITORINFO);
 		if (::GetMonitorInfo(::MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST), &info))
 		{
-			lpRect = info.rcMonitor;
+			if (bWork)
+				rc = info.rcWork;
+			else
+				rc = info.rcMonitor;
 			return TRUE;
 		}
 		else

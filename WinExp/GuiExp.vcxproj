@@ -123,6 +123,7 @@
     <ClInclude Include="GuiExp\GuiCtrl\GuiScroll.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiButtonEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiEditEvent.hpp" />
+    <ClInclude Include="GuiExp\GuiEvent\GuiEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiLCEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiListEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiLVEvent.hpp" />

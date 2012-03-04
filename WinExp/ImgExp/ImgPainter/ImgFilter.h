@@ -175,14 +175,14 @@ class CFilterBrush : public IFilterObject
 public:
 	BYTE m_Mask;
 	pixel_t m_Const;
-	BOOL m_bClrMask;
+	int m_nClrMask;
 	pixel_t m_ClrMask;
 
 public:
-	CFilterBrush(pixel_t cConst = 0, BYTE bMask = 0xf, BOOL bClrMask = FALSE, pixel_t cMask = 0)
+	CFilterBrush(pixel_t cConst = 0, BYTE bMask = 0xf, int nClrMask = 0, pixel_t cMask = 0)
 		: m_Const(cConst)
 		, m_Mask(bMask)
-		, m_bClrMask(bClrMask)
+		, m_nClrMask(nClrMask)
 		, m_ClrMask(cMask)
 	{ m_Const = ExRevColor(m_Const); }
 
@@ -190,7 +190,7 @@ public:
 				LONG w, LONG h, LONG inx_des)
 	{
 		if (m_Mask == 0) return;
-		if (m_Mask == 0xf && !m_bClrMask)
+		if (m_Mask == 0xf && m_nClrMask == 0)
 		{
 			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
 				CImgASM::PixSetP(pix_des + inx_des, w, m_Const);
@@ -199,8 +199,18 @@ public:
 		{
 			PreFilter();
 
-			if (m_bClrMask && pix_des[i_d] == m_ClrMask)
-				continue;
+			if (m_nClrMask == 1)
+			{
+				if (pix_des[i_d] == m_ClrMask)
+					continue;
+			}
+			else
+			if (m_nClrMask == 2)
+			{
+				if (pix_des[i_d] != m_ClrMask)
+					continue;
+			}
+
 			pix_des[i_d] = ExRGBA
 				(
 				(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pix_des[i_d]), 
@@ -220,38 +230,11 @@ public:
 class CFilterFill : public CFilterBrush
 {
 public:
-	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, BOOL bClrMask = FALSE, pixel_t cMask = 0)
-		: CFilterBrush(cConst, bMask, bClrMask, cMask)
+	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, int nClrMask = 0, pixel_t cMask = 0)
+		: CFilterBrush(cConst, bMask, nClrMask, cMask)
 	{
 		CImgASM::PixPreMul(&m_Const, 1);
 		CImgASM::PixPreMul(&m_ClrMask, 1);
-	}
-
-	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
-				LONG w, LONG h, LONG inx_des)
-	{
-		if (m_Mask == 0) return;
-		if (m_Mask == 0xf && !m_bClrMask)
-		{
-			for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
-				CImgASM::PixSetP(pix_des + inx_des, w, m_Const);
-		}
-		else
-		{
-			PreFilter();
-
-			if (m_bClrMask && pix_des[i_d] == m_ClrMask)
-				continue;
-			pix_des[i_d] = ExRGBA
-				(
-				(m_Mask & 0x08) ? ExGetR(m_Const) : ExGetR(pix_des[i_d]), 
-				(m_Mask & 0x04) ? ExGetG(m_Const) : ExGetG(pix_des[i_d]), 
-				(m_Mask & 0x02) ? ExGetB(m_Const) : ExGetB(pix_des[i_d]), 
-				(m_Mask & 0x01) ? ExGetA(m_Const) : ExGetA(pix_des[i_d])
-				);
-
-			EndFilter();
-		}
 	}
 };
 

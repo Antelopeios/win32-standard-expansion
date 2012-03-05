@@ -161,15 +161,14 @@ public:
 		CImage b_img; b_img.Create(sz.cx, sz.cy);
 		CRect rc(0, 0, sz.cx, sz.cy);
 		pixel_t w_bk = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), b_bk = ExRGBA(0, 0, 0, EXP_CM);
-		::SetBkMode(tmp_grp, OPAQUE);
-		::SetTextColor(tmp_grp, ExRGB(ExGetR(m_Color), ExGetG(m_Color), ExGetB(m_Color)));
+		::SetBkMode(tmp_grp, TRANSPARENT);
 		// 白色背景
+		CImgFilter::Filter(w_img, &CFilterBrush(w_bk));
 		tmp_grp.SetObject(w_img.Get());
-		::SetBkColor(tmp_grp, ExRGB(ExGetR(w_bk), ExGetG(w_bk), ExGetB(w_bk)));
 		::TextOut(tmp_grp, 0, 0, m_MemStr, (int)m_MemStr.GetLength());
 		// 黑色背景
+		CImgFilter::Filter(b_img, &CFilterBrush(b_bk));
 		tmp_grp.SetObject(b_img.Get());
-		::SetBkColor(tmp_grp, ExRGB(ExGetR(b_bk), ExGetG(b_bk), ExGetB(b_bk)));
 		::TextOut(tmp_grp, 0, 0, m_MemStr, (int)m_MemStr.GetLength());
 		// 计算前景色
 		pixel_t* p_w = w_img.GetPixels();
@@ -182,20 +181,15 @@ public:
 				int inx = y * sz.cx + x;
 				pixel_t w_p = p_w[inx], b_p = p_b[inx];
 				// 获得位图像素
-				chann_t w_r = ExGetR(w_p);
-				chann_t w_g = ExGetG(w_p);
-				chann_t w_b = ExGetB(w_p);
-				chann_t b_r = ExGetR(b_p);
-				chann_t b_g = ExGetG(b_p);
-				chann_t b_b = ExGetB(b_p);
+				chann_t w_r = ExGetR(w_p), b_r = ExGetR(b_p);
 				// 计算Alpha通道
-				chann_t a = EXP_CM + (b_r - w_r);
+				int a_s = (EXP_CM - w_r + b_r) * ExGetA(m_Color);
 				// 获得源像素
 				p_s[inx] = ExRGBA(
-					a ? (EXP_CM * b_r) / a : 0, 
-					a ? (EXP_CM * b_g) / a : 0, 
-					a ? (EXP_CM * b_b) / a : 0, 
-					a * EXP_CM / ExGetA(m_Color));
+					ExGetB(m_Color), 
+					ExGetG(m_Color), 
+					ExGetR(m_Color), 
+					ExDivCM(a_s));
 			}
 		}
 		CImgFilter::Filter(m_MemImg, &CFilterPreMul());

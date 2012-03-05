@@ -103,7 +103,7 @@ EXP_API pixel_t ExStringToColor(CString sColor)
 			rgb[0] = _tcstol(str_rgb[0], NULL, 16);
 			rgb[1] = _tcstol(str_rgb[1], NULL, 16);
 			rgb[2] = _tcstol(str_rgb[2], NULL, 16);
-			clr = ExRGB(rgb[0], rgb[1], rgb[2]);
+			clr = ExRGBA(rgb[0], rgb[1], rgb[2], EXP_CM);
 		}
 	}
 	return clr;

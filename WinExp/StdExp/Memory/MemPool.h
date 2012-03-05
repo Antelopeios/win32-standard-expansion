@@ -96,7 +96,7 @@ struct _MemPoolPolicy
 	typedef typename model_t::_LockPolicy mutex_policy_t;
 	typedef CLockT<mutex_policy_t> mutex_t;
 
-	typedef DWORD byte;
+	typedef long byte;
 
 	static const BOOL DUMP_MEM_LEAKS = TRUE;
 };

@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-29
-// Version:	1.0.0020.0451
+// Date:	2012-03-05
+// Version:	1.0.0021.2317
 //
 // History:
 //	- 1.0.0015.2359(2011-03-01)	# CRegistAllocT::Free()一个空指针时会引发内存异常
@@ -48,6 +48,7 @@
 //	- 1.0.0020.0451(2012-01-29)	= CRegistAllocT使用静态内存分配器作为策略,默认使用EXP_MEMPOOL_ALLOC
 //								= CRegistAllocT自身改写为静态类
 //								= 定义CRegistAlloc为EXP_MEMORY_ALLOC,并将ExMem定义为CRegistAlloc的别称
+//	- 1.0.0021.2317(2012-03-05)	= 按照标准要求,当Alloc的大小为0时分配最小内存块
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RegistAlloc_h__
@@ -143,14 +144,14 @@ public:
 
 	EXP_INLINE static void* Alloc(DWORD nSize, LPCSTR sFile = NULL, int nLine = 0)
 	{
-		if (nSize == 0) return NULL;
+		if (nSize == 0) nSize = 1;
 		_Regist* real = (_Regist*)alloc_t::Alloc(sizeof(_Regist) + nSize);
 		return _Regist::PtrReal(_Regist::Make<BYTE>(alloc_t::SetAlloc(real, sFile, nLine), nSize));
 	}
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1, LPCSTR sFile = NULL, int nLine = 0)
 	{
-		if (nCount == 0) return NULL;
+		if (nSize == 0) nSize = 1;
 		_Regist* real = (_Regist*)alloc_t::Alloc(sizeof(_Regist) + (sizeof(TypeT) * nCount));
 		return Construct<TypeT>((_Regist*)_Regist::Make<TypeT>(alloc_t::SetAlloc(real, sFile, nLine), nCount));
 	}

@@ -157,47 +157,11 @@ public:
 				ctl->SetWindowRect(rc_wnd);
 			}
 			break;
-		case WM_KILLFOCUS:
-			{
-				CString* edit = (CString*)ctl->GetState(_T("text"));
-				if (edit->Empty())
-					GET_CTL(cover)->SetVisible(TRUE);
-			}
-			break;
 		}
 	}
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_search, IGuiEvent)
-
-//////////////////////////////////////////////////////////////////
-
-class CEvent_cover : public CEvent_search
-{
-	EXP_DECLARE_DYNCREATE_CLS(CEvent_cover, CEvent_search)
-
-public:
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-		if (!ctl) return;
-
-		switch( nMessage )
-		{
-		case WM_SETFOCUS:
-			{
-				ctl->SetVisible(FALSE);
-				GET_CTL(search)->SetFocus();
-			}
-			break;
-		case WM_KILLFOCUS:
-			return;
-		}
-		EXP_BASE::OnMessage(pGui, nMessage, wParam, lParam);
-	}
-};
-
-EXP_IMPLEMENT_DYNCREATE_CLS(CEvent_cover, CEvent_search)
 
 //////////////////////////////////////////////////////////////////
 

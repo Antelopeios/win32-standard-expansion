@@ -151,7 +151,7 @@ public:
 	template <typename TypeT>
 	EXP_INLINE static TypeT* Alloc(DWORD nCount = 1, LPCSTR sFile = NULL, int nLine = 0)
 	{
-		if (nSize == 0) nSize = 1;
+		if (nCount == 0) return NULL;
 		_Regist* real = (_Regist*)alloc_t::Alloc(sizeof(_Regist) + (sizeof(TypeT) * nCount));
 		return Construct<TypeT>((_Regist*)_Regist::Make<TypeT>(alloc_t::SetAlloc(real, sFile, nLine), nCount));
 	}

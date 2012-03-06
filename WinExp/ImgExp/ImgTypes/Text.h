@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-04
-// Version:	1.0.0008.2050
+// Date:	2012-03-06
+// Version:	1.0.0009.1123
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
@@ -46,6 +46,7 @@
 //	- 1.0.0006.1331(2012-02-03)	- 将CString与CText分离
 //	- 1.0.0007.2327(2012-02-29)	+ 添加新的GetImage()接口,支持输出特定区域的折行文本
 //	- 1.0.0008.2050(2012-03-04)	# 尝试用黑/白文字图层混合的方式计算实际的文字图层,修正某些字体输出效果不理想的问题
+//	- 1.0.0009.1123(2012-03-06)	^ 使用ExtTextOut代替TextOut进行文字输出,提高输出效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -165,11 +166,11 @@ public:
 		// 白色背景
 		CImgFilter::Filter(w_img, &CFilterBrush(w_bk));
 		tmp_grp.SetObject(w_img.Get());
-		::TextOut(tmp_grp, 0, 0, m_MemStr, (int)m_MemStr.GetLength());
+		::ExtTextOut(tmp_grp, 0, 0, 0, NULL, m_MemStr, (UINT)m_MemStr.GetLength(), NULL);
 		// 黑色背景
 		CImgFilter::Filter(b_img, &CFilterBrush(b_bk));
 		tmp_grp.SetObject(b_img.Get());
-		::TextOut(tmp_grp, 0, 0, m_MemStr, (int)m_MemStr.GetLength());
+		::ExtTextOut(tmp_grp, 0, 0, 0, NULL, m_MemStr, (UINT)m_MemStr.GetLength(), NULL);
 		// 计算前景色
 		pixel_t* p_w = w_img.GetPixels();
 		pixel_t* p_b = b_img.GetPixels();

@@ -71,13 +71,9 @@ void CGuiLoader::LoadCtl()
 	// ËÑË÷¿ò
 	REG_CTL(search, ExGui<IGuiCtl>(_T("CGuiEdit")));
 	GET_CTL(search)->SetState(_T("font"), GET_TXT(search));
+	GET_CTL(search)->SetState(_T("empty_font"), GET_TXT(cover));
+	GET_CTL(search)->SetState(_T("empty_text"), &CString(_T("ÇëÊäÈë´ý²éÑ¯±êÇ©")));
 	GET_CTL(search)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_search")));
-	// ¸²¸Ç¿ò
-	REG_CTL(cover, ExGui<IGuiCtl>(_T("CGuiEdit")));
-	GET_CTL(cover)->SetState(_T("text"), GET_TXT(cover));
-	GET_CTL(cover)->SetState(_T("edit"), &CString(_T("ÇëÊäÈë´ý²éÑ¯±êÇ©")));
-	GET_CTL(cover)->SetVisible(FALSE);
-	GET_CTL(cover)->AddEvent(ExGui<IGuiEvent>(_T("CEvent_cover")));
 
 	// ±êÇ©ÔÆ
 	REG_CTL(cloud, ExGui<IGuiCtl>(_T("CGuiListView")));
@@ -204,8 +200,6 @@ void CGuiLoader::LinkGui()
 	GET_WND(main)->AddComp(GET_CTL(bottom2));
 	// ËÑË÷¿ò
 	GET_WND(main)->AddComp(GET_CTL(search));
-	// ¸²¸Ç¿ò
-	GET_WND(main)->AddComp(GET_CTL(cover));
 
 	// ±êÇ©ÔÆ
 	GET_WND(main)->AddComp(GET_CTL(cloud));

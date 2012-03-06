@@ -584,14 +584,17 @@ public:
 			CImage txt_img(text->GetImage(*edit));
 			if(!txt_img.IsNull())
 			{
-				txt_img.Set(txt_img.Clone());
+				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+				CImage sel_img;
 				CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
 				if (!sel_rc.IsEmpty())
 				{
-					CImgFilter::Filter(txt_img, sel_rc, &CFilterBrush(txt_sel_color, 0xf, TRUE));
-					CImgFilter::Filter(txt_img, sel_rc, &CFilterBrush(bkg_sel_color, 0xf, TRUE, txt_sel_color));
+					sel_img.Set(txt_img.Clone(sel_rc));
+					CImgFilter::Filter(sel_img, &CFilterBrush(txt_sel_color, 0xe, TRUE));
+					CImgFilter::Filter(sel_img, &CFilterPreMul());
+					CImgDrawer::Fill(mem_img->Get(), sel_rc, bkg_sel_color);
+					CImgDrawer::Draw(mem_img->Get(), sel_img, sel_rc);
 				}
-				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
 			}
 		}
 
@@ -600,19 +603,17 @@ public:
 		{
 			// 获得光标高度
 			CSize sz_flk;
-			text->GetSize(_T("lq"), sz_flk);
+			text->GetSize(_T("|"), sz_flk);
 			// 获得文字宽度
 			CString tmp(*edit);
 			if(!tmp.Empty()) tmp[m_iteFlicker->Index()] = _T('\0');
 			CSize sz_txt;
 			text->GetSize(tmp, sz_txt);
 			// 画线
-			CImgDrawer::Line
-				(
+			CImgDrawer::Line(
 				mem_img->Get(), 
 				CLine(sz_txt.cx - sz_off.cx, 0, sz_txt.cx - sz_off.cx, sz_flk.cy), 
-				ExRGBA(0, 0, 0, EXP_CM)
-				);
+				ExRGBA(0, 0, 0, EXP_CM));
 		}
 	}
 

@@ -23,7 +23,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	CRect rc_wnd(0, 0, 500, 300);
 	HICON ic_wnd = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTGUI2));
 	CText txt_edt((font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(0, 60, 116, 200));
-	CText txt_ept((font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(128, 128, 128, 255));
+	LOGFONT lf = {0};
+	txt_edt.GetLogFont(&lf);
+	_tcscpy_s(lf.lfFaceName, _T("微软雅黑"));
+	txt_edt.Create(&lf);
+	CText txt_ept(NULL, ExRGBA(128, 128, 128, 255));
+	txt_ept.Create(&lf);
 
 	// 创建窗口对象并设置
 	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
@@ -31,8 +36,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
 	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
-	//wnd->SetLayered();
-	wnd->ShowWindow(SW_SHOW);
 	wnd->GetClientRect(rc_wnd);
 
 	// 创建控件
@@ -44,9 +47,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 关联对象
 	wnd->AddComp(edit);
-	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
-	wnd->AddEvent(ExMem::Alloc<CFillEvent>());
+	wnd->AddEvent(dbnew(CCustomEvent));
+	wnd->AddEvent(dbnew(CFillEvent));
 
+	wnd->ShowWindow(SW_SHOW);
 	// 主消息循环:
 	MSG msg = {0};
 	while (GetMessage(&msg, NULL, 0, 0))

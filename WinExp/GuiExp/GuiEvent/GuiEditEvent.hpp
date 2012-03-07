@@ -568,6 +568,7 @@ public:
 			tmp.Del(tmp.Head(), ite1->Index());
 			text->GetSize(tmp, sz_sel);
 		}
+		sz_hed.cx -= sz_off.cx;
 
 		// »æÎÄ×Ö
 		if (edit->Empty())

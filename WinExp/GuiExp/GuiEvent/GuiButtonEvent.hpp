@@ -203,11 +203,15 @@ protected:
 
 	virtual void BtnDwn(IGuiCtl* pCtl)
 	{
-		pCtl->SetState(_T("status"), (void*)2);
+		if ((DWORD)pCtl->GetState(_T("status")) != 3)
+			pCtl->SetState(_T("status"), (void*)2);
 	}
 
 	virtual void BtnUp(IGuiCtl* pCtl)
 	{
+		DWORD status = (DWORD)pCtl->GetState(_T("status"));
+		if (status == 3) return;
+
 		IGuiWnd* wnd = pCtl->GetWnd();
 		if (!wnd) return;
 		POINT pt_tmp = {0};
@@ -217,13 +221,15 @@ protected:
 		CRect rc;
 		pCtl->GetRealRect(rc);
 
-		DWORD status = (DWORD)pCtl->GetState(_T("status"));
 		if (status == 2) // 当按下后抬起,视为一次Click
 		{
 			pCtl->SendMessage(BM_CLICK);
 			if(!pCtl->IsValid()) return;
 			SendPare(pCtl, BN_CLICKED);
 		}
+
+		status = (DWORD)pCtl->GetState(_T("status"));
+		if (status == 3) return;
 
 		if (rc.PtInRect(pt))
 			status = 1;
@@ -234,13 +240,15 @@ protected:
 
 	virtual void MusMov(IGuiCtl* pCtl)
 	{
-		if ((DWORD)pCtl->GetState(_T("status")) != 2)
+		DWORD status = (DWORD)pCtl->GetState(_T("status"));
+		if (status != 2 && status != 3)
 			pCtl->SetState(_T("status"), (void*)1);
 	}
 
 	virtual void MusLev(IGuiCtl* pCtl)
 	{
-		pCtl->SetState(_T("status"), (void*)0);
+		if ((DWORD)pCtl->GetState(_T("status")) != 3)
+			pCtl->SetState(_T("status"), (void*)0);
 	}
 
 	virtual void Paint(IGuiCtl* pCtl, CImage* mem_img)
@@ -249,18 +257,23 @@ protected:
 
 		// 获得属性
 		int thr_sta = (int)pCtl->GetState(_T("thr_sta"));
-		LONG sta_tim = (thr_sta == 1 ? 3 : (thr_sta == -1 ? 1 : 8));
+		LONG sta_tim = 0;
+		if (thr_sta == 1)	// 无焦点按钮
+			sta_tim = 3;
+		else
+		if (thr_sta == 2)	// Push按钮
+			sta_tim = 4;
+		else
+		if (thr_sta == -1)	// 单态按钮
+			sta_tim = 1;
+		else
+			sta_tim = 8;	// 普通按钮
 
 		DWORD status = (DWORD)pCtl->GetState(_T("status"));
 		if (thr_sta == 0)
 		{	// 正常情况
 			if(!pCtl->IsEnabled()) status = 3;
 			if (pCtl->IsFocus()) status += 4;
-		}
-		else
-		if (thr_sta == 1)
-		{	// 无焦点状态
-		//	if (!ctl->IsEnabled()) status = 3;
 		}
 		else
 		if (thr_sta == -1)
@@ -484,107 +497,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiPushBtnEvent : public CGuiButtonEvent
-{
-	EXP_DECLARE_DYNCREATE_CLS(CGuiPushBtnEvent, CGuiButtonEvent)
-
-protected:
-	void BtnDwn(IGuiCtl* pCtl)
-	{
-		if ((DWORD)pCtl->GetState(_T("status")) != 3)
-			pCtl->SetState(_T("status"), (void*)2);
-	}
-
-	void BtnUp(IGuiCtl* pCtl)
-	{
-		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-		if (status == 3) return;
-
-		IGuiWnd* wnd = pCtl->GetWnd();
-		if (!wnd) return;
-		POINT pt_tmp = {0};
-		::GetCursorPos(&pt_tmp);
-		CPoint pt(pt_tmp);
-		wnd->ScreenToClient(pt);
-		CRect rc;
-		pCtl->GetRealRect(rc);
-
-		if (status == 2) // 当按下后抬起,视为一次Click
-		{
-			pCtl->SendMessage(BM_CLICK);
-			if(!pCtl->IsValid()) return;
-			SendPare(pCtl, BN_CLICKED);
-		}
-
-		status = (DWORD)pCtl->GetState(_T("status"));
-		if (status == 3) return;
-
-		if (rc.PtInRect(pt))
-			status = 1;
-		else
-			status = 0;
-		pCtl->SetState(_T("status"), (void*)status);
-	}
-
-	void MusMov(IGuiCtl* pCtl)
-	{
-		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-		if (status != 2 && status != 3)
-			pCtl->SetState(_T("status"), (void*)1);
-	}
-
-	void MusLev(IGuiCtl* pCtl)
-	{
-		if ((DWORD)pCtl->GetState(_T("status")) != 3)
-			pCtl->SetState(_T("status"), (void*)0);
-	}
-
-	void Paint(IGuiCtl* pCtl, CImage* mem_img)
-	{
-		if (!mem_img || mem_img->IsNull()) return;
-
-		// 获得属性
-		LONG sta_tim = 4;
-
-		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-
-		CImage* image = (CImage*)pCtl->GetState(_T("image"));
-		pixel_t* pixel = ((pixel_t**)pCtl->GetState(_T("color")))[status];
-		CText* text = ((CText**)pCtl->GetState(_T("font")))[status];
-		CString* str = (CString*)pCtl->GetState(_T("text"));
-
-		CRect rect, clt_rct;
-		pCtl->GetClipRect(rect);
-		pCtl->GetClientRect(clt_rct);
-
-		// 处理
-		LONG r_h = clt_rct.Height() * sta_tim;
-
-		// 绘图
-		if (pixel)
-			CImgDrawer::Fill(mem_img->Get(), rect, *pixel);
-		// m-m
-		if (image)
-			CImgDrawer::Draw(mem_img->Get(), image->Get(), rect, CRect(0, 0, 
-				rect.Width() >= clt_rct.Width() ? 
-				image->GetWidth() : image->GetWidth() * rect.Width() / clt_rct.Width(), 
-				rect.Height() >= r_h ? 
-				image->GetHeight() : image->GetHeight() * rect.Height() / r_h).MoveTo(
-				CPoint(0, image->GetHeight() * status / sta_tim)));
-		
-		// 绘文字
-		DWORD locate = (DWORD)pCtl->GetState(_T("locate"));
-		LONG loc_off = (LONG)pCtl->GetState(_T("loc_off"));
-		CRect img_rct;
-		if (FmtTxtRect(rect, text, str, locate, loc_off, img_rct))
-			CImgDrawer::Draw(mem_img->Get(), m_imgClp, img_rct);
-	}
-};
-
-//////////////////////////////////////////////////////////////////
-
 EXP_IMPLEMENT_DYNCREATE_CLS(CGuiButtonEvent, IGuiEvent)
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiPushBtnEvent, CGuiButtonEvent)
 
 //////////////////////////////////////////////////////////////////
 

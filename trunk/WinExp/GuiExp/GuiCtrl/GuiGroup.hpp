@@ -86,17 +86,6 @@ public:
 		else
 		if (key == _T("sta_cnt"))
 			SetState(_T("sta_cnt"), (void*)_ttol(val));
-		else
-		if (key == _T("sty_box"))
-		{
-			CString temp(val);
-			temp.Lower();
-			if (temp == _T("false"))
-				SetState(_T("sty_box"), (void*)FALSE);
-			else
-			if (temp == _T("true"))
-				SetState(_T("sty_box"), (void*)TRUE);
-		}
 		return TRUE;
 	}
 
@@ -177,12 +166,6 @@ public:
 			return TRUE;
 		}
 		else
-		if (sType == _T("sty_box"))
-		{
-			m_StyleBox = (BOOL)(LONG_PTR)pState;
-			return TRUE;
-		}
-		else
 		if (sType == _T("image"))
 		{
 			CImage* img = (CImage*)pState;
@@ -197,14 +180,12 @@ public:
 			CRect rc_img(0, 0, offset, img->GetHeight());
 			CRect rc_itm(0, 0, offset, img->GetHeight() / m_StatusCount);
 			CPoint pt_off(offset, 0);
-			int c = m_StyleBox ? 9 : 1, 
-				n = m_StyleBox ? 4 : 0;
 			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
 			{
 				IGuiCtl* item = *ite;
-				CImage* tmp = gcnew(gc, CImage, c);
+				CImage* tmp = gcnew(gc, CImage, 9);
 				item->SetWindowRect(rc_itm);
-				tmp[n].Set(img->Clone(rc_img));
+				tmp[4].Set(img->Clone(rc_img));
 				item->SetState(_T("image"), tmp);
 				rc_img.Offset(pt_off);
 				rc_itm.Offset(pt_off);

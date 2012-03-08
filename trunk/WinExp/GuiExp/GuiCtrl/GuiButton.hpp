@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-01
-// Version:	1.0.0009.2025
+// Date:	2012-03-08
+// Version:	1.0.0010.1443
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -49,6 +49,7 @@
 //	- 1.0.0007.1513(2011-09-22)	= CGuiButton按钮状态改为8态
 //	- 1.0.0008.1216(2011-09-23)	+ 添加shake_ico属性,支持点击时晃动图标及文字
 //	- 1.0.0009.2025(2012-03-01) + GuiButton支持通过字符串匹配对应的locate属性
+//	- 1.0.0010.1443(2012-03-08) ^ 将CGuiPushBtn继承于GuiButton,其中的特殊处理一并放入GuiButton中
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -68,9 +69,9 @@ class CGuiButton : public IGuiCtrlBase
 
 public:
 	/*
-		正常; 浮动; 按下
+		正常; 浮动; 按下; push
 	*/
-	enum status_t {nor, ovr, hit};
+	enum status_t {nor, ovr, prs, psh};
 	/*
 		文字位置: 中; 上; 下; 左; 右
 	*/
@@ -157,7 +158,24 @@ public:
 			SetState(_T("text"), (void*)&val);
 		else
 		if (key == _T("status"))
-			SetState(_T("status"), (void*)_ttol(val));
+		{
+			int sta_i = _ttol(val);
+			if (sta_i == 0 && val != _T("0"))
+			{
+				if (val == _T("nor") || val == _T("normal"))
+					sta_i = (int)nor;
+				else
+				if (val == _T("ovr") || val == _T("over"))
+					sta_i = (int)ovr;
+				else
+				if (val == _T("prs") || val == _T("press"))
+					sta_i = (int)prs;
+				else
+				if (val == _T("psh") || val == _T("push"))
+					sta_i = (int)psh;
+			}
+			SetState(_T("status"), (void*)sta_i);
+		}
 		else
 		if (key == _T("locate"))
 		{
@@ -361,209 +379,21 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiPushBtn : public IGuiCtrlBase
+class CGuiPushBtn : public CGuiButton
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiPushBtn, IGuiCtrlBase)
-
-public:
-	/*
-		正常; 浮动; 按下; Push
-	*/
-	enum status_t {nor, ovr, hit, psh};
-	/*
-		文字位置: 中; 上; 下; 左; 右
-	*/
-	enum locate_t {center, top, bottom, left, right};
-
-protected:
-	status_t m_Status;	// 按钮状态
-	locate_t m_Locate;	// 文字位置
-	LONG m_LocOff;		// 文字位置偏移(m_Locate == center 时无效)
-
-	pixel_t m_Color[4];
-	CImage* m_Image;	// 保存4个状态
-	CText* m_Text[4];
-	CString m_Str;
+	EXP_DECLARE_DYNCREATE_MULT(CGuiPushBtn, CGuiButton)
 
 public:
 	CGuiPushBtn()
-		: m_Status(nor)
-		, m_Locate(center)
-		, m_LocOff(5)
-		, m_Image(NULL)
 	{
-		ZeroMemory(m_Color, sizeof(m_Color));
-		ZeroMemory(m_Text, sizeof(m_Text));
-		// 添加事件对象
-		AddEvent(ExGui(_T("CGuiPushBtnEvent"), GetGC()));
-	}
-	~CGuiPushBtn()
-	{}
-
-public:
-	BOOL Execute(const CString& key, const CString& val)
-	{
-		CArrayT<CString> sa;
-		if (key == _T("style"))
-		{
-			style_t* sty = ExGet<style_t>(val);
-			if (sty)
-			{
-				if(!sty->font.Empty())
-					for(int i = 0; i < (int)min(_countof(m_Text), sty->font.GetCount()); ++i)
-						m_Text[i] = sty->font[i];
-				if(!sty->color.Empty())
-					SetState(_T("color"), (void*)(pixel_t*)sty->color);
-				if(!sty->image.Empty())
-					SetState(_T("image"), sty->image[0]);
-			}
-		}
-		else
-		if (key == _T("font"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
-				m_Text[i] = ExGet<CText>(sa[i]);
-		}
-		else
-		if (key == _T("color"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
-				m_Color[i] = ExStringToColor(sa[i]);
-		}
-		else
-		if (key == _T("image"))
-		{
-			ExStringToArray(val, sa);
-			SetState(_T("image"), ExGet<CImage>(sa[0]));
-		}
-		else
-		if (key == _T("text"))
-			SetState(_T("text"), (void*)&val);
-		else
-		if (key == _T("status"))
-			SetState(_T("status"), (void*)_ttol(val));
-		else
-		if (key == _T("locate"))
-		{
-			int loc_i = _ttol(val);
-			if (loc_i == 0 && val != _T("0"))
-			{
-				if (val == _T("center"))
-					loc_i = (int)center;
-				else
-				if (val == _T("top"))
-					loc_i = (int)top;
-				else
-				if (val == _T("bottom"))
-					loc_i = (int)bottom;
-				else
-				if (val == _T("left"))
-					loc_i = (int)left;
-				else
-				if (val == _T("right"))
-					loc_i = (int)right;
-			}
-			SetState(_T("locate"), (void*)loc_i);
-		}
-		else
-		if (key == _T("loc_off"))
-			SetState(_T("loc_off"), (void*)_ttol(val));
-		return TRUE;
-	}
-
-	// 获得控件状态
-	void* GetState(const CString& sType)
-	{
-		if (sType == _T("status"))
-			return (void*)m_Status;
-		else
-		if (sType == _T("locate"))
-			return (void*)m_Locate;
-		else
-		if (sType == _T("loc_off"))
-			return (void*)m_LocOff;
-		else
-		if (sType == _T("color"))
-			return (void*)m_Color;
-		else
-		if (sType == _T("image"))
-			return (void*)m_Image;
-		else
-		if (sType == _T("font"))
-			return (void*)m_Text;
-		else
-		if (sType == _T("text"))
-			return (void*)(&m_Str);
-		else
-			return EXP_BASE::GetState(sType);
-	}
-	BOOL SetState(const CString& sType, void* pState)
-	{
-		if (sType == _T("status"))
-		{
-			status_t old_sta = m_Status;
-			m_Status = (status_t)(LONG_PTR)pState;
-			if (old_sta != m_Status)
-				return EXP_BASE::SetState(sType, pState);
-			else
-				return TRUE;
-		}
-		else
-		if (sType == _T("locate"))
-		{
-			locate_t old_sta = m_Locate;
-			m_Locate = (locate_t)(LONG_PTR)pState;
-			if (old_sta != m_Locate)
-				return EXP_BASE::SetState(sType, pState);
-			else
-				return TRUE;
-		}
-		else
-		if (sType == _T("loc_off"))
-		{
-			LONG old_sta = m_LocOff;
-			m_LocOff = (LONG)(LONG_PTR)pState;
-			if (old_sta != m_LocOff)
-				return EXP_BASE::SetState(sType, pState);
-			else
-				return TRUE;
-		}
-		else
-		if (sType == _T("color"))
-		{
-			for(int i = 0; i < _countof(m_Color); ++i)
-				m_Color[i] = ((pixel_t*)pState)[i];
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("image"))
-		{
-			m_Image = (CImage*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("font"))
-		{
-			for(int i = 0; i < _countof(m_Text); ++i)
-				m_Text[i] = (CText*)pState + i;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("text"))
-		{
-			m_Str = *(CString*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		return FALSE;
+		SetState(_T("thr_sta"), (void*)2);
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPushBtn, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPushBtn, CGuiButton)
 
 //////////////////////////////////////////////////////////////////
 

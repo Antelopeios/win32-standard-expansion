@@ -141,9 +141,9 @@ public:
 };
 
 // 向工厂注册 _TypeInfo 指针
-#define ExRegTypeInfo(key, inf)	CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
+#define ExRegTypeInfo(key, inf)	EXP::CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
 // 从工厂得到 _TypeInfo 指针
-#define ExGetTypeInfo(key)		CTypeInfoFactory::Instance().GetTypeInfo(key)
+#define ExGetTypeInfo(key)		EXP::CTypeInfoFactory::Instance().GetTypeInfo(key)
 
 //////////////////////////////////////////////////////////////////
 
@@ -186,10 +186,10 @@ public:																						\
 public:																						\
 	virtual int GetTypeID()					{ return EXP_TYPEINFO_MEMBER.type_id; }			\
 	virtual LPCTSTR GetTypeName()			{ return EXP_TYPEINFO_MEMBER.className; }		\
-	virtual _TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }					\
-	static _TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }					\
+	virtual EXP::_TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }				\
+	static EXP::_TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }				\
 private:																					\
-	static _TypeInfo EXP_TYPEINFO_MEMBER;
+	static EXP::_TypeInfo EXP_TYPEINFO_MEMBER;
 
 #define EXP_DECLARE_TYPEINFO_CLS(cls_name, base_name)										\
 	EXP_DEF_MULTTYPE(cls_name)																\
@@ -218,7 +218,7 @@ private:																					\
 	EXP_DEF_MULTTYPE(cls_name)																\
 	EXP_DECLARE_TYPEINFO(cls_name)															\
 public:																						\
-	BOOL IsKindOf(_TypeInfo& cls);
+	BOOL IsKindOf(EXP::_TypeInfo& cls);
 
 // dynamically typeinfo
 
@@ -241,7 +241,7 @@ public:																						\
 
 #define EXP_DECLARE_DYNCREATE_C(cls_name)													\
 public:																						\
-	static IBaseObject* CreateObject(CGC* gc = NULL);										\
+	static EXP::IBaseObject* CreateObject(EXP::CGC* gc = NULL);								\
 private:																					\
 	static BOOL m_bRegSuccess;
 
@@ -269,10 +269,10 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_CLS(cls_name, base_name, pfn_new, tmp)						\
 	tmp																						\
-	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		IBaseObject::TypeInfoOrder++, 														\
+		EXP::IBaseObject::TypeInfoOrder++, 													\
 		{&ExTypeInfoCls(base_name), NULL, NULL}, 											\
 		pfn_new																				\
 	};
@@ -282,37 +282,37 @@ private:																					\
 
 #define EXP_IMPLEMENT_TYPEINFO_MULT2(cls_name, base_name, base_name2, pfn_new, tmp)			\
 	tmp																						\
-	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		IBaseObject::TypeInfoOrder++, 														\
+		EXP::IBaseObject::TypeInfoOrder++, 													\
 		{&ExTypeInfoCls(base_name), &ExTypeInfoCls(base_name2), NULL}, 						\
 		pfn_new																				\
 	};
 
 #define EXP_IMPLEMENT_TYPEINFO_MULT3(cls_name, base_name, base_name2, base_name3, pfn_new, tmp)	\
 	tmp																						\
-	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		IBaseObject::TypeInfoOrder++, 														\
+		EXP::IBaseObject::TypeInfoOrder++, 													\
 		{&ExTypeInfoCls(base_name), &ExTypeInfoCls(base_name2), &ExTypeInfoCls(base_name3)}, \
 		pfn_new																				\
 	};
 
 #define EXP_IMPLEMENT_TYPEINFO_NULL(cls_name, pfn_new, tmp)									\
 	tmp																						\
-	_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =												\
+	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		IBaseObject::TypeInfoOrder++, 														\
+		EXP::IBaseObject::TypeInfoOrder++, 													\
 		{NULL, NULL, NULL}, 																\
 		pfn_new																				\
 	};																						\
 	tmp																						\
 	BOOL cls_name::IsKindOf(_TypeInfo& cls)													\
 	{																						\
-		_TypeInfo* p = &(this->GetTypeInfo());												\
+		EXP::_TypeInfo* p = &(this->GetTypeInfo());											\
 		return (p ? p->IsKindOf(cls) : FALSE);												\
 	}
 
@@ -337,7 +337,7 @@ private:																					\
 
 #define EXP_IMPLEMENT_DYNCREATE_C(cls_name, base_name, tmp)									\
 	tmp																						\
-	IBaseObject* cls_name::CreateObject(CGC* gc/* = NULL*/)									\
+	EXP::IBaseObject* cls_name::CreateObject(EXP::CGC* gc/* = NULL*/)						\
 	{ return (base_name*)(gc ? gcnew(*gc, cls_name) : dbnew(cls_name)); }					\
 	tmp																						\
 	BOOL cls_name::m_bRegSuccess =															\

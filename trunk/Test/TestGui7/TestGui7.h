@@ -51,10 +51,11 @@ public:
 				if (wnd)
 				{
 					wnd->GetClientRect(rc_wnd);
-					if (ExGet<IGuiCtl>(_T("scrl"))->IsVisible())
+					ctl->SetWindowRect(rc_wnd);
+					if (ctl->IsNeedScroll())
 					{
 						CRect rc_scr;
-						ExGet<IGuiCtl>(_T("scrl"))->GetWindowRect(rc_scr);
+						ctl->GetScroll()->GetWindowRect(rc_scr);
 						rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
 					}
 					ctl->SetWindowRect(rc_wnd);

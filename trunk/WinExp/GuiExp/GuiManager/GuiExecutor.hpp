@@ -33,8 +33,8 @@
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-30
-// Version:	1.0.0000.1058
+// Date:	2012-03-12
+// Version:	1.0.0002.1603
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiExecutor_hpp__
@@ -529,7 +529,13 @@ public:
 		IGuiEvent* evt = ExDynCast<IGuiEvent>(ExDynCreate(xml.GetAttr(_T("class"), ite)));
 		if (!evt) return NULL;
 		if (!name.Empty()) ExReg<IGuiEvent>(name, evt);
-		if (pre) pre->AddEvent(evt);
+		if (pre)
+		{
+			if (xml.GetAttr(_T("insert"), ite).Empty())
+				pre->AddEvent(evt);
+			else
+				pre->InsEvent(evt);
+		}
 		return NULL;
 	}
 };

@@ -197,14 +197,7 @@ public:
 		}
 		else
 		if (sType == _T("space"))
-		{
-			LONG old_sta = m_Space;
-			m_Space = (LONG)(LONG_PTR)pState;
-			if (old_sta != m_Space)
-				return IGuiCtrlBase::SetState(sType, pState);
-			else
-				return TRUE;
-		}
+			SET_STATE(LONG, m_Space)
 		else
 			return EXP_BASE::SetState(sType, pState);
 	}

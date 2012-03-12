@@ -84,7 +84,7 @@ void CGuiLoader::LoadCtl()
 	for(int i = 0; i < 40; ++i)
 	{
 		IGuiCtl* tag = ExGui<IGuiCtl>(_T("CGuiLVItem"));
-		tag->SetState(_T("thr_sta"), (void*)TRUE);
+		tag->SetState(_T("thr_sta"), (void*)(0x04 | 0x08));
 		tag->SetState(_T("loc_off"), (void*)0);
 		tag->SetState(_T("ico_off"), (void*)0);
 		CText* txt = gcnew(gc, CText, 8);

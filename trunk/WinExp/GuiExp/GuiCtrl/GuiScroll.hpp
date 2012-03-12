@@ -33,13 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-09-28
-// Version:	1.0.0002.1517
+// Date:	2012-03-12
+// Version:	1.0.0003.1447
 //
 // History:
 //	- 1.0.0000.0912(2011-08-02)	@ 准备构建GuiScroll
 //	- 1.0.0001.1816(2011-08-24)	+ 添加GuiScroll的main属性,方便在GuiScroll内部获取其关联的控件指针
 //	- 1.0.0002.1517(2011-09-28)	# 修正当外部销毁控件对象时,GuiScroll因内部对象析构顺序问题导致的内存访问异常
+//	- 1.0.0003.1447(2012-03-12)	= GuiScroll内部的按钮采用CGuiSimpBtn
+//								# 修正滚动条无限循环绘图导致CPU居高不下的bug
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiScroll_hpp__
@@ -58,7 +60,7 @@ class CGuiSlider : public CGuiPicture /*滚动条滑槽*/
 	EXP_DECLARE_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
 
 protected:
-	CGuiButton m_Slider;
+	CGuiSimpBtn m_Slider;
 	LONG m_All/*全部内容长度*/, m_Fra/*片段长度*/, m_Pos/*位置*/;
 	BOOL m_Ori; // 方向
 
@@ -85,6 +87,8 @@ public:
 	{
 		if (m_Pos > m_All - m_Fra) m_Pos = m_All - m_Fra;
 		if (m_Pos < 0) m_Pos = 0;
+		SendMessage(WM_SIZE, SIZE_RESTORED, 
+			(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
 		IGuiCtl* pare = ExDynCast<IGuiCtl>(GetParent());
 		if (pare)
 			pare->SendMessage(WM_COMMAND, SB_THUMBPOSITION);
@@ -148,40 +152,16 @@ public:
 	BOOL SetState(const CString& sType, void* pState)
 	{
 		if (sType == _T("all"))
-		{
-			if (m_All != (LONG)(LONG_PTR)pState)
-			{
-				m_All = (LONG)(LONG_PTR)pState;
-				Format();
-			}
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
+			SET_STATE(LONG, m_All, Format())
 		else
 		if (sType == _T("fra"))
-		{
-			if (m_Fra != (LONG)(LONG_PTR)pState)
-			{
-				m_Fra = (LONG)(LONG_PTR)pState;
-				Format();
-			}
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
+			SET_STATE(LONG, m_Fra, Format())
 		else
 		if (sType == _T("pos"))
-		{
-			if (m_Pos != (LONG)(LONG_PTR)pState)
-			{
-				m_Pos = (LONG)(LONG_PTR)pState;
-				Format();
-			}
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
+			SET_STATE(LONG, m_Pos, Format())
 		else
 		if (sType == _T("ori"))
-		{
-			m_Ori = (BOOL)(LONG_PTR)pState;
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
+			SET_STATE(BOOL, m_Ori)
 		else
 		if (sType.Left(4) == _T("blk_"))
 		{
@@ -202,7 +182,7 @@ class CGuiScroll : public IGuiCtrlBase
 
 protected:
 	CGuiSlider m_Slider;
-	CGuiButton m_Up, m_Down;
+	CGuiSimpBtn m_Up, m_Down;
 	IGuiCtl* m_Main;
 
 public:
@@ -298,14 +278,7 @@ public:
 	{
 		CString type(sType);
 		if (sType == _T("main"))
-		{
-			IGuiCtl* old_sta = m_Main;
-			m_Main = (IGuiCtl*)pState;
-			if (old_sta != m_Main)
-				return IGuiCtrlBase::SetState(sType, pState);
-			else
-				return TRUE;
-		}
+			SET_STATE(IGuiCtl*, m_Main)
 		else
 		if (type.Left(4) == _T("sli_"))
 		{

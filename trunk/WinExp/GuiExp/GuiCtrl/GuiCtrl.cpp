@@ -271,6 +271,19 @@ BOOL IGuiCtrlBase::IsVisible() const
 
 EXP_END
 
+#define SET_STATE(type, val, scp) \
+	{ \
+		if (val != (type)(LONG_PTR)pState) \
+		{ \
+			val = (type)(LONG_PTR)pState; \
+			scp; \
+			return EXP_BASE::SetState(sType, pState); \
+		} \
+		else \
+			return TRUE; \
+	}
+//#define SET_STATE()
+
 #include "GuiCtrl/GuiPicture.hpp"
 #include "GuiCtrl/GuiButton.hpp"
 #include "GuiCtrl/GuiEdit.hpp"

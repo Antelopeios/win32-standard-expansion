@@ -69,7 +69,7 @@ protected:
 		ExReg<IGuiCtl>(_T("list"), ExGui(_T("CGuiList")));
 		ExGet<IGuiCtl>(_T("list"))->AddEvent(dbnew(CLstEvent));
 		IGuiCtl::items_t items;
-		for(int i = 0; i < 100; ++i)
+		for(int i = 0; i < 10; ++i)
 		{
 			IGuiCtl* btn = ExGui<IGuiCtl>(_T("CGuiListItem"));
 			btn->SetState(_T("icon"), ExGet<CImage>(_T("icon")));

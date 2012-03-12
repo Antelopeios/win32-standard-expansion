@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-24
-// Version:	1.0.0001.1816
+// Date:	2012-03-12
+// Version:	1.0.0002.1447
 //
 // History:
 //	- 1.0.0000.1337(2011-08-02)	@ 准备构建GuiScrollEvent
 //	- 1.0.0001.1816(2011-08-24)	+ 当GuiScroll收到重定位消息时,自动通知其关联的控件进行滚动
+//	- 1.0.0002.1447(2012-03-12)	# 修正滚动条无限循环绘图导致CPU居高不下的bug
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiScrollEvent_hpp__
@@ -197,7 +198,6 @@ public:
 		case WM_SHOWWINDOW:
 			if (!wParam) break;
 		case WM_SIZE:
-		case WM_PAINT:
 			Format();
 			break;
 		case WM_COMMAND:
@@ -476,7 +476,6 @@ public:
 		case WM_SHOWWINDOW:
 			if (!wParam) break;
 		case WM_SIZE:
-		case WM_PAINT:
 			Format();
 			break;
 		case WM_MOUSEWHEEL:
@@ -493,8 +492,6 @@ public:
 		case WM_COMMAND:
 			if (wParam == SB_THUMBPOSITION)
 			{
-				IGuiCtl* main = GetMain();
-				if (!main) break;
 				LONG pos = GetPos();
 				CSize scr_sz;
 				BOOL ori = GetOri();
@@ -502,7 +499,9 @@ public:
 					scr_sz.cy = pos;
 				else
 					scr_sz.cx = pos;
-				main->SetScrollSize(scr_sz);
+				IGuiCtl* main = GetMain();
+				if (main)
+					main->SetScrollSize(scr_sz);
 			}
 			break;
 		}

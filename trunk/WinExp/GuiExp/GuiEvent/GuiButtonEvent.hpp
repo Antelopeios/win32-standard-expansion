@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-01
-// Version:	1.0.0019.2016
+// Date:	2012-03-11
+// Version:	1.0.0020.2222
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -63,6 +63,8 @@
 //	- 1.0.0018.2324(2012-02-29)	^ 将GuiButtonEvent中文字折行处理的相关逻辑交给底层完成
 //	- 1.0.0019.2016(2012-03-01)	^ 简化GuiButtonEvent文字与图标的绘图区域处理逻辑
 //								# 修正当GuiButton的文字内容发生变化时,文字绘制却不会变化的问题
+//	- 1.0.0020.2222(2012-03-11)	^ 优化按钮的绘图,支持各种自定义的状态图片拼接方式
+//								+ 支持勾选按钮的绘制
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -256,29 +258,59 @@ protected:
 		if (!mem_img || mem_img->IsNull()) return;
 
 		// 获得属性
-		int thr_sta = (int)pCtl->GetState(_T("thr_sta"));
-		LONG sta_tim = 0;
-		if (thr_sta == 1)	// 无焦点按钮
-			sta_tim = 3;
+		int btn_sty = (int)pCtl->GetState(_T("btn_sty"));
+		if (btn_sty < 0 || btn_sty > 2) return;
+		LONG sta_tim = (btn_sty == 1 ? 10 : 8), nfc_tim = sta_tim >> 1;
+		UINT thr_sta = (UINT)pCtl->GetState(_T("thr_sta"));
+		if (thr_sta & 0x01)				// ove
+			nfc_tim -= 1;
+		if (thr_sta & 0x02)				// prs
+			nfc_tim -= 1;
+		if (thr_sta & 0x04)				// dis
+			nfc_tim -= 1;
+		if (thr_sta & 0x08)				// foc
+			sta_tim = nfc_tim;
 		else
-		if (thr_sta == 2)	// Push按钮
-			sta_tim = 4;
-		else
-		if (thr_sta == -1)	// 单态按钮
-			sta_tim = 1;
-		else
-			sta_tim = 8;	// 普通按钮
+			sta_tim = nfc_tim << 1;
 
 		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-		if (thr_sta == 0)
-		{	// 正常情况
-			if(!pCtl->IsEnabled()) status = 3;
-			if (pCtl->IsFocus()) status += 4;
+		if(!pCtl->IsEnabled())			// dis
+		{
+			if (thr_sta & 0x04)
+				status = 0;
+			else
+				status = nfc_tim;
 		}
 		else
-		if (thr_sta == -1)
-		{	// 单态按钮
-			status = 0;
+		if (status == 1)				// ove
+		{
+			if (thr_sta & 0x01)
+				status = 0;
+		}
+		else
+		if (status == 2)				// prs
+		{
+			if (thr_sta & 0x02)
+				status = 0;
+			else
+			if (thr_sta & 0x01)
+				status = 1;
+		}
+		else
+		if (status == 3)				// psh
+		{
+			status = 4;
+			if (thr_sta & 0x04)
+				--status;
+			if (thr_sta & 0x02)
+				--status;
+			if (thr_sta & 0x01)
+				--status;
+		}
+		if (pCtl->IsFocus())			// foc
+		{
+			if(!(thr_sta & 0x08))
+				status += nfc_tim;
 		}
 
 		int shake_ico = (int)pCtl->GetState(_T("shake_ico"));
@@ -394,6 +426,19 @@ protected:
 			if(!image[i]) continue;
 			CImgDrawer::Draw(mem_img->Get(), *(image[i]), rc_mem[i], 
 				CPoint(0, image[i]->GetHeight() * status / sta_tim), sz_img[i]);
+		}
+
+		// 确定图标
+		CImage img_ico;
+		if (btn_sty == 2 && icon && icon->Get())
+		{
+			int ico_tim = 3;
+			if (thr_sta & 0x10)				// mid_chk_sta
+				ico_tim = 2;
+			CRect rc(0, 0, icon->GetWidth(), icon->GetHeight() / ico_tim);
+			rc.Offset(CPoint(0, rc.Height() * (int)pCtl->GetState(_T("chk_sta"))));
+			img_ico = icon->Clone(rc);
+			icon = &img_ico;
 		}
 
 		// 图标阴影

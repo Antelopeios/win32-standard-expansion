@@ -217,7 +217,7 @@ public:
 
 public:
 	IApp(BOOL bUIApp = TRUE, LPCTSTR sSingle = NULL/*用于判断进程唯一性的字符串*/, UINT nSingleID = 0)
-		: m_IsSingle(FALSE)
+		: m_IsSingle(TRUE)
 	{
 		IApp*& app = EXP_SINGLETON<IApp*>::Instance();
 		if (app) return;

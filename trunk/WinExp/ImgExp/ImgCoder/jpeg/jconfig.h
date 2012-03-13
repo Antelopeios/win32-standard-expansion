@@ -53,4 +53,6 @@ typedef unsigned char boolean;
 
 #endif /* JPEG_CJPEG_DJPEG */
 
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif

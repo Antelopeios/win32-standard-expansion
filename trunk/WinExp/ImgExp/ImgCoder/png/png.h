@@ -371,7 +371,9 @@
 #ifndef PNG_H
 #define PNG_H
 
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 /* This is not the place to learn how to use libpng.  The file libpng.txt
  * describes how to use libpng, and the file example.c summarizes it

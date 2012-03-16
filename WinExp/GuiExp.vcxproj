@@ -121,6 +121,7 @@
     <ClInclude Include="GuiExp\GuiCtrl\GuiListView.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiPicture.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiScroll.hpp" />
+    <ClInclude Include="GuiExp\GuiCtrl\GuiText.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiButtonEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiEditEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiEvent.hpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiMenuEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiPictureEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp" />
+    <ClInclude Include="GuiExp\GuiEvent\GuiTextEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiEffectBase.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp" />

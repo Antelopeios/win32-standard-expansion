@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-12-19
-// Version:	1.0.0008.1020
+// Date:	2012-03-16
+// Version:	1.0.0009.2356
 //
 // History:
 //	- 1.0.0001.1700(2011-04-07)	+ 添加pixel_t类型定义
@@ -46,6 +46,7 @@
 //	- 1.0.0007.1413(2011-06-28)	+ 添加ExRevColor(),用于颠倒像素中的颜色通道
 //	- 1.0.0008.1020(2011-12-19)	+ 添加chann_t定义代替BYTE表示通道
 //								+ 添加ExDivCM()用来快速计算((x) / EXP_CM)
+//	- 1.0.0009.2356(2012-03-16)	= graph_t改名为dc_t
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgCommon_h__
@@ -63,7 +64,7 @@ EXP_BEG
 
 // 类型定义
 
-typedef HDC			graph_t;	
+typedef HDC			dc_t;	
 typedef HBITMAP		image_t;
 typedef HFONT		font_t;
 typedef COLORREF	pixel_t;

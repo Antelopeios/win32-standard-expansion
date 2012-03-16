@@ -33,8 +33,8 @@
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-29
-// Version:	1.0.0020.1723
+// Date:	2012-03-16
+// Version:	1.0.0024.2356
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -60,11 +60,11 @@ IGuiCtrlBase::IGuiCtrlBase()
 {}
 
 // ¸üÐÂ×´Ì¬
-void* IGuiCtrlBase::GetState(const CString& sType)
+void* IGuiCtrlBase::GetState(const CString& sType, void* pParam/* = NULL*/)
 {
 	return NULL;
 }
-BOOL IGuiCtrlBase::SetState(const CString& sType, void* pState)
+BOOL IGuiCtrlBase::SetState(const CString& sType, void* pState, void* pParam/* = NULL*/)
 {
 	UpdateState();
 	return TRUE;
@@ -176,7 +176,7 @@ BOOL IGuiCtrlBase::GetRealRect(CRect& rc) const
 }
 BOOL IGuiCtrlBase::GetClientRect(CRect& rc) const
 {
-	if (!GetWindowRect(rc)) return FALSE;
+	if (!GetRect(rc)) return FALSE;
 	rc.MoveTo(CPoint());
 	return TRUE;
 }
@@ -292,5 +292,6 @@ EXP_END
 #include "GuiCtrl/GuiListView.hpp"
 #include "GuiCtrl/GuiGroup.hpp"
 #include "GuiCtrl/GuiScroll.hpp"
+#include "GuiCtrl/GuiText.hpp"
 
 //////////////////////////////////////////////////////////////////

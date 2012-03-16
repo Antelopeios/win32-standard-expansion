@@ -112,6 +112,7 @@
     <ClInclude Include="ImgExp\ImgCoder\zlib\zutil.h" />
     <ClInclude Include="ImgExp\ImgCommon\ImgASM.hpp" />
     <ClInclude Include="ImgExp\ImgCommon\ImgCommon.h" />
+    <ClInclude Include="ImgExp\ImgTypes\DC.h" />
     <ClInclude Include="ImgExp\ImgTypes\Font.h" />
     <ClInclude Include="ImgExp\ImgTypes\Graph.h" />
     <ClInclude Include="ImgExp\ImgTypes\Image.h" />

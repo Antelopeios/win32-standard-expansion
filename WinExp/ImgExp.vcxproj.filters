@@ -175,6 +175,9 @@
       <Filter>ImgPainter</Filter>
     </ClInclude>
     <ClInclude Include="ImgExp\ImgExp.h" />
+    <ClInclude Include="ImgExp\ImgTypes\DC.h">
+      <Filter>ImgTypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImgExp\ImgCoder\jpeg\jcapimin.c">

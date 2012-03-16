@@ -289,7 +289,7 @@ public:
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		if (sType == _T("status"))
 			return (void*)m_Status;
@@ -335,7 +335,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		if (sType == _T("status"))
 			SET_STATE(status_t, m_Status)

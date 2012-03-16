@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-12
-// Version:	1.0.0023.1603
+// Date:	2012-03-16
+// Version:	1.0.0024.2356
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -66,6 +66,8 @@
 //								+ 添加set_ins_t,用于方便控制集合的插入操作,并为集合型控件添加insert,delete与clear属性
 //	- 1.0.0022.0034(2012-03-04)	# 当调用IGuiCtl::SetWindowRect()的时候应该考虑滚动偏移,否则会导致控件位置的显示异常
 //	- 1.0.0023.1603(2012-03-12)	+ 添加IGuiCtl::IsNeedScroll()接口,方便外部判断当前是否需要显示滚动条
+//	- 1.0.0024.2356(2012-03-16)	^ 移除IGuiCtl::set_ins_t,在IGuiCtl::GetState()与IGuiCtl::SetState()接口上添加额外的param,可支持更为通用的属性设定
+//								- 移除IGuiCtl::GetClipRect(),关于剪切区的控制全部交给绘图逻辑层负责
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -90,12 +92,6 @@ EXP_INTERFACE IGuiCtl : public IGuiBase
 public:
 	typedef CListT<IGuiCtl*> items_t;
 	typedef CTreeT<IGuiCtl*> itree_t;
-
-	struct set_ins_t
-	{
-		void* p_ite;
-		void* p_itm;
-	};
 
 protected:
 	static IGuiCtl* m_Focus;
@@ -144,8 +140,8 @@ public:
 	}
 
 	// 获得控件状态
-	virtual void* GetState(const CString& sType) = 0;
-	virtual BOOL SetState(const CString& sType, void* pState) = 0;
+	virtual void* GetState(const CString& sType, void* pParam = NULL) = 0;
+	virtual BOOL SetState(const CString& sType, void* pState, void* pParam = NULL) = 0;
 	virtual void UpdateState(BOOL bRefreshSelf = TRUE) = 0;
 	virtual BOOL IsUpdated() = 0;
 
@@ -197,15 +193,6 @@ public:
 	virtual BOOL SetRealRect(const CRect& rc) = 0;
 	virtual BOOL GetAllRect(CSize& sz) const = 0;
 	virtual BOOL GetFraRect(CSize& sz) const = 0;
-
-	BOOL GetClipRect(CRect& rc) const
-	{
-		CRect rc_clp;
-		GetClipBox(rc_clp);
-		if (!GetClientRect(rc)) return FALSE;
-		rc.Offset(-rc_clp.pt1);
-		return TRUE;
-	}
 
 	BOOL GetScrollSize(CSize& sz) const
 	{
@@ -401,8 +388,8 @@ public:
 
 public:
 	// 更新状态
-	void* GetState(const CString& sType);
-	BOOL SetState(const CString& sType, void* pState);
+	void* GetState(const CString& sType, void* pParam = NULL);
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL);
 	void UpdateState(BOOL bRefreshSelf = TRUE);
 	BOOL IsUpdated();
 

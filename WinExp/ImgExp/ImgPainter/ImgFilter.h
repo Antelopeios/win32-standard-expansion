@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-01
-// Version:	1.0.0008.1531
+// Date:	2012-03-15
+// Version:	1.0.0009.1312
 //
 // History:
 //	- 1.0.0000.2200(2011-07-10)	@ 开始构建ImgFilter
@@ -51,6 +51,7 @@
 //	- 1.0.0007.1925(2012-01-03)	= 原先的CFilterFill调整为CFilterBrush,CFilterFill做单纯的上色处理
 //								^ 使用CImgASM优化CFilterBrush在不考虑屏蔽色与屏蔽位时的效率
 //	- 1.0.0008.1531(2012-02-01)	# 修正CFilterBrush绘图颜色错误的问题
+//	- 1.0.0009.1312(2012-03-15)	= CFilterFill的填充处理支持alpha通道混合
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgFilter_h__
@@ -169,7 +170,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-// 颜色画刷
+// 画刷(颜色替换)
 class CFilterBrush : public IFilterObject
 {
 public:
@@ -226,15 +227,24 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-// 上色(与CFilterBrush相比多了预乘的处理)
+// 填充
 class CFilterFill : public CFilterBrush
 {
 public:
-	CFilterFill(pixel_t cConst = 0, BYTE bMask = 0xf, int nClrMask = 0, pixel_t cMask = 0)
-		: CFilterBrush(cConst, bMask, nClrMask, cMask)
+	pixel_t m_Const;
+
+public:
+	CFilterFill(pixel_t cConst = 0)
+		: m_Const(ExRevColor(cConst))
 	{
 		CImgASM::PixPreMul(&m_Const, 1);
-		CImgASM::PixPreMul(&m_ClrMask, 1);
+	}
+
+	void Filter(pixel_t* pix_des, CSize& sz_des, CRect& rc_des, 
+				LONG w, LONG h, LONG inx_des)
+	{
+		for(LONG y = 0; y < h; ++y, inx_des -= sz_des.cx)
+			CImgASM::PixFill(pix_des + inx_des, w, m_Const);
 	}
 };
 

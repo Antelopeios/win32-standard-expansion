@@ -122,16 +122,16 @@ public:
 		return !(txt1 == txt2);
 	}
 
-	void GetSize(const CString& s, CSize& szCont, graph_t tGrp = NULL)
+	void GetSize(const CString& s, CSize& szCont, dc_t hdc = NULL)
 	{
-		graph_t grp_tmp = NULL;
-		if (!tGrp) tGrp = grp_tmp = ::CreateCompatibleDC(NULL);
-		HGDIOBJ old = ::SelectObject(tGrp, Get());
+		dc_t dc_tmp = NULL;
+		if (!hdc) hdc = dc_tmp = ::CreateCompatibleDC(NULL);
+		HGDIOBJ old = ::SelectObject(hdc, Get());
 		SIZE size = {0};
-		::GetTextExtentPoint32(tGrp, s, (int)s.GetLength(), &size);
+		::GetTextExtentPoint32(hdc, s, (int)s.GetLength(), &size);
 		szCont = size;
-		::SelectObject(tGrp, old);
-		if (grp_tmp) ::DeleteDC(grp_tmp);
+		::SelectObject(hdc, old);
+		if (dc_tmp) ::DeleteDC(dc_tmp);
 	}
 
 	image_t GetImage(const CString& sStr)
@@ -144,17 +144,17 @@ public:
 		m_MemFnt = (CFont)(*this);
 		m_MemClr = m_Color;
 		// 创建临时画板
-		CGraph tmp_grp;
-		tmp_grp.Create();
-		tmp_grp.SetObject(Get());
+		CDC tmp_dc;
+		tmp_dc.Create();
+		tmp_dc.SetObject(Get());
 		// 获得文字区域
 		CSize sz;
-		GetSize(m_MemStr, sz, tmp_grp);
+		GetSize(m_MemStr, sz, tmp_dc);
 		// 创建文字图像
 		m_MemImg.Create(sz.cx, sz.cy);
 		if (m_MemImg.IsNull())
 		{
-			tmp_grp.Delete();
+			tmp_dc.Delete();
 			return NULL;
 		}
 		// 文字图层处理
@@ -162,15 +162,15 @@ public:
 		CImage b_img; b_img.Create(sz.cx, sz.cy);
 		CRect rc(0, 0, sz.cx, sz.cy);
 		pixel_t w_bk = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM), b_bk = ExRGBA(0, 0, 0, EXP_CM);
-		::SetBkMode(tmp_grp, TRANSPARENT);
+		::SetBkMode(tmp_dc, TRANSPARENT);
 		// 白色背景
 		CImgFilter::Filter(w_img, &CFilterBrush(w_bk));
-		tmp_grp.SetObject(w_img.Get());
-		::ExtTextOut(tmp_grp, 0, 0, 0, NULL, m_MemStr, (UINT)m_MemStr.GetLength(), NULL);
+		tmp_dc.SetObject(w_img.Get());
+		::ExtTextOut(tmp_dc, 0, 0, 0, NULL, m_MemStr, (UINT)m_MemStr.GetLength(), NULL);
 		// 黑色背景
 		CImgFilter::Filter(b_img, &CFilterBrush(b_bk));
-		tmp_grp.SetObject(b_img.Get());
-		::ExtTextOut(tmp_grp, 0, 0, 0, NULL, m_MemStr, (UINT)m_MemStr.GetLength(), NULL);
+		tmp_dc.SetObject(b_img.Get());
+		::ExtTextOut(tmp_dc, 0, 0, 0, NULL, m_MemStr, (UINT)m_MemStr.GetLength(), NULL);
 		// 计算前景色
 		pixel_t* p_w = w_img.GetPixels();
 		pixel_t* p_b = b_img.GetPixels();
@@ -195,7 +195,7 @@ public:
 		}
 		CImgFilter::Filter(m_MemImg, &CFilterPreMul());
 		// 清理内存并返回
-		tmp_grp.Delete();
+		tmp_dc.Delete();
 		return m_MemImg;
 	}
 	image_t GetImage(const CString& sStr, const CRect& rcImg, const int nSpace = 2, const CString& sClp = _T("..."))

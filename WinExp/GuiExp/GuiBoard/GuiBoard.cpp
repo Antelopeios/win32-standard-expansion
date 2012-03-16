@@ -452,12 +452,12 @@ BOOL IGuiBoardBase::IsVisible() const
 }
 
 // ´°¿ÚDC
-graph_t IGuiBoardBase::GetDC() const
+dc_t IGuiBoardBase::GetDC() const
 {
 	if(IsNull()) return NULL;
-	return (graph_t)::GetDC(Get());
+	return (dc_t)::GetDC(Get());
 }
-BOOL IGuiBoardBase::ReleaseDC(graph_t hdc)
+BOOL IGuiBoardBase::ReleaseDC(dc_t hdc)
 {
 	if(IsNull()) return NULL;
 	return ::ReleaseDC(Get(), (HDC)hdc);
@@ -546,9 +546,9 @@ pixel_t IGuiBoardBase::GetColorKey() const
 {
 	return m_crKey;
 }
-void IGuiBoardBase::LayeredWindow(HDC hDC, HDC tGrp)
+void IGuiBoardBase::LayeredWindow(HDC hDes, HDC hSrc)
 {
-	if (!hDC || !tGrp) return;
+	if (!hDes || !hSrc) return;
 
 	DWORD ex_style = GetWindowLong(GWL_EXSTYLE);
 	if (m_bLayered)
@@ -566,7 +566,7 @@ void IGuiBoardBase::LayeredWindow(HDC hDC, HDC tGrp)
 		BLENDFUNCTION blend		  = {0};
 		blend.AlphaFormat		  = AC_SRC_ALPHA;
 		blend.SourceConstantAlpha = EXP_CM;
-		::UpdateLayeredWindow(Get(), hDC, &pt_wnd, &sz_wnd, tGrp, &pt_src, 0, &blend, 2);
+		::UpdateLayeredWindow(Get(), hDes, &pt_wnd, &sz_wnd, hSrc, &pt_src, 0, &blend, 2);
 	}
 	else
 	{
@@ -611,12 +611,12 @@ void IGuiBoardBase::LayeredWindow(HDC hDC, HDC tGrp)
 			::CombineRgn(bkg_rgn, bkg_rgn, cld_rgn, RGN_DIFF);
 			::DeleteObject(cld_rgn);
 		}
-		::SelectClipRgn(hDC, bkg_rgn);
+		::SelectClipRgn(hDes, bkg_rgn);
 		::DeleteObject(bkg_rgn);
 
 		// ïÎ¿Õºó»æÍ¼
 		GetClipBox(rect);
-		::BitBlt(hDC, rect.Left(), rect.Top(), rect.Width(), rect.Height(), tGrp, 0, 0, SRCCOPY);
+		::BitBlt(hDes, rect.Left(), rect.Top(), rect.Width(), rect.Height(), hSrc, 0, 0, SRCCOPY);
 	}
 }
 

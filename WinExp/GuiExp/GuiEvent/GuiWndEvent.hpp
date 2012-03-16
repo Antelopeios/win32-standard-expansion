@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-01
-// Version:	1.0.0017.1601
+// Date:	2012-03-16
+// Version:	1.0.0018.2349
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -58,6 +58,7 @@
 //	- 1.0.0016.1724(2012-02-29)	^ 将CGuiWndEvent::BaseSend()中与控件相关的部分独立
 //								% 调整并完善CGuiWndEvent中的滚动条控制逻辑
 //	- 1.0.0017.1601(2012-03-01)	- 不再在GuiWndEvent的滚动条逻辑中自动控制滚动条关联窗口的大小
+//	- 1.0.0018.2349(2012-03-16)	^ 绘图时传递的参数由图片对象改为带有独立剪切区与坐标的画布对象,将绘图工作彻底浓缩到一张全局位图上进行
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -325,8 +326,17 @@ protected:
 		if (nMessage == WM_PAINT)
 		{
 			// 得到全局图片
-			CImage* mem_img = (CImage*)lParam;
+			CGraph* mem_img = (CGraph*)lParam;
 			if (!mem_img || mem_img->IsNull()) goto EndBaseSend;
+			// 调校剪切区
+			CRect clp_rct, rect;
+			pGui->GetClipBox(clp_rct);
+			if (ExDynCast<IGuiCtl>(pGui))
+			{
+				pGui->GetWindowRect(rect);
+				clp_rct.Offset(-rect.pt1);
+			}
+			pGui->GetClientRect(rect);
 			// 遍历控件列表
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
@@ -335,40 +345,34 @@ protected:
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				if (ctl->IsVisible())
+				ctl->SetClipBox(clp_rct);
+				if (ctl->IsVisible() && ctl->IsDisplayed())
 				{
 					// 获取控件区域
-					CRect ctl_rct;
+					CRect ctl_rct; CPoint clp_pnt;
 					ctl->GetWindowRect(ctl_rct);
-					CRect rect(ctl_rct), clp_rct;
-					pGui->GetClipBox(clp_rct);
-					rect.Inter(clp_rct);
-					if (rect.Width() > 0 && rect.Height() > 0)
+					clp_pnt = ctl_rct.pt1;
+					clp_pnt.Offset(-clp_rct.pt1);
+					ctl_rct.Inter(rect);
+					ctl_rct.Offset(-clp_rct.pt1);
+					if (ctl_rct.Width() > 0 && ctl_rct.Height() > 0)
 					{
-						// 设置剪切区
-						rect.Offset(-ctl_rct.pt1);
-						ctl->SetClipBox(rect);
 						// 创建控件图片
-						CImage ctl_img;
-						ctl_img.Create(rect.Width(), rect.Height());
+						CGraph ctl_img(mem_img->GetImage(), ctl_rct, clp_pnt);
 						// 控件绘图
 						IGuiEffect* eff = ctl->GetEffect();
 						if (eff)
 						{
-							if (!eff->IsInit()) eff->Init(ctl_img);
+							if (!eff->IsInit()) eff->Init(ctl_img.GetImage());
 							ctl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
 							if(!ctl->IsValid()) return NULL;
-							eff->Show(*ite, ctl_img);
+							eff->Show(*ite, ctl_img.GetImage());
 						}
 						else
 						{
 							ctl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
 							if(!ctl->IsValid()) return NULL;
 						}
-						// 覆盖全局绘图
-						ctl_rct.Inter(clp_rct);
-						ctl_rct.Offset(-clp_rct.pt1);
-						CImgDrawer::Draw(mem_img->Get(), ctl_img, ctl_rct);
 					}
 				}
 				else
@@ -480,13 +484,14 @@ public:
 					if (wnd->IsColorKey())
 						CImgFilter::Filter(mem_img, rect, &CFilterBrush(wnd->GetColorKey()));
 					// 覆盖控件绘图
-					ret = WndSend(wnd, nMessage, wParam, (LPARAM)&mem_img);
+					CGraph wnd_img(mem_img);
+					ret = WndSend(wnd, nMessage, wParam, (LPARAM)&wnd_img);
 					// 覆盖缓存绘图
-					CGraph mem_grp;
-					mem_grp.Create();
-					mem_grp.SetObject(mem_img.Get());
-					wnd->LayeredWindow(hdc, mem_grp);
-					mem_grp.Delete();
+					CDC mem_dc;
+					mem_dc.Create();
+					mem_dc.SetObject(mem_img.Get());
+					wnd->LayeredWindow(hdc, mem_dc);
+					mem_dc.Delete();
 					// 结束绘图
 					::EndPaint(wnd->GethWnd(), &ps);
 				}

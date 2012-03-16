@@ -79,25 +79,24 @@ public:
 				CText* text = (CText*)ctl->GetState(_T("font"));
 				CString* str = (CString*)ctl->GetState(_T("text"));
 
-				CImage* mem_img = (CImage*)lParam;
+				CGraph* mem_img = (CGraph*)lParam;
 				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect, clt_rct;
-				ctl->GetClipRect(rect);
-				ctl->GetClientRect(clt_rct);
+				CRect rect;
+				ctl->GetClientRect(rect);
 
 				// »æÍ¼
-				CImgDrawer::Fill(mem_img->Get(), rect, pixel);
+				CImgDrawer::Fill(*mem_img, rect, pixel);
 				if (image && !image->IsNull())
-					CImgDrawer::Draw(mem_img->Get(), image->Get(), rect, 
-						CPoint(), CSize(clt_rct.Width(), clt_rct.Height()));
+					CImgDrawer::Draw(*mem_img, image->Get(), rect, 
+						CPoint(), CSize(rect.Width(), rect.Height()));
 				if (text && str)
 				{
 					CImage txt_img(text->GetImage(*str));
 					if (!txt_img.IsNull())
-						CImgDrawer::Draw(mem_img->Get(), txt_img, CRect(
-						(rect.Right() - txt_img.GetWidth()) / 2, 
-						(rect.Bottom() - txt_img.GetHeight()) / 2, 
-						rect.Right(), rect.Bottom()));
+						CImgDrawer::Draw(*mem_img, txt_img, CRect(
+							(rect.Right() - txt_img.GetWidth()) / 2, 
+							(rect.Bottom() - txt_img.GetHeight()) / 2, 
+							rect.Right(), rect.Bottom()));
 				}
 			}
 			break;

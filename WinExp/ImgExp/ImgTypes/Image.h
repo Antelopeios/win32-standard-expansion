@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-08-10
-// Version:	1.0.0010.1530
+// Date:	2012-03-16
+// Version:	1.0.0011.2313
 //
 // History:
 //	- 1.0.0001.1730(2011-04-07)	+ 添加IImageObject::GetSize()接口
@@ -50,6 +50,7 @@
 //	- 1.0.0008.2319(2011-05-24)	+ 为CImage的属性获取接口及一些常量接口添加const类型
 //	- 1.0.0009.0154(2011-07-13)	^ 提高CImage::Clone()在默认参数下的执行效率
 //	- 1.0.0010.1530(2011-08-10)	^ 再次优化CImage::Clone()的执行效率
+//	- 1.0.0011.2313(2012-03-16)	^ 优化CImage赋值接口,当对象赋值时无需重新获取计算图像的各种属性
 //
 // History(CExpImage):
 //	- 1.0.0001.1730(2011-04-07)	+ 添加CExpImage::GetSize()接口
@@ -93,7 +94,7 @@ public:
 		if (base_obj_t::IsNull()) return;
 		::GetObject(Get(), sizeof(m_Bitmap), &m_Bitmap);
 	}
-	BOOL IsNull()
+	BOOL IsNull() const
 	{
 		if (base_obj_t::IsNull())
 			return TRUE;
@@ -103,8 +104,13 @@ public:
 
 	image_t operator=(image_t tType)
 	{
-		Set(tType);
-		return Get();
+		return base_obj_t::operator=(tType);
+	}
+	CImage& operator=(CImage& tType)
+	{
+		base_obj_t::Set(tType);
+		memcpy(&m_Bitmap, &(tType.m_Bitmap), sizeof(m_Bitmap));
+		return (*this);
 	}
 
 	image_t Create(DWORD nWidth, DWORD nHeight)

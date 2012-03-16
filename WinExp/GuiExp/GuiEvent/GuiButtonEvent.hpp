@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-11
-// Version:	1.0.0020.2222
+// Date:	2012-03-16
+// Version:	1.0.0021.2325
 //
 // History:
 //	- 1.0.0000.2258(2011-05-25)	@ 开始构建CGuiButtonEvent
@@ -65,6 +65,7 @@
 //								# 修正当GuiButton的文字内容发生变化时,文字绘制却不会变化的问题
 //	- 1.0.0020.2222(2012-03-11)	^ 优化按钮的绘图,支持各种自定义的状态图片拼接方式
 //								+ 支持勾选按钮的绘制
+//	- 1.0.0021.2325(2012-03-16)	- 考虑到阴影绘图尚不完善,暂时关闭按钮对图标阴影的支持
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButtonEvent_hpp__
@@ -253,7 +254,7 @@ protected:
 			pCtl->SetState(_T("status"), (void*)0);
 	}
 
-	virtual void Paint(IGuiCtl* pCtl, CImage* mem_img)
+	virtual void Paint(IGuiCtl* pCtl, CGraph* mem_img)
 	{
 		if (!mem_img || mem_img->IsNull()) return;
 
@@ -322,9 +323,8 @@ protected:
 		CImage* icon = (CImage*)pCtl->GetState(_T("icon"));
 		BOOL glow = (BOOL)(LONG_PTR)pCtl->GetState(_T("glow"));
 
-		CRect rect, clt_rct;
-		pCtl->GetClipRect(rect);
-		pCtl->GetClientRect(clt_rct);
+		CRect rect;
+		pCtl->GetClientRect(rect);
 
 		CSize sz_res[9];
 		for(int i = 0; i < _countof(sz_res); ++i)
@@ -334,7 +334,7 @@ protected:
 		}
 
 		// 处理
-		LONG r_h = clt_rct.Height() * sta_tim;
+		LONG r_h = rect.Height() * sta_tim;
 		CRect rc_mem[9];
 		CSize sz_img[9];
 		// l-t
@@ -352,7 +352,7 @@ protected:
 			rect.Right() - sz_res[2].cx, 
 			rect.Top() + sz_res[1].cy / sta_tim);
 		sz_img[1].Set(
-			clt_rct.Width() - sz_res[0].cx - sz_res[2].cx, 
+			rect.Width() - sz_res[0].cx - sz_res[2].cx, 
 			sz_res[1].cy);
 		// r-t
 		rc_mem[2].Set(
@@ -379,7 +379,7 @@ protected:
 			rect.Right() - sz_res[5].cx, 
 			rect.Bottom() - sz_res[7].cy / sta_tim);
 		sz_img[4].Set(
-			clt_rct.Width() - sz_res[3].cx - sz_res[5].cx, 
+			rect.Width() - sz_res[3].cx - sz_res[5].cx, 
 			r_h - sz_res[1].cy - sz_res[7].cy);
 		// r-m
 		rc_mem[5].Set(
@@ -406,7 +406,7 @@ protected:
 			rect.Right() - sz_res[8].cx, 
 			rect.Bottom());
 		sz_img[7].Set(
-			clt_rct.Width() - sz_res[6].cx - sz_res[8].cx, 
+			rect.Width() - sz_res[6].cx - sz_res[8].cx, 
 			sz_res[7].cy);
 		// r-b
 		rc_mem[8].Set(
@@ -420,11 +420,11 @@ protected:
 
 		// 绘图
 		CRect rc_tmp;
-		CImgDrawer::Fill(mem_img->Get(), rect, pixel);
+		CImgDrawer::Fill(*mem_img, rect, pixel);
 		for(int i = 0; i < _countof(rc_mem); ++i)
 		{
 			if(!image[i]) continue;
-			CImgDrawer::Draw(mem_img->Get(), *(image[i]), rc_mem[i], 
+			CImgDrawer::Draw(*mem_img, *(image[i]), rc_mem[i], 
 				CPoint(0, image[i]->GetHeight() * status / sta_tim), sz_img[i]);
 		}
 
@@ -432,9 +432,7 @@ protected:
 		CImage img_ico;
 		if (btn_sty == 2 && icon && icon->Get())
 		{
-			int ico_tim = 3;
-			if (thr_sta & 0x10)				// mid_chk_sta
-				ico_tim = 2;
+			int ico_tim = ((thr_sta & 0x10) ? 2 : 3);	// mid_chk_sta
 			CRect rc(0, 0, icon->GetWidth(), icon->GetHeight() / ico_tim);
 			rc.Offset(CPoint(0, rc.Height() * (int)pCtl->GetState(_T("chk_sta"))));
 			img_ico = icon->Clone(rc);
@@ -443,7 +441,7 @@ protected:
 
 		// 图标阴影
 		LONG radius = 0;
-		if (glow)
+	/*	if (glow)
 		{
 			CFilterGauss filter;
 			radius = filter.m_Radius;
@@ -468,7 +466,7 @@ protected:
 				m_IconOld = icon->Get();
 			}
 			icon = &m_IconTmp;
-		}
+		}*/
 
 		// 绘文字
 		DWORD locate = (DWORD)pCtl->GetState(_T("locate"));
@@ -478,13 +476,13 @@ protected:
 		if (FmtTxtRect(rect, text, str, locate, loc_off + ico_off, img_rct, icon))
 		{
 			if (shake_ico != 0 && (status == 2 || status == 6)) img_rct.Offset(CPoint(1, 1));
-			CImgDrawer::Draw(mem_img->Get(), m_imgClp, img_rct);
+			CImgDrawer::Draw(*mem_img, m_imgClp, img_rct);
 		}
 
 		// 绘图标
 		CRect ico_rct;
 		if (GetIcoRect(img_rct, icon, locate, loc_off, ico_rct))
-			CImgDrawer::Draw(mem_img->Get(), icon->Get(), ico_rct);
+			CImgDrawer::Draw(*mem_img, icon->Get(), ico_rct);
 	}
 
 public:
@@ -534,7 +532,7 @@ public:
 			SendPare(ctl, BN_KILLFOCUS);
 			break;
 		case WM_PAINT:
-			Paint(ctl, (CImage*)lParam);
+			Paint(ctl, (CGraph*)lParam);
 			break;
 		}
 	}

@@ -605,6 +605,10 @@
 			Name="ImgTypes"
 			>
 			<File
+				RelativePath=".\ImgExp\ImgTypes\DC.h"
+				>
+			</File>
+			<File
 				RelativePath="ImgExp\ImgTypes\Font.h"
 				>
 			</File>

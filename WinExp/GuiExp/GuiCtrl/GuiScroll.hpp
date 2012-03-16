@@ -124,7 +124,7 @@ public:
 		return TRUE;
 	}
 
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		if (sType.Left(4) == _T("blk_"))
 		{
@@ -149,7 +149,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		if (sType == _T("all"))
 			SET_STATE(LONG, m_All, Format())
@@ -239,7 +239,7 @@ public:
 		return TRUE;
 	}
 
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		CString type(sType);
 		if (sType.Left(4) == _T("sli_"))
@@ -274,7 +274,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		CString type(sType);
 		if (sType == _T("main"))

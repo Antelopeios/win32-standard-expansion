@@ -133,8 +133,8 @@ public:
 	virtual BOOL UpdateWindow() = 0;
 
 	// 窗口DC
-	virtual graph_t GetDC() const = 0;
-	virtual BOOL ReleaseDC(graph_t hdc) = 0;
+	virtual dc_t GetDC() const = 0;
+	virtual BOOL ReleaseDC(dc_t hdc) = 0;
 
 	// 获得窗口大小
 	virtual BOOL GetRealRect(CRect& rc) const { return GetClientRect(rc); }
@@ -166,7 +166,7 @@ public:
 	virtual BOOL IsLayered() const = 0;
 	virtual BOOL IsColorKey() const = 0;
 	virtual pixel_t GetColorKey() const = 0;
-	virtual void LayeredWindow(HDC hDC, HDC tGrp) = 0;
+	virtual void LayeredWindow(HDC hDC, HDC hdc) = 0;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -268,8 +268,8 @@ public:
 	BOOL IsVisible() const;
 
 	// 窗口DC
-	graph_t GetDC() const;
-	BOOL ReleaseDC(graph_t hdc);
+	dc_t GetDC() const;
+	BOOL ReleaseDC(dc_t hdc);
 
 	// 获得窗口大小
 	BOOL GetWindowRect(CRect& lpRect) const;
@@ -288,7 +288,7 @@ public:
 	BOOL IsLayered() const;
 	BOOL IsColorKey() const;
 	pixel_t GetColorKey() const;
-	void LayeredWindow(HDC hDC, HDC tGrp);
+	void LayeredWindow(HDC hDC, HDC hdc);
 };
 
 //////////////////////////////////////////////////////////////////

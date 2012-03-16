@@ -121,7 +121,7 @@ public:
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		if (sType == _T("color"))
 			return (void*)m_Color;
@@ -137,7 +137,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		if (sType == _T("color"))
 		{

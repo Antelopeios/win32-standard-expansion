@@ -97,7 +97,7 @@ public:
 			{
 				CGuiSkin::Parse(_T("<image name=\"bk\" path=\"TestImg1/ground.png\" />"));
 				ExGet<IGuiWnd>(_T("wnd"))->SetLayered(TRUE, FALSE);
-				ExGet<IGuiCtl>(_T("btn"))->DelEvent();
+				ExGet<IGuiCtl>(_T("btn"))->PopEvent();
 				ExGet<IGuiCtl>(_T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent2));
 			}
 			break;
@@ -125,7 +125,7 @@ public:
 			{
 				CGuiSkin::Parse(_T("<image name=\"bk\" path=\"TestImg1/ground.jpg\" />"));
 				ExGet<IGuiWnd>(_T("wnd"))->SetLayered(FALSE, FALSE);
-				ExGet<IGuiCtl>(_T("btn"))->DelEvent();
+				ExGet<IGuiCtl>(_T("btn"))->PopEvent();
 				ExGet<IGuiCtl>(_T("btn"))->AddEvent((IGuiEvent*)dbnew(CCusBtnEvent));
 			}
 			break;

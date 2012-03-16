@@ -318,7 +318,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_OUTG:
 			if (imgShow)
 			{
-				CFilterGauss filter;
+			/*	CFilterGauss filter;
 				CPoint pt_flt(filter.m_Radius << 1, filter.m_Radius << 1);
 				// 将图片扩大
 				CRect rc(0, 0, imgShow.GetWidth(), imgShow.GetHeight());
@@ -332,7 +332,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CImgRenderer::Render(tmp, imgShow, rc, CPoint());
 				imgShow = tmp;
 				// 刷新窗口
-				Invalidate(hWnd);
+				Invalidate(hWnd);*/
 			}
 			break;
 		case IDM_GRAD:
@@ -360,12 +360,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			CImage mem_img;
 			mem_img.Create(rect.right - rect.left, rect.bottom - rect.top);
 
-			CGraph mem_grp;
-			mem_grp.Create(hdc);
-			mem_grp.SetObject(mem_img.Get());
+			CDC mem_dc;
+			mem_dc.Create(hdc);
+			mem_dc.SetObject(mem_img.Get());
 
 			HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
-			FillRect(mem_grp, &rect, brh);
+			FillRect(mem_dc, &rect, brh);
 
 			if(!imgShow.IsNull())
 			{
@@ -392,9 +392,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					rect.bottom - bmp_img.GetHeight() - 5, 
 					rect.right, rect.bottom));
 
-			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
+			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_dc, 0, 0, SRCCOPY);
 
-			mem_grp.Delete();
+			mem_dc.Delete();
 		}
 		EndPaint(hWnd, &ps);
 		break;

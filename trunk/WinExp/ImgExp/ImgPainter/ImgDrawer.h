@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-04
-// Version:	1.0.0004.1646
+// Date:	2012-03-16
+// Version:	1.0.0005.2325
 //
 // History:
 //	- 1.0.0000.1627(2011-06-20)	@ 重新构建ImgDrawer,作为ImgPainter的子模块,用于绘制基本图形
@@ -42,6 +42,7 @@
 //	- 1.0.0002.1747(2011-07-20)	# 修正CImgDrawer::Fill()像素循环遍历中的一个低级错误
 //	- 1.0.0003.1540(2011-08-10)	+ 添加CImgDrawer::Fill()的精简参数重载
 //	- 1.0.0004.1646(2012-01-04)	+ CImgDrawer添加Cover()与Draw()系列接口,用于方便绘图调用
+//	- 1.0.0005.2325(2012-03-16)	+ CImgDrawer支持通过CGraph进行带独立剪切区与坐标的图像绘制
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDrawer_h__
@@ -73,14 +74,14 @@ EXP_BEG
 	CImage img; \
 	img.Create(sz_des.cx, sz_des.cy); \
 	Fill(img, CRect(), ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM)); \
-	CGraph grp; \
-	grp.Create(); \
-	grp.SetObject(img)
+	CDC dc; \
+	dc.Create(); \
+	dc.SetObject(img)
 //#define PreDraw
 #pragma push_macro("EndDraw")
 #undef EndDraw
 #define EndDraw() \
-	grp.Delete(); \
+	dc.Delete(); \
 	pixel_t* pix_des = exp_des.GetPixels(); \
 	pixel_t* pix_img = img.GetPixels(); \
 	for(LONG y_d = 0; y_d < sz_des.cy; ++y_d) \
@@ -100,8 +101,10 @@ class CImgDrawer
 {
 public:
 	// 画点
-	EXP_INLINE static BOOL Point(image_t imgDes, CPoint& ptDes, pixel_t pixSrc)
+	EXP_INLINE static BOOL Point(const CGraph& imgDes, const CPoint& ptDes, pixel_t pixSrc)
 	{
+		CPoint pt_des(ptDes);
+		imgDes.Transform(pt_des);
 		CImage exp_des;
 		exp_des.SetTrust(FALSE);
 		exp_des = imgDes;
@@ -109,8 +112,8 @@ public:
 		CImgASM::PixPreMul(&pixSrc, 1);
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		pixel_t* pix_des = exp_des.GetPixels();
-		if (ptDes.x >= sz_des.cx || ptDes.y >= sz_des.cy) return TRUE;
-		LONG i_d = (sz_des.cy - ptDes.y - 1) * sz_des.cx + ptDes.x;
+		if (pt_des.x >= sz_des.cx || pt_des.y >= sz_des.cy) return TRUE;
+		LONG i_d = (sz_des.cy - pt_des.y - 1) * sz_des.cx + pt_des.x;
 		pix_des[i_d] = pixSrc;
 		return TRUE;
 	}
@@ -119,35 +122,43 @@ public:
 	EXP_INLINE static BOOL Line(image_t imgDes, const CLine& lnDes, pixel_t pixSrc)
 	{
 		PreDraw();
-		MoveToEx(grp, lnDes.pt1.x, lnDes.pt1.y, &POINT());
-		LineTo(grp, lnDes.pt2.x, lnDes.pt2.y);
+		MoveToEx(dc, lnDes.pt1.x, lnDes.pt1.y, &POINT());
+		LineTo(dc, lnDes.pt2.x, lnDes.pt2.y);
 		EndDraw()
 		return TRUE;
 	}
 
 	// 填充
-	EXP_INLINE static BOOL Fill(image_t imgDes, const CRect& rcDes, pixel_t pixSrc)
+	EXP_INLINE static BOOL Fill(const CGraph& imgDes, const CRect& rcDes, pixel_t pixSrc)
 	{
-		return CImgFilter::Filter(imgDes, rcDes, &CFilterFill(pixSrc));
+		CRect rc_des(rcDes);
+		if (rc_des.IsNull())
+			rc_des = imgDes.GetRect();
+		imgDes.Transform(rc_des);
+		return CImgFilter::Filter(imgDes, rc_des, &CFilterFill(pixSrc));
 	}
-	EXP_INLINE static BOOL Fill(image_t imgDes, pixel_t pixSrc)
+	EXP_INLINE static BOOL Fill(const CGraph& imgDes, pixel_t pixSrc)
 	{
 		return Fill(imgDes, CRect(), pixSrc);
 	}
 
 	// 覆盖
-	EXP_INLINE static BOOL Cover(image_t imgDes, image_t imgSrc, 
+	EXP_INLINE static BOOL Cover(const CGraph& imgDes, image_t imgSrc, 
 		const CRect& rcDes = CRect(), const CPoint& ptSrc = CPoint(), chann_t cAlpha = EXP_CM)
 	{
-		return CImgRenderer::Render(imgDes, imgSrc, rcDes, ptSrc, &CRenderCopy(cAlpha));
+		CRect rc_des(rcDes);
+		if (rc_des.IsNull())
+			rc_des = imgDes.GetRect();
+		imgDes.Transform(rc_des);
+		return CImgRenderer::Render(imgDes, imgSrc, rc_des, ptSrc, &CRenderCopy(cAlpha));
 	}
-	EXP_INLINE static BOOL Cover(image_t imgDes, image_t imgSrc, chann_t cAlpha)
+	EXP_INLINE static BOOL Cover(const CGraph& imgDes, image_t imgSrc, chann_t cAlpha)
 	{
 		return Cover(imgDes, imgSrc, CRect(), CPoint(), cAlpha);
 	}
 
 	// 画图
-	EXP_INLINE static BOOL Draw(image_t imgDes, image_t imgSrc, 
+	EXP_INLINE static BOOL Draw(const CGraph& imgDes, image_t imgSrc, 
 		const CRect& rcDes, const CRect& rcSrc, chann_t cAlpha = EXP_CM)
 	{
 		CImage exp_des;
@@ -162,10 +173,11 @@ public:
 		CSize sz_des(exp_des.GetWidth(), exp_des.GetHeight());
 		CSize sz_src(exp_src.GetWidth(), exp_src.GetHeight());
 		CRect rc_des(rcDes);
-		if (rc_des.IsEmpty())
+		if (rc_des.IsNull())
 			rc_des.Set(CPoint(), CPoint(sz_des.cx, sz_des.cy));
+		imgDes.Transform(rc_des);
 		CRect rc_src(rcSrc);
-		if (rc_src.IsEmpty())
+		if (rc_src.IsNull())
 			rc_src.Set(CPoint(), CPoint(sz_src.cx, sz_src.cy));
 		// 校验rc_src
 		if (rc_src.Left() < 0)
@@ -189,27 +201,28 @@ public:
 			rc_src.Bottom(sz_src.cy);
 		}
 		// 开始绘图
-		CGraph grp_des;
-		grp_des.Create();
-		grp_des.SetObject(imgDes);
-		CGraph grp_src;
-		grp_src.Create();
-		grp_src.SetObject(imgSrc);
+		CDC dc_des;
+		dc_des.Create();
+		dc_des.SetObject(imgDes);
+		dc_des.SetClipBox(imgDes.GetRect());
+		CDC dc_src;
+		dc_src.Create();
+		dc_src.SetObject(imgSrc);
 		BLENDFUNCTION bl = {0};
 		bl.AlphaFormat = AC_SRC_ALPHA;
 		bl.SourceConstantAlpha = cAlpha;
-		BOOL ret = AlphaBlend(grp_des, rc_des.Left(), rc_des.Top(), rc_des.Width(), rc_des.Height(), 
-							  grp_src, rc_src.Left(), rc_src.Top(), rc_src.Width(), rc_src.Height(), bl);
-		grp_src.Delete();
-		grp_des.Delete();
+		BOOL ret = AlphaBlend(dc_des, rc_des.Left(), rc_des.Top(), rc_des.Width(), rc_des.Height(), 
+							  dc_src, rc_src.Left(), rc_src.Top(), rc_src.Width(), rc_src.Height(), bl);
+		dc_src.Delete();
+		dc_des.Delete();
 		return ret;
 	}
-	EXP_INLINE static BOOL Draw(image_t imgDes, image_t imgSrc, 
+	EXP_INLINE static BOOL Draw(const CGraph& imgDes, image_t imgSrc, 
 		const CRect& rcDes, const CPoint& ptSrc, const CSize& szSrc/*用于形变的宽/高*/, chann_t cAlpha = EXP_CM)
 	{
 		// 格式化区域
 		CRect rc_des(rcDes);
-		if (rc_des.IsEmpty())
+		if (rc_des.IsNull())
 		{
 			CImage exp_des;
 			exp_des.SetTrust(FALSE);
@@ -230,12 +243,12 @@ public:
 		// 开始绘图
 		return Draw(imgDes, imgSrc, rc_des, rc_src, cAlpha);
 	}
-	EXP_INLINE static BOOL Draw(image_t imgDes, image_t imgSrc, 
+	EXP_INLINE static BOOL Draw(const CGraph& imgDes, image_t imgSrc, 
 		const CRect& rcDes = CRect(), const CPoint& ptSrc = CPoint(), chann_t cAlpha = EXP_CM)
 	{
 		// 格式化区域
 		CRect rc_des(rcDes);
-		if (rc_des.IsEmpty())
+		if (rc_des.IsNull())
 		{
 			CImage exp_des;
 			exp_des.SetTrust(FALSE);
@@ -248,7 +261,7 @@ public:
 		// 开始绘图
 		return Draw(imgDes, imgSrc, rc_des, rc_src, cAlpha);
 	}
-	EXP_INLINE static BOOL Draw(image_t imgDes, image_t imgSrc, chann_t cAlpha)
+	EXP_INLINE static BOOL Draw(const CGraph& imgDes, image_t imgSrc, chann_t cAlpha)
 	{
 		return Draw(imgDes, imgSrc, CRect(), CPoint(), cAlpha);
 	}

@@ -148,6 +148,12 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiEvent.hpp">
       <Filter>GuiEvent</Filter>
     </ClInclude>
+    <ClInclude Include="GuiExp\GuiCtrl\GuiText.hpp">
+      <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiTextEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GuiExp\GuiExp.rc" />

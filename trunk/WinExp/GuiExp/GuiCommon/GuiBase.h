@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-20
-// Version:	1.0.0007.1712
+// Date:	2012-03-13
+// Version:	1.0.0008.1417
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
@@ -43,6 +43,7 @@
 //	- 1.0.0005.1550(2011-07-07)	# IGuiBase::GetPtCtrl()会返回不可见控件,导致可见控件被遮住而无法响应消息
 //	- 1.0.0006.2000(2011-07-16)	+ 在IGuiBase中添加绘图剪切区的相关接口
 //	- 1.0.0007.1712(2012-01-20)	= IGuiBase::GetGC()默认返回空GC
+//	- 1.0.0008.1417(2012-03-13)	+ 添加IGuiBase::ExcState()接口,方便外部调用时的名称统一(与调用IGuiBase::Execute()同义)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -100,6 +101,10 @@ public:
 		}
 		else
 			return this;
+	}
+	virtual BOOL ExcState(const CString& key, const CString& val)
+	{
+		return Execute(key, val);
 	}
 
 	void InsEvent(void* p)

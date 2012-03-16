@@ -33,13 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-03
-// Version:	1.0.0003.1925
+// Date:	2012-03-15
+// Version:	1.0.0004.1318
 //
 // History:
 //	- 1.0.0002.1814(2011-12-22)	# 修正ExASM_punpap()中的算法错误
 //								# 修正ExASM_punpck()中可能的内存访问异常
 //	- 1.0.0003.1925(2012-01-03)	+ 添加CImgASM,将所有的图像渲染算法集中
+//	- 1.0.0004.1318(2012-03-15)	+ 添加CImgASM::PixFill()纯色alpha混合(即绘制色块)接口
+//								^ 小幅优化CImgASM::PixBlend()在不使用指令集加速时的效率
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgASM_hpp__
@@ -306,6 +308,71 @@ public:
 			pd[x] = ExRGBA(ExDivCM(r), ExDivCM(g), ExDivCM(b), ExDivCM(a));
 		}
 	}
+	// 纯色alpha混合
+	EXP_INLINE static void PixFill(pixel_t* pd, LONG size, pixel_t c)
+	{
+		if (size <= 0) return;
+		chann_t a_s = ExGetA(c);
+		if (a_s == 0) return;
+		if (a_s == EXP_CM)
+		{
+			PixSetP(pd, size, c);
+			return;
+		}
+		LONG sse_len = size >> 1;
+		DWORD pt = 1;
+		if (sse_len)
+		__asm
+		{
+			ExASM_movw(xmm5, pt)
+			ExASM_mask(xmm6)
+			ExASM_maskcm(xmm7, xmm6)
+			mov edx, [pd]
+			mov ecx, [sse_len]
+			// 拓展ps
+			movd xmm4, c
+			punpckldq xmm4, xmm4
+			punpcklbw xmm4, xmm6
+			movupd [edx], xmm4
+		sse_loop_1:
+			movupd xmm0, xmm4
+			// 拓展pd	 
+			ExASM_punpck(xmm1, edx, xmm6)
+			movupd [edx], xmm1
+			// 拓展as
+			ExASM_punpap(xmm2, xmm0, xmm3)
+			// 生成ai
+			movupd xmm3, xmm7
+			psubw xmm3, xmm2
+			// 混色计算
+			pmullw xmm1, xmm3
+			ExASM_divcm(xmm1, xmm2, xmm5)
+			paddw xmm0, xmm1
+			// 恢复像素
+			packuswb xmm0, xmm0
+			// 保存结果
+			movlpd [edx], xmm0
+			// 循环扫描
+			add edx, 08h
+			dec ecx
+			jnz sse_loop_1
+		}
+		LONG sse_lst = sse_len << 1;
+		for(LONG x = sse_lst; x < size; ++x)
+		{
+			chann_t a_i = EXP_CM - a_s;
+			int tmp;
+			int a = a_s + (tmp = (ExGetA(pd[x]) * a_i), ExDivCM(tmp));
+			int r = ExGetR(c) + (tmp = (ExGetR(pd[x]) * a_i), ExDivCM(tmp));
+			int g = ExGetG(c) + (tmp = (ExGetG(pd[x]) * a_i), ExDivCM(tmp));
+			int b = ExGetB(c) + (tmp = (ExGetB(pd[x]) * a_i), ExDivCM(tmp));
+			if (a > EXP_CM) a = EXP_CM;
+			if (r > EXP_CM) r = EXP_CM;
+			if (g > EXP_CM) g = EXP_CM;
+			if (b > EXP_CM) b = EXP_CM;
+			pd[x] = ExRGBA(r, g, b, a);
+		}
+	}
 	// AlphaBlend
 	EXP_INLINE static void PixBlend(pixel_t* pd, pixel_t* ps, LONG size)
 	{
@@ -354,6 +421,9 @@ public:
 				pd[x] = ps[x];
 				continue;
 			}
+			else
+			if (a_s == 0)
+				continue;
 			chann_t a_i = EXP_CM - a_s;
 			int tmp;
 			int a = a_s + (tmp = (ExGetA(pd[x]) * a_i), ExDivCM(tmp));

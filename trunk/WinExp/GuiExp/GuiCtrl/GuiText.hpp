@@ -1,4 +1,4 @@
-// Copyright 2011-2012, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,29 +28,48 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiEvent - 事件对象
+// GuiText - 文字控件
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-04
-// Version:	1.0.0003.1647
+// Date:	2012-03-13
+// Version:	1.0.0000.0918
+//
+// History:
+//	- 1.0.0000.0918(2012-03-13)	@ 开始构建GuiText
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
+#ifndef __GuiText_hpp__
+#define __GuiText_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "GuiEvent/GuiWndEvent.hpp"
-#include "GuiEvent/GuiPictureEvent.hpp"
-#include "GuiEvent/GuiButtonEvent.hpp"
-#include "GuiEvent/GuiEditEvent.hpp"
-#include "GuiEvent/GuiListEvent.hpp"
-#include "GuiEvent/GuiLCEvent.hpp"
-#include "GuiEvent/GuiLVEvent.hpp"
-#include "GuiEvent/GuiScrollEvent.hpp"
-#include "GuiEvent/GuiMenuEvent.hpp"
-#include "GuiEvent/GuiTextEvent.hpp"
-#include "GuiEvent/GuiEvent.hpp"
+class CGuiText : public CGuiPicture
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiText, CGuiPicture)
+		
+public:
+	CGuiText()
+	{
+		// 添加事件对象
+		PopEvent(FALSE);
+		InsEvent(ExGui(_T("CGuiTextEvent"), GetGC())); /*先让基类绘图*/
+	}
+};
 
 //////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiText, CGuiPicture)
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiText_hpp__*/

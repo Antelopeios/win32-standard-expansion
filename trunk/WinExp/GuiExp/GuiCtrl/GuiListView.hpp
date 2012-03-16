@@ -114,28 +114,18 @@ public:
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		if (sType == _T("align_top"))
 			return (void*)m_AlignTop;
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		CString type(sType);
 		if (sType == _T("align_top"))
-		{
-			BOOL old_sta = m_AlignTop;
-			m_AlignTop = (BOOL)(LONG_PTR)pState;
-			if (old_sta != m_AlignTop)
-			{
-				SendMessage(WM_SIZE);
-				return IGuiCtrlBase::SetState(sType, pState);
-			}
-			else
-				return TRUE;
-		}
+			SET_STATE(BOOL, m_AlignTop, SendMessage(WM_SIZE))
 		else
 			return EXP_BASE::SetState(sType, pState);
 	}

@@ -28,122 +28,117 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Graph - 画布对象类
+// DC - 设备上下文
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-03-16
-// Version:	1.0.0001.2324
+// Version:	1.0.0004.2315
 //
 // History:
-//	- 1.0.0001.2324(2012-03-16)	@ 开始构建Graph
+//	- 1.0.0001.1334(2011-04-12)	^ 移除IGraphObject接口,通过ITypeObjectT接口模板统一通用的接口
+//								= CExpGraph更名为CGraph
+//	- 1.0.0002.2319(2011-05-24)	+ 为CGraph的属性获取接口添加const类型
+//	- 1.0.0003.2230(2012-01-04)	# CGraph::SetObject()只能记录第一个传入的类型参数,导致部分资源无法自动释放
+//	- 1.0.0004.2315(2012-03-16)	= 将CGraph改名为CDC
+//								+ 添加CDC::GetClipBox()与CDC::SetClipBox()
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Graph_h__
-#define __Graph_h__
+#ifndef __DC_h__
+#define __DC_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "ImgTypes/Image.h"
+#include "ImgTypes/TypeObject.h"
 
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGraph
+struct _DCAlloc
 {
+	EXP_INLINE static void Free(void* pPtr)
+	{
+		if (!pPtr) return;
+		::DeleteDC((HDC)pPtr);
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CDC : public ITypeObjectT<dc_t, _DCAlloc>
+{
+public:
+	typedef ITypeObjectT<dc_t, _DCAlloc> base_obj_t;
+
 protected:
-	CImage	m_Image;
-	CRect	m_Rect;
-	CPoint	m_Coor;
+	typedef CListT<DWORD>	typlst_t;
+	typedef CListT<HGDIOBJ>	objlst_t;
 
-private:
-	CGraph()
-	{
-		m_Image.SetTrust(FALSE);
-	}
-public:
-	CGraph(const CGraph& dat)
-	{
-		this->CGraph::CGraph();
-		(*this) = dat;
-	}
-	CGraph(const CImage& img, const CRect& rc, const CPoint& cr)
-	{
-		this->CGraph::CGraph();
-		m_Image = img;
-		m_Rect = rc;
-		m_Coor = cr;
-	}
-	CGraph(const CImage& img, const CRect& rc)
-	{
-		this->CGraph::CGraph(img, rc, rc.LeftTop());
-	}
-	CGraph(const CImage& img)
-	{
-		this->CGraph::CGraph(img, CRect(0, 0, img.GetWidth(), img.GetHeight()));
-	}
+	typlst_t m_TypLst;
+	objlst_t m_ObjLst;
 
 public:
-	BOOL IsNull() const
+	CDC(dc_t tGraph = NULL)
+		: base_obj_t()
+	{ Set(tGraph); }
+	virtual ~CDC()
+	{}
+
+public:
+	void Set(dc_t tGraph)
 	{
-		return m_Image.IsNull();
+		if (Get() == tGraph) return;
+		if (!IsNull())
+		{
+			for(objlst_t::iterator_t ite = m_ObjLst.Head(); ite != m_ObjLst.Tail(); ++ite)
+				::SelectObject(Get(), (*ite));
+		}
+		m_ObjLst.Clear();
+		m_TypLst.Clear();
+		base_obj_t::Set(tGraph);
 	}
 
-	CGraph& operator=(const CGraph& tType)
+	dc_t operator=(dc_t tType)
 	{
-		m_Image = tType.m_Image;
-		m_Rect = tType.m_Rect;
-		m_Coor = tType.m_Coor;
-		return (*this);
+		Set(tType);
+		return Get();
 	}
 
-	operator image_t() const
+	dc_t Create(dc_t tGraph = NULL)
 	{
-		return m_Image;
-	}
-	operator CImage() const
-	{
-		return m_Image;
+		Set(::CreateCompatibleDC(tGraph));
+		return Get();
 	}
 
-	CImage& GetImage()
+	HGDIOBJ SetObject(HGDIOBJ hObj)
 	{
-		return m_Image;
+		HGDIOBJ tmp_obj(::SelectObject(Get(), hObj));
+		DWORD type = ::GetObjectType(hObj);
+		if (m_TypLst.Find(type) == m_TypLst.Tail())
+		{
+			m_TypLst.Add(type);
+			if (tmp_obj && (m_ObjLst.Find(tmp_obj) == m_ObjLst.Tail()))
+				m_ObjLst.Add(tmp_obj);
+		}
+		return tmp_obj;
 	}
-	void SetImage(const CImage& tType)
-	{
-		m_Image = tType;
-	}
+	HGDIOBJ GetObject(UINT uType) const
+	{ return ::GetCurrentObject(Get(), uType); }
 
-	const CRect& GetRect() const
+	int GetClipBox(CRect& rc)
 	{
-		return m_Rect;
+		return ::GetClipBox(Get(), (LPRECT)&rc);
 	}
-	void SetRect(const CRect& tType)
+	int SetClipBox(const CRect& rc)
 	{
-		m_Rect = tType;
-	}
-
-	const CPoint& GetCoor() const
-	{
-		return m_Coor;
-	}
-	void SetCoor(const CPoint& tType)
-	{
-		m_Coor = tType;
-	}
-
-	CPoint& Transform(CPoint& pt) const
-	{
-		return pt.Offset(m_Coor);
-	}
-	CRect& Transform(CRect& rc) const
-	{
-		return rc.Offset(m_Coor);
+		HRGN rgn = ::CreateRectRgnIndirect((LPRECT)&rc);
+		int r = ::SelectClipRgn(Get(), rgn);
+		::DeleteObject(rgn);
+		return r;
 	}
 };
 
@@ -151,4 +146,4 @@ public:
 
 EXP_END
 
-#endif/*__Graph_h__*/
+#endif/*__DC_h__*/

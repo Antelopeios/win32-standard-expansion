@@ -154,33 +154,34 @@ protected:
 				//CImgASM::PixZero(g_MemImg.GetPixels(), g_MemImg.GetSize() >> 2);
 				ZeroMemory(g_MemImg.GetPixels(), g_MemImg.GetSize());
 				//{
-				//	CGraph mem_grp;
-				//	mem_grp.Create();
-				//	mem_grp.SetObject(g_MemImg.Get());
+				//	CDC mem_dc;
+				//	mem_dc.Create();
+				//	mem_dc.SetObject(g_MemImg.Get());
 				//	HBRUSH brh = (HBRUSH)GetStockObject(GRAY_BRUSH);
-				//	FillRect(mem_grp, &(RECT)CRect(0, 0, imgShow.GetWidth(), imgShow.GetHeight()), brh);
-				//	mem_grp.Delete();
+				//	FillRect(mem_dc, &(RECT)CRect(0, 0, imgShow.GetWidth(), imgShow.GetHeight()), brh);
+				//	mem_dc.Delete();
 				//}
 				{
-					//CGraph mem_grp;
-					//mem_grp.Create();
-					//mem_grp.SetObject(g_MemImg.Get());
-					//CGraph img_grp;
-					//img_grp.Create();
-					//img_grp.SetObject(imgShow.Get());
+					//CDC mem_dc;
+					//mem_dc.Create();
+					//mem_dc.SetObject(g_MemImg.Get());
+					//CDC img_dc;
+					//img_dc.Create();
+					//img_dc.SetObject(imgShow.Get());
 					//BLENDFUNCTION bl = {0};
 					//bl.AlphaFormat = AC_SRC_ALPHA;
 					//bl.SourceConstantAlpha = 255;
-					//AlphaBlend(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
-					//		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
-					////BitBlt(mem_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_grp, 0, 0, SRCCOPY);
-					////StretchBlt(mem_grp, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
-					////		   img_grp, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
-					//img_grp.Delete();
-					//mem_grp.Delete();
+					//AlphaBlend(mem_dc, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), 
+					//		   img_dc, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), bl);
+					////BitBlt(mem_dc, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), img_dc, 0, 0, SRCCOPY);
+					////StretchBlt(mem_dc, 0, 0, imgShow.GetWidth() * 2, imgShow.GetHeight() / 2, 
+					////		   img_dc, 0, 0, imgShow.GetWidth(), imgShow.GetHeight(), SRCCOPY);
+					//img_dc.Delete();
+					//mem_dc.Delete();
 
 					//Render(g_MemImg, imgShow, CRect(), CPoint());
 
+					//CImgDrawer::Fill(g_MemImg, CRect(0, 0, imgShow.GetWidth(), imgShow.GetHeight()), ExRGBA(33, 66, 99, 111));
 					CImgDrawer::Draw(g_MemImg, imgShow/*, 200*/);
 					//CImgDrawer::Cover(g_MemImg, imgShow/*, 200*/);
 
@@ -262,12 +263,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			CImage mem_img;
 			mem_img.Create(rect.right - rect.left, rect.bottom - rect.top);
 
-			CGraph mem_grp;
-			mem_grp.Create(hdc);
-			mem_grp.SetObject(mem_img.Get());
+			CDC mem_dc;
+			mem_dc.Create(hdc);
+			mem_dc.SetObject(mem_img.Get());
 
 			HBRUSH brh = (HBRUSH)GetStockObject(/*BLACK_BRUSH*/GRAY_BRUSH);
-			FillRect(mem_grp, &rect, brh);
+			FillRect(mem_dc, &rect, brh);
 
 			{
 				ExLock(g_MemLck, true);
@@ -287,8 +288,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						rect.bottom - bmp_img.GetHeight() - 5, 
 						rect.right, rect.bottom), CPoint());
 
-			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_grp, 0, 0, SRCCOPY);
-			mem_grp.Delete();
+			::BitBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, mem_dc, 0, 0, SRCCOPY);
+			mem_dc.Delete();
 		}
 		EndPaint(hWnd, &ps);
 		break;

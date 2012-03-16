@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-04
-// Version:	1.0.0006.1905
+// Date:	2012-03-16
+// Version:	1.0.0007.1802
 //
 // History:
 //	- 1.0.0001.1630(2011-04-19)	+ CPoint改为CPointT<>,支持通过模板参数控制内部数据的类型
@@ -43,6 +43,7 @@
 //	- 1.0.0004.1020(2011-05-17)	+ 添加CPointT::operator-()负号重载
 //	- 1.0.0005.2242(2011-05-24)	+ 添加CPointT::operator!=()与CPointT::operator POINT()
 //	- 1.0.0006.1905(2012-01-04)	+ CPointT的所有修改接口均提供返回值
+//	- 1.0.0007.1802(2012-03-16)	+ CPointT::Offset()支持CPointT对象参数类型
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Point_h__
@@ -85,6 +86,10 @@ public:
 		x += nX;
 		y += nY;
 		return (*this);
+	}
+	EXP_INLINE CPointT& Offset(const CPointT& tPoint)
+	{
+		return Offset(tPoint.x, tPoint.y);
 	}
 
 	EXP_INLINE CPointT& operator=(const CPointT& tPoint)

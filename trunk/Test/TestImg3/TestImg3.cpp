@@ -191,9 +191,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			CImgDrawer::Fill(mem_img, ExRGBA(128, 128, 128, 128));
 			CImgRenderer::Render(mem_img, imgShow, CRect(), CPoint(), &CRenderNormal());
 
-			CGraph mem_grp;
-			mem_grp.Create(hdc);
-			mem_grp.SetObject(mem_img.Get());
+			CDC mem_dc;
+			mem_dc.Create(hdc);
+			mem_dc.SetObject(mem_img.Get());
 
 			POINT pt_wnd = {rect.Left(), rect.Top()};
 			SIZE  sz_wnd = {rect.Width(), rect.Height()};
@@ -202,9 +202,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			BLENDFUNCTION blend		  = {0};
 			blend.AlphaFormat		  = AC_SRC_ALPHA;
 			blend.SourceConstantAlpha = EXP_CM;
-			::UpdateLayeredWindow(hWnd, hdc, &pt_wnd, &sz_wnd, mem_grp, &pt_src, 0, &blend, ULW_ALPHA);
+			::UpdateLayeredWindow(hWnd, hdc, &pt_wnd, &sz_wnd, mem_dc, &pt_src, 0, &blend, ULW_ALPHA);
 
-			mem_grp.Delete();
+			mem_dc.Delete();
 		}
 		EndPaint(hWnd, &ps);
 		break;

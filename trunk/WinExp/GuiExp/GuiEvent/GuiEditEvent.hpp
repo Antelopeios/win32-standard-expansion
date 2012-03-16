@@ -513,13 +513,12 @@ public:
 	}
 
 	// 界面绘图
-	void OnPaint(CImage* mem_img)
+	void OnPaint(CGraph* mem_img)
 	{
 		ExAssert(m_Ctrl);
 		if (!mem_img || mem_img->IsNull()) return;
-		CRect rect, clt_rct;
-		m_Ctrl->GetClipRect(rect);
-		m_Ctrl->GetClientRect(clt_rct);
+		CRect rect;
+		m_Ctrl->GetClientRect(rect);
 
 		// 获得属性
 		int no_foc = m_Ctrl->IsFocus() ? 0 : 1;
@@ -537,10 +536,10 @@ public:
 		pixel_t bkg_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("bkg_sel_color")))[no_foc];
 
 		// 绘背景
-		CImgDrawer::Fill(mem_img->Get(), rect, pixel);
+		CImgDrawer::Fill(*mem_img, rect, pixel);
 		if (image && !image->IsNull())
-			CImgDrawer::Draw(mem_img->Get(), image->Get(), rect, 
-				CPoint(), CSize(clt_rct.Width(), clt_rct.Height()));
+			CImgDrawer::Draw(*mem_img, image->Get(), rect, 
+				CPoint(), CSize(rect.Width(), rect.Height()));
 
 		// 拿到偏移量
 		CSize sz_off;
@@ -577,7 +576,7 @@ public:
 			{
 				CImage txt_img(empt->GetImage(*empt_str));
 				if(!txt_img.IsNull())
-					CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+					CImgDrawer::Draw(*mem_img, txt_img, rect, CPoint(sz_off.cx, 0));
 			}
 		}
 		else
@@ -585,7 +584,7 @@ public:
 			CImage txt_img(text->GetImage(*edit));
 			if(!txt_img.IsNull())
 			{
-				CImgDrawer::Draw(mem_img->Get(), txt_img, rect, CPoint(sz_off.cx, 0));
+				CImgDrawer::Draw(*mem_img, txt_img, rect, CPoint(sz_off.cx, 0));
 				CImage sel_img;
 				CRect sel_rc(sz_hed.cx, 0, sz_hed.cx + sz_sel.cx, sz_sel.cy);
 				if (!sel_rc.IsEmpty())
@@ -593,8 +592,8 @@ public:
 					sel_img.Set(txt_img.Clone(sel_rc));
 					CImgFilter::Filter(sel_img, &CFilterBrush(txt_sel_color, 0xe, TRUE));
 					CImgFilter::Filter(sel_img, &CFilterPreMul());
-					CImgDrawer::Fill(mem_img->Get(), sel_rc, bkg_sel_color);
-					CImgDrawer::Draw(mem_img->Get(), sel_img, sel_rc);
+					CImgDrawer::Fill(*mem_img, sel_rc, bkg_sel_color);
+					CImgDrawer::Draw(*mem_img, sel_img, sel_rc);
 				}
 			}
 		}
@@ -612,7 +611,7 @@ public:
 			text->GetSize(tmp, sz_txt);
 			// 画线
 			CImgDrawer::Line(
-				mem_img->Get(), 
+				*mem_img, 
 				CLine(sz_txt.cx - sz_off.cx, 0, sz_txt.cx - sz_off.cx, sz_flk.cy), 
 				ExRGBA(0, 0, 0, EXP_CM));
 		}
@@ -697,7 +696,7 @@ public:
 			break;
 		case WM_PAINT:
 			ShowFlicker(m_Ctrl->IsFocus());
-			OnPaint((CImage*)lParam);
+			OnPaint((CGraph*)lParam);
 			SetState(break_next);
 			break;
 		}

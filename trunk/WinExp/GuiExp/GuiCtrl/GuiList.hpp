@@ -73,7 +73,7 @@ class CGuiList : public CGuiPicture
 protected:
 	items_t m_ItemList;
 	LONG m_Space;	// 项间距
-	CGuiButton m_FocPic;
+	CGuiStatic m_FocPic;
 
 public:
 	CGuiList()
@@ -82,7 +82,6 @@ public:
 		// 添加事件对象
 		InsEvent(ExGui(_T("CGuiListEvent"), GetGC())); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
-		m_FocPic.SetState(_T("thr_sta"), (void*)-1); /*单态按钮*/
 		AddComp(&m_FocPic);
 	}
 	~CGuiList()
@@ -109,7 +108,7 @@ public:
 	}
 
 	// 获得控件状态
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		if (sType.Left(4) == _T("foc_"))
 		{
@@ -129,7 +128,7 @@ public:
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		CString type(sType);
 		if (type.Left(4) == _T("foc_"))
@@ -162,10 +161,9 @@ public:
 		else
 		if (sType == _T("insert"))
 		{
-			set_ins_t* ins = (set_ins_t*)pState;
-			if (!ins || !ins->p_ite || !ins->p_itm) return FALSE;
-			items_t::iterator_t ite = *(items_t::iterator_t*)ins->p_ite;
-			IGuiCtl* item = (IGuiCtl*)ins->p_itm;
+			if (!pState || !pParam) return FALSE;
+			items_t::iterator_t ite = *(items_t::iterator_t*)pState;
+			IGuiCtl* item = (IGuiCtl*)pParam;
 			AddComp(item);
 			m_ItemList.Add(item, ite);
 			SendMessage(WM_SIZE);

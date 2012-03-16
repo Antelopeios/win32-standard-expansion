@@ -90,14 +90,14 @@ public:
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬
-	void* GetState(const CString& sType)
+	void* GetState(const CString& sType, void* pParam = NULL)
 	{
 		if (sType == _T("items"))
 			return (void*)(&m_ItemList);
 		else
 			return EXP_BASE::GetState(sType);
 	}
-	BOOL SetState(const CString& sType, void* pState)
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
 		if (sType == _T("items"))
 		{
@@ -124,10 +124,9 @@ public:
 		else
 		if (sType == _T("insert"))
 		{
-			set_ins_t* ins = (set_ins_t*)pState;
-			if (!ins || !ins->p_ite || !ins->p_itm) return FALSE;
-			items_t::iterator_t ite = *(items_t::iterator_t*)ins->p_ite;
-			IGuiCtl* item = (IGuiCtl*)ins->p_itm;
+			if (!pState || !pParam) return FALSE;
+			items_t::iterator_t ite = *(items_t::iterator_t*)pState;
+			IGuiCtl* item = (IGuiCtl*)pParam;
 			AddComp(item);
 			m_ItemList.Add(item, ite);
 			gc.Clear();

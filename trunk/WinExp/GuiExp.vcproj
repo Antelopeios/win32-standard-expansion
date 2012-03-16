@@ -264,6 +264,10 @@
 				RelativePath="GuiExp\GuiCtrl\GuiScroll.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiExp\GuiCtrl\GuiText.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="GuiEvent"
@@ -306,6 +310,10 @@
 			</File>
 			<File
 				RelativePath="GuiExp\GuiEvent\GuiScrollEvent.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiEvent\GuiTextEvent.hpp"
 				>
 			</File>
 			<File

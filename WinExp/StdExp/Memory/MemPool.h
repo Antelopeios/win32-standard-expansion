@@ -274,7 +274,7 @@ public:
 		pool->SetObjSize(sizeof(_TypeT<16384>));
 		*(size++) = (pool++)->GetObjSize();
 		pool->SetObjSize(sizeof(_TypeT<32768>));
-		*(size++) = (pool++)->GetObjSize();
+		*size = pool->GetObjSize();
 	}
 	~CMemPoolT()
 	{

@@ -75,12 +75,11 @@
 // 置换掉默认的全局单例
 
 #include "Common/Common.h"
-#include "Thread/Lock.h"
+
+#define EXP_SINGLETON EXP::IGuiSingletonT
+#include "Pattern/Singleton.h"
 
 EXP_BEG
-
-template <typename ModelT>
-class CPtrManagerT;
 
 template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
 EXP_INTERFACE IGuiSingletonT
@@ -88,29 +87,11 @@ EXP_INTERFACE IGuiSingletonT
 public:
 	EXP_INLINE static TypeT& Instance()
 	{
-		static BOOL is_init = FALSE;
-		if(!is_init)
-		{
-			is_init = TRUE;
-			IGuiSingletonT<CPtrManager, ModelT>::Instance();
-		}
-		static TypeT* instance = NULL;
-		if (instance == NULL)
-		{
-			ExLockThis(typename ModelT::_LockPolicy);
-			if (instance == NULL)
-			{
-				static TypeT type;
-				instance = &type;
-			}
-		}
-		return (*instance);
+		return ISingletonT<TypeT, ModelT>::Instance();
 	}
 };
 
 EXP_END
-
-#define EXP_SINGLETON EXP::IGuiSingletonT
 
 // 图像处理库
 #include "ImgExp.h"

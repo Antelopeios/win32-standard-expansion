@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-07-07
-// Version:	1.1.0013.0058
+// Date:	2012-03-17
+// Version:	1.1.0014.2156
 //
 // History:
 //	- 1.1.0008.1730(2011-05-05)	^ 规范化基类重定义,并添加统一的基类获取宏
@@ -43,6 +43,7 @@
 //	- 1.1.0011.1511(2011-05-16)	= 调整一些内部接口的名称定义
 //	- 1.1.0012.1400(2011-05-19)	^ ExDynCreate()支持默认传入空指针GC构造对象
 //	- 1.1.0013.0058(2011-07-07)	# 由于在Dll中使用RTTI,会导致工程中的RTTI编译失败,因此将IBaseObjectT模板改为类
+//	- 1.1.0014.2156(2012-03-17)	+ CTypeInfoFactory支持继承与替换,并支持替换ExRegTypeInfo和ExGetTypeInfo
 //////////////////////////////////////////////////////////////////
 
 #ifndef __RTTI_h__
@@ -102,15 +103,13 @@ struct _TypeInfo
 //////////////////////////////////////////////////////////////////
 
 // _TypeInfo 指针单例工厂
-class CTypeInfoFactory : INonCopyable, public EXP_SINGLETON<CTypeInfoFactory>
+class CTypeInfoFactory : INonCopyable
 {
-	friend interface EXP_SINGLETON<CTypeInfoFactory>;
-
-private:
+protected:
 	typedef CMapT<CString, _TypeInfo*> key_map_t;
 	key_map_t dc_funcs;
 
-private:
+public:
 	CTypeInfoFactory() : dc_funcs(1009) {}
 
 public:
@@ -140,10 +139,18 @@ public:
 	}
 };
 
+#ifndef EXP_TYPEINFO_FACTORY
+#define EXP_TYPEINFO_FACTORY	EXP::CTypeInfoFactory
+#endif/*EXP_TYPEINFO_FACTORY*/
+
 // 向工厂注册 _TypeInfo 指针
-#define ExRegTypeInfo(key, inf)	EXP::CTypeInfoFactory::Instance().RegTypeInfo(key, inf)
+#ifndef ExRegTypeInfo
+#define ExRegTypeInfo(key, inf)	EXP::ExSingleton<EXP_TYPEINFO_FACTORY>().RegTypeInfo(key, inf)
+#endif/*ExRegTypeInfo*/
 // 从工厂得到 _TypeInfo 指针
-#define ExGetTypeInfo(key)		EXP::CTypeInfoFactory::Instance().GetTypeInfo(key)
+#ifndef ExGetTypeInfo
+#define ExGetTypeInfo(key)		EXP::ExSingleton<EXP_TYPEINFO_FACTORY>().GetTypeInfo(key)
+#endif/*ExGetTypeInfo*/
 
 //////////////////////////////////////////////////////////////////
 

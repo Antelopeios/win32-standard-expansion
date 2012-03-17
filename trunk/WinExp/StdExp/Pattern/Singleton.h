@@ -33,14 +33,15 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-01-28
-// Version:	1.0.0008.1430
+// Date:	2012-03-17
+// Version:	1.0.0009.2121
 //
 // History:
 //	- 1.0.0005.1710(2011-05-03)	# 采用懒汉方式实现CSingletonT::Instance(),避免出现全局变量之间的构造顺序冲突
 //	- 1.0.0006.1909(2011-05-11)	= 重命名CSingletonT为ISingletonT
 //	- 1.0.0007.1554(2011-05-19)	+ StdExp内部的单例调用支持由外部统一置换
 //	- 1.0.0008.1430(2012-01-28)	+ ISingletonT支持外部传入ModelT作为内部实现的线程模型策略
+//	- 1.0.0009.2121(2012-03-17)	+ 可通过重定义EXP_SINGLETON_INIT动态调整单例初始化时的行为
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Singleton_h__
@@ -56,18 +57,29 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+#ifndef EXP_SINGLETON
+#define EXP_SINGLETON EXP::ISingletonT
+#endif/*EXP_SINGLETON*/
+
+#ifndef EXP_SINGLETON_INIT
+#define EXP_SINGLETON_INIT \
+	static BOOL is_init = FALSE; \
+	if(!is_init) \
+	{ \
+		is_init = TRUE; \
+		EXP_SINGLETON<CPtrManager, ModelT>::Instance(); \
+	}
+#endif/*EXP_SINGLETON_INIT*/
+
+//////////////////////////////////////////////////////////////////
+
 template <typename TypeT, typename ModelT = EXP_THREAD_MODEL>
 interface ISingletonT
 {
 public:
 	EXP_INLINE static TypeT& Instance()
 	{
-		static BOOL is_init = FALSE;
-		if(!is_init)
-		{
-			is_init = TRUE;
-			ISingletonT<CPtrManager, ModelT>::Instance();
-		}
+		EXP_SINGLETON_INIT
 		static TypeT* instance = NULL;
 		if (instance == NULL)
 		{
@@ -81,10 +93,6 @@ public:
 		return (*instance);
 	}
 };
-
-#ifndef EXP_SINGLETON
-#define EXP_SINGLETON EXP::ISingletonT
-#endif/*EXP_SINGLETON*/
 
 template <typename TypeT>
 EXP_INLINE TypeT& ExSingleton() { return EXP_SINGLETON<TypeT>::Instance(); }

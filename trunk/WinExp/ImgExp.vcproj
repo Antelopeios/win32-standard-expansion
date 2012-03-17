@@ -593,7 +593,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ImgExp\ImgCommon\ImgCommon.cpp"
+				RelativePath=".\ImgExp\ImgCommon\ImgCommon.cpp"
 				>
 			</File>
 			<File

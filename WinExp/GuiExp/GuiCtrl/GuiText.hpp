@@ -61,6 +61,7 @@ public:
 		// 添加事件对象
 		PopEvent(FALSE);
 		InsEvent(ExGui(_T("CGuiTextEvent"), GetGC())); /*先让基类绘图*/
+		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 	}
 };
 

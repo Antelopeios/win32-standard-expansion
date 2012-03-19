@@ -73,22 +73,25 @@ public:
 		case WM_PAINT:
 			if (lParam)
 			{
+				CGraph* mem_img = (CGraph*)lParam;
+				if (!mem_img || mem_img->IsNull()) break;
+
+				CRect rect;
+				ctl->GetClientRect(rect);
+
 				// 获得属性
 				CImage* image = (CImage*)ctl->GetState(_T("image"));
 				pixel_t pixel = (pixel_t)ctl->GetState(_T("color"));
 				CText* text = (CText*)ctl->GetState(_T("font"));
 				CString* str = (CString*)ctl->GetState(_T("text"));
 
-				CGraph* mem_img = (CGraph*)lParam;
-				if (!mem_img || mem_img->IsNull()) break;
-				CRect rect;
-				ctl->GetClientRect(rect);
-
 				// 绘图
 				CImgDrawer::Fill(*mem_img, rect, pixel);
 				if (image && !image->IsNull())
 					CImgDrawer::Draw(*mem_img, image->Get(), rect, 
 						CPoint(), CSize(rect.Width(), rect.Height()));
+
+				// 绘文字
 				if (text && str)
 				{
 					CImage txt_img(text->GetImage(*str));

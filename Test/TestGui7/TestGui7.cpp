@@ -98,7 +98,7 @@ protected:
 		ExGet<IGuiCtl>(_T("list"))->SetScroll(ExGet<IGuiCtl>(_T("scrl")));
 
 		ExReg<IGuiWnd>(_T("main"), ExGui(_T("CGuiWnd"), &gc));
-		ExGet<IGuiWnd>(_T("main"))->Create(_T("TestGui6"), CRect(0, 0, 800, 500), SW_HIDE, WS_OVERLAPPEDWINDOW);
+		ExGet<IGuiWnd>(_T("main"))->Create(_T("TestGui7"), CRect(0, 0, 800, 500), SW_HIDE, WS_OVERLAPPEDWINDOW);
 		ExGet<IGuiWnd>(_T("main"))->CenterWindow();
 		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("scrl")));
 		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("list")));

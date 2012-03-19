@@ -1,10 +1,10 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by TestGui7.rc
+// Used by TestGui8.rc
 //
 #define IDC_MYICON                      2
-#define IDD_TESTGUI7_DIALOG             102
-#define IDI_TESTGUI7                    107
+#define IDD_TESTGUI8_DIALOG             102
+#define IDI_TESTGUI8                    107
 #define IDI_SMALL                       108
 #define IDR_MAINFRAME                   128
 #define IDC_STATIC                      -1

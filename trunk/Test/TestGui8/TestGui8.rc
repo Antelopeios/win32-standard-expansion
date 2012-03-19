@@ -7,9 +7,6 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#ifndef APSTUDIO_INVOKED
-#include "targetver.h"
-#endif
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include "windows.h"
 #undef APSTUDIO_HIDDEN_SYMBOLS
@@ -31,7 +28,7 @@ LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_TESTGUI7            ICON                    "TestGui7.ico"
+IDI_TESTGUI8            ICON                    "TestGui8.ico"
 IDI_SMALL               ICON                    "small.ico"
 
 #ifdef APSTUDIO_INVOKED

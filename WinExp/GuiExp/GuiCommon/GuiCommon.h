@@ -87,7 +87,18 @@ EXP_INTERFACE IGuiSingletonT
 public:
 	EXP_INLINE static TypeT& Instance()
 	{
-		return ISingletonT<TypeT, ModelT>::Instance();
+		EXP_SINGLETON_INIT
+		static TypeT* instance = NULL;
+		if (instance == NULL)
+		{
+			ExLockThis(typename ModelT::_LockPolicy);
+			if (instance == NULL)
+			{
+				static TypeT type;
+				instance = &type;
+			}
+		}
+		return (*instance);
 	}
 };
 

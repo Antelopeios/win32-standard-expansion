@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-03
-// Version:	1.3.0030.1800
+// Date:	2012-03-19
+// Version:	1.3.0031.1416
 //
 // History:
 //	- 1.2.0016.2345(2011-03-01)	^ 改进MemPool的内部实现方式,简化逻辑,优化算法
@@ -55,6 +55,7 @@
 //	- 1.3.0029.0451(2012-01-29) ^ 采用统一类型的对象池作为CMemPoolT内部分级内存分配,简化CMemPoolT的内部实现
 //								+ 通过CMemPoolAllocT实现一个静态内存池分配器,并定义EXP_MEMPOOL_ALLOC作为其别称
 //	- 1.3.0030.1800(2012-02-03) + 添加EXP_BREAK_ALLOC宏,支持外部调试时自定义某次分配时中断
+//	- 1.3.0031.1416(2012-03-19) ^ 内存池内部对象池的级数大小自16之后开始线性递增
 //////////////////////////////////////////////////////////////////
 
 #ifndef __MemPool_h__
@@ -255,25 +256,25 @@ public:
 		*(size++) = (pool++)->GetObjSize();
 		pool->SetObjSize(sizeof(_TypeT<32>));
 		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<48>));
+		*(size++) = (pool++)->GetObjSize();
 		pool->SetObjSize(sizeof(_TypeT<64>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<80>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<96>));
+		*(size++) = (pool++)->GetObjSize();
+		pool->SetObjSize(sizeof(_TypeT<112>));
 		*(size++) = (pool++)->GetObjSize();
 		pool->SetObjSize(sizeof(_TypeT<128>));
 		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<256>));
+		pool->SetObjSize(sizeof(_TypeT<144>));
 		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<512>));
+		pool->SetObjSize(sizeof(_TypeT<160>));
 		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<1024>));
+		pool->SetObjSize(sizeof(_TypeT<176>));
 		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<2048>));
-		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<4096>));
-		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<8192>));
-		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<16384>));
-		*(size++) = (pool++)->GetObjSize();
-		pool->SetObjSize(sizeof(_TypeT<32768>));
+		pool->SetObjSize(sizeof(_TypeT<192>));
 		*size = pool->GetObjSize();
 	}
 	~CMemPoolT()

@@ -33,7 +33,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	const int TestCont = 1000;
 	const int TestLast = 1000;
 	const int TestSMin = 1;
-	const int TestSMax = 100000;
+	const int TestSMax = 10000;
 #endif/*_DEBUG*/
 	unsigned int tStart = 0, tEnd = 0;
 	A*	  Test[TestLast] = {0};

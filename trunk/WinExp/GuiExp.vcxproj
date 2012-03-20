@@ -120,6 +120,7 @@
     <ClInclude Include="GuiExp\GuiCtrl\GuiListCtrl.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiListView.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiPicture.hpp" />
+    <ClInclude Include="GuiExp\GuiCtrl\GuiProgress.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiScroll.hpp" />
     <ClInclude Include="GuiExp\GuiCtrl\GuiText.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiButtonEvent.hpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiLVEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiMenuEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiPictureEvent.hpp" />
+    <ClInclude Include="GuiExp\GuiEvent\GuiProgressEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiTextEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp" />

@@ -293,5 +293,6 @@ EXP_END
 #include "GuiCtrl/GuiGroup.hpp"
 #include "GuiCtrl/GuiScroll.hpp"
 #include "GuiCtrl/GuiText.hpp"
+#include "GuiCtrl/GuiProgress.hpp"
 
 //////////////////////////////////////////////////////////////////

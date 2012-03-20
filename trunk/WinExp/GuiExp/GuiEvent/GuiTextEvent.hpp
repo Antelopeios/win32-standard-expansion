@@ -54,11 +54,64 @@ EXP_BEG
 class CGuiTextEvent : public IGuiEvent
 {
 	EXP_DECLARE_DYNCREATE_CLS(CGuiTextEvent, IGuiEvent)
-		
+
+protected:
+	CImage m_imgClp;
+	CText m_txtTmp;
+	CRect m_rcImg;
+	CString m_StrTmp;
+
 public:
+	BOOL FmtTxtRect(CRect rect, CText* text, CString* str, IGuiCtrlBase* ctl)
+	{
+		if (!text || !str)
+		{
+			ctl->SetFraRect(CSize());
+			ctl->SetAllRect(CSize());
+			return FALSE;
+		}
+
+		if (m_txtTmp == (*text) && 
+			m_rcImg == rect && 
+			m_StrTmp == *str) return TRUE;
+
+		m_txtTmp = (*text);
+		m_rcImg = rect;
+		m_StrTmp = (*str);
+
+		// 计算缓存图大小并预存分段位图
+		CArrayT<CString> sa;
+		ExStringToArray(*str, sa, _T('\n'), FALSE);
+		CArrayT<CImage> ia;
+		CArrayT<LONG> fa;
+		LONG h = 0;
+		for(DWORD i = 0; i < sa.GetCount(); ++i)
+		{
+			fa.PushLast(0);
+			ia.PushLast(text->GetImage(sa[i], rect, 2, _T("..."), &(fa[i])));
+			if (!ia[i].IsNull()) h += fa[i];
+		}
+
+		// 绘制缓存
+		rect.MoveTo(CPoint());
+		rect.Height(h);
+		m_imgClp.Create(rect.Width(), rect.Height());
+		for(DWORD i = 0; i < ia.GetCount(); ++i)
+		{
+			if (ia[i].IsNull()) continue;
+			CImgDrawer::Draw(m_imgClp, ia[i], rect);
+			rect.Top(rect.Top() + fa[i]);
+		}
+
+		ctl->SetFraRect(CSize(0, m_rcImg.Height()));
+		ctl->SetAllRect(CSize(0, h));
+
+		return TRUE;
+	}
+
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		IGuiCtrlBase* ctl = ExDynCast<IGuiCtrlBase>(pGui);
 		if (!ctl) return;
 
 		// 处理消息
@@ -86,14 +139,13 @@ public:
 						CPoint(), CSize(rect.Width(), rect.Height()));
 
 				// 绘文字
-				if (text && str)
+				if (FmtTxtRect(rect, text, str, ctl))
 				{
-					CImage txt_img(text->GetImage(*str));
-					if (!txt_img.IsNull())
-						CImgDrawer::Draw(*mem_img, txt_img, CRect(
-							(rect.Right() - txt_img.GetWidth()) / 2, 
-							(rect.Bottom() - txt_img.GetHeight()) / 2, 
-							rect.Right(), rect.Bottom()));
+					CSize scr_sz;
+					ctl->GetScrollSize(scr_sz);
+					rect.Left(-scr_sz.cx);
+					rect.Top(-scr_sz.cy);
+					CImgDrawer::Draw(*mem_img, m_imgClp, rect);
 				}
 			}
 			break;

@@ -30,9 +30,16 @@ protected:
 		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_blk_color"), pix);
 		ExGet<IGuiCtl>(_T("scrl"))->AddEvent(dbnew(CScrEvent));
 
+		CString str;
+		for(int i = 0; i < 10; ++i)
+		{
+			CString tmp;
+			tmp.Format(_T("这是一行文字, 文字测试第%d行\n"), i + 1);
+			str += tmp;
+		}
 		ExReg<IGuiCtl>(_T("text"), ExGui(_T("CGuiText")));
 		ExGet<IGuiCtl>(_T("text"))->SetState(_T("font"), (void*)ExGet<CText>(_T("font")));
-		ExGet<IGuiCtl>(_T("text"))->SetState(_T("text"), (void*)&CString(_T("这是一行文字\n这是一行文字\n这是一行文字")));
+		ExGet<IGuiCtl>(_T("text"))->SetState(_T("text"), (void*)&str);
 		ExGet<IGuiCtl>(_T("text"))->AddEvent(dbnew(CTxtEvent));
 		ExGet<IGuiCtl>(_T("text"))->SetScroll(ExGet<IGuiCtl>(_T("scrl")));
 

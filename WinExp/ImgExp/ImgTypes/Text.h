@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-06
-// Version:	1.0.0009.1123
+// Date:	2012-03-20
+// Version:	1.0.0010.1125
 //
 // History:
 //	- 1.0.0001.1425(2011-05-25)	# 修正CText::operator=()的赋值及返回值错误
@@ -47,6 +47,7 @@
 //	- 1.0.0007.2327(2012-02-29)	+ 添加新的GetImage()接口,支持输出特定区域的折行文本
 //	- 1.0.0008.2050(2012-03-04)	# 尝试用黑/白文字图层混合的方式计算实际的文字图层,修正某些字体输出效果不理想的问题
 //	- 1.0.0009.1123(2012-03-06)	^ 使用ExtTextOut代替TextOut进行文字输出,提高输出效率
+//	- 1.0.0010.1125(2012-03-20)	+ 输出特定区域折行文本的GetImage()接口支持返回文字图片的内容区域高度
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Text_h__
@@ -198,7 +199,8 @@ public:
 		tmp_dc.Delete();
 		return m_MemImg;
 	}
-	image_t GetImage(const CString& sStr, const CRect& rcImg, const int nSpace = 2, const CString& sClp = _T("..."))
+	image_t GetImage(const CString& sStr, const CRect& rcImg, 
+		const int nSpace = 2, const CString& sClp = _T("..."), LONG* lpTxtOff = NULL)
 	{
 		CString clp_str(sStr), clp_lne(sStr);
 		CImage img_clp;
@@ -242,6 +244,7 @@ public:
 			clp_str = clp_lne;
 			txt_off += (txt_clp.cy + nSpace);
 		} while(txt_off + txt_clp.cy <= rcImg.Height());
+		if (lpTxtOff) (*lpTxtOff) = txt_off;
 		return img_clp;
 	}
 };

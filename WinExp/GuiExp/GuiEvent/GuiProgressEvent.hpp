@@ -1,4 +1,4 @@
-// Copyright 2011-2012, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,89 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiEvent - 事件对象
+// GuiProgressEvent - 进度条控件事件
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-04
-// Version:	1.0.0003.1647
+// Date:	2012-03-20
+// Version:	1.0.0000.1308
+//
+// History:
+//	- 1.0.0000.1308(2012-03-20)	@ 开始构建GuiProgressEvent
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
+#ifndef __GuiProgressEvent_hpp__
+#define __GuiProgressEvent_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "GuiEvent/GuiWndEvent.hpp"
-#include "GuiEvent/GuiPictureEvent.hpp"
-#include "GuiEvent/GuiButtonEvent.hpp"
-#include "GuiEvent/GuiEditEvent.hpp"
-#include "GuiEvent/GuiListEvent.hpp"
-#include "GuiEvent/GuiLCEvent.hpp"
-#include "GuiEvent/GuiLVEvent.hpp"
-#include "GuiEvent/GuiScrollEvent.hpp"
-#include "GuiEvent/GuiMenuEvent.hpp"
-#include "GuiEvent/GuiTextEvent.hpp"
-#include "GuiEvent/GuiProgressEvent.hpp"
-#include "GuiEvent/GuiEvent.hpp"
+class CGuiProgressEvent : public IGuiEvent
+{
+	EXP_DECLARE_DYNCREATE_CLS(CGuiProgressEvent, IGuiEvent)
+
+protected:
+	IGuiCtl* m_Ctrl;
+
+public:
+	// 获得属性
+	IGuiCtl* GetProg()
+	{
+		return (IGuiCtl*)m_Ctrl->GetState(_T("pg"));
+	}
+	uint32_t GetVal()
+	{
+		return (uint32_t)m_Ctrl->GetState(_T("val"));
+	}
+	uint32_t GetMax()
+	{
+		return (uint32_t)m_Ctrl->GetState(_T("max"));
+	}
+
+	// 格式化位置
+	void Format()
+	{
+		ExAssert(m_Ctrl);
+		IGuiCtl* prog = GetProg();
+		if (!prog) return;
+		uint32_t val = GetVal(), max = GetMax();
+		if (val > max) val = max;
+		CRect rect, rc_pg;
+		m_Ctrl->GetClientRect(rect);
+		rc_pg = rect;
+		rc_pg.Width((rect.Width() * max) / val);
+		prog->SetWindowRect(rc_pg);
+	}
+
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
+		if (!m_Ctrl) return;
+
+		// 处理消息
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (!wParam) break;
+		case WM_SIZE:
+			Format();
+			break;
+		}
+	}
+};
 
 //////////////////////////////////////////////////////////////////
+
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiProgressEvent, IGuiEvent)
+
+//////////////////////////////////////////////////////////////////
+
+EXP_END
+
+#endif/*__GuiProgressEvent_hpp__*/

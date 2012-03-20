@@ -261,6 +261,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiExp\GuiCtrl\GuiProgress.hpp"
+				>
+			</File>
+			<File
 				RelativePath="GuiExp\GuiCtrl\GuiScroll.hpp"
 				>
 			</File>
@@ -306,6 +310,10 @@
 			</File>
 			<File
 				RelativePath="GuiExp\GuiEvent\GuiPictureEvent.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiExp\GuiEvent\GuiProgressEvent.hpp"
 				>
 			</File>
 			<File

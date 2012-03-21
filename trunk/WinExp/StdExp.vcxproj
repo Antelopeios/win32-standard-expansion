@@ -92,6 +92,7 @@
     <ClInclude Include="StdExp\Debugging\XZipFile.h" />
     <ClInclude Include="StdExp\Debugging\XZip\XUnzip.h" />
     <ClInclude Include="StdExp\Debugging\XZip\XZip.h" />
+    <ClInclude Include="StdExp\Pattern\Composite.h" />
     <ClInclude Include="StdExp\Thread\App.h" />
     <ClInclude Include="StdExp\Thread\Event.h" />
     <ClInclude Include="StdExp\Thread\Lock.h" />

@@ -190,6 +190,9 @@
     <ClInclude Include="StdExp\Algorithm\CRC.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="StdExp\Pattern\Composite.h">
+      <Filter>Pattern</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdExp\Debugging\CrashHandler.cpp">

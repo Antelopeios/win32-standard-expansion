@@ -373,6 +373,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="GuiSet"
+			>
+			<File
+				RelativePath=".\GuiExp\GuiSet\GuiSet.cpp"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="GuiExp\GuiExp.h"
 			>

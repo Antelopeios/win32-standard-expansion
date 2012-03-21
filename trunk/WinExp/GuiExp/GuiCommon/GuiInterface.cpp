@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-06-08
-// Version:	1.0.0004.0047
-//
-// History:
-//	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
-//	- 1.0.0002.1000(2011-05-19)	+ 添加IGuiBase界面对象基础类实现
-//	- 1.0.0003.1000(2011-05-23)	+ 添加IGuiEffect效果对象基础类实现
-//	- 1.0.0004.0047(2011-06-08)	^ 将IGuiBase移出并单独实现
+// Date:	2012-03-21
+// Version:	1.0.0022.1820
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -51,11 +45,15 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiObject, IBaseObject)
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiItem, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiItemMgr, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEvent, IGuiItem)
 IGuiCtl* IGuiEvent::s_MLMove = NULL;
-EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSender, IGuiItemMgr)
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiComp, IGuiObject)
 EXP_IMPLEMENT_DYNAMIC_CLS(IGuiEffect, IGuiObject)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSet, IGuiItem)
+EXP_IMPLEMENT_DYNAMIC_CLS(IGuiSetMgr, IGuiItemMgr)
 
 //////////////////////////////////////////////////////////////////
 

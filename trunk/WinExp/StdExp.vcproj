@@ -305,6 +305,10 @@
 			Name="Pattern"
 			>
 			<File
+				RelativePath=".\StdExp\Pattern\Composite.h"
+				>
+			</File>
+			<File
 				RelativePath="StdExp\Pattern\Iterator.h"
 				>
 			</File>

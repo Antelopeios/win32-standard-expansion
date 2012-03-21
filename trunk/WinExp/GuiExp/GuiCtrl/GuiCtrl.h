@@ -90,14 +90,7 @@ EXP_INTERFACE IGuiCtl : public IGuiBase
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtl, IGuiBase)
 
 public:
-	interface ISet
-	{
-		virtual CString Key() const = 0;
-		virtual BOOL Exc(const CString& key, const CString& val) = 0;
-		virtual void* Get(const CString& key, void* par = NULL) = 0;
-		virtual BOOL Set(const CString& key, void* sta, void* par = NULL) = 0;
-		virtual void Msg(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
-	};
+	typedef CListT<IGuiSet*> isets_t;
 	typedef CListT<IGuiCtl*> items_t;
 	typedef CTreeT<IGuiCtl*> itree_t;
 
@@ -107,6 +100,7 @@ protected:
 	BOOL m_bTruEff;
 	CSize m_szScroll;
 	IGuiCtl* (m_Scroll[2]);
+	isets_t m_Sets;
 
 public:
 	IGuiCtl()
@@ -146,6 +140,9 @@ public:
 	{
 		Send(this, nMessage, wParam, lParam);
 	}
+
+	// 控件设置对象管理
+
 
 	// 获得控件状态
 	virtual void* GetState(const CString& sType, void* pParam = NULL) = 0;
@@ -396,6 +393,7 @@ public:
 
 public:
 	// 更新状态
+	BOOL Execute(const CString& key, const CString& val);
 	void* GetState(const CString& sType, void* pParam = NULL);
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL);
 	void UpdateState(BOOL bRefreshSelf = TRUE);

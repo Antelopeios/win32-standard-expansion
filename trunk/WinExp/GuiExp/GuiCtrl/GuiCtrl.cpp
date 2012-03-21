@@ -60,6 +60,10 @@ IGuiCtrlBase::IGuiCtrlBase()
 {}
 
 // ¸üÐÂ×´Ì¬
+BOOL IGuiCtrlBase::Execute(const CString& key, const CString& val)
+{
+	return FALSE;
+}
 void* IGuiCtrlBase::GetState(const CString& sType, void* pParam/* = NULL*/)
 {
 	return NULL;

@@ -19,6 +19,9 @@
     <Filter Include="GuiManager">
       <UniqueIdentifier>{5cf6ef67-3330-4b4f-8ed6-cacd6acbedee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GuiSet">
+      <UniqueIdentifier>{c58d1a5e-87e8-4d49-9d49-39b53f005707}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuiExp\GuiCommon\GuiCommon.cpp">
@@ -41,6 +44,9 @@
     </ClCompile>
     <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp">
       <Filter>GuiManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiExp\GuiSet\GuiSet.cpp">
+      <Filter>GuiSet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

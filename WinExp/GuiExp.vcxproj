@@ -102,6 +102,7 @@
     <ClCompile Include="GuiExp\GuiEvent\GuiEvent.cpp" />
     <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp" />
     <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp" />
+    <ClCompile Include="GuiExp\GuiSet\GuiSet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GuiExp\GuiBoard\GuiMenu.hpp" />

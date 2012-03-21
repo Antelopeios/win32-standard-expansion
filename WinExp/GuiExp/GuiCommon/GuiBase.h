@@ -123,7 +123,7 @@ public:
 	void PopEvent(BOOL bLast = TRUE)
 	{
 		if (GetEvent().Empty()) return;
-		IGuiEvent* evt = NULL;
+		IGuiItem* evt = NULL;
 		if (bLast)
 		{
 			evt = GetEvent().LastItem();
@@ -141,7 +141,7 @@ public:
 			evt = *ite;
 			GetEvent().Del(ite);
 		}
-		if (IGuiSender::m_bTru && evt && evt->IsTrust()) evt->Free();
+		if (IsTrustEvent() && evt && evt->IsTrust()) evt->Free();
 	}
 
 	virtual CGC* GetGC() const { return m_GC; }

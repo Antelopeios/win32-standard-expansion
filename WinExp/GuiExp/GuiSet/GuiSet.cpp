@@ -1,4 +1,4 @@
-// Copyright 2010, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,22 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Pattern - 模式
+// GuiSet - 界面控件属性及逻辑设置对象
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-09
-// Version:	1.0.0001.2056
+// Date:	2012-03-21
+// Version:	1.0.0000.1117
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Pattern_h__
-#define __Pattern_h__
+#include "GuiCtrl/GuiCtrl.h"
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-#include "Common/Common.h"
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "Pattern/Singleton.h"
-#include "Pattern/Iterator.h"
-#include "Pattern/Composite.h"
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Pattern_h__*/
+EXP_END

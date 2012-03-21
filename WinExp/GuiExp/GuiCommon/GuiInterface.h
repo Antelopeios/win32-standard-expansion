@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-03
-// Version:	1.0.0021.1830
+// Date:	2012-03-21
+// Version:	1.0.0022.1820
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -66,6 +66,7 @@
 //								# 修正某事件处理在跳过后面的事件之后,其返回值仍然有可能被后面未响应事件的默认返回值覆盖的问题
 //	- 1.0.0020.1110(2012-03-01)	+ 添加IGuiSender::PopEvent()与IGuiComp::PopComp(),方便删除事件与组合对象
 //	- 1.0.0021.1830(2012-03-03)	= 调整IGuiComp::GetChildren()为IGuiComp::GetComp()
+//	- 1.0.0022.1820(2012-03-21)	+ 添加IGuiItem与IGuiItemMgr,合并一些通用的元素聚合操作
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -98,13 +99,134 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+// GUI 元素对象接口
+EXP_INTERFACE IGuiItem : public IGuiObject
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiItem, IGuiObject)
+
+protected:
+	BOOL m_bTru;
+
+public:
+	IGuiItem()
+		: m_bTru(TRUE)
+	{}
+	virtual ~IGuiItem()
+	{}
+
+public:
+	virtual void SetTrust(BOOL bTru = TRUE) { m_bTru = bTru; }
+	virtual BOOL IsTrust() const { return m_bTru; }
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 元素对象管理器
+EXP_INTERFACE IGuiItemMgr : public IGuiObject
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiItemMgr, IGuiObject)
+
+public:
+	typedef CListT<IGuiItem*> itm_list_t;
+
+protected:
+	BOOL m_bTru;		// 子容器链托管标记
+private:
+	itm_list_t* m_CldrItm;
+
+public:
+	IGuiItemMgr(void)
+		: m_bTru(TRUE)
+		, m_CldrItm(dbnew(itm_list_t))
+	{}
+	virtual ~IGuiItemMgr(void)
+	{
+		ClearItm();
+		del(m_CldrItm);
+		m_CldrItm = NULL;
+	}
+
+public:
+	// 是否对子容器做托管
+	void SetTrustItm(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
+	BOOL IsTrustItm() const { return m_bTru; }
+	// 获得内部对象
+	itm_list_t& GetItm() const { return *m_CldrItm; }
+
+	// 查找
+	itm_list_t::iterator_t FindItm(IGuiItem* p) { return GetItm().Find(p); }
+
+	// 组合接口
+	virtual void AddItm(void* p)
+	{
+		IGuiItem* set = ExDynCast<IGuiItem>(p);
+		if (!set) return ;
+		// 定位对象
+		itm_list_t::iterator_t ite = FindItm(set);
+		if (ite != GetItm().Tail()) return;
+		// 添加新对象
+		GetItm().Add(set);
+	}
+	virtual void InsItm(void* p)
+	{
+		IGuiItem* set = ExDynCast<IGuiItem>(p);
+		if (!set) return ;
+		// 定位对象
+		itm_list_t::iterator_t ite = FindItm(set);
+		if (ite != GetItm().Tail()) return;
+		// 添加新对象
+		GetItm().Add(set, GetItm().Head());
+	}
+	virtual void DelItm(void* p)
+	{
+		IGuiItem* set = ExDynCast<IGuiItem>(p);
+		if (!set) return;
+		// 定位对象
+		itm_list_t::iterator_t ite = FindItm(set);
+		if (ite == GetItm().Tail()) return;
+		// 删除对象
+		GetItm().Del(ite);
+		if (m_bTru && set->IsTrust()) set->Free();
+	}
+	virtual void PopItm(BOOL bLast = TRUE)
+	{
+		if (GetItm().Empty()) return;
+		IGuiItem* set = NULL;
+		if (bLast)
+		{
+			set = GetItm().LastItem();
+			GetItm().PopLast();
+		}
+		else
+		{
+			set = GetItm().HeadItem();
+			GetItm().PopHead();
+		}
+		if (m_bTru && set && set->IsTrust()) set->Free();
+	}
+	virtual void ClearItm()
+	{
+		if (m_bTru)
+			for(itm_list_t::iterator_t ite = GetItm().Head(); ite != GetItm().Tail(); ++ite)
+			{
+				if (!(*ite) || 
+					!(*ite)->IsValid() || 
+					!(*ite)->IsTrust()) continue;
+				(*ite)->Free();
+			}
+		GetItm().Clear();
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
 EXP_INTERFACE IGuiComp;
 EXP_INTERFACE IGuiCtl;
 
 // GUI 事件接口
-EXP_INTERFACE IGuiEvent : public IGuiObject
+EXP_INTERFACE IGuiEvent : public IGuiItem
 {
-	EXP_DECLARE_DYNAMIC_CLS(IGuiEvent, IGuiObject)
+	EXP_DECLARE_DYNAMIC_CLS(IGuiEvent, IGuiItem)
 
 	friend EXP_INTERFACE IGuiComp;
 
@@ -117,7 +239,6 @@ public:
 	};
 
 protected:
-	BOOL m_bTru;
 	LRESULT m_Result;
 	state_t m_State;
 
@@ -127,21 +248,18 @@ protected:
 
 public:
 	IGuiEvent()
-		: m_bTru(TRUE)
-		, m_Result(0)
+		: m_Result(0)
 		, m_State(continue_next)
-	{}
-	virtual ~IGuiEvent()
 	{}
 
 public:
-	virtual void SetTrust(BOOL bTru = TRUE) { m_bTru = bTru; }
-	virtual BOOL IsTrust() { return m_bTru; }
 	// 额外的存储指针
 	virtual void* Param() { return NULL; }
+
 	// 事件结果接口
 	void SetResult(LRESULT lrRes = 0) { m_Result = lrRes; }
 	LRESULT GetResult() const { return m_Result; }
+
 	// 事件状态接口
 	void SetState(state_t eSta) { m_State = eSta; }
 	state_t GetState()
@@ -150,6 +268,7 @@ public:
 		m_State = continue_next;
 		return sta;
 	}
+
 	// 事件传递接口
 	virtual void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
 };
@@ -157,100 +276,30 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 事件转发器
-EXP_INTERFACE IGuiSender : public IGuiObject
+EXP_INTERFACE IGuiSender : private IGuiItemMgr
 {
-	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiObject)
+	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiItemMgr)
 
 public:
-	typedef CListT<IGuiEvent*> evt_list_t;
-
-protected:
-	BOOL m_bTru;		// 子容器链托管标记
-private:
-	evt_list_t* m_CldrEvt;
-
-public:
-	IGuiSender(void)
-		: m_bTru(TRUE)
-		, m_CldrEvt(dbnew(evt_list_t))
-	{}
-	virtual ~IGuiSender(void)
-	{
-		ClearEvent();
-		del(m_CldrEvt);
-		m_CldrEvt = NULL;
-	}
+	typedef itm_list_t evt_list_t;
 
 public:
 	// 是否对子容器做托管
-	void SetTrustEvent(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
-	BOOL IsTrustEvent() const { return m_bTru; }
+	void SetTrustEvent(BOOL bTruCldr = TRUE) { SetTrustItm(bTruCldr); }
+	BOOL IsTrustEvent() const { return IsTrustItm(); }
+
 	// 获得内部对象
-	evt_list_t& GetEvent() const { return *m_CldrEvt; }
+	evt_list_t& GetEvent() const { return GetItm(); }
 
 	// 查找
-	evt_list_t::iterator_t FindEvent(IGuiEvent* pEvent) { return GetEvent().Find(pEvent); }
+	evt_list_t::iterator_t FindEvent(IGuiEvent* p) { return FindItm(p); }
 
 	// 组合接口
-	virtual void AddEvent(void* p)
-	{
-		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
-		if (!evt) return ;
-		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(evt);
-		if (ite != GetEvent().Tail()) return;
-		// 添加新对象
-		GetEvent().Add(evt);
-	}
-	virtual void InsEvent(void* p)
-	{
-		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
-		if (!evt) return ;
-		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(evt);
-		if (ite != GetEvent().Tail()) return;
-		// 添加新对象
-		GetEvent().Add(evt, GetEvent().Head());
-	}
-	virtual void DelEvent(void* p)
-	{
-		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
-		if (!evt) return;
-		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(evt);
-		if (ite == GetEvent().Tail()) return;
-		// 删除对象
-		GetEvent().Del(ite);
-		if (m_bTru && evt->IsTrust()) evt->Free();
-	}
-	virtual void PopEvent(BOOL bLast = TRUE)
-	{
-		if (GetEvent().Empty()) return;
-		IGuiEvent* evt = NULL;
-		if (bLast)
-		{
-			evt = GetEvent().LastItem();
-			GetEvent().PopLast();
-		}
-		else
-		{
-			evt = GetEvent().HeadItem();
-			GetEvent().PopHead();
-		}
-		if (m_bTru && evt && evt->IsTrust()) evt->Free();
-	}
-	virtual void ClearEvent()
-	{
-		if (m_bTru)
-			for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
-			{
-				if (!(*ite) || 
-					!(*ite)->IsValid() || 
-					!(*ite)->IsTrust()) continue;
-				(*ite)->Free();
-			}
-		GetEvent().Clear();
-	}
+	virtual void AddEvent(void* p) { AddItm(p); }
+	virtual void InsEvent(void* p) { InsItm(p); }
+	virtual void DelEvent(void* p) { DelItm(p); }
+	virtual void PopEvent(BOOL bLast = TRUE) { PopItm(bLast); }
+	virtual void ClearEvent() { ClearItm(); }
 
 	// 事件结果接口
 	void SetResult(LRESULT lrRet = 0)
@@ -258,8 +307,9 @@ public:
 		if(!IsValid()) return;
 		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
-			if (!(*ite)) continue;
-			(*ite)->SetResult(lrRet);
+			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+			if (!evt) continue;
+			evt->SetResult(lrRet);
 		}
 	}
 	LRESULT GetResult(LRESULT lrDef = 0)
@@ -269,13 +319,15 @@ public:
 		evt_list_t::iterator_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)
 		{
-			if (!(*ite)) continue;
-			LRESULT r = (*ite)->GetResult();
+			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+			if (!evt) continue;
+			LRESULT r = evt->GetResult();
 			if (r != 0 && lrDef != r) lrDef = r;
 		}
-		if (*ite)
+		IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+		if (evt)
 		{
-			LRESULT r = (*ite)->GetResult();
+			LRESULT r = evt->GetResult();
 			if (r != 0 && lrDef != r) lrDef = r;
 		}
 		return lrDef;
@@ -300,12 +352,13 @@ public:
 				SetResult(ret);
 				return;
 			}
-			if (!(*ite)) continue;
-			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
-			(*ite)->OnMessage(gui, nMessage, wParam, lParam);
-			if (!(*ite)->IsValid()) return;
-			sta = (*ite)->GetState();
-			LRESULT r = (*ite)->GetResult();
+			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+			if (!evt) continue;
+			evt->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
+			evt->OnMessage(gui, nMessage, wParam, lParam);
+			if (!evt->IsValid()) return;
+			sta = evt->GetState();
+			LRESULT r = evt->GetResult();
 			if (r != 0 && ret != r) ret = r;
 		}
 		if (sta != IGuiEvent::continue_next)
@@ -313,11 +366,12 @@ public:
 			SetResult(ret);
 			return;
 		}
-		if (*ite)
+		IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+		if (evt)
 		{
-			(*ite)->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
-			(*ite)->OnMessage(gui, nMessage, wParam, lParam);
-			LRESULT r = (*ite)->GetResult();
+			evt->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
+			evt->OnMessage(gui, nMessage, wParam, lParam);
+			LRESULT r = evt->GetResult();
 			if (r != 0 && ret != r) ret = r;
 		}
 		SetResult(ret);
@@ -359,7 +413,7 @@ protected:
 public:
 	// 是否对子容器做托管
 	void SetTrust(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
-	BOOL IsTrust() { return m_bTru; }
+	BOOL IsTrust() const { return m_bTru; }
 	// 获得内部对象
 	IGuiComp* GetParent() const { return m_Pare; }
 	list_t& GetComp() const { return *m_Cldr; }
@@ -460,6 +514,52 @@ public:
 	// 定时器
 	virtual void SetTimer(wnd_t hWnd) = 0;
 	virtual void KillTimer(wnd_t hWnd) = 0;
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 控件属性及逻辑设置对象
+EXP_INTERFACE IGuiSet : public IGuiItem
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiSet, IGuiItem)
+
+public:
+	IGuiCtl*& Ctl() { static IGuiCtl* ctl = NULL; return ctl; }
+	virtual CString Key() const = 0;
+
+	virtual BOOL Exc(const CString& val) = 0;
+	virtual void* Get(void* par) = 0;
+	virtual BOOL Set(void* sta, void* par) = 0;
+	virtual void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
+};
+
+//////////////////////////////////////////////////////////////////
+
+// GUI 设置对象控制器
+EXP_INTERFACE IGuiSetMgr : private IGuiItemMgr
+{
+	EXP_DECLARE_DYNAMIC_CLS(IGuiSetMgr, IGuiItemMgr)
+
+public:
+	typedef itm_list_t set_list_t;
+
+public:
+	// 是否对子容器做托管
+	void SetTrustSet(BOOL bTruCldr = TRUE) { SetTrustItm(bTruCldr); }
+	BOOL IsTrustSet() const { return IsTrustItm(); }
+
+	// 获得内部对象
+	set_list_t& GetSet() const { return GetItm(); }
+
+	// 查找
+	set_list_t::iterator_t FindSet(IGuiSet* p) { return FindItm(p); }
+
+	// 组合接口
+	virtual void AddSet(void* p) { AddItm(p); }
+	virtual void InsSet(void* p) { InsItm(p); }
+	virtual void DelSet(void* p) { DelItm(p); }
+	virtual void PopSet(BOOL bLast = TRUE) { PopItm(bLast); }
+	virtual void ClearSet() { ClearItm(); }
 };
 
 //////////////////////////////////////////////////////////////////

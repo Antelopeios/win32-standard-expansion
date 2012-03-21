@@ -1,4 +1,4 @@
-// Copyright 2010, 木头云
+// Copyright 2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,101 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// Pattern - 模式
+// Composite - 组合
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2010-12-09
-// Version:	1.0.0001.2056
+// Date:	2012-03-21
+// Version:	1.0.0000.1532
+//
+// History:
+//	- 1.0.0000.1532(2012-03-21)	@ 开始构建Composite模式
 //////////////////////////////////////////////////////////////////
 
-#ifndef __Pattern_h__
-#define __Pattern_h__
+#ifndef __Composite_h__
+#define __Composite_h__
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Common/Common.h"
+#include "Container/List.h"
+
+EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-#include "Pattern/Singleton.h"
-#include "Pattern/Iterator.h"
-#include "Pattern/Composite.h"
+template <typename TypeT>
+interface ICompT
+{
+public:
+	typedef TypeT type_t;
+	typedef CListT<TypeT*> comp_t;
+	typedef typename comp_t::iterator_t iter_t;
+
+protected:
+	TypeT*	m_Pare;		// 父对象指针
+	comp_t	m_Cldr;		// 子容器链
+
+public:
+	ICompT(void)
+		: m_Pare(NULL)
+	{}
+
+public:
+	// 获得内部对象
+	TypeT* GetPare() const { return m_Pare; }
+	comp_t& GetCldr() const { return m_Cldr; }
+
+	// 查找
+	iter_t Find(TypeT* cmp) { return GetCldr().Find(cmp); }
+
+	// 组合接口
+	BOOL Add(TypeT* cmp, iter_t ite = GetComp().Tail())
+	{
+		if (!cmp) return FALSE;
+		// 定位对象
+		iter_t it = Find(cmp);
+		if (it != GetCldr().Tail()) return FALSE;
+		// 添加新对象
+		if (cmp->m_Pare)
+			cmp->m_Pare->Del(cmp);
+		GetCldr().Add(cmp, ite);
+		return TRUE;
+	}
+	BOOL Del(TypeT* cmp)
+	{
+		if (!cmp) return FALSE;
+		// 定位对象
+		iter_t it = Find(cmp);
+		if (it == GetCldr().Tail()) return FALSE;
+		// 删除对象
+		GetCldr().Del(it);
+		return TRUE;
+	}
+	TypeT* Pop(BOOL bLast = TRUE)
+	{
+		TypeT* cmp = NULL;
+		if (GetCldr().Empty()) return cmp;
+		if (bLast)
+		{
+			cmp = GetCldr().LastItem();
+			GetCldr().PopLast();
+		}
+		else
+		{
+			cmp = GetCldr().HeadItem();
+			GetCldr().PopHead();
+		}
+		return cmp;
+	}
+	void Clear()
+	{ GetCldr().Clear(); }
+};
 
 //////////////////////////////////////////////////////////////////
 
-#endif/*__Pattern_h__*/
+EXP_END
+
+#endif/*__Composite_h__*/

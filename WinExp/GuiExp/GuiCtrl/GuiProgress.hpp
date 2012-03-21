@@ -77,14 +77,14 @@ public:
 		{
 			CString type(key);
 			type.TrimLeft(_T("pg_"));
-			m_Prog.Execute(type, val);
+			return m_Prog.Execute(type, val);
 		}
 		else
 		if (key == _T("val"))
-			SetState(_T("val"), (void*)_ttol(val));
+			return SetState(_T("val"), (void*)_ttol(val));
 		else
 		if (key == _T("max"))
-			SetState(_T("max"), (void*)_ttol(val));
+			return SetState(_T("max"), (void*)_ttol(val));
 		else
 			return EXP_BASE::Execute(key, val);
 	}

@@ -90,6 +90,14 @@ EXP_INTERFACE IGuiCtl : public IGuiBase
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtl, IGuiBase)
 
 public:
+	interface ISet
+	{
+		virtual CString Key() const = 0;
+		virtual BOOL Exc(const CString& key, const CString& val) = 0;
+		virtual void* Get(const CString& key, void* par = NULL) = 0;
+		virtual BOOL Set(const CString& key, void* sta, void* par = NULL) = 0;
+		virtual void Msg(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
+	};
 	typedef CListT<IGuiCtl*> items_t;
 	typedef CTreeT<IGuiCtl*> itree_t;
 

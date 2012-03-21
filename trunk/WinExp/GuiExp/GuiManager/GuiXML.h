@@ -70,11 +70,16 @@ public:
 	typedef CMapT<CString, CString> map_t;
 	typedef struct _Node
 	{
+		friend class CGuiXML;
+
 		CString nam; // 名称
 		CString val; // 值
 		map_t	att; // 属性
+
+	private:
 		CString tmp; // 临时存储
 
+	public:
 		BOOL IsValid() const { return (!nam.Empty()); }
 	} node_t;
 	typedef CTreeT<node_t*> tree_t;

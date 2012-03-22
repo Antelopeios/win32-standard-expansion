@@ -62,14 +62,32 @@ IGuiCtrlBase::IGuiCtrlBase()
 // ¸üÐÂ×´Ì¬
 BOOL IGuiCtrlBase::Execute(const CString& key, const CString& val)
 {
-	return FALSE;
+	for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if(!set || !set->Key(key)) continue;
+		return set->Exc(val);
+	}
+	return TRUE;
 }
 void* IGuiCtrlBase::GetState(const CString& sType, void* pParam/* = NULL*/)
 {
+	for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if(!set || !set->Key(sType)) continue;
+		return set->Get(pParam);
+	}
 	return NULL;
 }
 BOOL IGuiCtrlBase::SetState(const CString& sType, void* pState, void* pParam/* = NULL*/)
 {
+	for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if(!set || !set->Key(sType)) continue;
+		if (set->Set(pState, pParam)) break;
+	}
 	UpdateState();
 	return TRUE;
 }

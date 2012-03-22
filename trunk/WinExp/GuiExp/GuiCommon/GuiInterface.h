@@ -141,72 +141,72 @@ public:
 	{}
 	virtual ~IGuiItemMgr(void)
 	{
-		ClearItm();
+		Clear();
 		del(m_CldrItm);
 		m_CldrItm = NULL;
 	}
 
 public:
 	// 是否对子容器做托管
-	void SetTrustItm(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
-	BOOL IsTrustItm() const { return m_bTru; }
+	void SetTrust(BOOL bTruCldr = TRUE) { m_bTru = bTruCldr; }
+	BOOL IsTrust() const { return m_bTru; }
 	// 获得内部对象
 	itm_list_t& GetItm() const { return *m_CldrItm; }
 
 	// 查找
-	itm_list_t::iterator_t FindItm(IGuiItem* p) { return GetItm().Find(p); }
+	itm_list_t::iterator_t Find(IGuiItem* p) { return GetItm().Find(p); }
 
 	// 组合接口
-	virtual void AddItm(void* p)
+	virtual void Add(void* p)
 	{
-		IGuiItem* set = ExDynCast<IGuiItem>(p);
-		if (!set) return ;
+		IGuiItem* itm = ExDynCast<IGuiItem>(p);
+		if (!itm) return ;
 		// 定位对象
-		itm_list_t::iterator_t ite = FindItm(set);
+		itm_list_t::iterator_t ite = Find(itm);
 		if (ite != GetItm().Tail()) return;
 		// 添加新对象
-		GetItm().Add(set);
+		GetItm().Add(itm);
 	}
-	virtual void InsItm(void* p)
+	virtual void Ins(void* p)
 	{
-		IGuiItem* set = ExDynCast<IGuiItem>(p);
-		if (!set) return ;
+		IGuiItem* itm = ExDynCast<IGuiItem>(p);
+		if (!itm) return ;
 		// 定位对象
-		itm_list_t::iterator_t ite = FindItm(set);
+		itm_list_t::iterator_t ite = Find(itm);
 		if (ite != GetItm().Tail()) return;
 		// 添加新对象
-		GetItm().Add(set, GetItm().Head());
+		GetItm().Add(itm, GetItm().Head());
 	}
-	virtual void DelItm(void* p)
+	virtual void Del(void* p)
 	{
-		IGuiItem* set = ExDynCast<IGuiItem>(p);
-		if (!set) return;
+		IGuiItem* itm = ExDynCast<IGuiItem>(p);
+		if (!itm) return;
 		// 定位对象
-		itm_list_t::iterator_t ite = FindItm(set);
+		itm_list_t::iterator_t ite = Find(itm);
 		if (ite == GetItm().Tail()) return;
 		// 删除对象
 		GetItm().Del(ite);
-		if (m_bTru && set->IsTrust()) set->Free();
+		if (IsTrust() && itm->IsTrust()) itm->Free();
 	}
-	virtual void PopItm(BOOL bLast = TRUE)
+	virtual void Pop(BOOL bLast = TRUE)
 	{
 		if (GetItm().Empty()) return;
-		IGuiItem* set = NULL;
+		IGuiItem* itm = NULL;
 		if (bLast)
 		{
-			set = GetItm().LastItem();
+			itm = GetItm().LastItem();
 			GetItm().PopLast();
 		}
 		else
 		{
-			set = GetItm().HeadItem();
+			itm = GetItm().HeadItem();
 			GetItm().PopHead();
 		}
-		if (m_bTru && set && set->IsTrust()) set->Free();
+		if (IsTrust() && itm && itm->IsTrust()) itm->Free();
 	}
-	virtual void ClearItm()
+	virtual void Clear()
 	{
-		if (m_bTru)
+		if (IsTrust())
 			for(itm_list_t::iterator_t ite = GetItm().Head(); ite != GetItm().Tail(); ++ite)
 			{
 				if (!(*ite) || 
@@ -285,21 +285,21 @@ public:
 
 public:
 	// 是否对子容器做托管
-	void SetTrustEvent(BOOL bTruCldr = TRUE) { SetTrustItm(bTruCldr); }
-	BOOL IsTrustEvent() const { return IsTrustItm(); }
+	void SetTrustEvent(BOOL bTruCldr = TRUE) { SetTrust(bTruCldr); }
+	BOOL IsTrustEvent() const { return IsTrust(); }
 
 	// 获得内部对象
 	evt_list_t& GetEvent() const { return GetItm(); }
 
 	// 查找
-	evt_list_t::iterator_t FindEvent(IGuiEvent* p) { return FindItm(p); }
+	evt_list_t::iterator_t FindEvent(IGuiEvent* p) { return Find(p); }
 
 	// 组合接口
-	virtual void AddEvent(void* p) { AddItm(p); }
-	virtual void InsEvent(void* p) { InsItm(p); }
-	virtual void DelEvent(void* p) { DelItm(p); }
-	virtual void PopEvent(BOOL bLast = TRUE) { PopItm(bLast); }
-	virtual void ClearEvent() { ClearItm(); }
+	virtual void AddEvent(void* p) { Add(p); }
+	virtual void InsEvent(void* p) { Ins(p); }
+	virtual void DelEvent(void* p) { Del(p); }
+	virtual void PopEvent(BOOL bLast = TRUE) { Pop(bLast); }
+	virtual void ClearEvent() { Clear(); }
 
 	// 事件结果接口
 	void SetResult(LRESULT lrRet = 0)
@@ -458,7 +458,7 @@ public:
 		// 删除对象
 		GetComp().Del(ite);
 		cmp->Fina();
-		if (bAutoTru && m_bTru)
+		if (bAutoTru && IsTrust())
 		{
 			if (IGuiEvent::s_MLMove == (IGuiCtl*)cmp)
 				IGuiEvent::s_MLMove = NULL;
@@ -479,7 +479,9 @@ public:
 			cmp = GetComp().HeadItem();
 			GetComp().PopHead();
 		}
-		if (bAutoTru && m_bTru && cmp)
+		if(!cmp) return;
+		cmp->Fina();
+		if (bAutoTru && IsTrust() && cmp)
 		{
 			if (IGuiEvent::s_MLMove == (IGuiCtl*)cmp)
 				IGuiEvent::s_MLMove = NULL;
@@ -492,7 +494,7 @@ public:
 		{
 			if (!(*ite)) continue;
 			(*ite)->Fina();
-			if (m_bTru) (*ite)->Free();
+			if (IsTrust()) (*ite)->Free();
 		}
 		GetComp().Clear();
 	}
@@ -523,14 +525,21 @@ EXP_INTERFACE IGuiSet : public IGuiItem
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiSet, IGuiItem)
 
-public:
-	IGuiCtl*& Ctl() { static IGuiCtl* ctl = NULL; return ctl; }
-	virtual CString Key() const = 0;
+protected:
+	IGuiCtl* m_Ctl;
 
-	virtual BOOL Exc(const CString& val) = 0;
-	virtual void* Get(void* par) = 0;
-	virtual BOOL Set(void* sta, void* par) = 0;
-	virtual void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam) = 0;
+public:
+	IGuiSet()
+		: m_Ctl(NULL)
+	{}
+
+public:
+	IGuiCtl*& Ctl() { return m_Ctl; }
+	virtual BOOL Key(const CString& key) const { return FALSE; }
+	virtual BOOL Exc(const CString& val) { return FALSE; }
+	virtual void* Get(void* par) { return NULL; }
+	virtual BOOL Set(void* sta, void* par) { return TRUE; }
+	virtual void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam) {}
 };
 
 //////////////////////////////////////////////////////////////////
@@ -545,21 +554,21 @@ public:
 
 public:
 	// 是否对子容器做托管
-	void SetTrustSet(BOOL bTruCldr = TRUE) { SetTrustItm(bTruCldr); }
-	BOOL IsTrustSet() const { return IsTrustItm(); }
+	void SetTrustSet(BOOL bTruCldr = TRUE) { SetTrust(bTruCldr); }
+	BOOL IsTrustSet() const { return IsTrust(); }
 
 	// 获得内部对象
 	set_list_t& GetSet() const { return GetItm(); }
 
 	// 查找
-	set_list_t::iterator_t FindSet(IGuiSet* p) { return FindItm(p); }
+	set_list_t::iterator_t FindSet(IGuiSet* p) { return Find(p); }
 
 	// 组合接口
-	virtual void AddSet(void* p) { AddItm(p); }
-	virtual void InsSet(void* p) { InsItm(p); }
-	virtual void DelSet(void* p) { DelItm(p); }
-	virtual void PopSet(BOOL bLast = TRUE) { PopItm(bLast); }
-	virtual void ClearSet() { ClearItm(); }
+	virtual void AddSet(void* p) { Add(p); }
+	virtual void InsSet(void* p) { Ins(p); }
+	virtual void DelSet(void* p) { Del(p); }
+	virtual void PopSet(BOOL bLast = TRUE) { Pop(bLast); }
+	virtual void ClearSet() { Clear(); }
 };
 
 //////////////////////////////////////////////////////////////////

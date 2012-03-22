@@ -409,7 +409,7 @@ protected:
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				ctl->Send(*ite, nMessage, wParam, lParam);
+				ctl->SendMessage(nMessage, wParam, lParam);
 				if(!ctl->IsValid()) return NULL;
 				// 判断返回值
 				lrDef = ctl->GetResult(lrDef);
@@ -425,7 +425,7 @@ protected:
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
-				ctl->Send(*ite, nMessage, wParam, lParam);
+				ctl->SendMessage(nMessage, wParam, lParam);
 				if(!ctl->IsValid()) return NULL;
 				// 判断返回值
 				lrDef = ctl->GetResult(lrDef);

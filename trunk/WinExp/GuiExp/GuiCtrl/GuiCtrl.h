@@ -85,12 +85,11 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // GUI 控件对象接口
-EXP_INTERFACE IGuiCtl : public IGuiBase
+EXP_INTERFACE IGuiCtl : public IGuiBase, public IGuiSetMgr
 {
 	EXP_DECLARE_DYNAMIC_MULT(IGuiCtl, IGuiBase)
 
 public:
-	typedef CListT<IGuiSet*> isets_t;
 	typedef CListT<IGuiCtl*> items_t;
 	typedef CTreeT<IGuiCtl*> itree_t;
 
@@ -100,7 +99,6 @@ protected:
 	BOOL m_bTruEff;
 	CSize m_szScroll;
 	IGuiCtl* (m_Scroll[2]);
-	isets_t m_Sets;
 
 public:
 	IGuiCtl()
@@ -109,6 +107,7 @@ public:
 	{
 		m_Scroll[1] = m_Scroll[0] = NULL;
 	}
+	BOOL IsValid() const { return EXP_BASE::IsValid(); }
 
 protected:
 	void Init(IGuiComp* pComp)
@@ -133,16 +132,32 @@ protected:
 public:
 	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		if (GetParent())
-			IGuiSender::Send(pGui, nMessage, wParam, lParam);
+		if(!GetParent()) return;
+		for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+		{
+			IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+			if(!set) continue;
+			set->Msg(nMessage, wParam, lParam);
+		}
+		IGuiSender::Send(pGui, nMessage, wParam, lParam);
 	}
-	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		Send(this, nMessage, wParam, lParam);
-	}
+	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) { Send(this, nMessage, wParam, lParam); }
 
 	// 控件设置对象管理
-
+	void AddSet(void* p)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		if (!set) return;
+		set->Ctl() = this;
+		IGuiSetMgr::AddSet(p);
+	}
+	void InsSet(void* p)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		if (!set) return;
+		set->Ctl() = this;
+		IGuiSetMgr::InsSet(p);
+	}
 
 	// 获得控件状态
 	virtual void* GetState(const CString& sType, void* pParam = NULL) = 0;

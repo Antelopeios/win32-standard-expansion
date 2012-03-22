@@ -72,101 +72,16 @@ public:
 		, m_Image(NULL)
 		, m_Text(NULL)
 	{
+		// 添加逻辑对象
+		AddSet(ExGui(_T("_pic_style"), GetGC()));
+		AddSet(ExGui(_T("_pic_font"), GetGC()));
+		AddSet(ExGui(_T("_pic_color"), GetGC()));
+		AddSet(ExGui(_T("_pic_image"), GetGC()));
+		AddSet(ExGui(_T("_pic_text"), GetGC()));
 		// 添加事件对象
 		AddEvent(ExGui(_T("CGuiPictureEvent"), GetGC()));
 	}
-	~CGuiPicture()
-	{
-	}
-
-public:
-	BOOL Execute(const CString& key, const CString& val)
-	{
-		CArrayT<CString> sa;
-		if (key == _T("style"))
-		{
-			style_t* sty = ExGet<style_t>(val);
-			if (sty)
-			{
-				if(!sty->font.Empty())
-					SetState(_T("font"), sty->font[0]);
-				if(!sty->color.Empty())
-					SetState(_T("color"), (void*)(sty->color[0]));
-				if(!sty->image.Empty())
-					SetState(_T("image"), sty->image[0]);
-			}
-		}
-		else
-		if (key == _T("font"))
-		{
-			ExStringToArray(val, sa);
-			SetState(_T("font"), ExGet<CText>(sa[0]));
-		}
-		else
-		if (key == _T("color"))
-		{
-			ExStringToArray(val, sa);
-			SetState(_T("color"), (void*)ExStringToColor(sa[0]));
-		}
-		else
-		if (key == _T("image"))
-		{
-			ExStringToArray(val, sa);
-			SetState(_T("image"), ExGet<CImage>(sa[0]));
-		}
-		else
-		if (key == _T("text"))
-			SetState(_T("text"), (void*)&val);
-		return TRUE;
-	}
-
-	// 获得控件状态
-	void* GetState(const CString& sType, void* pParam = NULL)
-	{
-		if (sType == _T("color"))
-			return (void*)m_Color;
-		else
-		if (sType == _T("image"))
-			return (void*)m_Image;
-		else
-		if (sType == _T("font"))
-			return (void*)m_Text;
-		else
-		if (sType == _T("text"))
-			return (void*)(&m_Str);
-		else
-			return EXP_BASE::GetState(sType);
-	}
-	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
-	{
-		if (sType == _T("color"))
-		{
-			m_Color = (pixel_t)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("image"))
-		{
-			m_Image = (CImage*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("font"))
-		{
-			m_Text = (CText*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("text"))
-		{
-			m_Str = *(CString*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		return FALSE;
-	}
 };
-
-//////////////////////////////////////////////////////////////////
 
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
 

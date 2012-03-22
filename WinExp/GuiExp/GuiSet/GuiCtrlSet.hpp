@@ -112,7 +112,7 @@ public:
 EXP_IMPLEMENT_DYNCREATE_CLS(_pic_font, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
-	
+
 class _pic_color : public IGuiSet
 {
 	EXP_DECLARE_DYNCREATE_CLS(_pic_color, IGuiSet)
@@ -146,7 +146,7 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_pic_color, IGuiSet)
-	
+
 //////////////////////////////////////////////////////////////////
 	
 class _pic_image : public IGuiSet
@@ -182,9 +182,9 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_pic_image, IGuiSet)
-	
+
 //////////////////////////////////////////////////////////////////
-	
+
 class _pic_text : public IGuiSet
 {
 	EXP_DECLARE_DYNCREATE_CLS(_pic_text, IGuiSet)
@@ -237,7 +237,7 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_style, IGuiSet)
-	
+
 //////////////////////////////////////////////////////////////////
 
 class _btn_font : public IGuiSet
@@ -283,7 +283,96 @@ public:
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_font, IGuiSet)
 
+//////////////////////////////////////////////////////////////////
 
+class _btn_color : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_color, IGuiSet)
+
+protected:
+	pixel_t m_Color[10];
+
+public:
+	_btn_color()
+	{ ZeroMemory(m_Color, sizeof(m_Color)); }
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("color")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
+			m_Color[i] = ExStringToColor(sa[i]);
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Color;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		for(int i = 0; i < _countof(m_Color); ++i)
+			m_Color[i] = ((pixel_t*)sta)[i];
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_color, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_image : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_image, IGuiSet)
+
+protected:
+	CImage* m_Image[9];	// 九宫格分割,每个小块保存所有状态
+
+public:
+	_btn_image()
+	{ ZeroMemory(m_Image, sizeof(m_Image)); }
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("image")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		for(int i = 0; i < (int)min(_countof(m_Image), sa.GetCount()); ++i)
+			m_Image[i] = ExGet<CImage>(sa[i]);
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Image;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		if (par)
+		{
+			for(int i = 0; i < _countof(m_Image); ++i)
+				m_Image[i] = ((CImage**)sta)[i];
+		}
+		else
+		{
+			for(int i = 0; i < _countof(m_Image); ++i)
+				m_Image[i] = (CImage*)sta + i;
+		}
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_image, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_text : public _pic_text
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_text, _pic_text)
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_text, _pic_text)
 
 //////////////////////////////////////////////////////////////////
 

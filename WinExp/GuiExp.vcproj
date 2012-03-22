@@ -377,6 +377,10 @@
 			Name="GuiSet"
 			>
 			<File
+				RelativePath=".\GuiExp\GuiSet\GuiCtrlSet.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GuiExp\GuiSet\GuiSet.cpp"
 				>
 			</File>

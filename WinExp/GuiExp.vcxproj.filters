@@ -166,6 +166,9 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiProgressEvent.hpp">
       <Filter>GuiEvent</Filter>
     </ClInclude>
+    <ClInclude Include="GuiExp\GuiSet\GuiCtrlSet.hpp">
+      <Filter>GuiSet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GuiExp\GuiExp.rc" />

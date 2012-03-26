@@ -34,7 +34,7 @@
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
 // Date:	2012-03-26
-// Version:	1.0.0024.1207
+// Version:	1.0.0024.1515
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -68,7 +68,8 @@
 //	- 1.0.0021.1830(2012-03-03)	= 调整IGuiComp::GetChildren()为IGuiComp::GetComp()
 //	- 1.0.0022.1820(2012-03-21)	+ 添加IGuiItem与IGuiItemMgr,合并一些通用的元素聚合操作
 //	- 1.0.0023.1505(2012-03-24)	+ IGuiItemMgr支持直接通过字符串创建或删除指定类型的IGuiItem对象
-//	- 1.0.0024.1207(2012-03-26)	+ IGuiSetMgr支持直接通过其内部IGuiSet的Key值直接定位IGuiSet指针
+//	- 1.0.0024.1515(2012-03-26)	+ IGuiSetMgr支持直接通过其内部IGuiSet的Key值直接定位IGuiSet指针
+//								= IGuiSetMgr将会自动覆盖掉Key值相同的IGuiSet对象(Key为空的不会被覆盖)
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -221,6 +222,7 @@ public:
 		itm_iter_t ite = Find(itm);
 		if (ite == GetItm().Tail()) return TRUE;
 		// 删除对象
+		m_CldrMap->Replace(ite);
 		if (!GetItm().Del(ite)) return FALSE;
 		if (IsTrust() && itm->IsTrust()) itm->Free();
 		return TRUE;
@@ -231,9 +233,9 @@ public:
 		itm_iter_t ite = Find(key);
 		if (ite == GetItm().Tail()) return TRUE;
 		// 删除对象
+		m_CldrMap->Del(key);
 		if (!GetItm().Del(ite)) return FALSE;
 		if (IsTrust() && (*ite)->IsTrust()) (*ite)->Free();
-		m_CldrMap->Del(key);
 		return TRUE;
 	}
 	BOOL Pop(BOOL bLast = TRUE)
@@ -586,12 +588,19 @@ public:
 	{}
 
 public:
+	// 获得该属性对象所属的控件指针(支持修改)
 	EXP_INLINE IGuiCtl*& Ctl() { return m_Ctl; }
+	// 获得该属性对象的属性关键字
 	virtual CString GetKey() const { return _T(""); }
+	// 传入一个字符串比较是否是该属性对象的属性关键字
 	virtual BOOL Key(const CString& key) const { return (key == GetKey()); }
+	// 脚本解析接口
 	virtual BOOL Exc(const CString& val) { return FALSE; }
+	// 属性获取接口
 	virtual void* Get(void* par) { return NULL; }
+	// 属性设置接口
 	virtual BOOL Set(void* sta, void* par) { return TRUE; }
+	// 属性消息响应接口
 	virtual void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam) {}
 };
 
@@ -645,46 +654,64 @@ public:
 	{
 		IGuiSet* set = ExDynCast<IGuiSet>(p);
 		if (!set) return FALSE;
-		if (!Add(p)) return FALSE;
 		CString str(set->GetKey());
-		if (!str.Empty()) m_KeyMap[str] = GetSet().Last();
+		if (str.Empty()) return Add(p);
+		// 替换掉当前已有的属性
+		Del(FindKeySet(str));
+		if (!Add(p)) return FALSE;
+		m_KeyMap[str] = GetSet().Last();
 		return TRUE;
 	}
 	virtual BOOL AddSet(LPCTSTR key)
 	{
+		if (FindSet(key) != GetSet().Tail())
+			Del(key)/*不删除m_KeyMap的映射*/;
 		if (!Add(key)) return FALSE;
 		set_list_t::iterator_t ite = GetSet().Last();
 		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
 		if (!set)
 		{
-			DelSet(key);
+			DelSet(key)/*删除m_KeyMap的映射*/;
 			return FALSE;
 		}
 		CString str(set->GetKey());
-		if (!str.Empty()) m_KeyMap[str] = ite;
+		if (!str.Empty())
+		{	// 替换掉当前已有的属性
+			Del(FindKeySet(str));
+			m_KeyMap[str] = ite;
+		}
 		return TRUE;
 	}
 	virtual BOOL InsSet(void* p)
 	{
 		IGuiSet* set = ExDynCast<IGuiSet>(p);
 		if (!set) return FALSE;
-		if (!Ins(p)) return FALSE;
 		CString str(set->GetKey());
+		if (str.Empty()) return Ins(p);
+		// 替换掉当前已有的属性
+		Del(FindKeySet(str));
+		if (!Ins(p)) return FALSE;
 		if (!str.Empty()) m_KeyMap[str] = GetSet().Head();
 		return TRUE;
 	}
 	virtual BOOL InsSet(LPCTSTR key)
 	{
+		if (FindSet(key) != GetSet().Tail())
+			Del(key)/*不删除m_KeyMap的映射*/; // 替换掉当前已有的属性
 		if (!Ins(key)) return FALSE;
 		set_list_t::iterator_t ite = GetSet().Head();
 		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
 		if (!set)
 		{
-			DelSet(key);
+			DelSet(key)/*删除m_KeyMap的映射*/;
 			return FALSE;
 		}
 		CString str(set->GetKey());
-		if (!str.Empty()) m_KeyMap[str] = ite;
+		if (!str.Empty())
+		{	// 替换掉当前已有的属性
+			Del(FindKeySet(str));
+			m_KeyMap[str] = ite;
+		}
 		return TRUE;
 	}
 	virtual BOOL DelSet(void* p)

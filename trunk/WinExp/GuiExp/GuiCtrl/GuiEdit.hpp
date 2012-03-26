@@ -56,6 +56,93 @@
 #pragma comment(lib, "Imm32.lib")
 
 EXP_BEG
+	
+//////////////////////////////////////////////////////////////////
+
+class _edt_font : public _pic_font
+{
+	EXP_DECLARE_DYNCREATE_CLS(_edt_font, _pic_font)
+
+public:
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam) {}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_edt_font, _pic_font)
+
+//////////////////////////////////////////////////////////////////
+
+class _edt_empty_font : public _pic_font
+{
+	EXP_DECLARE_DYNCREATE_CLS(_edt_empty_font, _pic_font)
+
+public:
+	CString GetKey() const { return _T("empty_font"); }
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam) {}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_edt_empty_font, _pic_font)
+
+//////////////////////////////////////////////////////////////////
+
+class _edt_empty_text : public _pic_text
+{
+	EXP_DECLARE_DYNCREATE_CLS(_edt_empty_text, _pic_text)
+
+public:
+	CString GetKey() const { return _T("empty_text"); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_edt_empty_text, _pic_text)
+
+//////////////////////////////////////////////////////////////////
+
+class _edt_txt_sel_color : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_edt_txt_sel_color, IGuiSet)
+
+protected:
+	pixel_t m_Color[2];
+
+public:
+	_edt_txt_sel_color()
+	{ ZeroMemory(m_Color, sizeof(m_Color)); }
+
+public:
+	CString GetKey() const { return _T("txt_sel_color"); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
+			m_Color[i] = ExStringToColor(sa[i]);
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Color;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		for(int i = 0; i < _countof(m_Color); ++i)
+			m_Color[i] = ((pixel_t*)sta)[i];
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_edt_txt_sel_color, IGuiSet)
+	
+//////////////////////////////////////////////////////////////////
+
+class _edt_bkg_sel_color : public _edt_txt_sel_color
+{
+	EXP_DECLARE_DYNCREATE_CLS(_edt_bkg_sel_color, _edt_txt_sel_color)
+
+public:
+	CString GetKey() const { return _T("bkg_sel_color"); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_edt_bkg_sel_color, _edt_txt_sel_color)
 
 //////////////////////////////////////////////////////////////////
 
@@ -64,11 +151,7 @@ class CGuiEdit : public CGuiPicture
 	EXP_DECLARE_DYNCREATE_MULT(CGuiEdit, CGuiPicture)
 
 protected:
-	CString m_EmptyStr;
-	CText* m_EmptyText;
-	pixel_t m_ColorSelTxt[2];
-	pixel_t m_ColorSelBkg[2];
-	HIMC	m_ImmContext;
+	HIMC m_ImmContext;
 
 protected:
 	void Init(IGuiComp* pComp)
@@ -89,12 +172,16 @@ protected:
 public:
 	CGuiEdit()
 		: m_ImmContext(NULL)
-		, m_EmptyText(NULL)
 	{
-		ZeroMemory(m_ColorSelTxt, sizeof(m_ColorSelTxt));
-		ZeroMemory(m_ColorSelBkg, sizeof(m_ColorSelBkg));
+		// 添加逻辑对象
+		AddSet(_T("_edt_font"));
+		AddSet(_T("_edt_empty_font"));
+		AddSet(_T("_edt_empty_text"));
+		AddSet(_T("_edt_txt_sel_color"));
+		AddSet(_T("_edt_bkg_sel_color"));
 		// 添加事件对象
 		AddEvent(ExGui(_T("CGuiEditEvent"), GetGC()));
+		// 设置默认属性
 		pixel_t pix[2] = {0};
 		pix[0] = ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM);
 		pix[1] = ExRGBA(0, 0, 0, EXP_CM);
@@ -103,82 +190,6 @@ public:
 		pix[0] = ExRGBA(51, 153, EXP_CM, EXP_CM);
 		pix[1] = ExRGBA(191, 205, 219, EXP_CM);
 		SetState(_T("bkg_sel_color"), pix);
-	}
-
-public:
-	BOOL Execute(const CString& key, const CString& val)
-	{
-		CArrayT<CString> sa;
-		if (key == _T("empty_text"))
-			SetState(_T("empty_text"), (void*)&val);
-		else
-		if (key == _T("empty_font"))
-			SetState(_T("empty_font"), ExGet<CText>(val));
-		else
-		if (key == _T("txt_sel_color"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_ColorSelTxt), sa.GetCount()); ++i)
-				m_ColorSelTxt[i] = ExStringToColor(sa[i]);
-		}
-		else
-		if (key == _T("bkg_sel_color"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_ColorSelBkg), sa.GetCount()); ++i)
-				m_ColorSelBkg[i] = ExStringToColor(sa[i]);
-		}
-		else
-			return EXP_BASE::Execute(key, val);
-		return IGuiCtrlBase::Execute(key, val);
-	}
-
-	// 获得控件状态
-	void* GetState(const CString& sType, void* pParam = NULL)
-	{
-		if (sType == _T("empty_text"))
-			return (void*)(&m_EmptyStr);
-		else
-		if (sType == _T("empty_font"))
-			return (void*)m_EmptyText;
-		else
-		if (sType == _T("txt_sel_color"))
-			return (void*)m_ColorSelTxt;
-		else
-		if (sType == _T("bkg_sel_color"))
-			return (void*)m_ColorSelBkg;
-		else
-			return EXP_BASE::GetState(sType);
-	}
-	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
-	{
-		if (sType == _T("empty_text"))
-		{
-			m_EmptyStr = *(CString*)pState;
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("empty_font"))
-		{
-			m_EmptyText = (CText*)pState;
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("txt_sel_color"))
-		{
-			for(int i = 0; i < _countof(m_ColorSelTxt); ++i)
-				m_ColorSelTxt[i] = ((pixel_t*)pState)[i];
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("bkg_sel_color"))
-		{
-			for(int i = 0; i < _countof(m_ColorSelBkg); ++i)
-				m_ColorSelBkg[i] = ((pixel_t*)pState)[i];
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-			return EXP_BASE::SetState(sType, pState);
 	}
 };
 

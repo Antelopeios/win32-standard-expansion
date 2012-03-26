@@ -151,18 +151,14 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_txt_font, _pic_font)
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiText : public IGuiCtrlBase
+class CGuiText : public CGuiPicture
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiText, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiText, CGuiPicture)
 		
 public:
 	CGuiText()
 	{
 		// 添加逻辑对象
-		AddSet(_T("_pic_style"));
-		AddSet(_T("_pic_image"));
-		AddSet(_T("_pic_color"));
-		AddSet(_T("_pic_text"));
 		AddSet(_T("_txt_font"));
 		// 设置默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
@@ -171,7 +167,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiText, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiText, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////
 

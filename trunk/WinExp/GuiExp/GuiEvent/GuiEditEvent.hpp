@@ -529,17 +529,8 @@ public:
 		CText* empt = (CText*)m_Ctrl->GetState(_T("empty_font"));
 		CString* empt_str = (CString*)m_Ctrl->GetState(_T("empty_text"));
 
-		CImage* image = (CImage*)m_Ctrl->GetState(_T("image"));
-		pixel_t pixel = (pixel_t)m_Ctrl->GetState(_T("color"));
-
 		pixel_t txt_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("txt_sel_color")))[no_foc];
 		pixel_t bkg_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("bkg_sel_color")))[no_foc];
-
-		// »æ±³¾°
-		CImgDrawer::Fill(*mem_img, rect, pixel);
-		if (image && !image->IsNull())
-			CImgDrawer::Draw(*mem_img, image->Get(), rect, 
-				CPoint(), CSize(rect.Width(), rect.Height()));
 
 		// ÄÃµ½Æ«ÒÆÁ¿
 		CSize sz_off;
@@ -697,7 +688,6 @@ public:
 		case WM_PAINT:
 			ShowFlicker(m_Ctrl->IsFocus());
 			OnPaint((CGraph*)lParam);
-			SetState(break_next);
 			break;
 		}
 	}

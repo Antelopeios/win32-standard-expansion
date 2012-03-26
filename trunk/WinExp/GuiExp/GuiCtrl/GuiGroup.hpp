@@ -162,7 +162,7 @@ public:
 		if (sType == _T("sta_cnt"))
 		{
 			m_StatusCount = (DWORD)(LONG_PTR)pState;
-			return TRUE;
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
 		if (sType == _T("image"))
@@ -190,7 +190,7 @@ public:
 				rc_itm.Offset(pt_off);
 			}
 			m_ImgCac = NULL;
-			return EXP_BASE::SetState(sType, pState);
+			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		return FALSE;
 	}

@@ -19,9 +19,6 @@
     <Filter Include="GuiManager">
       <UniqueIdentifier>{5cf6ef67-3330-4b4f-8ed6-cacd6acbedee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GuiSet">
-      <UniqueIdentifier>{c58d1a5e-87e8-4d49-9d49-39b53f005707}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuiExp\GuiCommon\GuiCommon.cpp">
@@ -44,9 +41,6 @@
     </ClCompile>
     <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp">
       <Filter>GuiManager</Filter>
-    </ClCompile>
-    <ClCompile Include="GuiExp\GuiSet\GuiSet.cpp">
-      <Filter>GuiSet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -96,9 +90,6 @@
       <Filter>GuiEvent</Filter>
     </ClInclude>
     <ClInclude Include="GuiExp\GuiEvent\GuiLVEvent.hpp">
-      <Filter>GuiEvent</Filter>
-    </ClInclude>
-    <ClInclude Include="GuiExp\GuiEvent\GuiPictureEvent.hpp">
       <Filter>GuiEvent</Filter>
     </ClInclude>
     <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp">
@@ -157,17 +148,11 @@
     <ClInclude Include="GuiExp\GuiCtrl\GuiText.hpp">
       <Filter>GuiCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="GuiExp\GuiEvent\GuiTextEvent.hpp">
-      <Filter>GuiEvent</Filter>
-    </ClInclude>
     <ClInclude Include="GuiExp\GuiCtrl\GuiProgress.hpp">
       <Filter>GuiCtrl</Filter>
     </ClInclude>
     <ClInclude Include="GuiExp\GuiEvent\GuiProgressEvent.hpp">
       <Filter>GuiEvent</Filter>
-    </ClInclude>
-    <ClInclude Include="GuiExp\GuiSet\GuiCtrlSet.hpp">
-      <Filter>GuiSet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

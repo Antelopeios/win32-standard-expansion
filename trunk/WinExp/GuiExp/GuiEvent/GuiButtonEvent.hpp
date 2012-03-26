@@ -199,61 +199,6 @@ protected:
 		return TRUE;
 	}
 
-	virtual void DblClk(IGuiCtl* pCtl)
-	{
-		SendPare(pCtl, BN_DOUBLECLICKED);
-	}
-
-	virtual void BtnDwn(IGuiCtl* pCtl)
-	{
-		if ((DWORD)pCtl->GetState(_T("status")) != 3)
-			pCtl->SetState(_T("status"), (void*)2);
-	}
-
-	virtual void BtnUp(IGuiCtl* pCtl)
-	{
-		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-		if (status == 3) return;
-
-		IGuiWnd* wnd = pCtl->GetWnd();
-		if (!wnd) return;
-		POINT pt_tmp = {0};
-		::GetCursorPos(&pt_tmp);
-		CPoint pt(pt_tmp);
-		wnd->ScreenToClient(pt);
-		CRect rc;
-		pCtl->GetRealRect(rc);
-
-		if (status == 2) // 当按下后抬起,视为一次Click
-		{
-			pCtl->SendMessage(BM_CLICK);
-			if(!pCtl->IsValid()) return;
-			SendPare(pCtl, BN_CLICKED);
-		}
-
-		status = (DWORD)pCtl->GetState(_T("status"));
-		if (status == 3) return;
-
-		if (rc.PtInRect(pt))
-			status = 1;
-		else
-			status = 0;
-		pCtl->SetState(_T("status"), (void*)status);
-	}
-
-	virtual void MusMov(IGuiCtl* pCtl)
-	{
-		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-		if (status != 2 && status != 3)
-			pCtl->SetState(_T("status"), (void*)1);
-	}
-
-	virtual void MusLev(IGuiCtl* pCtl)
-	{
-		if ((DWORD)pCtl->GetState(_T("status")) != 3)
-			pCtl->SetState(_T("status"), (void*)0);
-	}
-
 	virtual void Paint(IGuiCtl* pCtl, CGraph* mem_img)
 	{
 		if (!mem_img || mem_img->IsNull()) return;
@@ -314,14 +259,13 @@ protected:
 				status += nfc_tim;
 		}
 
-		int shake_ico = (int)pCtl->GetState(_T("shake_ico"));
+		BOOL shake_ico = (BOOL)pCtl->GetState(_T("shake_ico"));
 
 		CImage** image = (CImage**)pCtl->GetState(_T("image"));
 		pixel_t pixel = ((pixel_t*)pCtl->GetState(_T("color")))[status];
 		CText* text = ((CText**)pCtl->GetState(_T("font")))[status];
 		CString* str = (CString*)pCtl->GetState(_T("text"));
 		CImage* icon = (CImage*)pCtl->GetState(_T("icon"));
-		BOOL glow = (BOOL)(LONG_PTR)pCtl->GetState(_T("glow"));
 
 		CRect rect;
 		pCtl->GetClientRect(rect);
@@ -439,35 +383,6 @@ protected:
 			icon = &img_ico;
 		}
 
-		// 图标阴影
-		LONG radius = 0;
-	/*	if (glow)
-		{
-			CFilterGauss filter;
-			radius = filter.m_Radius;
-			if (m_IconOld.Get() != icon->Get())
-			{
-				if (icon->IsNull())
-					m_IconTmp.Delete();
-				else
-				{
-					CPoint pt_flt(radius << 1, radius << 1);
-					// 将图片扩大
-					CRect rc(0, 0, icon->GetWidth(), icon->GetHeight());
-					m_IconTmp = icon->Clone(rc + pt_flt);
-					// 阴影化
-					CImgFilter::Filter(m_IconTmp, CRect(), &CFilterFill(0, 0xe));
-					CImgFilter::Filter(m_IconTmp, CRect(), &filter);
-					// 阴影叠加
-					rc.Offset(pt_flt);
-					CImgDrawer::Draw(m_IconTmp, icon->Get(), rc);
-				}
-				// 保存指针
-				m_IconOld = icon->Get();
-			}
-			icon = &m_IconTmp;
-		}*/
-
 		// 绘文字
 		DWORD locate = (DWORD)pCtl->GetState(_T("locate"));
 		LONG loc_off = (LONG)pCtl->GetState(_T("loc_off"));
@@ -475,7 +390,7 @@ protected:
 		CRect img_rct;
 		if (FmtTxtRect(rect, text, str, locate, loc_off + ico_off, img_rct, icon))
 		{
-			if (shake_ico != 0 && (status == 2 || status == 6)) img_rct.Offset(CPoint(1, 1));
+			if (shake_ico != FALSE && (status == 2 || status == 6)) img_rct.Offset(CPoint(1, 1));
 			CImgDrawer::Draw(*mem_img, m_imgClp, img_rct);
 		}
 
@@ -504,32 +419,16 @@ public:
 		{
 		case WM_LBUTTONDBLCLK:
 		case WM_NCLBUTTONDBLCLK:
-			DblClk(ctl);
-			break;
-		case WM_MOUSEMOVE:
-		case WM_NCMOUSEMOVE:
-			MusMov(ctl);
-			break;
-		case WM_KEYDOWN:
-			if (wParam != VK_RETURN) break; // Enter
-		case WM_LBUTTONDOWN:
-		case WM_NCLBUTTONDOWN:
-			BtnDwn(ctl);
-			break;
-		case WM_KEYUP:
-			if (wParam != VK_RETURN) break; // Enter
-		case WM_LBUTTONUP:
-		case WM_NCLBUTTONUP:
-			BtnUp(ctl);
-			break;
-		case WM_MOUSELEAVE:
-			MusLev(ctl);
+			SendPare(ctl, BN_DOUBLECLICKED);
 			break;
 		case WM_SETFOCUS:
 			SendPare(ctl, BN_SETFOCUS);
 			break;
 		case WM_KILLFOCUS:
 			SendPare(ctl, BN_KILLFOCUS);
+			break;
+		case BM_CLICK:
+			SendPare(ctl, BN_CLICKED);
 			break;
 		case WM_PAINT:
 			Paint(ctl, (CGraph*)lParam);

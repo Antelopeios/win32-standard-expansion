@@ -77,16 +77,17 @@ public:
 		{
 			CString type(key);
 			type.TrimLeft(_T("pg_"));
-			return m_Prog.Execute(type, val);
+			m_Prog.Execute(type, val);
 		}
 		else
 		if (key == _T("val"))
-			return SetState(_T("val"), (void*)_ttol(val));
+			SetState(_T("val"), (void*)_ttol(val));
 		else
 		if (key == _T("max"))
-			return SetState(_T("max"), (void*)_ttol(val));
+			SetState(_T("max"), (void*)_ttol(val));
 		else
 			return EXP_BASE::Execute(key, val);
+		return IGuiCtrlBase::Execute(key, val);
 	}
 
 	void* GetState(const CString& sType, void* pParam = NULL)

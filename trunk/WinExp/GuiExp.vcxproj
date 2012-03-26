@@ -102,7 +102,6 @@
     <ClCompile Include="GuiExp\GuiEvent\GuiEvent.cpp" />
     <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp" />
     <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp" />
-    <ClCompile Include="GuiExp\GuiSet\GuiSet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GuiExp\GuiBoard\GuiMenu.hpp" />
@@ -131,10 +130,8 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiListEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiLVEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiMenuEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiPictureEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiProgressEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp" />
-    <ClInclude Include="GuiExp\GuiEvent\GuiTextEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiEffectBase.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp" />
@@ -144,7 +141,6 @@
     <ClInclude Include="GuiExp\GuiManager\GuiManager.h" />
     <ClInclude Include="GuiExp\GuiManager\GuiXML.h" />
     <ClInclude Include="GuiExp\GuiExp.h" />
-    <ClInclude Include="GuiExp\GuiSet\GuiCtrlSet.hpp" />
     <ClInclude Include="GuiExp\resource.h" />
   </ItemGroup>
   <ItemGroup>

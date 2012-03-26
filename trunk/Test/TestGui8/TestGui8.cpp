@@ -31,7 +31,7 @@ protected:
 		ExGet<IGuiCtl>(_T("scrl"))->AddEvent(dbnew(CScrEvent));
 
 		CString str;
-		for(int i = 0; i < 10; ++i)
+		for(int i = 0; i < 1000; ++i)
 		{
 			CString tmp;
 			tmp.Format(_T("这是一行文字, 文字测试第%d行\n"), i + 1);

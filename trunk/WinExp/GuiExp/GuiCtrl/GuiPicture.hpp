@@ -56,30 +56,164 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+class _pic_style : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_pic_style, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("style")); }
+	BOOL Exc(const CString& val)
+	{
+		style_t* sty = ExGet<style_t>(val);
+		if(!sty) return TRUE;
+		if(!sty->font.Empty())
+			Ctl()->SetState(_T("font"), sty->font[0]);
+		if(!sty->color.Empty())
+			Ctl()->SetState(_T("color"), (void*)(sty->color[0]));
+		if(!sty->image.Empty())
+			Ctl()->SetState(_T("image"), sty->image[0]);
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_pic_style, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _pic_font : public ICtrlSetT<CText*>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_pic_font, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("font")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		Set(ExGet<CText>(sa[0]));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		if (nMessage != WM_PAINT) return;
+
+		if (!m_Val) return;
+		CString* str = (CString*)Ctl()->GetState(_T("text"));
+		if (!str) return;
+
+		CImage txt_img(m_Val->GetImage(*str));
+		if (txt_img.IsNull()) return;
+
+		CGraph* mem_img = (CGraph*)lParam;
+		if (!mem_img || mem_img->IsNull()) return;
+
+		CRect rect;
+		Ctl()->GetClientRect(rect);
+
+		CImgDrawer::Draw(*mem_img, txt_img, CRect(
+				(rect.Right() - txt_img.GetWidth()) / 2, 
+				(rect.Bottom() - txt_img.GetHeight()) / 2, 
+				rect.Right(), rect.Bottom()));
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_pic_font, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _pic_color : public ICtrlSetT<pixel_t>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_pic_color, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("color")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		Set((void*)ExStringToColor(sa[0]));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		if (nMessage != WM_PAINT) return;
+
+		CGraph* mem_img = (CGraph*)lParam;
+		if (!mem_img || mem_img->IsNull()) return;
+
+		CRect rect;
+		Ctl()->GetClientRect(rect);
+
+		CImgDrawer::Fill(*mem_img, rect, m_Val);
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_pic_color, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+	
+class _pic_image : public ICtrlSetT<CImage*>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_pic_image, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("image")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		Set((void*)ExGet<CImage>(sa[0]));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		if (nMessage != WM_PAINT) return;
+
+		if (!m_Val || m_Val->IsNull()) return;
+
+		CGraph* mem_img = (CGraph*)lParam;
+		if (!mem_img || mem_img->IsNull()) return;
+
+		CRect rect;
+		Ctl()->GetClientRect(rect);
+
+		CImgDrawer::Draw(*mem_img, m_Val->Get(), rect, 
+			CPoint(), CSize(rect.Width(), rect.Height()));
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_pic_image, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _pic_text : public ICtrlSetT<CString>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_pic_text, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("text")); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_pic_text, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
 class CGuiPicture : public IGuiCtrlBase
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
 
-protected:
-	pixel_t m_Color;
-	CImage* m_Image;
-	CText* m_Text;
-	CString m_Str;
-
 public:
 	CGuiPicture()
-		: m_Color(0)
-		, m_Image(NULL)
-		, m_Text(NULL)
 	{
 		// 添加逻辑对象
-		AddSet(ExGui(_T("_pic_style"), GetGC()));
-		AddSet(ExGui(_T("_pic_font"), GetGC()));
-		AddSet(ExGui(_T("_pic_color"), GetGC()));
-		AddSet(ExGui(_T("_pic_image"), GetGC()));
-		AddSet(ExGui(_T("_pic_text"), GetGC()));
-		// 添加事件对象
-		AddEvent(ExGui(_T("CGuiPictureEvent"), GetGC()));
+		AddSet(_T("_pic_style"));
+		AddSet(_T("_pic_image"));
+		AddSet(_T("_pic_color"));
+		AddSet(_T("_pic_text"));
+		AddSet(_T("_pic_font"));
 	}
 };
 

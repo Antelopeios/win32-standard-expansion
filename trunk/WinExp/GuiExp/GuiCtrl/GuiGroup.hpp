@@ -86,7 +86,7 @@ public:
 		else
 		if (key == _T("sta_cnt"))
 			SetState(_T("sta_cnt"), (void*)_ttol(val));
-		return TRUE;
+		return IGuiCtrlBase::Execute(key, val);
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬

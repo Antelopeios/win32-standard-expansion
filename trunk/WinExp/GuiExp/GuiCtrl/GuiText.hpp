@@ -48,26 +48,115 @@
 #endif // _MSC_VER > 1000
 
 EXP_BEG
+	
+//////////////////////////////////////////////////////////////////
+
+class _txt_font : public _pic_font
+{
+	EXP_DECLARE_DYNCREATE_CLS(_pic_font, _pic_font)
+
+protected:
+	CImage m_imgClp;
+	CText m_txtTmp;
+	CRect m_rcImg;
+	CString m_StrTmp;
+
+public:
+	BOOL FmtTxtRect(CRect rect, CText* text, CString* str, IGuiCtrlBase* ctl)
+	{
+		if (!text || !str)
+		{
+			ctl->SetFraRect(CSize());
+			ctl->SetAllRect(CSize());
+			return FALSE;
+		}
+
+		if (m_txtTmp == (*text) && 
+			m_rcImg == rect && 
+			m_StrTmp == *str) return TRUE;
+
+		m_txtTmp = (*text);
+		m_rcImg = rect;
+		m_StrTmp = (*str);
+
+		// 计算缓存图大小并预存分段位图
+		CArrayT<CString> sa;
+		ExStringToArray(*str, sa, _T('\n'), FALSE);
+		CArrayT<CImage> ia;
+		CArrayT<LONG> fa;
+		LONG h = 0;
+		for(DWORD i = 0; i < sa.GetCount(); ++i)
+		{
+			fa.PushLast(0);
+			ia.PushLast(text->GetImage(sa[i], rect, 2, _T("..."), &(fa[i])));
+			if (!ia[i].IsNull()) h += fa[i];
+		}
+
+		// 绘制缓存
+		rect.MoveTo(CPoint());
+		rect.Height(h);
+		m_imgClp.Create(rect.Width(), rect.Height());
+		for(DWORD i = 0; i < ia.GetCount(); ++i)
+		{
+			if (ia[i].IsNull()) continue;
+			CImgDrawer::Draw(m_imgClp, ia[i], rect);
+			rect.Top(rect.Top() + fa[i]);
+		}
+
+		ctl->SetFraRect(CSize(0, m_rcImg.Height()));
+		ctl->SetAllRect(CSize(0, h));
+
+		return TRUE;
+	}
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		if (nMessage != WM_PAINT) return;
+
+		if (!m_Val) return;
+		CString* str = (CString*)Ctl()->GetState(_T("text"));
+		if (!str) return;
+
+		CRect rect;
+		Ctl()->GetClientRect(rect);
+
+		if (!FmtTxtRect(rect, m_Val, str, (IGuiCtrlBase*)Ctl())) return;
+
+		CGraph* mem_img = (CGraph*)lParam;
+		if (!mem_img || mem_img->IsNull()) return;
+
+		CSize scr_sz;
+		Ctl()->GetScrollSize(scr_sz);
+		rect.Left(-scr_sz.cx);
+		rect.Top(-scr_sz.cy);
+		CImgDrawer::Draw(*mem_img, m_imgClp, rect);
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_txt_font, _pic_font)
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiText : public CGuiPicture
+class CGuiText : public IGuiCtrlBase
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiText, CGuiPicture)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiText, IGuiCtrlBase)
 		
 public:
 	CGuiText()
 	{
-		// 添加事件对象
-		PopEvent(FALSE);
-		InsEvent(ExGui(_T("CGuiTextEvent"), GetGC())); /*先让基类绘图*/
+		// 添加逻辑对象
+		AddSet(_T("_pic_style"));
+		AddSet(_T("_pic_image"));
+		AddSet(_T("_pic_color"));
+		AddSet(_T("_pic_text"));
+		AddSet(_T("_txt_font"));
+		// 设置默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 	}
 };
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiText, CGuiPicture)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiText, IGuiCtrlBase)
 
 //////////////////////////////////////////////////////////////////
 

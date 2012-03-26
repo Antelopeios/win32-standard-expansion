@@ -42,7 +42,6 @@
 //////////////////////////////////////////////////////////////////
 
 #include "GuiEvent/GuiWndEvent.hpp"
-#include "GuiEvent/GuiPictureEvent.hpp"
 #include "GuiEvent/GuiButtonEvent.hpp"
 #include "GuiEvent/GuiEditEvent.hpp"
 #include "GuiEvent/GuiListEvent.hpp"
@@ -50,7 +49,6 @@
 #include "GuiEvent/GuiLVEvent.hpp"
 #include "GuiEvent/GuiScrollEvent.hpp"
 #include "GuiEvent/GuiMenuEvent.hpp"
-#include "GuiEvent/GuiTextEvent.hpp"
 #include "GuiEvent/GuiProgressEvent.hpp"
 #include "GuiEvent/GuiEvent.hpp"
 

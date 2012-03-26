@@ -121,7 +121,7 @@ public:
 		}
 		else
 			return EXP_BASE::Execute(key, val);
-		return TRUE;
+		return IGuiCtrlBase::Execute(key, val);
 	}
 
 	void* GetState(const CString& sType, void* pParam = NULL)

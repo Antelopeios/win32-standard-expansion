@@ -292,6 +292,103 @@ BOOL IGuiCtrlBase::IsVisible() const
 //////////////////////////////////////////////////////////////////
 
 EXP_END
+	
+//////////////////////////////////////////////////////////////////
+//  Ù–‘…Ë÷√ƒ£∞Â
+
+template <typename TypeT>
+class ICtrlSetT : public IGuiSet
+{
+protected:
+	TypeT m_Val;
+
+	void ZeroVal(_true_type) { m_Val = 0; }
+	void ZeroVal(_false_type) {}
+
+public:
+	ICtrlSetT()
+	{ ZeroVal(_TraitsT<TypeT>::is_POD_type()); }
+
+public:
+	BOOL Exc(const CString& val)
+	{
+		Set((void*)_ttol(val));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Val;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		m_Val = (TypeT)(LONG)sta;
+		return TRUE;
+	}
+};
+
+template <>
+class ICtrlSetT<BOOL> : public IGuiSet
+{
+protected:
+	BOOL m_Val;
+
+public:
+	ICtrlSetT()
+		: m_Val(FALSE)
+	{}
+
+public:
+	BOOL Exc(const CString& val)
+	{
+		CString tmp(val);
+		tmp.Lower();
+		if (tmp == _T("false"))
+			Set((void*)FALSE);
+		else
+		if (tmp == _T("true"))
+			Set((void*)TRUE);
+		else
+			Set((void*)_ttol(val));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Val;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		m_Val = (BOOL)sta;
+		return TRUE;
+	}
+};
+
+template <>
+class ICtrlSetT<CString> : public IGuiSet
+{
+protected:
+	CString m_Val;
+
+public:
+	BOOL Exc(const CString& val)
+	{
+		Set((void*)&val);
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)(&m_Val);
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		m_Val = *(CString*)sta;
+		return TRUE;
+	}
+};
+
+//////////////////////////////////////////////////////////////////
 
 #define SET_STATE(type, val, scp) \
 	{ \
@@ -305,6 +402,8 @@ EXP_END
 			return TRUE; \
 	}
 //#define SET_STATE()
+
+//////////////////////////////////////////////////////////////////
 
 #include "GuiCtrl/GuiPicture.hpp"
 #include "GuiCtrl/GuiButton.hpp"

@@ -110,7 +110,7 @@ public:
 		}
 		else
 			return EXP_BASE::Execute(key, val);
-		return TRUE;
+		return IGuiCtrlBase::Execute(key, val);
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬

@@ -65,15 +65,414 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiButton : public IGuiCtrlBase
+class _btn_style : public IGuiSet
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_CLS(_btn_style, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("style")); }
+	BOOL Exc(const CString& val)
+	{
+		style_t* sty = ExGet<style_t>(val);
+		if(!sty) return TRUE;
+		if(!sty->font.Empty())
+			Ctl()->SetState(_T("font"), (void*)(CText**)sty->font, (void*)TRUE);
+		if(!sty->color.Empty())
+			Ctl()->SetState(_T("color"), (void*)(pixel_t*)sty->color);
+		if(!sty->image.Empty())
+			Ctl()->SetState(_T("image"), (void*)(CImage**)sty->image, (void*)TRUE);
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_style, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_font : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_font, IGuiSet)
+
+protected:
+	CText* m_Text[10];
+
+public:
+	_btn_font()
+	{ ZeroMemory(m_Text, sizeof(m_Text)); }
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("font")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
+			m_Text[i] = ExGet<CText>(sa[i]);
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Text;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		if (par)
+		{
+			for(int i = 0; i < _countof(m_Text); ++i)
+				m_Text[i] = ((CText**)sta)[i];
+		}
+		else
+		{
+			for(int i = 0; i < _countof(m_Text); ++i)
+				m_Text[i] = (CText*)sta + i;
+		}
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_font, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_color : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_color, IGuiSet)
+
+protected:
+	pixel_t m_Color[10];
+
+public:
+	_btn_color()
+	{ ZeroMemory(m_Color, sizeof(m_Color)); }
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("color")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
+			m_Color[i] = ExStringToColor(sa[i]);
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Color;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		for(int i = 0; i < _countof(m_Color); ++i)
+			m_Color[i] = ((pixel_t*)sta)[i];
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_color, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_image : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_image, IGuiSet)
+
+protected:
+	CImage* m_Image[9];	// 九宫格分割,每个小块保存所有状态
+
+public:
+	_btn_image()
+	{ ZeroMemory(m_Image, sizeof(m_Image)); }
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("image")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		ExStringToArray(val, sa);
+		for(int i = 0; i < (int)min(_countof(m_Image), sa.GetCount()); ++i)
+			m_Image[i] = ExGet<CImage>(sa[i]);
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Image;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		if (par)
+		{
+			for(int i = 0; i < _countof(m_Image); ++i)
+				m_Image[i] = ((CImage**)sta)[i];
+		}
+		else
+		{
+			for(int i = 0; i < _countof(m_Image); ++i)
+				m_Image[i] = (CImage*)sta + i;
+		}
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_image, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_status : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_status, IGuiSet)
 
 public:
 	/*
 		正常; 浮动; 按下; push
 	*/
 	enum status_t {nor, ovr, prs, psh};
+protected:
+	status_t m_Status;	// 按钮状态
+
+public:
+	_btn_status()
+		: m_Status(nor)
+	{}
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("status")); }
+	BOOL Exc(const CString& val)
+	{
+		if (val == _T("nor") || val == _T("normal"))
+			Set((void*)nor);
+		else
+		if (val == _T("ovr") || val == _T("over"))
+			Set((void*)ovr);
+		else
+		if (val == _T("prs") || val == _T("press"))
+			Set((void*)prs);
+		else
+		if (val == _T("psh") || val == _T("push"))
+			Set((void*)psh);
+		else
+			Set((void*)_ttol(val));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Status;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		m_Status = (status_t)(LONG)sta;
+		return TRUE;
+	}
+
+	void BtnDwn()
+	{
+		if (m_Status == psh) return;
+		m_Status = prs;
+		Ctl()->UpdateState();
+	}
+	void BtnUp()
+	{
+		if (m_Status == psh) return;
+
+		IGuiWnd* wnd = Ctl()->GetWnd();
+		if (!wnd) return;
+		POINT pt_tmp = {0};
+		::GetCursorPos(&pt_tmp);
+		CPoint pt(pt_tmp);
+		wnd->ScreenToClient(pt);
+		CRect rc;
+		Ctl()->GetRealRect(rc);
+
+		if (m_Status == prs) // 当按下后抬起,视为一次Click
+		{
+			Ctl()->SendMessage(BM_CLICK);
+			if(!Ctl()->IsValid()) return;
+		}
+
+		if (m_Status == psh) return;
+
+		if (rc.PtInRect(pt))
+			m_Status = ovr;
+		else
+			m_Status = nor;
+
+		Ctl()->UpdateState();
+	}
+	void MusMov()
+	{
+		if (m_Status == psh || m_Status == prs) return;
+		m_Status = ovr;
+		Ctl()->UpdateState();
+	}
+	void MusLev()
+	{
+		if (m_Status == psh) return;
+		m_Status = nor;
+		Ctl()->UpdateState();
+	}
+
+	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
+	{
+		switch( nMessage )
+		{
+		case WM_MOUSEMOVE:
+		case WM_NCMOUSEMOVE:
+			MusMov();
+			break;
+		case WM_KEYDOWN:
+			if (wParam != VK_RETURN) break; // Enter
+		case WM_LBUTTONDOWN:
+		case WM_NCLBUTTONDOWN:
+			BtnDwn();
+			break;
+		case WM_KEYUP:
+			if (wParam != VK_RETURN) break; // Enter
+		case WM_LBUTTONUP:
+		case WM_NCLBUTTONUP:
+			BtnUp();
+			break;
+		case WM_MOUSELEAVE:
+			MusLev();
+			break;
+		}
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_status, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_locate : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_locate, IGuiSet)
+
+public:
+	/*
+		文字位置: 中; 上; 下; 左; 右
+	*/
+	enum locate_t {center, top, bottom, left, right};
+protected:
+	locate_t m_Locate;	// 文字位置
+
+public:
+	_btn_locate()
+		: m_Locate(center)
+	{}
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("locate")); }
+	BOOL Exc(const CString& val)
+	{
+		if (val == _T("center"))
+			Set((void*)center);
+		else
+		if (val == _T("top"))
+			Set((void*)top);
+		else
+		if (val == _T("bottom"))
+			Set((void*)bottom);
+		else
+		if (val == _T("left"))
+			Set((void*)left);
+		else
+		if (val == _T("right"))
+			Set((void*)right);
+		else
+			Set((void*)_ttol(val));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+	void* Get(void* par = NULL)
+	{
+		return (void*)m_Locate;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		m_Locate = (locate_t)(LONG)sta;
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_locate, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+// 文字位置偏移
+class _btn_loc_off : public ICtrlSetT<LONG>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_loc_off, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("loc_off")); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_loc_off, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+// 图标点击是否摇晃
+class _btn_shake_ico : public ICtrlSetT<BOOL>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_shake_ico, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("shake_ico")); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_shake_ico, IGuiSet)
+	
+//////////////////////////////////////////////////////////////////
+
+// 按钮状态屏蔽选项
+class _btn_thr_sta : public ICtrlSetT<UINT>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_thr_sta, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("thr_sta")); }
+	BOOL Exc(const CString& val)
+	{
+		CArrayT<CString> sa;
+		int sta_i = _ttol(val);
+		if (sta_i == 0 && val != _T("0"))
+		{
+			ExStringToArray(val, sa);
+			for(int i = 0; i < (int)sa.GetCount(); ++i)
+			{
+				if (sa[i] == _T("0x01") || sa[i] == _T("NO_OVER"))
+					sta_i |= 0x01;
+				else
+				if (sa[i] == _T("0x02") || sa[i] == _T("NO_PRESS"))
+					sta_i |= 0x02;
+				else
+				if (sa[i] == _T("0x04") || sa[i] == _T("NO_DISABLE"))
+					sta_i |= 0x04;
+				else
+				if (sa[i] == _T("0x08") || sa[i] == _T("NO_FOCUS"))
+					sta_i |= 0x08;
+				else
+				if (sa[i] == _T("0x10") || sa[i] == _T("NO_MID_CHECK"))
+					sta_i |= 0x10;
+			}
+		}
+		Set((void*)sta_i);
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_thr_sta, IGuiSet)
+
+
+//////////////////////////////////////////////////////////////////
+
+class _btn_btn_sty : public IGuiSet
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_btn_sty, IGuiSet)
+
+public:
 	/*
 		按钮类型
 	*/
@@ -83,320 +482,115 @@ public:
 		psh_btn,	// 下压按钮
 		check_box	// 勾选按钮
 	};
-	/*
-		文字位置: 中; 上; 下; 左; 右
-	*/
-	enum locate_t {center, top, bottom, left, right};
-
 protected:
-	status_t m_Status;	// 按钮状态
-	locate_t m_Locate;	// 文字位置
-	LONG m_LocOff;		// 文字位置偏移
-
-	CImage* m_Icon;
-	BOOL m_bGlow;		// 是否绘制图标外发光
-	LONG m_IcoOff;		// 图标位置偏移
-	int m_ShakeIco;		// 图标点击摇晃
-
-	UINT m_ThreeSta;	// 按钮状态选项
 	styles_t m_BtnSty;	// 按钮状态
-	pixel_t m_Color[10];
-	CImage* m_Image[9];	// 九宫格分割,每个小块保存所有状态
-	CText* m_Text[10];
-	CString m_Str;
-
-	int m_CheckSta;		// 勾选状态
 
 public:
-	CGuiButton()
-		: m_Status(nor)
-		, m_Locate(center)
-		, m_LocOff(0)
-		, m_bGlow(FALSE)
-		, m_IcoOff(0)
-		, m_ShakeIco(0)
-		, m_ThreeSta(0)
-		, m_BtnSty(nor_btn)
-		, m_Icon(NULL)
-		, m_CheckSta(0)
-	{
-		ZeroMemory(m_Color, sizeof(m_Color));
-		ZeroMemory(m_Image, sizeof(m_Image));
-		ZeroMemory(m_Text, sizeof(m_Text));
-		// 添加事件对象
-		AddEvent(ExGui(_T("CGuiButtonEvent"), GetGC()));
-	}
-	~CGuiButton()
+	_btn_btn_sty()
+		: m_BtnSty(nor_btn)
 	{}
 
 public:
-	BOOL Execute(const CString& key, const CString& val)
+	BOOL Key(const CString& key) const { return (key == _T("btn_sty")); }
+	BOOL Exc(const CString& val)
 	{
-		CArrayT<CString> sa;
-		if (key == _T("style"))
-		{
-			style_t* sty = ExGet<style_t>(val);
-			if (sty)
-			{
-				if(!sty->font.Empty())
-					for(int i = 0; i < (int)min(_countof(m_Text), sty->font.GetCount()); ++i)
-						m_Text[i] = sty->font[i];
-				if(!sty->color.Empty())
-					SetState(_T("color"), (void*)(pixel_t*)sty->color);
-				if(!sty->image.Empty())
-					for(int i = 0; i < (int)min(_countof(m_Image), sty->image.GetCount()); ++i)
-						m_Image[i] = sty->image[i];
-			}
-		}
+		if (val == _T("nor_btn"))
+			Set((void*)nor_btn);
 		else
-		if (key == _T("font"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_Text), sa.GetCount()); ++i)
-				m_Text[i] = ExGet<CText>(sa[i]);
-		}
+		if (val == _T("psh_btn"))
+			Set((void*)psh_btn);
 		else
-		if (key == _T("color"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_Color), sa.GetCount()); ++i)
-				m_Color[i] = ExStringToColor(sa[i]);
-		}
+		if (val == _T("check_box"))
+			Set((void*)check_box);
 		else
-		if (key == _T("image"))
-		{
-			ExStringToArray(val, sa);
-			for(int i = 0; i < (int)min(_countof(m_Image), sa.GetCount()); ++i)
-				m_Image[i] = ExGet<CImage>(sa[i]);
-		}
-		else
-		if (key == _T("text"))
-			SetState(_T("text"), (void*)&val);
-		else
-		if (key == _T("status"))
-		{
-			int sta_i = _ttol(val);
-			if (sta_i == 0 && val != _T("0"))
-			{
-				if (val == _T("nor") || val == _T("normal"))
-					sta_i = (int)nor;
-				else
-				if (val == _T("ovr") || val == _T("over"))
-					sta_i = (int)ovr;
-				else
-				if (val == _T("prs") || val == _T("press"))
-					sta_i = (int)prs;
-				else
-				if (val == _T("psh") || val == _T("push"))
-					sta_i = (int)psh;
-			}
-			SetState(_T("status"), (void*)sta_i);
-		}
-		else
-		if (key == _T("locate"))
-		{
-			int loc_i = _ttol(val);
-			if (loc_i == 0 && val != _T("0"))
-			{
-				if (val == _T("center"))
-					loc_i = (int)center;
-				else
-				if (val == _T("top"))
-					loc_i = (int)top;
-				else
-				if (val == _T("bottom"))
-					loc_i = (int)bottom;
-				else
-				if (val == _T("left"))
-					loc_i = (int)left;
-				else
-				if (val == _T("right"))
-					loc_i = (int)right;
-			}
-			SetState(_T("locate"), (void*)loc_i);
-		}
-		else
-		if (key == _T("loc_off"))
-			SetState(_T("loc_off"), (void*)_ttol(val));
-		else
-		if (key == _T("shake_ico"))
-			SetState(_T("shake_ico"), (void*)_ttoi(val));
-		else
-		if (key == _T("thr_sta"))
-		{
-			int sta_i = _ttol(val);
-			if (sta_i == 0 && val != _T("0"))
-			{
-				ExStringToArray(val, sa);
-				for(int i = 0; i < (int)sa.GetCount(); ++i)
-				{
-					if (sa[i] == _T("0x01") || sa[i] == _T("NO_OVER"))
-						sta_i |= 0x01;
-					else
-					if (sa[i] == _T("0x02") || sa[i] == _T("NO_PRESS"))
-						sta_i |= 0x02;
-					else
-					if (sa[i] == _T("0x04") || sa[i] == _T("NO_DISABLE"))
-						sta_i |= 0x04;
-					else
-					if (sa[i] == _T("0x08") || sa[i] == _T("NO_FOCUS"))
-						sta_i |= 0x08;
-					else
-					if (sa[i] == _T("0x10") || sa[i] == _T("NO_MID_CHECK"))
-						sta_i |= 0x10;
-				}
-			}
-			SetState(key, (void*)sta_i);
-		}
-		else
-		if (key == _T("btn_sty"))
-		{
-			int sty_i = _ttol(val);
-			if (sty_i == 0 && val != _T("0"))
-			{
-				if (val == _T("nor_btn"))
-					sty_i = (int)nor_btn;
-				else
-				if (val == _T("psh_btn"))
-					sty_i = (int)psh_btn;
-				else
-				if (val == _T("check_box"))
-					sty_i = (int)check_box;
-			}
-			SetState(key, (void*)sty_i);
-		}
-		else
-		if (key == _T("chk_sta"))
-			SetState(key, (void*)_ttoi(val));
-		else
-		if (key == _T("icon"))
-			SetState(_T("icon"), ExGet<CImage>(val));
-		else
-		if (key == _T("ico_off"))
-			SetState(_T("ico_off"), (void*)_ttol(val));
-		else
-		if (key == _T("glow"))
-		{
-			CString temp(val);
-			temp.Lower();
-			if (temp == _T("false"))
-				SetState(_T("glow"), (void*)FALSE);
-			else
-			if (temp == _T("true"))
-				SetState(_T("glow"), (void*)TRUE);
-		}
+			Set((void*)_ttol(val));
+		Ctl()->UpdateState();
 		return TRUE;
 	}
-
-	// 获得控件状态
-	void* GetState(const CString& sType, void* pParam = NULL)
+	void* Get(void* par = NULL)
 	{
-		if (sType == _T("status"))
-			return (void*)m_Status;
-		else
-		if (sType == _T("locate"))
-			return (void*)m_Locate;
-		else
-		if (sType == _T("loc_off"))
-			return (void*)m_LocOff;
-		else
-		if (sType == _T("shake_ico"))
-			return (void*)m_ShakeIco;
-		else
-		if (sType == _T("thr_sta"))
-			return (void*)m_ThreeSta;
-		else
-		if (sType == _T("btn_sty"))
-			return (void*)m_BtnSty;
-		else
-		if (sType == _T("chk_sta"))
-			return (void*)m_CheckSta;
-		else
-		if (sType == _T("color"))
-			return (void*)m_Color;
-		else
-		if (sType == _T("image"))
-			return (void*)m_Image;
-		else
-		if (sType == _T("font"))
-			return (void*)m_Text;
-		else
-		if (sType == _T("text"))
-			return (void*)(&m_Str);
-		else
-		if (sType == _T("icon"))
-			return (void*)m_Icon;
-		else
-		if (sType == _T("ico_off"))
-			return (void*)m_IcoOff;
-		else
-		if (sType == _T("glow"))
-			return (void*)m_bGlow;
-		else
-			return EXP_BASE::GetState(sType);
+		return (void*)m_BtnSty;
 	}
-	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
+	BOOL Set(void* sta, void* par = NULL)
 	{
-		if (sType == _T("status"))
-			SET_STATE(status_t, m_Status)
-		else
-		if (sType == _T("locate"))
-			SET_STATE(locate_t, m_Locate)
-		else
-		if (sType == _T("loc_off"))
-			SET_STATE(LONG, m_LocOff)
-		else
-		if (sType == _T("shake_ico"))
-			SET_STATE(int, m_ShakeIco)
-		else
-		if (sType == _T("thr_sta"))
-			SET_STATE(int, m_ThreeSta)
-		else
-		if (sType == _T("btn_sty"))
-			SET_STATE(styles_t, m_BtnSty)
-		else
-		if (sType == _T("chk_sta"))
-			SET_STATE(int, m_CheckSta)
-		else
-		if (sType == _T("color"))
-		{
-			for(int i = 0; i < _countof(m_Color); ++i)
-				m_Color[i] = ((pixel_t*)pState)[i];
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("image"))
-		{
-			for(int i = 0; i < _countof(m_Image); ++i)
-				m_Image[i] = (CImage*)pState + i;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("font"))
-		{
-			for(int i = 0; i < _countof(m_Text); ++i)
-				m_Text[i] = (CText*)pState + i;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("text"))
-		{
-			m_Str = *(CString*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("icon"))
-		{
-			m_Icon = (CImage*)pState;
-			return EXP_BASE::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("ico_off"))
-			SET_STATE(LONG, m_IcoOff)
-		else
-		if (sType == _T("glow"))
-			SET_STATE(BOOL, m_bGlow)
-		return FALSE;
+		m_BtnSty = (styles_t)(LONG)sta;
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_btn_sty, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+// 勾选状态
+class _btn_chk_sta : public ICtrlSetT<int>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_chk_sta, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("chk_sta")); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_chk_sta, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+// 按钮图标
+class _btn_icon : public ICtrlSetT<CImage*>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_icon, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("icon")); }
+	BOOL Exc(const CString& val)
+	{
+		Set(ExGet<CImage>(val));
+		Ctl()->UpdateState();
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_icon, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+// 图标位置偏移
+class _btn_ico_off : public ICtrlSetT<LONG>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_ico_off, IGuiSet)
+
+public:
+	BOOL Key(const CString& key) const { return (key == _T("ico_off")); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_ico_off, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiButton : public IGuiCtrlBase
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
+
+public:
+	CGuiButton()
+	{
+		// 添加逻辑对象
+		AddSet(_T("_btn_style"));
+		AddSet(_T("_btn_font"));
+		AddSet(_T("_btn_color"));
+		AddSet(_T("_btn_image"));
+		AddSet(_T("_pic_text"));
+		AddSet(_T("_btn_status"));
+		AddSet(_T("_btn_locate"));
+		AddSet(_T("_btn_loc_off"));
+		AddSet(_T("_btn_shake_ico"));
+		AddSet(_T("_btn_thr_sta"));
+		AddSet(_T("_btn_btn_sty"));
+		AddSet(_T("_btn_chk_sta"));
+		AddSet(_T("_btn_icon"));
+		AddSet(_T("_btn_ico_off"));
+		// 添加事件对象
+		AddEvent(ExGui(_T("CGuiButtonEvent"), GetGC()));
 	}
 };
 
@@ -435,7 +629,7 @@ class CGuiPushBtn : public CGuiSimpBtn
 public:
 	CGuiPushBtn()
 	{
-		SetState(_T("btn_sty"), (void*)psh_btn);
+		SetState(_T("btn_sty"), (void*)1);
 	}
 };
 
@@ -448,7 +642,7 @@ class CGuiCheckBox : public CGuiButton
 public:
 	CGuiCheckBox()
 	{
-		SetState(_T("btn_sty"), (void*)check_box);
+		SetState(_T("btn_sty"), (void*)2);
 	}
 };
 

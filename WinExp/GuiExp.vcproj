@@ -309,19 +309,11 @@
 				>
 			</File>
 			<File
-				RelativePath="GuiExp\GuiEvent\GuiPictureEvent.hpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GuiExp\GuiEvent\GuiProgressEvent.hpp"
 				>
 			</File>
 			<File
 				RelativePath="GuiExp\GuiEvent\GuiScrollEvent.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiExp\GuiEvent\GuiTextEvent.hpp"
 				>
 			</File>
 			<File
@@ -378,10 +370,6 @@
 			>
 			<File
 				RelativePath=".\GuiExp\GuiSet\GuiCtrlSet.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GuiExp\GuiSet\GuiSet.cpp"
 				>
 			</File>
 		</Filter>

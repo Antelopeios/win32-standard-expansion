@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-16
-// Version:	1.0.0024.2356
+// Date:	2012-03-24
+// Version:	1.0.0025.1515
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -68,6 +68,7 @@
 //	- 1.0.0023.1603(2012-03-12)	+ 添加IGuiCtl::IsNeedScroll()接口,方便外部判断当前是否需要显示滚动条
 //	- 1.0.0024.2356(2012-03-16)	^ 移除IGuiCtl::set_ins_t,在IGuiCtl::GetState()与IGuiCtl::SetState()接口上添加额外的param,可支持更为通用的属性设定
 //								- 移除IGuiCtl::GetClipRect(),关于剪切区的控制全部交给绘图逻辑层负责
+//	- 1.0.0025.1515(2012-03-24)	+ 添加控件设置对象管理的相关接口,支持通过控件设置对象对控件的属性做动态管理
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -151,12 +152,26 @@ public:
 		set->Ctl() = this;
 		IGuiSetMgr::AddSet(p);
 	}
+	void AddSet(LPCTSTR key)
+	{
+		if (!IGuiSetMgr::Add(key)) return;
+		IGuiSet* set = ExDynCast<IGuiSet>(GetSet().LastItem());
+		if (!set) return;
+		set->Ctl() = this;
+	}
 	void InsSet(void* p)
 	{
 		IGuiSet* set = ExDynCast<IGuiSet>(p);
 		if (!set) return;
 		set->Ctl() = this;
 		IGuiSetMgr::InsSet(p);
+	}
+	void InsSet(LPCTSTR key)
+	{
+		if (!IGuiSetMgr::Ins(key)) return;
+		IGuiSet* set = ExDynCast<IGuiSet>(GetSet().HeadItem());
+		if (!set) return;
+		set->Ctl() = this;
 	}
 
 	// 获得控件状态

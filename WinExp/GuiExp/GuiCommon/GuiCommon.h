@@ -116,9 +116,6 @@ typedef HWND		wnd_t;
 #define ExGetY(lp)	((int)(short)HIWORD(lp))
 EXP_END
 
-// 基本接口定义
-#include "GuiCommon/GuiInterface.h"
-
 EXP_BEG
 
 // 通用对象创建接口
@@ -131,6 +128,8 @@ EXP_INLINE TypeT* ExGui(LPCTSTR sGuiType, CGC* pGC = NULL)
 
 EXP_END
 
+// 基本接口定义
+#include "GuiCommon/GuiInterface.h"
 // Gui 基础接口定义
 #include "GuiCommon/GuiBase.h"
 

@@ -121,10 +121,6 @@ public:
 		: m_Array(NULL)
 		, m_nSize(0)
 	{ (*this) = str; }
-	CStringT(const array_t& str)
-		: m_Array(NULL)
-		, m_nSize(0)
-	{ (*this) = str; }
 	CStringT(const char* str)
 		: m_Array(NULL)
 		, m_nSize(0)

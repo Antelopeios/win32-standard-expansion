@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-21
-// Version:	1.0.0022.1820
+// Date:	2012-03-24
+// Version:	1.0.0023.1505
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -67,6 +67,7 @@
 //	- 1.0.0020.1110(2012-03-01)	+ 添加IGuiSender::PopEvent()与IGuiComp::PopComp(),方便删除事件与组合对象
 //	- 1.0.0021.1830(2012-03-03)	= 调整IGuiComp::GetChildren()为IGuiComp::GetComp()
 //	- 1.0.0022.1820(2012-03-21)	+ 添加IGuiItem与IGuiItemMgr,合并一些通用的元素聚合操作
+//	- 1.0.0023.1505(2012-03-24)	+ IGuiItemMgr支持直接通过字符串创建或删除指定类型的IGuiItem对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -128,20 +129,26 @@ EXP_INTERFACE IGuiItemMgr : public IGuiObject
 
 public:
 	typedef CListT<IGuiItem*> itm_list_t;
+	typedef itm_list_t::iterator_t itm_iter_t;
+	typedef CMapT<CString, itm_iter_t> itm_map_t;
 
 protected:
 	BOOL m_bTru;		// 子容器链托管标记
 private:
 	itm_list_t* m_CldrItm;
+	itm_map_t* m_CldrMap;
 
 public:
 	IGuiItemMgr(void)
 		: m_bTru(TRUE)
 		, m_CldrItm(dbnew(itm_list_t))
+		, m_CldrMap(dbnew(itm_map_t))
 	{}
 	virtual ~IGuiItemMgr(void)
 	{
 		Clear();
+		del(m_CldrMap);
+		m_CldrMap = NULL;
 		del(m_CldrItm);
 		m_CldrItm = NULL;
 	}
@@ -154,66 +161,110 @@ public:
 	itm_list_t& GetItm() const { return *m_CldrItm; }
 
 	// 查找
-	itm_list_t::iterator_t Find(IGuiItem* p) { return GetItm().Find(p); }
+	itm_iter_t Find(IGuiItem* p) { return GetItm().Find(p); }
+	itm_iter_t Find(LPCTSTR key)
+	{
+		itm_map_t::iterator_t map_ite = m_CldrMap->Locate(key);
+		if (map_ite == m_CldrMap->Tail()) return GetItm().Tail();
+		return map_ite->Val();
+	}
 
 	// 组合接口
-	virtual void Add(void* p)
+	BOOL Add(void* p)
 	{
 		IGuiItem* itm = ExDynCast<IGuiItem>(p);
-		if (!itm) return ;
+		if (!itm) return FALSE;
 		// 定位对象
-		itm_list_t::iterator_t ite = Find(itm);
-		if (ite != GetItm().Tail()) return;
+		itm_iter_t ite = Find(itm);
+		if (ite != GetItm().Tail()) return TRUE;
 		// 添加新对象
-		GetItm().Add(itm);
+		return GetItm().Add(itm);
 	}
-	virtual void Ins(void* p)
+	BOOL Add(LPCTSTR key)
+	{
+		void* p = ExGui(key);
+		if(!Add(p))
+		{
+			del(p);
+			return FALSE;
+		}
+		(*m_CldrMap)[key] = GetItm().Last();
+		return TRUE;
+	}
+	BOOL Ins(void* p)
 	{
 		IGuiItem* itm = ExDynCast<IGuiItem>(p);
-		if (!itm) return ;
+		if (!itm) return FALSE;
 		// 定位对象
-		itm_list_t::iterator_t ite = Find(itm);
-		if (ite != GetItm().Tail()) return;
+		itm_iter_t ite = Find(itm);
+		if (ite != GetItm().Tail()) return TRUE;
 		// 添加新对象
-		GetItm().Add(itm, GetItm().Head());
+		return GetItm().Add(itm, GetItm().Head());
 	}
-	virtual void Del(void* p)
+	BOOL Ins(LPCTSTR key)
+	{
+		void* p = ExGui(key);
+		if(!Ins(p))
+		{
+			del(p);
+			return FALSE;
+		}
+		(*m_CldrMap)[key] = GetItm().Head();
+		return TRUE;
+	}
+	BOOL Del(void* p)
 	{
 		IGuiItem* itm = ExDynCast<IGuiItem>(p);
-		if (!itm) return;
+		if (!itm) return FALSE;
 		// 定位对象
-		itm_list_t::iterator_t ite = Find(itm);
-		if (ite == GetItm().Tail()) return;
+		itm_iter_t ite = Find(itm);
+		if (ite == GetItm().Tail()) return TRUE;
 		// 删除对象
-		GetItm().Del(ite);
+		if (!GetItm().Del(ite)) return FALSE;
 		if (IsTrust() && itm->IsTrust()) itm->Free();
+		return TRUE;
 	}
-	virtual void Pop(BOOL bLast = TRUE)
+	BOOL Del(LPCTSTR key)
 	{
-		if (GetItm().Empty()) return;
+		// 定位对象
+		itm_iter_t ite = Find(key);
+		if (ite == GetItm().Tail()) return TRUE;
+		// 删除对象
+		if (!GetItm().Del(ite)) return FALSE;
+		if (IsTrust() && (*ite)->IsTrust()) (*ite)->Free();
+		m_CldrMap->Del(key);
+		return TRUE;
+	}
+	BOOL Pop(BOOL bLast = TRUE)
+	{
+		if (GetItm().Empty()) return TRUE;
 		IGuiItem* itm = NULL;
 		if (bLast)
 		{
 			itm = GetItm().LastItem();
+			m_CldrMap->Replace(GetItm().Last());
 			GetItm().PopLast();
 		}
 		else
 		{
 			itm = GetItm().HeadItem();
+			m_CldrMap->Replace(GetItm().Head());
 			GetItm().PopHead();
 		}
 		if (IsTrust() && itm && itm->IsTrust()) itm->Free();
+		return TRUE;
 	}
-	virtual void Clear()
+	void Clear()
 	{
 		if (IsTrust())
-			for(itm_list_t::iterator_t ite = GetItm().Head(); ite != GetItm().Tail(); ++ite)
+			for(itm_iter_t ite = GetItm().Head(); ite != GetItm().Tail(); ++ite)
 			{
 				if (!(*ite) || 
 					!(*ite)->IsValid() || 
 					!(*ite)->IsTrust()) continue;
 				(*ite)->Free();
 			}
+		m_CldrMap->Clear();
 		GetItm().Clear();
 	}
 };
@@ -276,7 +327,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 事件转发器
-EXP_INTERFACE IGuiSender : private IGuiItemMgr
+EXP_INTERFACE IGuiSender : public IGuiItemMgr
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiSender, IGuiItemMgr)
 
@@ -534,7 +585,7 @@ public:
 	{}
 
 public:
-	IGuiCtl*& Ctl() { return m_Ctl; }
+	EXP_INLINE IGuiCtl*& Ctl() { return m_Ctl; }
 	virtual BOOL Key(const CString& key) const { return FALSE; }
 	virtual BOOL Exc(const CString& val) { return FALSE; }
 	virtual void* Get(void* par) { return NULL; }
@@ -545,7 +596,7 @@ public:
 //////////////////////////////////////////////////////////////////
 
 // GUI 设置对象控制器
-EXP_INTERFACE IGuiSetMgr : private IGuiItemMgr
+EXP_INTERFACE IGuiSetMgr : public IGuiItemMgr
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiSetMgr, IGuiItemMgr)
 

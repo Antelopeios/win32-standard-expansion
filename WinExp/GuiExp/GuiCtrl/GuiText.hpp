@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-13
-// Version:	1.0.0000.0918
+// Date:	2012-03-26
+// Version:	1.0.0001.1207
 //
 // History:
 //	- 1.0.0000.0918(2012-03-13)	@ 开始构建GuiText
+//	- 1.0.0001.1207(2012-03-26)	# 修正当CGuiText在控件显示的时候没有刷新控件内部文字区域,导致滚动条无法自动加载的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiText_hpp__
@@ -110,25 +111,39 @@ public:
 	}
 	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
 	{
-		if (nMessage != WM_PAINT) return;
+		if (nMessage == WM_SHOWWINDOW)
+		{
+			if (!wParam) return;
+			if (!m_Val) return;
+			CString* str = (CString*)Ctl()->GetState(_T("text"));
+			if (!str) return;
 
-		if (!m_Val) return;
-		CString* str = (CString*)Ctl()->GetState(_T("text"));
-		if (!str) return;
+			CRect rect;
+			Ctl()->GetClientRect(rect);
 
-		CRect rect;
-		Ctl()->GetClientRect(rect);
+			FmtTxtRect(rect, m_Val, str, (IGuiCtrlBase*)Ctl());
+		}
+		else
+		if (nMessage == WM_PAINT)
+		{
+			if (!m_Val) return;
+			CString* str = (CString*)Ctl()->GetState(_T("text"));
+			if (!str) return;
 
-		if (!FmtTxtRect(rect, m_Val, str, (IGuiCtrlBase*)Ctl())) return;
+			CRect rect;
+			Ctl()->GetClientRect(rect);
 
-		CGraph* mem_img = (CGraph*)lParam;
-		if (!mem_img || mem_img->IsNull()) return;
+			if (!FmtTxtRect(rect, m_Val, str, (IGuiCtrlBase*)Ctl())) return;
 
-		CSize scr_sz;
-		Ctl()->GetScrollSize(scr_sz);
-		rect.Left(-scr_sz.cx);
-		rect.Top(-scr_sz.cy);
-		CImgDrawer::Draw(*mem_img, m_imgClp, rect);
+			CGraph* mem_img = (CGraph*)lParam;
+			if (!mem_img || mem_img->IsNull()) return;
+
+			CSize scr_sz;
+			Ctl()->GetScrollSize(scr_sz);
+			rect.Left(-scr_sz.cx);
+			rect.Top(-scr_sz.cy);
+			CImgDrawer::Draw(*mem_img, m_imgClp, rect);
+		}
 	}
 };
 

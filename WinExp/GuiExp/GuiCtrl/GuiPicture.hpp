@@ -61,7 +61,7 @@ class _pic_style : public IGuiSet
 	EXP_DECLARE_DYNCREATE_CLS(_pic_style, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("style")); }
+	CString GetKey() const { return _T("style"); }
 	BOOL Exc(const CString& val)
 	{
 		style_t* sty = ExGet<style_t>(val);
@@ -85,7 +85,7 @@ class _pic_font : public ICtrlSetT<CText*>
 	EXP_DECLARE_DYNCREATE_CLS(_pic_font, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("font")); }
+	CString GetKey() const { return _T("font"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -127,7 +127,7 @@ class _pic_color : public ICtrlSetT<pixel_t>
 	EXP_DECLARE_DYNCREATE_CLS(_pic_color, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("color")); }
+	CString GetKey() const { return _T("color"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -159,7 +159,7 @@ class _pic_image : public ICtrlSetT<CImage*>
 	EXP_DECLARE_DYNCREATE_CLS(_pic_image, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("image")); }
+	CString GetKey() const { return _T("image"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -194,7 +194,7 @@ class _pic_text : public ICtrlSetT<CString>
 	EXP_DECLARE_DYNCREATE_CLS(_pic_text, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("text")); }
+	CString GetKey() const { return _T("text"); }
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_pic_text, IGuiSet)

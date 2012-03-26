@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-24
-// Version:	1.0.0023.1505
+// Date:	2012-03-26
+// Version:	1.0.0024.1207
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -68,6 +68,7 @@
 //	- 1.0.0021.1830(2012-03-03)	= 调整IGuiComp::GetChildren()为IGuiComp::GetComp()
 //	- 1.0.0022.1820(2012-03-21)	+ 添加IGuiItem与IGuiItemMgr,合并一些通用的元素聚合操作
 //	- 1.0.0023.1505(2012-03-24)	+ IGuiItemMgr支持直接通过字符串创建或删除指定类型的IGuiItem对象
+//	- 1.0.0024.1207(2012-03-26)	+ IGuiSetMgr支持直接通过其内部IGuiSet的Key值直接定位IGuiSet指针
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -586,7 +587,8 @@ public:
 
 public:
 	EXP_INLINE IGuiCtl*& Ctl() { return m_Ctl; }
-	virtual BOOL Key(const CString& key) const { return FALSE; }
+	virtual CString GetKey() const { return _T(""); }
+	virtual BOOL Key(const CString& key) const { return (key == GetKey()); }
 	virtual BOOL Exc(const CString& val) { return FALSE; }
 	virtual void* Get(void* par) { return NULL; }
 	virtual BOOL Set(void* sta, void* par) { return TRUE; }
@@ -602,6 +604,10 @@ EXP_INTERFACE IGuiSetMgr : public IGuiItemMgr
 
 public:
 	typedef itm_list_t set_list_t;
+	typedef itm_map_t set_map_t;
+
+protected:
+	set_map_t m_KeyMap;
 
 public:
 	// 是否对子容器做托管
@@ -613,13 +619,110 @@ public:
 
 	// 查找
 	set_list_t::iterator_t FindSet(IGuiSet* p) { return Find(p); }
+	set_list_t::iterator_t FindSet(LPCTSTR key) { return Find(key); }
+	IGuiSet* FindKeySet(const CString& key)
+	{
+		if (key.Empty())
+		{
+			for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+			{
+				IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+				if(!set || !set->Key(key)) continue;
+				return set;
+			}
+			return NULL;
+		}
+		else
+		{
+			set_map_t::iterator_t it = m_KeyMap.Locate(key);
+			if (it == m_KeyMap.Tail()) return NULL;
+			return ExDynCast<IGuiSet>(*(*it));
+		}
+	}
 
 	// 组合接口
-	virtual void AddSet(void* p) { Add(p); }
-	virtual void InsSet(void* p) { Ins(p); }
-	virtual void DelSet(void* p) { Del(p); }
-	virtual void PopSet(BOOL bLast = TRUE) { Pop(bLast); }
-	virtual void ClearSet() { Clear(); }
+	virtual BOOL AddSet(void* p)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		if (!set) return FALSE;
+		if (!Add(p)) return FALSE;
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap[str] = GetSet().Last();
+		return TRUE;
+	}
+	virtual BOOL AddSet(LPCTSTR key)
+	{
+		if (!Add(key)) return FALSE;
+		set_list_t::iterator_t ite = GetSet().Last();
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if (!set)
+		{
+			DelSet(key);
+			return FALSE;
+		}
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap[str] = ite;
+		return TRUE;
+	}
+	virtual BOOL InsSet(void* p)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		if (!set) return FALSE;
+		if (!Ins(p)) return FALSE;
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap[str] = GetSet().Head();
+		return TRUE;
+	}
+	virtual BOOL InsSet(LPCTSTR key)
+	{
+		if (!Ins(key)) return FALSE;
+		set_list_t::iterator_t ite = GetSet().Head();
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if (!set)
+		{
+			DelSet(key);
+			return FALSE;
+		}
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap[str] = ite;
+		return TRUE;
+	}
+	virtual BOOL DelSet(void* p)
+	{
+		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		if (!set) return FALSE;
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap.Del(str);
+		return Del(p);
+	}
+	virtual BOOL DelSet(LPCTSTR key)
+	{
+		set_list_t::iterator_t ite = FindSet(key);
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if (!set) return Del(key);
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap.Del(str);
+		return Del(key);
+	}
+	virtual BOOL PopSet(BOOL bLast = TRUE)
+	{
+		if (GetSet().Empty()) return TRUE;
+		set_list_t::iterator_t ite;
+		if (bLast)
+			ite = GetSet().Last();
+		else
+			ite = GetSet().Head();
+		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		if (!set) return Pop(bLast);
+		CString str(set->GetKey());
+		if (!str.Empty()) m_KeyMap.Del(str);
+		return Pop(bLast);
+	}
+	virtual void ClearSet()
+	{
+		m_KeyMap.Clear();
+		Clear();
+	}
 };
 
 //////////////////////////////////////////////////////////////////

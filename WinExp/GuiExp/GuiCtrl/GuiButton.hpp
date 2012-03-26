@@ -70,7 +70,7 @@ class _btn_style : public IGuiSet
 	EXP_DECLARE_DYNCREATE_CLS(_btn_style, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("style")); }
+	CString GetKey() const { return _T("style"); }
 	BOOL Exc(const CString& val)
 	{
 		style_t* sty = ExGet<style_t>(val);
@@ -101,7 +101,7 @@ public:
 	{ ZeroMemory(m_Text, sizeof(m_Text)); }
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("font")); }
+	CString GetKey() const { return _T("font"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -147,7 +147,7 @@ public:
 	{ ZeroMemory(m_Color, sizeof(m_Color)); }
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("color")); }
+	CString GetKey() const { return _T("color"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -185,7 +185,7 @@ public:
 	{ ZeroMemory(m_Image, sizeof(m_Image)); }
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("image")); }
+	CString GetKey() const { return _T("image"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -237,7 +237,7 @@ public:
 	{}
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("status")); }
+	CString GetKey() const { return _T("status"); }
 	BOOL Exc(const CString& val)
 	{
 		if (val == _T("nor") || val == _T("normal"))
@@ -362,7 +362,7 @@ public:
 	{}
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("locate")); }
+	CString GetKey() const { return _T("locate"); }
 	BOOL Exc(const CString& val)
 	{
 		if (val == _T("center"))
@@ -405,7 +405,7 @@ class _btn_loc_off : public ICtrlSetT<LONG>
 	EXP_DECLARE_DYNCREATE_CLS(_btn_loc_off, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("loc_off")); }
+	CString GetKey() const { return _T("loc_off"); }
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_loc_off, IGuiSet)
@@ -418,7 +418,7 @@ class _btn_shake_ico : public ICtrlSetT<BOOL>
 	EXP_DECLARE_DYNCREATE_CLS(_btn_shake_ico, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("shake_ico")); }
+	CString GetKey() const { return _T("shake_ico"); }
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_shake_ico, IGuiSet)
@@ -431,7 +431,7 @@ class _btn_thr_sta : public ICtrlSetT<UINT>
 	EXP_DECLARE_DYNCREATE_CLS(_btn_thr_sta, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("thr_sta")); }
+	CString GetKey() const { return _T("thr_sta"); }
 	BOOL Exc(const CString& val)
 	{
 		CArrayT<CString> sa;
@@ -491,7 +491,7 @@ public:
 	{}
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("btn_sty")); }
+	CString GetKey() const { return _T("btn_sty"); }
 	BOOL Exc(const CString& val)
 	{
 		if (val == _T("nor_btn"))
@@ -528,7 +528,7 @@ class _btn_chk_sta : public ICtrlSetT<int>
 	EXP_DECLARE_DYNCREATE_CLS(_btn_chk_sta, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("chk_sta")); }
+	CString GetKey() const { return _T("chk_sta"); }
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_chk_sta, IGuiSet)
@@ -541,7 +541,7 @@ class _btn_icon : public ICtrlSetT<CImage*>
 	EXP_DECLARE_DYNCREATE_CLS(_btn_icon, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("icon")); }
+	CString GetKey() const { return _T("icon"); }
 	BOOL Exc(const CString& val)
 	{
 		Set(ExGet<CImage>(val));
@@ -560,7 +560,7 @@ class _btn_ico_off : public ICtrlSetT<LONG>
 	EXP_DECLARE_DYNCREATE_CLS(_btn_ico_off, IGuiSet)
 
 public:
-	BOOL Key(const CString& key) const { return (key == _T("ico_off")); }
+	CString GetKey() const { return _T("ico_off"); }
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_ico_off, IGuiSet)

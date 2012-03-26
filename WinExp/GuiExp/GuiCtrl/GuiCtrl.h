@@ -145,33 +145,43 @@ public:
 	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) { Send(this, nMessage, wParam, lParam); }
 
 	// 控件设置对象管理
-	void AddSet(void* p)
+	BOOL AddSet(void* p)
 	{
 		IGuiSet* set = ExDynCast<IGuiSet>(p);
-		if (!set) return;
+		if (!set) return FALSE;
 		set->Ctl() = this;
-		IGuiSetMgr::AddSet(p);
+		return IGuiSetMgr::AddSet(p);
 	}
-	void AddSet(LPCTSTR key)
+	BOOL AddSet(LPCTSTR key)
 	{
-		if (!IGuiSetMgr::Add(key)) return;
+		if (!IGuiSetMgr::AddSet(key)) return FALSE;
 		IGuiSet* set = ExDynCast<IGuiSet>(GetSet().LastItem());
-		if (!set) return;
+		if (!set)
+		{
+			DelSet(key);
+			return FALSE;
+		}
 		set->Ctl() = this;
+		return TRUE;
 	}
-	void InsSet(void* p)
+	BOOL InsSet(void* p)
 	{
 		IGuiSet* set = ExDynCast<IGuiSet>(p);
-		if (!set) return;
+		if (!set) return FALSE;
 		set->Ctl() = this;
-		IGuiSetMgr::InsSet(p);
+		return IGuiSetMgr::InsSet(p);
 	}
-	void InsSet(LPCTSTR key)
+	BOOL InsSet(LPCTSTR key)
 	{
-		if (!IGuiSetMgr::Ins(key)) return;
+		if (!IGuiSetMgr::InsSet(key)) return FALSE;
 		IGuiSet* set = ExDynCast<IGuiSet>(GetSet().HeadItem());
-		if (!set) return;
+		if (!set)
+		{
+			DelSet(key);
+			return FALSE;
+		}
 		set->Ctl() = this;
+		return TRUE;
 	}
 
 	// 获得控件状态

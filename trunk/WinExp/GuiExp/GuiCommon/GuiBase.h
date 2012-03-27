@@ -85,6 +85,9 @@ public:
 public:
 	BOOL IsValid() const { return EXP_MULT::IsValid(); }
 
+	void SetTrust(BOOL bTruCldr = TRUE) { IGuiComp::SetTrust(bTruCldr); }
+	BOOL IsTrust() const { return IGuiComp::IsTrust(); }
+
 	virtual BOOL Execute(const CString& key, const CString& val)
 	{
 		return FALSE;

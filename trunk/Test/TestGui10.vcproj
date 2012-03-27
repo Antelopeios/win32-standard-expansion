@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="TestGui7 - List"
-	ProjectGUID="{6CEB6909-F172-4932-94A8-2541B8F3BD4F}"
-	RootNamespace="TestGui7"
+	Name="TestGui10 - Tree"
+	ProjectGUID="{8386A5B5-DF87-49FD-AE00-95F222C159C4}"
+	RootNamespace="TestGui10"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -175,7 +175,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\TestGui7\stdafx.cpp"
+				RelativePath=".\TestGui10\stdafx.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -195,7 +195,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TestGui7\TestGui7.cpp"
+				RelativePath=".\TestGui10\TestGui10.cpp"
 				>
 			</File>
 		</Filter>
@@ -205,11 +205,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\TestGui7\stdafx.h"
+				RelativePath=".\TestGui10\stdafx.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TestGui7\TestGui7.h"
+				RelativePath=".\TestGui10\TestGui10.h"
 				>
 			</File>
 		</Filter>

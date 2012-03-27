@@ -45,7 +45,7 @@ protected:
 		for(int i = 0; i < 100; ++i)
 		{
 			CString tmp;
-			tmp.Format(_T("这是一行文字, 文字测试第%d行\n"), i + 1);
+			tmp.Format(_T("Dark-C.at Dark-C.at Dark-C.at 这是一行文字, 文字测试第 %d 行\n"), i + 1);
 			str += tmp;
 		}
 		ExReg<IGuiCtl>(_T("text"), ExGui(_T("CGuiText")));

@@ -33,12 +33,13 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-26
-// Version:	1.0.0001.1207
+// Date:	2012-03-27
+// Version:	1.0.0002.1227
 //
 // History:
 //	- 1.0.0000.0918(2012-03-13)	@ 开始构建GuiText
 //	- 1.0.0001.1207(2012-03-26)	# 修正当CGuiText在控件显示的时候没有刷新控件内部文字区域,导致滚动条无法自动加载的问题
+//	- 1.0.0002.1227(2012-03-27)	# 修正当CGuiText改变大小时可能导致滚动条刷新不正常的问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiText_hpp__
@@ -72,48 +73,53 @@ public:
 			return FALSE;
 		}
 
+		if (m_rcImg != rect)
+		{
+			m_rcImg = rect;
+			ctl->SetFraRect(CSize(rect.Width(), rect.Height()));
+		}
+
 		if (m_txtTmp == (*text) && 
 			m_rcImg == rect && 
 			m_StrTmp == *str) return TRUE;
 
 		m_txtTmp = (*text);
-		m_rcImg = rect;
 		m_StrTmp = (*str);
 
 		// 计算缓存图大小并预存分段位图
 		CArrayT<CString> sa;
 		ExStringToArray(*str, sa, _T('\n'), FALSE);
 		CArrayT<CImage> ia;
-		CArrayT<LONG> fa;
-		LONG h = 0;
+		CSize sz_all;
 		for(DWORD i = 0; i < sa.GetCount(); ++i)
 		{
-			fa.PushLast(0);
-			ia.PushLast(text->GetImage(sa[i], rect, 2, _T("..."), &(fa[i])));
-			if (!ia[i].IsNull()) h += fa[i];
+			ia.PushLast(text->GetImage(sa[i]));
+			if(!ia[i].IsNull())
+			{
+				sz_all.cx = max(sz_all.cx, ia[i].GetWidth());
+				sz_all.cy += (ia[i].GetHeight() + 2);
+			}
 		}
 
 		// 绘制缓存
-		rect.MoveTo(CPoint());
-		rect.Height(h);
-		m_imgClp.Create(rect.Width(), rect.Height());
+		CRect rc(0, 0, sz_all.cx, sz_all.cy);
+		m_imgClp.Create(rc.Width(), rc.Height());
 		for(DWORD i = 0; i < ia.GetCount(); ++i)
 		{
 			if (ia[i].IsNull()) continue;
-			CImgDrawer::Draw(m_imgClp, ia[i], rect);
-			rect.Top(rect.Top() + fa[i]);
+			CImgDrawer::Draw(m_imgClp, ia[i], rc);
+			rc.Top(rc.Top() + ia[i].GetHeight() + 2);
 		}
 
-		ctl->SetFraRect(CSize(0, m_rcImg.Height()));
-		ctl->SetAllRect(CSize(0, h));
+		ctl->SetAllRect(sz_all);
 
 		return TRUE;
 	}
 	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
 	{
-		if (nMessage == WM_SHOWWINDOW)
+		if (nMessage == WM_SHOWWINDOW || nMessage == WM_SIZE)
 		{
-			if (!wParam) return;
+			if (nMessage == WM_SHOWWINDOW && !wParam) return;
 			if (!m_Val) return;
 			CString* str = (CString*)Ctl()->GetState(_T("text"));
 			if (!str) return;

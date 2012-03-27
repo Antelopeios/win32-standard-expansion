@@ -14,21 +14,32 @@ protected:
 	{
 		DWORD ret = IApp::OnInit();
 
-		// ÎÄ×Ö×ÊÔ´
 		ExReg<CText>(_T("font"), gcnew(gc, CText));
 		ExGet<CText>(_T("font"))->SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 
-		ExReg<IGuiCtl>(_T("scrl"), ExGui(_T("CGuiScroll")));
-		ExGet<IGuiCtl>(_T("scrl"))->SetVisible(FALSE);
-		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl"))->GetState(_T("up")))->SetWindowRect(CRect());
-		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl"))->GetState(_T("down")))->SetWindowRect(CRect());
-		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
-		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_ori"), (void*)TRUE);
-		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 		pixel_t pix[8] = {0};
+
+		ExReg<IGuiCtl>(_T("scrl_v"), ExGui(_T("CGuiScroll")));
+		ExGet<IGuiCtl>(_T("scrl_v"))->SetVisible(FALSE);
+		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl_v"))->GetState(_T("up")))->SetWindowRect(CRect());
+		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl_v"))->GetState(_T("down")))->SetWindowRect(CRect());
+		ExGet<IGuiCtl>(_T("scrl_v"))->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
+		ExGet<IGuiCtl>(_T("scrl_v"))->SetState(_T("sli_ori"), (void*)TRUE);
+		ExGet<IGuiCtl>(_T("scrl_v"))->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
 		for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
-		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_blk_color"), pix);
-		ExGet<IGuiCtl>(_T("scrl"))->AddEvent(dbnew(CScrEvent));
+		ExGet<IGuiCtl>(_T("scrl_v"))->SetState(_T("sli_blk_color"), pix);
+		ExGet<IGuiCtl>(_T("scrl_v"))->AddEvent(dbnew(CScrEventV));
+
+		ExReg<IGuiCtl>(_T("scrl_h"), ExGui(_T("CGuiScroll")));
+		ExGet<IGuiCtl>(_T("scrl_h"))->SetVisible(FALSE);
+		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl_h"))->GetState(_T("up")))->SetWindowRect(CRect());
+		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl_h"))->GetState(_T("down")))->SetWindowRect(CRect());
+		ExGet<IGuiCtl>(_T("scrl_h"))->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
+		ExGet<IGuiCtl>(_T("scrl_h"))->SetState(_T("sli_ori"), (void*)FALSE);
+		ExGet<IGuiCtl>(_T("scrl_h"))->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
+		for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
+		ExGet<IGuiCtl>(_T("scrl_h"))->SetState(_T("sli_blk_color"), pix);
+		ExGet<IGuiCtl>(_T("scrl_h"))->AddEvent(dbnew(CScrEventH));
 
 		CString str;
 		for(int i = 0; i < 100; ++i)
@@ -41,12 +52,14 @@ protected:
 		ExGet<IGuiCtl>(_T("text"))->SetState(_T("font"), (void*)ExGet<CText>(_T("font")));
 		ExGet<IGuiCtl>(_T("text"))->SetState(_T("text"), (void*)&str);
 		ExGet<IGuiCtl>(_T("text"))->AddEvent(dbnew(CTxtEvent));
-		ExGet<IGuiCtl>(_T("text"))->SetScroll(ExGet<IGuiCtl>(_T("scrl")));
+		ExGet<IGuiCtl>(_T("text"))->SetScroll(ExGet<IGuiCtl>(_T("scrl_v")), TRUE);
+		ExGet<IGuiCtl>(_T("text"))->SetScroll(ExGet<IGuiCtl>(_T("scrl_h")), FALSE);
 
 		ExReg<IGuiWnd>(_T("main"), ExGui(_T("CGuiWnd"), &gc));
 		ExGet<IGuiWnd>(_T("main"))->Create(_T("TestGui8"), CRect(0, 0, 600, 400), SW_HIDE, WS_OVERLAPPEDWINDOW);
 		ExGet<IGuiWnd>(_T("main"))->CenterWindow();
-		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("scrl")));
+		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("scrl_v")));
+		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("scrl_h")));
 		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("text")));
 		ExGet<IGuiWnd>(_T("main"))->AddEvent(ExGui(_T("CQuitEvent")));
 		ExGet<IGuiWnd>(_T("main"))->AddEvent(dbnew(CWndEvent));

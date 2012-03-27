@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-26
-// Version:	1.0.0024.1515
+// Date:	2012-03-27
+// Version:	1.0.0025.1216
 //
 // History:
 //	- 1.0.0001.1730(2011-05-05)	= GuiInterface里仅保留最基本的公共接口
@@ -70,6 +70,7 @@
 //	- 1.0.0023.1505(2012-03-24)	+ IGuiItemMgr支持直接通过字符串创建或删除指定类型的IGuiItem对象
 //	- 1.0.0024.1515(2012-03-26)	+ IGuiSetMgr支持直接通过其内部IGuiSet的Key值直接定位IGuiSet指针
 //								= IGuiSetMgr将会自动覆盖掉Key值相同的IGuiSet对象(Key为空的不会被覆盖)
+//	- 1.0.0025.1216(2012-03-27)	+ IGuiEvent支持通过GetPrev()和GetNext()枚举上/下一个事件接口对象
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiInterface_h__
@@ -102,12 +103,17 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+EXP_INTERFACE IGuiItemMgr;
+
 // GUI 元素对象接口
 EXP_INTERFACE IGuiItem : public IGuiObject
 {
 	EXP_DECLARE_DYNAMIC_CLS(IGuiItem, IGuiObject)
 
+	friend interface IGuiItemMgr;
+
 protected:
+	IGuiItemMgr* m_Pare;		// 父对象指针
 	BOOL m_bTru;
 
 public:
@@ -118,6 +124,7 @@ public:
 	{}
 
 public:
+	IGuiItemMgr* GetPare() const { return m_Pare; }
 	virtual void SetTrust(BOOL bTru = TRUE) { m_bTru = bTru; }
 	virtual BOOL IsTrust() const { return m_bTru; }
 };
@@ -163,8 +170,8 @@ public:
 	itm_list_t& GetItm() const { return *m_CldrItm; }
 
 	// 查找
-	itm_iter_t Find(IGuiItem* p) { return GetItm().Find(p); }
-	itm_iter_t Find(LPCTSTR key)
+	itm_iter_t Find(IGuiItem* p) const { return GetItm().Find(p); }
+	itm_iter_t Find(LPCTSTR key) const
 	{
 		itm_map_t::iterator_t map_ite = m_CldrMap->Locate(key);
 		if (map_ite == m_CldrMap->Tail()) return GetItm().Tail();
@@ -180,6 +187,7 @@ public:
 		itm_iter_t ite = Find(itm);
 		if (ite != GetItm().Tail()) return TRUE;
 		// 添加新对象
+		itm->m_Pare = this;
 		return GetItm().Add(itm);
 	}
 	BOOL Add(LPCTSTR key)
@@ -201,6 +209,7 @@ public:
 		itm_iter_t ite = Find(itm);
 		if (ite != GetItm().Tail()) return TRUE;
 		// 添加新对象
+		itm->m_Pare = this;
 		return GetItm().Add(itm, GetItm().Head());
 	}
 	BOOL Ins(LPCTSTR key)
@@ -323,6 +332,26 @@ public:
 		return sta;
 	}
 
+	// 事件对象枚举接口
+	IGuiEvent* GetPrev() const
+	{
+		IGuiItemMgr* pare = GetPare();
+		if (!pare) return NULL;
+		IGuiItemMgr::itm_iter_t ite = pare->Find((IGuiItem*)this);
+		if (ite == pare->GetItm().Tail()) return NULL;
+		if (ite == pare->GetItm().Last()) return NULL;
+		return (IGuiEvent*)(*(++ite));
+	}
+	IGuiEvent* GetNext() const
+	{
+		IGuiItemMgr* pare = GetPare();
+		if (!pare) return NULL;
+		IGuiItemMgr::itm_iter_t ite = pare->Find((IGuiItem*)this);
+		if (ite == pare->GetItm().Tail()) return NULL;
+		if (ite == pare->GetItm().Head()) return NULL;
+		return (IGuiEvent*)(*(--ite));
+	}
+
 	// 事件传递接口
 	virtual void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
 };
@@ -346,7 +375,7 @@ public:
 	evt_list_t& GetEvent() const { return GetItm(); }
 
 	// 查找
-	evt_list_t::iterator_t FindEvent(IGuiEvent* p) { return Find(p); }
+	evt_list_t::iterator_t FindEvent(IGuiEvent* p) const { return Find(p); }
 
 	// 组合接口
 	virtual void AddEvent(void* p) { Add(p); }
@@ -473,7 +502,7 @@ public:
 	list_t& GetComp() const { return *m_Cldr; }
 
 	// 查找
-	list_t::iterator_t FindComp(void* p) { return GetComp().Find(ExDynCast<IGuiComp>(p)); }
+	list_t::iterator_t FindComp(void* p) const { return GetComp().Find(ExDynCast<IGuiComp>(p)); }
 
 	// 组合接口
 	virtual void AddComp(void* p)
@@ -627,8 +656,8 @@ public:
 	set_list_t& GetSet() const { return GetItm(); }
 
 	// 查找
-	set_list_t::iterator_t FindSet(IGuiSet* p) { return Find(p); }
-	set_list_t::iterator_t FindSet(LPCTSTR key) { return Find(key); }
+	set_list_t::iterator_t FindSet(IGuiSet* p) const { return Find(p); }
+	set_list_t::iterator_t FindSet(LPCTSTR key) const { return Find(key); }
 	IGuiSet* FindKeySet(const CString& key)
 	{
 		if (key.Empty())

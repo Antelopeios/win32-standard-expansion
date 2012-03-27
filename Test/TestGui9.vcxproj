@@ -101,16 +101,8 @@
     <ClCompile Include="TestGui9\TestGui9.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TestGui9\Resource.h" />
     <ClInclude Include="TestGui9\stdafx.h" />
     <ClInclude Include="TestGui9\TestGui9.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="TestGui9\small.ico" />
-    <None Include="TestGui9\TestGui9.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="TestGui9\TestGui9.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

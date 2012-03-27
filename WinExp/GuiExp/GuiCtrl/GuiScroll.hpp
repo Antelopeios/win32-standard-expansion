@@ -199,6 +199,14 @@ public:
 		InsComp(&m_Up);
 		m_Down.SetWindowRect(CRect(0, 0, 20, 20));
 		InsComp(&m_Down);
+		// 调整默认属性
+		SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, EXP_CM));
+		pixel_t pix[8] = {0};
+		CImgASM::PixSetP(pix, _countof(pix), ExRGBA(120, 120, 120, EXP_CM));
+		SetState(_T("sli_blk_color"), pix);
+		CImgASM::PixSetP(pix, _countof(pix), ExRGBA(180, 180, 180, EXP_CM));
+		SetState(_T("up_color"), pix);
+		SetState(_T("dn_color"), pix);
 	}
 	~CGuiScroll()
 	{

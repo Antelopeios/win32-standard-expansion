@@ -1,7 +1,5 @@
 #pragma once
 
-#include "resource.h"
-
 //////////////////////////////////////////////////////////////////
 
 class CCustomEvent : public IGuiEvent

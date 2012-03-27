@@ -21,7 +21,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	RECT rc_dsk = {0};
 	::GetClientRect(::GetDesktopWindow(), &rc_dsk);
 	CRect rc_wnd(0, 0, 500, 300);
-	HICON ic_wnd = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTGUI2));
 	CText txt_edt((font_t)::GetStockObject(DEFAULT_GUI_FONT), ExRGBA(0, 60, 116, 200));
 	LOGFONT lf = {0};
 	txt_edt.GetLogFont(&lf);
@@ -33,8 +32,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 创建窗口对象并设置
 	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
 	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
-	wnd->SendMessage(WM_SETICON, (WPARAM)TRUE, (LPARAM)ic_wnd);
-	wnd->SendMessage(WM_SETICON, (WPARAM)FALSE, (LPARAM)ic_wnd);
 	wnd->CenterWindow();
 	wnd->GetClientRect(rc_wnd);
 

@@ -1,11 +1,17 @@
 #pragma once
 
-#include "resource.h"
-
 //////////////////////////////////////////////////////////////////
 
-class CScrEvent : public IGuiEvent
+class CPrgEvent : public IGuiEvent
 {
+public:
+	int m_Off;
+
+public:
+	CPrgEvent()
+		: m_Off(0)
+	{}
+
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
@@ -14,52 +20,15 @@ public:
 
 		switch( nMessage )
 		{
-		case WM_SHOWWINDOW:
-			if (wParam)
+		case WM_TIMER:
+			if (wParam == 1)
 			{
-				CRect rc_wnd;
-				IGuiWnd* wnd = ctl->GetWnd();
-				if (wnd)
-				{
-					wnd->GetClientRect(rc_wnd);
-					rc_wnd.Left(rc_wnd.Right() - 10);
-					ctl->SetWindowRect(rc_wnd);
-				}
-			}
-			break;
-		}
-	}
-};
-
-//////////////////////////////////////////////////////////////////
-
-class CTxtEvent : public IGuiEvent
-{
-public:
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-		if (!ctl) return;
-
-		switch( nMessage )
-		{
-		case WM_SHOWWINDOW:
-			if (wParam)
-			{
-				CRect rc_wnd;
-				IGuiWnd* wnd = ctl->GetWnd();
-				if (wnd)
-				{
-					wnd->GetClientRect(rc_wnd);
-					ctl->SetWindowRect(rc_wnd);
-					if (ctl->IsNeedScroll())
-					{
-						CRect rc_scr;
-						ctl->GetScroll()->GetWindowRect(rc_scr);
-						rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
-					}
-					ctl->SetWindowRect(rc_wnd);
-				}
+				UINT val = (UINT)ctl->GetState(_T("val"));
+				UINT max = (UINT)ctl->GetState(_T("max"));
+				ctl->SetState(_T("val"), (void*)(val += m_Off));
+				if (m_Off > 0 && val >= max) m_Off = -m_Off;
+				else
+				if (m_Off < 0 && val == 0) m_Off = -m_Off;
 			}
 			break;
 		}
@@ -78,12 +47,24 @@ public:
 
 		switch( nMessage )
 		{
+		case WM_SHOWWINDOW:
+			if (!wParam) break;
+			::SetTimer(wnd->GethWnd(), 1, 40, NULL);
 		case WM_SIZE:
-			for(IGuiBase::list_t::iterator_t ite = wnd->GetComp().Head(); ite != wnd->GetComp().Tail(); ++ite)
 			{
-				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
-				if (!ctl) continue;
-				ctl->SendMessage(WM_SHOWWINDOW, TRUE);
+				CRect rc_wnd, rc;
+				wnd->GetClientRect(rc_wnd);
+				rc.Width(rc_wnd.Width() - 40);
+				rc.Height(25);
+				rc.MoveTo(CPoint(
+					(rc_wnd.Width() - rc.Width()) >> 1, 
+					(rc_wnd.Height() - rc.Height()) >> 1));
+				rc.Offset(CPoint(0, -(rc.Height() + 20)));
+				ExGet<IGuiCtl>(_T("prog1"))->SetWindowRect(rc);
+				rc.Offset(CPoint(0, rc.Height() + 20));
+				ExGet<IGuiCtl>(_T("prog2"))->SetWindowRect(rc);
+				rc.Offset(CPoint(0, rc.Height() + 20));
+				ExGet<IGuiCtl>(_T("prog3"))->SetWindowRect(rc);
 			}
 			break;
 		}

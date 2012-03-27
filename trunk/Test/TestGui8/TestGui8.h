@@ -1,10 +1,8 @@
 #pragma once
 
-#include "resource.h"
-
 //////////////////////////////////////////////////////////////////
 
-class CScrEvent : public IGuiEvent
+class CScrEventV : public IGuiEvent
 {
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
@@ -17,12 +15,42 @@ public:
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
-				CRect rc_wnd;
 				IGuiWnd* wnd = ctl->GetWnd();
 				if (wnd)
 				{
+					CRect rc_wnd;
 					wnd->GetClientRect(rc_wnd);
 					rc_wnd.Left(rc_wnd.Right() - 10);
+					ctl->SetWindowRect(rc_wnd);
+				}
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CScrEventH : public IGuiEvent
+{
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (wnd)
+				{
+					CRect rc_wnd;
+					wnd->GetClientRect(rc_wnd);
+					rc_wnd.Right(rc_wnd.Right() - 10);
+					rc_wnd.Top(rc_wnd.Bottom() - 10);
 					ctl->SetWindowRect(rc_wnd);
 				}
 			}
@@ -46,17 +74,23 @@ public:
 		case WM_SHOWWINDOW:
 			if (wParam)
 			{
-				CRect rc_wnd;
 				IGuiWnd* wnd = ctl->GetWnd();
 				if (wnd)
 				{
+					CRect rc_wnd;
 					wnd->GetClientRect(rc_wnd);
 					ctl->SetWindowRect(rc_wnd);
-					if (ctl->IsNeedScroll())
+					if (ctl->IsNeedScroll(TRUE))
 					{
 						CRect rc_scr;
-						ctl->GetScroll()->GetWindowRect(rc_scr);
+						ctl->GetScroll(TRUE)->GetWindowRect(rc_scr);
 						rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
+					}
+					if (ctl->IsNeedScroll(FALSE))
+					{
+						CRect rc_scr;
+						ctl->GetScroll(FALSE)->GetWindowRect(rc_scr);
+						rc_wnd.Bottom(rc_wnd.Bottom() - rc_scr.Height());
 					}
 					ctl->SetWindowRect(rc_wnd);
 				}

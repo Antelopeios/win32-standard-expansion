@@ -23,27 +23,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TestGui6\Resource.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="TestGui6\stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TestGui6\TestGui6.h">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="TestGui6\small.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="TestGui6\TestGui6.ico">
-      <Filter>资源文件</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="TestGui6\TestGui6.rc">
-      <Filter>资源文件</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

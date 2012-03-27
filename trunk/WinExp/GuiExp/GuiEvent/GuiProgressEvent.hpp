@@ -84,7 +84,7 @@ public:
 		CRect rect, rc_pg;
 		m_Ctrl->GetClientRect(rect);
 		rc_pg = rect;
-		rc_pg.Width((rect.Width() * max) / val);
+		rc_pg.Width((rect.Width() * val) / max);
 		prog->SetWindowRect(rc_pg);
 	}
 

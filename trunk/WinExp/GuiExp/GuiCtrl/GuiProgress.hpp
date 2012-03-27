@@ -66,8 +66,14 @@ public:
 	{
 		// 添加事件对象
 		InsEvent(ExGui(_T("CGuiProgressEvent"), GetGC())); /*先让基类绘图*/
-		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
-		m_Prog.SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
+		SetState(_T("color"), (void*)ExRGBA(220, 220, 220, EXP_CM));
+		m_Prog.SetState(_T("color"), (void*)ExRGBA(120, 120, 120, EXP_CM));
+		// 添加控件对象
+		InsComp(&m_Prog);
+	}
+	~CGuiProgress()
+	{
+		DelComp(&m_Prog, FALSE);
 	}
 
 public:
@@ -120,16 +126,14 @@ public:
 		else
 		if (sType == _T("val"))
 		{
-			SET_STATE(uint32_t, m_nVal)
-			SendMessage(WM_SIZE, SIZE_RESTORED, 
-				(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
+			SET_STATE(uint32_t, m_nVal, 
+				SendMessage(WM_SIZE, SIZE_RESTORED, (LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height())))
 		}
 		else
 		if (sType == _T("max"))
 		{
-			SET_STATE(uint32_t, m_nMax)
-			SendMessage(WM_SIZE, SIZE_RESTORED, 
-				(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
+			SET_STATE(uint32_t, m_nMax, 
+				SendMessage(WM_SIZE, SIZE_RESTORED, (LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height())))
 		}
 		else
 			return EXP_BASE::SetState(sType, pState);

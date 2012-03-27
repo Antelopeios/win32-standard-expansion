@@ -2,16 +2,8 @@
 
 //////////////////////////////////////////////////////////////////
 
-class CPrgEvent : public IGuiEvent
+class CScrEventV : public IGuiEvent
 {
-public:
-	int m_Off;
-
-public:
-	CPrgEvent()
-		: m_Off(0)
-	{}
-
 public:
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
@@ -20,15 +12,92 @@ public:
 
 		switch( nMessage )
 		{
-		case WM_TIMER:
-			if (wParam == 1)
+		case WM_SHOWWINDOW:
+			if (wParam)
 			{
-				UINT val = (UINT)ctl->GetState(_T("val"));
-				UINT max = (UINT)ctl->GetState(_T("max"));
-				ctl->SetState(_T("val"), (void*)(val += m_Off));
-				if (m_Off > 0 && val >= max) m_Off = -m_Off;
-				else
-				if (m_Off < 0 && val == 0) m_Off = -m_Off;
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (wnd)
+				{
+					CRect rc_wnd;
+					wnd->GetClientRect(rc_wnd);
+					rc_wnd.Left(rc_wnd.Right() - 10);
+					ctl->SetWindowRect(rc_wnd);
+				}
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CScrEventH : public IGuiEvent
+{
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (wnd)
+				{
+					CRect rc_wnd;
+					wnd->GetClientRect(rc_wnd);
+					rc_wnd.Right(rc_wnd.Right() - 10);
+					rc_wnd.Top(rc_wnd.Bottom() - 10);
+					ctl->SetWindowRect(rc_wnd);
+				}
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
+class CTreEvent : public IGuiEvent
+{
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
+
+		switch( nMessage )
+		{
+		case WM_SHOWWINDOW:
+			if (wParam)
+			{
+				IGuiWnd* wnd = ctl->GetWnd();
+				if (wnd)
+				{
+					CRect rc_wnd;
+					wnd->GetClientRect(rc_wnd);
+					ctl->SetWindowRect(rc_wnd);
+					BOOL nd_sc = FALSE;
+					if (ctl->IsNeedScroll(TRUE))
+					{
+						CRect rc_scr;
+						ctl->GetScroll(TRUE)->GetWindowRect(rc_scr);
+						rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
+						nd_sc = TRUE;
+					}
+					if (ctl->IsNeedScroll(FALSE))
+					{
+						CRect rc_scr;
+						ctl->GetScroll(FALSE)->GetWindowRect(rc_scr);
+						rc_wnd.Bottom(rc_wnd.Bottom() - rc_scr.Height());
+						nd_sc = TRUE;
+					}
+					if (nd_sc)
+						ctl->SetWindowRect(rc_wnd);
+				}
 			}
 			break;
 		}
@@ -47,24 +116,12 @@ public:
 
 		switch( nMessage )
 		{
-		case WM_SHOWWINDOW:
-			if (!wParam) break;
-			::SetTimer(wnd->GethWnd(), 1, 40, NULL);
 		case WM_SIZE:
+			for(IGuiBase::list_t::iterator_t ite = wnd->GetComp().Head(); ite != wnd->GetComp().Tail(); ++ite)
 			{
-				CRect rc_wnd, rc;
-				wnd->GetClientRect(rc_wnd);
-				rc.Width(rc_wnd.Width() - 40);
-				rc.Height(25);
-				rc.MoveTo(CPoint(
-					(rc_wnd.Width() - rc.Width()) >> 1, 
-					(rc_wnd.Height() - rc.Height()) >> 1));
-				rc.Offset(CPoint(0, -(rc.Height() + 20)));
-				ExGet<IGuiCtl>(_T("prog1"))->SetWindowRect(rc);
-				rc.Offset(CPoint(0, rc.Height() + 20));
-				ExGet<IGuiCtl>(_T("prog2"))->SetWindowRect(rc);
-				rc.Offset(CPoint(0, rc.Height() + 20));
-				ExGet<IGuiCtl>(_T("prog3"))->SetWindowRect(rc);
+				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+				if (!ctl) continue;
+				ctl->SendMessage(WM_SHOWWINDOW, TRUE);
 			}
 			break;
 		}

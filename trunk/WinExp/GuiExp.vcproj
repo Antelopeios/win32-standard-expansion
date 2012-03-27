@@ -272,6 +272,10 @@
 				RelativePath=".\GuiExp\GuiCtrl\GuiText.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\GuiExp\GuiCtrl\GuiTree.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="GuiEvent"

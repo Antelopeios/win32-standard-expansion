@@ -403,5 +403,6 @@ public:
 #include "GuiCtrl/GuiScroll.hpp"
 #include "GuiCtrl/GuiText.hpp"
 #include "GuiCtrl/GuiProgress.hpp"
+#include "GuiCtrl/GuiTree.hpp"
 
 //////////////////////////////////////////////////////////////////

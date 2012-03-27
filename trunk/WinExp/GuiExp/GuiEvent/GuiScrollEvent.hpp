@@ -33,13 +33,14 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-12
-// Version:	1.0.0002.1447
+// Date:	2012-03-27
+// Version:	1.0.0003.1532
 //
 // History:
 //	- 1.0.0000.1337(2011-08-02)	@ 准备构建GuiScrollEvent
 //	- 1.0.0001.1816(2011-08-24)	+ 当GuiScroll收到重定位消息时,自动通知其关联的控件进行滚动
 //	- 1.0.0002.1447(2012-03-12)	# 修正滚动条无限循环绘图导致CPU居高不下的bug
+//	- 1.0.0003.1532(2012-03-27)	# 修正滚动条在设置滚动坐标时将非自身的滚动维度永远置于原点的bug
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiScrollEvent_hpp__
@@ -492,16 +493,17 @@ public:
 		case WM_COMMAND:
 			if (wParam == SB_THUMBPOSITION)
 			{
+				IGuiCtl* main = GetMain();
+				if (!main) break;
 				LONG pos = GetPos();
 				CSize scr_sz;
+				main->GetScrollSize(scr_sz);
 				BOOL ori = GetOri();
 				if (ori)
 					scr_sz.cy = pos;
 				else
 					scr_sz.cx = pos;
-				IGuiCtl* main = GetMain();
-				if (main)
-					main->SetScrollSize(scr_sz);
+				main->SetScrollSize(scr_sz);
 			}
 			break;
 		}

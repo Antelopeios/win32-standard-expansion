@@ -131,6 +131,9 @@ protected:
 	}
 
 public:
+	void SetTrust(BOOL bTruCldr = TRUE) { IGuiBase::SetTrust(bTruCldr); }
+	BOOL IsTrust() const { return IGuiBase::IsTrust(); }
+
 	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
 		if(!GetParent()) return;

@@ -50,18 +50,44 @@
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
+// CGuiTreeItem
+//////////////////////////////////////////////////////////////////
 
-class CGuiTreeItem : public CGuiButton /*CGuiList内部使用的列表项*/
+// 树结点是否展开
+class _tre_itm_expand : public ICtrlSetT<BOOL>
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
+	EXP_DECLARE_DYNCREATE_CLS(_tre_itm_expand, IGuiSet)
+
+public:
+	CString GetKey() const { return _T("expand"); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_tre_itm_expand, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiTreeItem : public CGuiListItem /*CGuiTree内部使用的列表项*/
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, CGuiListItem)
 
 public:
 	CGuiTreeItem()
 	{
-		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiListItemEvent"), GetGC())); /*先让基类绘图*/
+		// 添加逻辑对象
+		AddSet(_T("_tre_itm_expand"));
 	}
 };
+
+//////////////////////////////////////////////////////////////////
+// CGuiTree
+//////////////////////////////////////////////////////////////////
+
+class _tre_items : public IItemSetT<IGuiCtl::itree_t>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_tre_items, IGuiSet)
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_tre_items, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 
@@ -72,6 +98,8 @@ class CGuiTree : public CGuiPicture
 public:
 	CGuiTree()
 	{
+		// 添加逻辑对象
+		AddSet(_T("_tre_items"));
 		// 设置默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 	}
@@ -79,7 +107,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, CGuiListItem)
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTree, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////

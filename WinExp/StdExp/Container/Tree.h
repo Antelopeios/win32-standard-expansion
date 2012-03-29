@@ -198,6 +198,7 @@ public:
 				(*itm) = (*(*ite));	// �ݹ鸳ֵ
 				Chdr.Add(itm);
 			}
+			return (*this);
 		}
 
 		DWORD GetCount(DWORD nStart = 0)

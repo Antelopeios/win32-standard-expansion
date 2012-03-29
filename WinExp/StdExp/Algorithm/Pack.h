@@ -1,4 +1,4 @@
-// Copyright 2011, 木头云
+// Copyright 2011-2012, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,11 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-10-17
-// Version:	1.0.0001.1032
+// Date:	2012-03-29
+// Version:	1.0.0002.1741
+//
+// History:
+//	- 1.0.0002.1741(2012-03-29)	^ 将CPack与CPackList改为模板类重定义,支持参数配置CPack与CPackList
 //////////////////////////////////////////////////////////////////
 
 #ifndef __Pack_h__
@@ -51,7 +54,8 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CPack
+template <uint32_t MagicT = 0x20111017/*2011.10.17*/, uint32_t VersionT = 1>
+class CPackT
 {
 public:
 	// 数据类型
@@ -76,8 +80,8 @@ public:
 		err_crc, 
 	};
 
-	static const uint32_t MAGIC = 0x20111017;	// 2011.10.17
-	static const uint32_t VERSION = 0;
+	static const uint32_t MAGIC = MagicT;
+	static const uint32_t VERSION = VersionT;
 
 #pragma pack(1)
 	// 包头
@@ -104,7 +108,7 @@ protected:
 	DWORD m_CurSize, m_BufSize, m_CurPos;
 
 public:
-	CPack()
+	CPackT()
 		: m_Error(err_none)
 		, m_Pack(NULL)
 		, m_CurSize(0)
@@ -113,13 +117,13 @@ public:
 	{
 		Init();
 	}
-	CPack(CPack& pack)
+	CPackT(CPackT& pack)
 	{
-		this->CPack::CPack();
+		this->CPackT::CPackT();
 		operator=(pack);
 	}
 
-	virtual ~CPack()
+	virtual ~CPackT()
 	{
 		Term();
 	}
@@ -138,7 +142,7 @@ public:
 		m_CurPos = m_BufSize = m_CurSize = 0;
 	}
 
-	CPack& operator=(CPack& pack)
+	CPackT& operator=(CPackT& pack)
 	{
 		Term();
 
@@ -150,9 +154,9 @@ public:
 
 		return (*this);
 	}
-	CPack* Clone()
+	CPackT* Clone()
 	{
-		CPack* pack = dbnew(CPack);
+		CPackT* pack = dbnew(CPackT);
 		*pack = *this;
 		return pack;
 	}
@@ -267,7 +271,7 @@ public:
 		m_CurSize = sizeof(head_t) + head->size;
 		return TRUE;
 	}
-	BOOL PushData(CPack* pPack)
+	BOOL PushData(CPackT* pPack)
 	{
 		if (!pPack) return FALSE;
 		typ_t t; size_t s = 0; void* b = NULL;
@@ -391,24 +395,27 @@ public:
 	}
 };
 
+typedef CPackT<> CPack;
+
 //////////////////////////////////////////////////////////////////
 
-class CPackList
+template <typename PackT = CPack>
+class CPackListT
 {
 public:
-	typedef CListT<CPack*> list_t;
+	typedef PackT pack_t;
+	typedef CListT<pack_t*> list_t;
 
 protected:
 	list_t m_PackList;
 	CMutex m_PackLock;
-	CPack* m_PackLast;
+	pack_t* m_PackLast;
 
 public:
-	CPackList(void)
+	CPackListT(void)
 		: m_PackLast(NULL)
-	{
-	}
-	virtual ~CPackList(void)
+	{}
+	virtual ~CPackListT(void)
 	{
 		if (m_PackLast)
 		{
@@ -420,13 +427,13 @@ public:
 	}
 
 public:
-	void PushPack(CPack* pack)
+	void PushPack(pack_t* pack)
 	{
 		if (!pack) return;
 		ExLock(m_PackLock);
 		m_PackList.PushLast(pack->Clone());
 	}
-	CPack* PopPack()
+	pack_t* PopPack()
 	{
 		ExLock(m_PackLock);
 		if (m_PackLast) del(m_PackLast);
@@ -440,6 +447,8 @@ public:
 		return m_PackLast;
 	}
 };
+
+typedef CPackListT<> CPackList;
 
 //////////////////////////////////////////////////////////////////
 

@@ -49,7 +49,25 @@
 #endif // _MSC_VER > 1000
 
 EXP_BEG
-	
+
+//////////////////////////////////////////////////////////////////
+// CGuiListItem
+//////////////////////////////////////////////////////////////////
+
+class CGuiListItem : public CGuiButton /*CGuiList内部使用的列表项*/
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiListItem, CGuiButton)
+
+public:
+	CGuiListItem()
+	{
+		// 添加事件对象
+		InsEvent(ExGui(_T("CGuiListItemEvent"), GetGC())); /*先让基类绘图*/
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+// CGuiList
 //////////////////////////////////////////////////////////////////
 
 class _lst_space : public ICtrlSetT<LONG>
@@ -70,20 +88,6 @@ class _lst_items : public IItemSetT<IGuiCtl::items_t>
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_lst_items, IGuiSet)
-
-//////////////////////////////////////////////////////////////////
-
-class CGuiListItem : public CGuiButton /*CGuiList内部使用的列表项*/
-{
-	EXP_DECLARE_DYNCREATE_MULT(CGuiListItem, CGuiButton)
-
-public:
-	CGuiListItem()
-	{
-		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiListItemEvent"), GetGC())); /*先让基类绘图*/
-	}
-};
 
 //////////////////////////////////////////////////////////////////
 

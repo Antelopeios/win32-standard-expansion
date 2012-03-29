@@ -82,29 +82,40 @@ public:
 	{ (*this) = tLine; }
 
 public:
-	EXP_INLINE void Set(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
+	EXP_INLINE CLineT& Set(const CPointT<TypeT>& Pt1, const CPointT<TypeT>& Pt2)
 	{
 		pt1 = Pt1;
 		pt2 = Pt2;
+		return (*this);
 	}
-	EXP_INLINE void Set(const CPointT<TypeT>& Pt1, const TypeT k)
+	EXP_INLINE CLineT& Set(const CPointT<TypeT>& Pt1, const TypeT k)
 	{
-		Set(Pt1, Pt1 + CPointT<TypeT>(1, k));
+		return Set(Pt1, Pt1 + CPointT<TypeT>(1, k));
 	}
-	EXP_INLINE void Set(const CPointT<TypeT>& Pt1)
+	EXP_INLINE CLineT& Set(const CPointT<TypeT>& Pt1)
 	{
-		Set(Pt1, Pt1 + CPointT<TypeT>(0, 1));
+		return Set(Pt1, Pt1 + CPointT<TypeT>(0, 1));
 	}
-	EXP_INLINE void Offset(const CPointT<TypeT>& Pt)
+	EXP_INLINE CLineT& Offset(const CPointT<TypeT>& Pt)
 	{
 		pt1 += Pt;
 		pt2 += Pt;
+		return (*this);
 	}
-	EXP_INLINE void MoveTo(const CPointT<TypeT>& Pt)
+	EXP_INLINE CLineT& Offset(TypeT x, TypeT y)
+	{
+		return Offset(CPointT<TypeT>(x, y));
+	}
+	EXP_INLINE CLineT& MoveTo(const CPointT<TypeT>& Pt)
 	{
 		CPointT<TypeT> pt(pt2 - pt1);
 		pt1 = Pt;
 		pt2 = pt1 + pt;
+		return (*this);
+	}
+	EXP_INLINE CLineT& MoveTo(TypeT x, TypeT y)
+	{
+		return MoveTo(CPointT<TypeT>(x, y));
 	}
 
 	EXP_INLINE BOOL IsEmpty() const

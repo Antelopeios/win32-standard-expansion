@@ -63,6 +63,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	wnd->ShowWindow(SW_SHOW);
 	wnd->GetClientRect(rc_wnd);
 
+	// 创建滚动条
+	IGuiCtl* scrl_v = ExGui<IGuiCtl>(_T("CGuiScroll"));
+	scrl_v->SetVisible(FALSE);
+	ExDynCast<IGuiCtl>(scrl_v->GetState(_T("up")))->SetWindowRect(CRect());
+	ExDynCast<IGuiCtl>(scrl_v->GetState(_T("down")))->SetWindowRect(CRect());
+	scrl_v->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
+	scrl_v->SetState(_T("sli_ori"), (void*)TRUE);
+	scrl_v->AddEvent(dbnew(CScrEventV));
+
 	// 创建列表控件
 	IGuiCtl* list = ExGui<IGuiCtl>(_T("CGuiListView"));
 	IGuiCtl::items_t items;
@@ -82,12 +91,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 	list->SetState(_T("items"), &items);
 	list->SetState(_T("space"), (void*)5);
-	list->SetWindowRect(rc_wnd);
+	list->SetScroll(scrl_v, TRUE);
+	list->AddEvent(ExGui(_T("CScrollEvent")));
 
 	// 关联对象
+	wnd->AddComp(scrl_v);
 	wnd->AddComp(list);
 	wnd->AddEvent(ExMem::Alloc<CCustomEvent>());
-	wnd->AddEvent(ExMem::Alloc<CFillEvent>());
+	wnd->AddEvent(ExGui(_T("CSizeEvent")));
 
 	// 主消息循环:
 	MSG msg = {0};

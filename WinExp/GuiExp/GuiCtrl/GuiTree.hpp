@@ -51,6 +51,20 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
+class CGuiTreeItem : public CGuiButton /*CGuiList内部使用的列表项*/
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
+
+public:
+	CGuiTreeItem()
+	{
+		// 添加事件对象
+		InsEvent(ExGui(_T("CGuiListItemEvent"), GetGC())); /*先让基类绘图*/
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
 class CGuiTree : public CGuiPicture
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiTree, CGuiPicture)
@@ -65,6 +79,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTree, CGuiPicture)
 
 //////////////////////////////////////////////////////////////////

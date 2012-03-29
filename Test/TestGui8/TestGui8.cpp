@@ -43,7 +43,7 @@ protected:
 		ExReg<IGuiCtl>(_T("text"), ExGui(_T("CGuiText")));
 		ExGet<IGuiCtl>(_T("text"))->SetState(_T("font"), (void*)ExGet<CText>(_T("font")));
 		ExGet<IGuiCtl>(_T("text"))->SetState(_T("text"), (void*)&str);
-		ExGet<IGuiCtl>(_T("text"))->AddEvent(dbnew(CTxtEvent));
+		ExGet<IGuiCtl>(_T("text"))->AddEvent(ExGui(_T("CScrollEvent")));
 		ExGet<IGuiCtl>(_T("text"))->SetScroll(ExGet<IGuiCtl>(_T("scrl_v")), TRUE);
 		ExGet<IGuiCtl>(_T("text"))->SetScroll(ExGet<IGuiCtl>(_T("scrl_h")), FALSE);
 
@@ -53,8 +53,8 @@ protected:
 		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("scrl_v")));
 		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("scrl_h")));
 		ExGet<IGuiWnd>(_T("main"))->AddComp(ExGet<IGuiCtl>(_T("text")));
+		ExGet<IGuiWnd>(_T("main"))->AddEvent(ExGui(_T("CSizeEvent")));
 		ExGet<IGuiWnd>(_T("main"))->AddEvent(ExGui(_T("CQuitEvent")));
-		ExGet<IGuiWnd>(_T("main"))->AddEvent(dbnew(CWndEvent));
 		ExGet<IGuiWnd>(_T("main"))->ShowWindow(SW_SHOW);
 
 		return ret;

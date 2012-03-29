@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-16
-// Version:	1.0.0005.2325
+// Date:	2012-03-28
+// Version:	1.0.0006.1142
 //
 // History:
 //	- 1.0.0000.1627(2011-06-20)	@ 重新构建ImgDrawer,作为ImgPainter的子模块,用于绘制基本图形
@@ -43,6 +43,7 @@
 //	- 1.0.0003.1540(2011-08-10)	+ 添加CImgDrawer::Fill()的精简参数重载
 //	- 1.0.0004.1646(2012-01-04)	+ CImgDrawer添加Cover()与Draw()系列接口,用于方便绘图调用
 //	- 1.0.0005.2325(2012-03-16)	+ CImgDrawer支持通过CGraph进行带独立剪切区与坐标的图像绘制
+//	- 1.0.0006.1142(2012-03-28)	+ CImgDrawer::Line()支持通过CGraph进行带独立坐标的图像绘制
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDrawer_h__
@@ -119,11 +120,13 @@ public:
 	}
 
 	// 画线
-	EXP_INLINE static BOOL Line(image_t imgDes, const CLine& lnDes, pixel_t pixSrc)
+	EXP_INLINE static BOOL Line(const CGraph& imgDes, const CLine& lnDes, pixel_t pixSrc)
 	{
+		CLine ln_des(lnDes);
+		imgDes.Transform(ln_des);
 		PreDraw();
-		MoveToEx(dc, lnDes.pt1.x, lnDes.pt1.y, &POINT());
-		LineTo(dc, lnDes.pt2.x, lnDes.pt2.y);
+		MoveToEx(dc, ln_des.pt1.x, ln_des.pt1.y, &POINT());
+		LineTo(dc, ln_des.pt2.x, ln_des.pt2.y);
 		EndDraw()
 		return TRUE;
 	}

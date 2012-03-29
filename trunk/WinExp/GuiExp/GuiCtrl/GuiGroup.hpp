@@ -52,122 +52,71 @@
 #endif // _MSC_VER > 1000
 
 EXP_BEG
-
+	
 //////////////////////////////////////////////////////////////////
 
-class CGuiGroup : public IGuiCtrlBase
+class _grp_items : public IItemSetT<IGuiCtl::items_t>
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiGroup, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_CLS(_grp_items, IGuiSet)
 
 protected:
-	items_t m_ItemList;
 	DWORD m_StatusCount;
-	BOOL m_StyleBox;
 	CImage* m_ImgCac;
-
 	CGC gc;
 
 public:
-	CGuiGroup()
-		: m_ItemList(NULL)
-		, m_StatusCount(3)
-		, m_StyleBox(TRUE)
+	_grp_items()
+		: m_StatusCount(3)
 		, m_ImgCac(NULL)
 	{}
-	~CGuiGroup()
-	{
-	}
 
 public:
-	BOOL Execute(const CString& key, const CString& val)
+	BOOL Key(const CString& key)
 	{
-		if (key == _T("image"))
-			SetState(_T("image"), ExGet<CImage>(val));
+		if (IItemSetT<IGuiCtl::items_t>::Key(key))
+			return TRUE;
 		else
-		if (key == _T("sta_cnt"))
-			SetState(_T("sta_cnt"), (void*)_ttol(val));
-		return IGuiCtrlBase::Execute(key, val);
+		if (key == _T("image") || 
+			key == _T("sta_cnt"))
+		{
+			m_Key = key;
+			return TRUE;
+		}
+		else
+		{
+			m_Key = _T("");
+			return FALSE;
+		}
 	}
-
-	// 获得控件状态
-	void* GetState(const CString& sType, void* pParam = NULL)
+	BOOL Exc(const CString& val)
 	{
-		if (sType == _T("items"))
-			return (void*)(&m_ItemList);
+		if (m_Key == _T("image"))
+			Set(ExGet<CImage>(val));
 		else
-			return EXP_BASE::GetState(sType);
+		if (m_Key == _T("sta_cnt"))
+			Set((void*)_ttol(val));
+		Ctl()->UpdateState();
+		return TRUE;
 	}
-	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
+	BOOL Set(void* sta, void* par = NULL)
 	{
-		if (sType == _T("items"))
+		if (m_Key == _T("items") || 
+			m_Key == _T("insert") || 
+			m_Key == _T("delete") || 
+			m_Key == _T("clear"))
 		{
-			items_t* new_sta = (items_t*)pState;
-			if (new_sta == NULL) return FALSE;
-			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			IItemSetT<IGuiCtl::items_t>::Set(sta, par);
+			gc.Clear();
+			if (m_Key != _T("clear"))
 			{
-				IGuiCtl* item = *ite;
-				if (!item) continue;
-				items_t::iterator_t it = new_sta->Find(item);
-				if (it == new_sta->Tail()) DelComp(item);
+				m_Key = _T("image");
+				Set(m_ImgCac);
 			}
-			m_ItemList = *(items_t*)pState;
-			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
-			{
-				IGuiCtl* item = *ite;
-				if (!item) continue;
-				AddComp(item);
-			}
-			gc.Clear();
-			SetState(_T("image"), m_ImgCac);
-			return IGuiCtrlBase::SetState(sType, pState);
 		}
 		else
-		if (sType == _T("insert"))
+		if (m_Key == _T("image"))
 		{
-			if (!pState || !pParam) return FALSE;
-			items_t::iterator_t ite = *(items_t::iterator_t*)pState;
-			IGuiCtl* item = (IGuiCtl*)pParam;
-			AddComp(item);
-			m_ItemList.Add(item, ite);
-			gc.Clear();
-			SetState(_T("image"), m_ImgCac);
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("delete"))
-		{
-			items_t::iterator_t ite = *(items_t::iterator_t*)pState;
-			IGuiCtl* item = *ite;
-			if (!item) return FALSE;
-			DelComp(item);
-			m_ItemList.Del(ite);
-			gc.Clear();
-			SetState(_T("image"), m_ImgCac);
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("clear"))
-		{
-			for(items_t::iterator_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
-			{
-				IGuiCtl* item = *ite;
-				if (!item) continue;
-				DelComp(item);
-			}
-			m_ItemList.Clear();
-			gc.Clear();
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("sta_cnt"))
-		{
-			m_StatusCount = (DWORD)(LONG_PTR)pState;
-			return IGuiCtrlBase::SetState(sType, pState);
-		}
-		else
-		if (sType == _T("image"))
-		{
-			CImage* img = (CImage*)pState;
+			CImage* img = (CImage*)sta;
 			if (!img || img->IsNull()) return FALSE;
 			if (m_ItemList.Empty())
 			{
@@ -190,9 +139,27 @@ public:
 				rc_itm.Offset(pt_off);
 			}
 			m_ImgCac = NULL;
-			return IGuiCtrlBase::SetState(sType, pState);
 		}
-		return FALSE;
+		else
+		if (m_Key == _T("sta_cnt"))
+			m_StatusCount = (DWORD)(LONG_PTR)sta;
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_grp_items, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
+class CGuiGroup : public IGuiCtrlBase
+{
+	EXP_DECLARE_DYNCREATE_MULT(CGuiGroup, IGuiCtrlBase)
+
+public:
+	CGuiGroup()
+	{
+		// 添加逻辑对象
+		AddSet(_T("_grp_items"));
 	}
 };
 

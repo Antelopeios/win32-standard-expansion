@@ -622,7 +622,7 @@ public:
 	// 获得该属性对象的属性关键字
 	virtual CString GetKey() const { return _T(""); }
 	// 传入一个字符串比较是否是该属性对象的属性关键字
-	virtual BOOL Key(const CString& key) const { return (key == GetKey()); }
+	virtual BOOL Key(const CString& key) { return (key == GetKey()); }
 	// 脚本解析接口
 	virtual BOOL Exc(const CString& val) { return FALSE; }
 	// 属性获取接口
@@ -658,7 +658,7 @@ public:
 	// 查找
 	set_list_t::iterator_t FindSet(IGuiSet* p) const { return Find(p); }
 	set_list_t::iterator_t FindSet(LPCTSTR key) const { return Find(key); }
-	IGuiSet* FindKeySet(const CString& key)
+	IGuiSet* FindKeySet(const CString& key, BOOL bSearch = TRUE)
 	{
 		if (key.Empty())
 		{
@@ -673,7 +673,17 @@ public:
 		else
 		{
 			set_map_t::iterator_t it = m_KeyMap.Locate(key);
-			if (it == m_KeyMap.Tail()) return NULL;
+			if (it == m_KeyMap.Tail())
+			{
+				if (bSearch)
+				for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+				{
+					IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+					if(!set || !set->Key(key)) continue;
+					return set;
+				}
+				return NULL;
+			}
 			return ExDynCast<IGuiSet>(*(*it));
 		}
 	}
@@ -686,7 +696,7 @@ public:
 		CString str(set->GetKey());
 		if (str.Empty()) return Add(p);
 		// 替换掉当前已有的属性
-		Del(FindKeySet(str));
+		Del(FindKeySet(str, FALSE));
 		if (!Add(p)) return FALSE;
 		m_KeyMap[str] = GetSet().Last();
 		return TRUE;
@@ -706,7 +716,7 @@ public:
 		CString str(set->GetKey());
 		if (!str.Empty())
 		{	// 替换掉当前已有的属性
-			Del(FindKeySet(str));
+			Del(FindKeySet(str, FALSE));
 			m_KeyMap[str] = ite;
 		}
 		return TRUE;
@@ -718,7 +728,7 @@ public:
 		CString str(set->GetKey());
 		if (str.Empty()) return Ins(p);
 		// 替换掉当前已有的属性
-		Del(FindKeySet(str));
+		Del(FindKeySet(str, FALSE));
 		if (!Ins(p)) return FALSE;
 		if (!str.Empty()) m_KeyMap[str] = GetSet().Head();
 		return TRUE;
@@ -738,7 +748,7 @@ public:
 		CString str(set->GetKey());
 		if (!str.Empty())
 		{	// 替换掉当前已有的属性
-			Del(FindKeySet(str));
+			Del(FindKeySet(str, FALSE));
 			m_KeyMap[str] = ite;
 		}
 		return TRUE;

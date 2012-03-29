@@ -376,6 +376,99 @@ public:
 	}
 };
 
+template <typename TypeT>
+class IItemSetT : public IGuiSet
+{
+public:
+	typedef TypeT items_t;
+	typedef typename items_t::iterator_t iter_t;
+
+protected:
+	CString m_Key;
+	items_t m_ItemList;
+
+public:
+	BOOL Key(const CString& key)
+	{
+		if (key == _T("items") || 
+			key == _T("insert") || 
+			key == _T("delete") || 
+			key == _T("clear"))
+		{
+			m_Key = key;
+			return TRUE;
+		}
+		else
+		{
+			m_Key = _T("");
+			return FALSE;
+		}
+	}
+	void* Get(void* par = NULL)
+	{
+		if (m_Key == _T("items"))
+			return (void*)(&m_ItemList);
+		else
+			return NULL;
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		if (m_Key == _T("items"))
+		{
+			items_t* new_sta = (items_t*)sta;
+			if (new_sta == NULL) return FALSE;
+			for(iter_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				iter_t it = new_sta->Find(item);
+				if (it == new_sta->Tail()) Ctl()->DelComp(item);
+			}
+			m_ItemList = *new_sta;
+			for(iter_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				Ctl()->AddComp(item);
+			}
+			Ctl()->SendMessage(WM_SIZE);
+		}
+		else
+		if (m_Key == _T("insert"))
+		{
+			if (!sta || !par) return TRUE;
+			iter_t ite = *(iter_t*)sta;
+			IGuiCtl* item = (IGuiCtl*)par;
+			Ctl()->AddComp(item);
+			m_ItemList.Add(item, ite);
+			Ctl()->SendMessage(WM_SIZE);
+		}
+		else
+		if (m_Key == _T("delete"))
+		{
+			iter_t ite = *(iter_t*)sta;
+			IGuiCtl* item = *ite;
+			if (!item) return FALSE;
+			Ctl()->DelComp(item);
+			m_ItemList.Del(ite);
+			Ctl()->SendMessage(WM_SIZE);
+		}
+		else
+		if (m_Key == _T("clear"))
+		{
+			for(iter_t ite = m_ItemList.Head(); ite != m_ItemList.Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item) continue;
+				Ctl()->DelComp(item);
+			}
+			m_ItemList.Clear();
+			Ctl()->SendMessage(WM_SIZE);
+		}
+		return TRUE;
+	}
+};
+
 //////////////////////////////////////////////////////////////////
 
 #define SET_STATE(type, val, scp) \

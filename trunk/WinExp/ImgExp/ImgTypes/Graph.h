@@ -141,6 +141,10 @@ public:
 	{
 		return pt.Offset(m_Coor);
 	}
+	CLine& Transform(CLine& ln) const
+	{
+		return ln.Offset(m_Coor);
+	}
 	CRect& Transform(CRect& rc) const
 	{
 		return rc.Offset(m_Coor);

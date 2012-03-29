@@ -101,12 +101,20 @@ public:
 		pt2 += Pt;
 		return (*this);
 	}
+	EXP_INLINE CRectT& Offset(TypeT x, TypeT y)
+	{
+		return Offset(CPointT<TypeT>(x, y));
+	}
 	EXP_INLINE CRectT& MoveTo(const CPointT<TypeT>& Pt)
 	{
 		CPointT<TypeT> pt(pt2 - pt1);
 		pt1 = Pt;
 		pt2 = pt1 + pt;
 		return (*this);
+	}
+	EXP_INLINE CRectT& MoveTo(TypeT x, TypeT y)
+	{
+		return MoveTo(CPointT<TypeT>(x, y));
 	}
 
 	EXP_INLINE CRectT& Inter(const CRectT& tRect)

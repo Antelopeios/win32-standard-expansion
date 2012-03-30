@@ -365,7 +365,7 @@ protected:
 						{
 							if (!eff->IsInit()) eff->Init(ctl_img.GetImage());
 							ctl->Send(*ite, nMessage, wParam, (LPARAM)&ctl_img);
-							if(!ctl->IsValid()) return NULL;
+							if (!ctl->IsValid()) return NULL;
 							eff->Show(*ite, ctl_img.GetImage());
 						}
 						else

@@ -65,7 +65,7 @@ public:
 		, m_nMax(100)
 	{
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiProgressEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(_T("CGuiProgressEvent")); /*先让基类绘图*/
 		SetState(_T("color"), (void*)ExRGBA(220, 220, 220, EXP_CM));
 		m_Prog.SetState(_T("color"), (void*)ExRGBA(120, 120, 120, EXP_CM));
 		// 添加控件对象

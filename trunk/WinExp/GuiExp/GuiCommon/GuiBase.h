@@ -76,7 +76,7 @@ public:
 		: m_GC(NULL)
 	{
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiWndEvent"), GetGC()));
+		InsEvent(_T("CGuiWndEvent"));
 	}
 	virtual ~IGuiBase(void)
 	{
@@ -112,39 +112,31 @@ public:
 
 	void InsEvent(void* p)
 	{
-		IGuiEvent* evt = ExDynCast<IGuiEvent>(p);
-		if (!evt) return ;
-		// 定位对象
-		evt_list_t::iterator_t ite = FindEvent(evt);
-		if (ite != GetEvent().Tail()) return;
-		// 添加新对象
 		if (GetEvent().Empty())
-			GetEvent().Add(evt, GetEvent().Head());
+			IGuiSender::Ins(p);
 		else
-			GetEvent().Add(evt, GetEvent().Head() + 1);
+			IGuiSender::Ins(p, GetEvent().Head() + 1);
 	}
+	void InsEvent(LPCTSTR key)
+	{
+		if (GetEvent().Empty())
+			IGuiSender::Ins(key);
+		else
+			IGuiSender::Ins(key, GetEvent().Head() + 1);
+	}
+
 	void PopEvent(BOOL bLast = TRUE)
 	{
-		if (GetEvent().Empty()) return;
-		IGuiItem* evt = NULL;
-		if (bLast)
-		{
-			evt = GetEvent().LastItem();
-			GetEvent().PopLast();
-		}
-		else
-		if (GetEvent().GetCount() == 1)
-		{
-			evt = GetEvent().HeadItem();
-			GetEvent().PopHead();
-		}
+		if (bLast || GetEvent().GetCount() <= 1)
+			IGuiSender::PopEvent(bLast);
 		else
 		{
-			evt_list_t::iterator_t ite = GetEvent().Head() + 1;
-			evt = *ite;
+			evt_iter_t ite = GetEvent().Head() + 1;
+			IGuiItem* evt = *ite;
+			m_CldrMap->Replace(ite);
 			GetEvent().Del(ite);
+			if (IsTrustEvent() && evt && evt->IsTrust()) evt->Free();
 		}
-		if (IsTrustEvent() && evt && evt->IsTrust()) evt->Free();
 	}
 
 	virtual CGC* GetGC() const { return m_GC; }

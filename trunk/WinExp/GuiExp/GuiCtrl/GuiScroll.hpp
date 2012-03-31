@@ -54,8 +54,10 @@
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
+// CGuiSlider - 滚动条滑槽
+//////////////////////////////////////////////////////////////////
 
-class CGuiSlider : public CGuiPicture /*滚动条滑槽*/
+class CGuiSlider : public CGuiPicture
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
 
@@ -72,8 +74,8 @@ public:
 		, m_Ori(FALSE)
 	{
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiSliderEvent"), GetGC())); /*先让基类绘图*/
-		m_Slider.AddEvent(ExGui(_T("CGuiSliBlkEvent"), m_Slider.GetGC()));
+		InsEvent(_T("CGuiSliderEvent")); /*先让基类绘图*/
+		m_Slider.AddEvent(_T("CGuiSliBlkEvent"));
 		// 添加控件对象
 		InsComp(&m_Slider);
 	}
@@ -174,6 +176,10 @@ public:
 	}
 };
 
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
+
+//////////////////////////////////////////////////////////////////
+// CGuiScroll - 滚动条
 //////////////////////////////////////////////////////////////////
 
 class CGuiScroll : public IGuiCtrlBase
@@ -190,9 +196,9 @@ public:
 		: m_Main(NULL)
 	{
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiScrollEvent"), GetGC())); /*先让基类绘图*/
-		m_Up.InsEvent(ExGui(_T("CGuiScrUpEvent"), m_Up.GetGC()));
-		m_Down.InsEvent(ExGui(_T("CGuiScrDnEvent"), m_Down.GetGC()));
+		InsEvent(_T("CGuiScrollEvent")); /*先让基类绘图*/
+		m_Up.InsEvent(_T("CGuiScrUpEvent"));
+		m_Down.InsEvent(_T("CGuiScrDnEvent"));
 		// 添加控件对象
 		InsComp(&m_Slider);
 		m_Up.SetWindowRect(CRect(0, 0, 20, 20));
@@ -309,9 +315,6 @@ public:
 	}
 };
 
-//////////////////////////////////////////////////////////////////
-
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiScroll, IGuiCtrlBase)
 
 //////////////////////////////////////////////////////////////////

@@ -59,7 +59,7 @@ public:
 	CGuiMenu()
 	{
 		// 添加事件对象
-		AddEvent(ExGui(_T("CGuiMenuEvent"), GetGC()));
+		AddEvent(_T("CGuiMenuEvent"));
 	}
 
 public:

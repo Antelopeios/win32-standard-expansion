@@ -180,7 +180,7 @@ public:
 		AddSet(_T("_edt_txt_sel_color"));
 		AddSet(_T("_edt_bkg_sel_color"));
 		// 添加事件对象
-		AddEvent(ExGui(_T("CGuiEditEvent"), GetGC()));
+		AddEvent(_T("CGuiEditEvent"));
 		// 设置默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 		pixel_t pix[2] = {ExRGBA(0, 0, 0, EXP_CM), ExRGBA(0, 0, 0, EXP_CM)};

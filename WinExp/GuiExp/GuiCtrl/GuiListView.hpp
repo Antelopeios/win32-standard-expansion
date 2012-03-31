@@ -70,7 +70,7 @@ public:
 	CGuiLVItem()
 	{
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiLVItemEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(_T("CGuiLVItemEvent")); /*先让基类绘图*/
 	}
 };
 
@@ -89,7 +89,7 @@ public:
 	{
 		// 添加事件对象
 		PopEvent(FALSE);
-		InsEvent(ExGui(_T("CGuiLVEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(_T("CGuiLVEvent")); /*先让基类绘图*/
 	}
 	~CGuiListView()
 	{

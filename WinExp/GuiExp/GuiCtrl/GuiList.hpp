@@ -62,7 +62,7 @@ public:
 	CGuiListItem()
 	{
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiListItemEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(_T("CGuiListItemEvent")); /*先让基类绘图*/
 	}
 };
 
@@ -105,7 +105,7 @@ public:
 		AddSet(_T("_lst_space"));
 		AddSet(_T("_lst_items"));
 		// 添加事件对象
-		InsEvent(ExGui(_T("CGuiListEvent"), GetGC())); /*先让基类绘图*/
+		InsEvent(_T("CGuiListEvent")); /*先让基类绘图*/
 		// 调整默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 		AddComp(&m_FocPic);

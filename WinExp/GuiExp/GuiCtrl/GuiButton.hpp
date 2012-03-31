@@ -64,6 +64,8 @@
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////
+// 按钮属性对象
+//////////////////////////////////////////////////////////////////
 
 class _btn_style : public IGuiSet
 {
@@ -566,6 +568,8 @@ public:
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_ico_off, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
+// 按钮对象
+//////////////////////////////////////////////////////////////////
 
 class CGuiButton : public IGuiCtrlBase
 {
@@ -590,9 +594,11 @@ public:
 		AddSet(_T("_btn_icon"));
 		AddSet(_T("_btn_ico_off"));
 		// 添加事件对象
-		AddEvent(ExGui(_T("CGuiButtonEvent"), GetGC()));
+		AddEvent(_T("CGuiButtonEvent"));
 	}
 };
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
 
 //////////////////////////////////////////////////////////////////
 
@@ -607,6 +613,8 @@ public:
 	}
 };
 
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiStatic, CGuiButton)
+
 //////////////////////////////////////////////////////////////////
 
 class CGuiSimpBtn : public CGuiButton
@@ -619,6 +627,8 @@ public:
 		SetState(_T("thr_sta"), (void*)(0x04 | 0x08));
 	}
 };
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiSimpBtn, CGuiButton)
 
 //////////////////////////////////////////////////////////////////
 
@@ -633,6 +643,8 @@ public:
 	}
 };
 
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPushBtn, CGuiSimpBtn)
+
 //////////////////////////////////////////////////////////////////
 
 class CGuiCheckBox : public CGuiButton
@@ -646,12 +658,6 @@ public:
 	}
 };
 
-//////////////////////////////////////////////////////////////////
-
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiStatic, CGuiButton)
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiSimpBtn, CGuiButton)
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPushBtn, CGuiSimpBtn)
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiCheckBox, CGuiButton)
 
 //////////////////////////////////////////////////////////////////

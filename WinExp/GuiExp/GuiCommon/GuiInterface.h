@@ -143,7 +143,6 @@ public:
 
 protected:
 	BOOL m_bTru;		// 子容器链托管标记
-private:
 	itm_list_t* m_CldrItm;
 	itm_map_t* m_CldrMap;
 
@@ -198,10 +197,11 @@ public:
 			del(p);
 			return FALSE;
 		}
+		Del(key);
 		(*m_CldrMap)[key] = GetItm().Last();
 		return TRUE;
 	}
-	BOOL Ins(void* p)
+	BOOL Ins(void* p, itm_iter_t i)
 	{
 		IGuiItem* itm = ExDynCast<IGuiItem>(p);
 		if (!itm) return FALSE;
@@ -210,18 +210,27 @@ public:
 		if (ite != GetItm().Tail()) return TRUE;
 		// 添加新对象
 		itm->m_Pare = this;
-		return GetItm().Add(itm, GetItm().Head());
+		return GetItm().Add(itm, i);
 	}
-	BOOL Ins(LPCTSTR key)
+	BOOL Ins(void* p)
+	{
+		return Ins(p, GetItm().Head());
+	}
+	BOOL Ins(LPCTSTR key, itm_iter_t i)
 	{
 		void* p = ExGui(key);
-		if(!Ins(p))
+		if(!Ins(p, i))
 		{
 			del(p);
 			return FALSE;
 		}
-		(*m_CldrMap)[key] = GetItm().Head();
+		Del(key);
+		(*m_CldrMap)[key] = i;
 		return TRUE;
+	}
+	BOOL Ins(LPCTSTR key)
+	{
+		return Ins(key, GetItm().Head());
 	}
 	BOOL Del(void* p)
 	{
@@ -365,6 +374,7 @@ EXP_INTERFACE IGuiSender : public IGuiItemMgr
 
 public:
 	typedef itm_list_t evt_list_t;
+	typedef evt_list_t::iterator_t evt_iter_t;
 
 public:
 	// 是否对子容器做托管
@@ -375,12 +385,15 @@ public:
 	evt_list_t& GetEvent() const { return GetItm(); }
 
 	// 查找
-	evt_list_t::iterator_t FindEvent(IGuiEvent* p) const { return Find(p); }
+	evt_iter_t FindEvent(IGuiEvent* p) const { return Find(p); }
 
 	// 组合接口
 	virtual void AddEvent(void* p) { Add(p); }
+	virtual void AddEvent(LPCTSTR key) { Add(key); }
 	virtual void InsEvent(void* p) { Ins(p); }
+	virtual void InsEvent(LPCTSTR key) { Ins(key); }
 	virtual void DelEvent(void* p) { Del(p); }
+	virtual void DelEvent(LPCTSTR key) { Del(key); }
 	virtual void PopEvent(BOOL bLast = TRUE) { Pop(bLast); }
 	virtual void ClearEvent() { Clear(); }
 
@@ -388,7 +401,7 @@ public:
 	void SetResult(LRESULT lrRet = 0)
 	{
 		if(!IsValid()) return;
-		for(evt_list_t::iterator_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
+		for(evt_iter_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
 			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
 			if (!evt) continue;
@@ -399,7 +412,7 @@ public:
 	{
 		if(!IsValid()) return NULL;
 		// 后添加的事件优先执行
-		evt_list_t::iterator_t ite = GetEvent().Last();
+		evt_iter_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)
 		{
 			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
@@ -424,7 +437,7 @@ public:
 		LRESULT ret = GetResult();
 		IGuiEvent::state_t sta = IGuiEvent::continue_next;
 		// 后添加的事件优先执行
-		evt_list_t::iterator_t ite = GetEvent().Last();
+		evt_iter_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)
 		{
 			if (sta == IGuiEvent::break_next)

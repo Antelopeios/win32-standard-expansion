@@ -66,19 +66,87 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_tre_itm_expand, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiTreeItem : public CGuiListItem /*CGuiTree内部使用的列表项*/
+class CGuiTreeItem : public IGuiCtrlBase /*CGuiTree内部使用的列表项*/
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, CGuiListItem)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, IGuiCtrlBase)
+
+protected:
+	CGuiButton m_Ind, m_Itm;
 
 public:
 	CGuiTreeItem()
 	{
 		// 添加逻辑对象
 		AddSet(_T("_tre_itm_expand"));
+		// 添加控件对象
+		InsComp(&m_Ind);
+		InsComp(&m_Itm);
+	}
+	~CGuiTreeItem()
+	{
+		DelComp(&m_Ind, FALSE);
+		DelComp(&m_Itm, FALSE);
+	}
+
+public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		if (key.Left(4) == _T("ind_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("ind_"));
+			m_Ind.Execute(type, val);
+		}
+		else
+		if (key.Left(4) == _T("itm_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("itm_"));
+			m_Itm.Execute(type, val);
+		}
+		else
+			return EXP_BASE::Execute(key, val);
+		return IGuiCtrlBase::Execute(key, val);
+	}
+	void* GetState(const CString& sType, void* pParam = NULL)
+	{
+		if (sType.Left(4) == _T("ind_"))
+		{
+			CString type(sType);
+			type.TrimLeft(_T("ind_"));
+			return m_Ind.GetState(type);
+		}
+		else
+		if (sType.Left(4) == _T("itm_"))
+		{
+			CString type(sType);
+			type.TrimLeft(_T("itm_"));
+			return m_Itm.GetState(type);
+		}
+		else
+			return EXP_BASE::GetState(sType);
+	}
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
+	{
+		if (sType.Left(4) == _T("ind_"))
+		{
+			CString type(sType);
+			type.TrimLeft(_T("ind_"));
+			return m_Ind.SetState(type, pState);
+		}
+		else
+		if (sType.Left(4) == _T("itm_"))
+		{
+			CString type(sType);
+			type.TrimLeft(_T("itm_"));
+			return m_Itm.SetState(type, pState);
+		}
+		else
+			return EXP_BASE::SetState(sType, pState);
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, CGuiListItem)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, IGuiCtrlBase)
 
 //////////////////////////////////////////////////////////////////
 // CGuiTree

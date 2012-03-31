@@ -134,16 +134,24 @@ public:
 	void SetTrust(BOOL bTruCldr = TRUE) { IGuiBase::SetTrust(bTruCldr); }
 	BOOL IsTrust() const { return IGuiBase::IsTrust(); }
 
-	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	virtual void SendSet(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		if(!GetParent()) return;
 		for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
 		{
 			IGuiSet* set = ExDynCast<IGuiSet>(*ite);
 			if(!set) continue;
 			set->Msg(nMessage, wParam, lParam);
 		}
+	}
+	virtual void SendMsg(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
 		IGuiSender::Send(pGui, nMessage, wParam, lParam);
+	}
+	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		if(!GetParent()) return;
+		SendSet(nMessage, wParam, lParam);
+		SendMsg(pGui, nMessage, wParam, lParam);
 	}
 	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) { Send(this, nMessage, wParam, lParam); }
 

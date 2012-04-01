@@ -66,6 +66,8 @@ EXP_END
 
 //////////////////////////////////////////////////////////////////
 
+#ifdef	_USRDLL
+
 // GuiExp Dll Èë¿Úµã
 BOOL APIENTRY DllMain(HMODULE hModule,
 					  DWORD ul_reason_for_call,
@@ -81,5 +83,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	}
 	return TRUE;
 }
+
+#endif/*_USRDLL*/
 
 //////////////////////////////////////////////////////////////////

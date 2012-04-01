@@ -15,7 +15,11 @@ protected:
 		DWORD ret = IApp::OnInit();
 
 		CIOFile file(_T("TestGui5\\test.xml"));
-		if (file.Error() || file.Size() == 0) return 0;
+		if (file.Error() || file.Size() == 0)
+		{
+			::PostQuitMessage(0);
+			return 0;
+		}
 		CGuiSkin::Parse(&file);
 
 		ExGet<IGuiWnd>(_T("wnd"))->CenterWindow();

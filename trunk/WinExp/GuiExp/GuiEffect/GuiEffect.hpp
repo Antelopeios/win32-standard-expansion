@@ -1,4 +1,4 @@
-// Copyright 2011-2012, 木头云
+// Copyright 2011, 木头云
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,28 +28,27 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiEvent - 事件对象
+// GuiEffect - 效果对象
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-04
-// Version:	1.0.0003.1647
+// Date:	2011-05-23
+// Version:	1.0.0000.1333
 //////////////////////////////////////////////////////////////////
 
-#include "GuiCommon/GuiCommon.h"
+#ifndef __GuiEffect_hpp__
+#define __GuiEffect_hpp__
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
 
 //////////////////////////////////////////////////////////////////
 
-#include "GuiEvent/GuiWndEvent.hpp"
-#include "GuiEvent/GuiButtonEvent.hpp"
-#include "GuiEvent/GuiEditEvent.hpp"
-#include "GuiEvent/GuiListEvent.hpp"
-#include "GuiEvent/GuiLCEvent.hpp"
-#include "GuiEvent/GuiLVEvent.hpp"
-#include "GuiEvent/GuiScrollEvent.hpp"
-#include "GuiEvent/GuiMenuEvent.hpp"
-#include "GuiEvent/GuiProgressEvent.hpp"
-#include "GuiEvent/GuiEvent.hpp"
+#include "GuiEffect/GuiEffectBase.hpp"
+#include "GuiEffect/GuiFade.hpp"
 
 //////////////////////////////////////////////////////////////////
+
+#endif/*__GuiEffect_hpp__*/

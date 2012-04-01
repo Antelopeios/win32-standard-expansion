@@ -50,6 +50,20 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////
+
+#include "GuiEvent/GuiWndEvent.hpp"
+#include "GuiEvent/GuiButtonEvent.hpp"
+#include "GuiEvent/GuiEditEvent.hpp"
+#include "GuiEvent/GuiListEvent.hpp"
+#include "GuiEvent/GuiLCEvent.hpp"
+#include "GuiEvent/GuiLVEvent.hpp"
+#include "GuiEvent/GuiScrollEvent.hpp"
+#include "GuiEvent/GuiMenuEvent.hpp"
+#include "GuiEvent/GuiProgressEvent.hpp"
+
+//////////////////////////////////////////////////////////////////
+
 EXP_BEG
 
 //////////////////////////////////////////////////////////////////

@@ -33,12 +33,6 @@
     <ClCompile Include="GuiExp\GuiCtrl\GuiCtrl.cpp">
       <Filter>GuiCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="GuiExp\GuiEvent\GuiEvent.cpp">
-      <Filter>GuiEvent</Filter>
-    </ClCompile>
-    <ClCompile Include="GuiExp\GuiEffect\GuiEffect.cpp">
-      <Filter>GuiEffect</Filter>
-    </ClCompile>
     <ClCompile Include="GuiExp\GuiManager\GuiSkin.cpp">
       <Filter>GuiManager</Filter>
     </ClCompile>
@@ -156,6 +150,9 @@
     </ClInclude>
     <ClInclude Include="GuiExp\GuiCtrl\GuiTree.hpp">
       <Filter>GuiCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiExp\GuiEffect\GuiEffect.hpp">
+      <Filter>GuiEffect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

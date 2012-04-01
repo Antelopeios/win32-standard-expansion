@@ -38,6 +38,8 @@
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
+#include "GuiEffect/GuiEffect.hpp"
+#include "GuiEvent/GuiEvent.hpp"
 #include "GuiCtrl.h"
 
 EXP_BEG

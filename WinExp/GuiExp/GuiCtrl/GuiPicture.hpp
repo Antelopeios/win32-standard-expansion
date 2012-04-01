@@ -210,10 +210,10 @@ public:
 	{
 		// Ìí¼ÓÂß¼­¶ÔÏó
 		AddSet(_T("_pic_style"));
-		AddSet(_T("_pic_image"));
 		AddSet(_T("_pic_color"));
-		AddSet(_T("_pic_text"));
+		AddSet(_T("_pic_image"));
 		AddSet(_T("_pic_font"));
+		AddSet(_T("_pic_text"));
 	}
 };
 

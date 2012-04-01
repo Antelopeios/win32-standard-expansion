@@ -411,6 +411,7 @@ public:
 	LRESULT GetResult(LRESULT lrDef = 0)
 	{
 		if(!IsValid()) return NULL;
+		if (GetEvent().Empty()) return lrDef;
 		// 后添加的事件优先执行
 		evt_iter_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)

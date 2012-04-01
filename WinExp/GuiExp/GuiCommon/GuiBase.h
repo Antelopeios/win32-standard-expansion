@@ -65,22 +65,18 @@ EXP_INTERFACE IGuiBase : public IGuiComp, public IGuiSender, public IExecutor
 	EXP_DECLARE_DYNAMIC_MULT3(IGuiBase, IGuiComp, IGuiSender, IExecutor)
 
 protected:
-	CGC* m_GC;
-
 	static IGuiBase* s_pCapture;
 
 	CRect m_rcClip;
 
 public:
 	IGuiBase()
-		: m_GC(NULL)
 	{
 		// 添加事件对象
 		InsEvent(_T("CGuiWndEvent"));
 	}
 	virtual ~IGuiBase(void)
-	{
-	}
+	{}
 
 public:
 	BOOL IsValid() const { return EXP_MULT::IsValid(); }
@@ -127,7 +123,10 @@ public:
 
 	void PopEvent(BOOL bLast = TRUE)
 	{
-		if (bLast || GetEvent().GetCount() <= 1)
+		if (GetEvent().GetCount() <= 1)
+			return;
+		else
+		if (bLast)
 			IGuiSender::PopEvent(bLast);
 		else
 		{
@@ -138,8 +137,6 @@ public:
 			if (IsTrustEvent() && evt && evt->IsTrust()) evt->Free();
 		}
 	}
-
-	virtual CGC* GetGC() const { return m_GC; }
 
 	virtual BOOL GetWindowRect(CRect& rc) const = 0;
 	virtual BOOL GetClientRect(CRect& rc) const = 0;

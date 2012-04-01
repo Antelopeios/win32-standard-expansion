@@ -580,9 +580,9 @@ public:
 	{
 		// Ìí¼ÓÂß¼­¶ÔÏó
 		AddSet(_T("_btn_style"));
-		AddSet(_T("_btn_font"));
 		AddSet(_T("_btn_color"));
 		AddSet(_T("_btn_image"));
+		AddSet(_T("_btn_font"));
 		AddSet(_T("_pic_text"));
 		AddSet(_T("_btn_status"));
 		AddSet(_T("_btn_locate"));

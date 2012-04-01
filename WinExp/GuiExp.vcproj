@@ -165,6 +165,131 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="DebugLib|Win32"
+			OutputDirectory="$(SolutionDir)!)Build\$(FrameworkVersion)\Bin\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)!)Build\$(FrameworkVersion)\Temp\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="4"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="GuiExp;ImgExp;StdExp"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_LIB;EXP_EXPORTS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseLib|Win32"
+			OutputDirectory="$(SolutionDir)!)Build\$(FrameworkVersion)\Bin\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)!)Build\$(FrameworkVersion)\Temp\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="4"
+			CharacterSet="1"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="GuiExp;ImgExp;StdExp"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_LIB;EXP_EXPORTS"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -289,10 +414,6 @@
 				>
 			</File>
 			<File
-				RelativePath="GuiExp\GuiEvent\GuiEvent.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GuiExp\GuiEvent\GuiEvent.hpp"
 				>
 			</File>
@@ -329,7 +450,7 @@
 			Name="GuiEffect"
 			>
 			<File
-				RelativePath="GuiExp\GuiEffect\GuiEffect.cpp"
+				RelativePath=".\GuiExp\GuiEffect\GuiEffect.hpp"
 				>
 			</File>
 			<File

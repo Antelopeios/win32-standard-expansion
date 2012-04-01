@@ -117,6 +117,7 @@ public:
 	BOOL RegTypeInfo(LPCTSTR c_key, _TypeInfo* inf)
 	{
 		if (!c_key) return FALSE;
+	//	ExTrace(_T("%s\n"), c_key);
 		CString key(c_key);
 		if (dc_funcs.Locate(key) == dc_funcs.Tail())
 		{

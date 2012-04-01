@@ -64,11 +64,17 @@
 #pragma warning(disable: 4275)
 
 // Dll 导出宏定义
-#ifdef EXP_EXPORTS
+#ifdef	EXP_EXPORTS
+
+#ifdef	_USRDLL
 #define EXP_API __declspec(dllexport)
-#else
+#endif/*_USRDLL*/
+
+#else /*EXP_EXPORTS*/
+
 #define EXP_API __declspec(dllimport)
-#endif
+
+#endif/*EXP_EXPORTS*/
 
 //////////////////////////////////////////////////////////////////
 

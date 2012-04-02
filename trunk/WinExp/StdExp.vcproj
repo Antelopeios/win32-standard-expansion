@@ -474,10 +474,6 @@
 				>
 			</File>
 			<File
-				RelativePath="StdExp\Algorithm\RTTI.cpp"
-				>
-			</File>
-			<File
 				RelativePath="StdExp\Algorithm\RTTI.h"
 				>
 			</File>

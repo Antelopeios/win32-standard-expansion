@@ -7,4 +7,3 @@
 
 #define EXP_USING_APP
 #include "StdExp.h"
-#pragma comment(lib, "StdExp.lib")

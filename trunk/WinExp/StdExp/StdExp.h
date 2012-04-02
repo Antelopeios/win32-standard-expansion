@@ -88,4 +88,10 @@
 EXP_USING_NAMESPACE
 #endif/*EXP_UNUSED_NAMESPACE*/
 
+#ifdef	EXP_CHECK_CRASH
+#pragma comment(lib, "StdExp.lib")
+#endif/*EXP_CHECK_CRASH*/
+
+//////////////////////////////////////////////////////////////////
+
 #endif/*__StdExp_h__*/

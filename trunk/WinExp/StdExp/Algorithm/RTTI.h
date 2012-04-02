@@ -63,7 +63,9 @@ EXP_BEG
 //////////////////////////////////////////////////////////////////
 
 // RTTI 起始类声明
-interface IBaseObject;
+template <int OrderT = 0>
+interface IBaseObjectT;
+typedef IBaseObjectT<> IBaseObject;
 
 //////////////////////////////////////////////////////////////////
 
@@ -192,8 +194,8 @@ public:																						\
 // 类的 RTTI 宏定义
 #define EXP_DECLARE_TYPEINFO(cls_name)														\
 public:																						\
-	virtual int GetTypeID()					{ return EXP_TYPEINFO_MEMBER.type_id; }			\
-	virtual LPCTSTR GetTypeName()			{ return EXP_TYPEINFO_MEMBER.className; }		\
+	virtual int GetTypeID()						{ return EXP_TYPEINFO_MEMBER.type_id; }		\
+	virtual LPCTSTR GetTypeName()				{ return EXP_TYPEINFO_MEMBER.className; }	\
 	virtual EXP::_TypeInfo& GetTypeInfo()		{ return EXP_TYPEINFO_MEMBER; }				\
 	static EXP::_TypeInfo& GetTypeInfoClass()	{ return EXP_TYPEINFO_MEMBER; }				\
 private:																					\
@@ -226,7 +228,11 @@ private:																					\
 	EXP_DEF_MULTTYPE(cls_name)																\
 	EXP_DECLARE_TYPEINFO(cls_name)															\
 public:																						\
-	BOOL IsKindOf(EXP::_TypeInfo& cls);
+	BOOL IsKindOf(EXP::_TypeInfo& cls)														\
+	{																						\
+		EXP::_TypeInfo* p = &(this->GetTypeInfo());											\
+		return (p ? p->IsKindOf(cls) : FALSE);												\
+	}
 
 // dynamically typeinfo
 
@@ -280,7 +286,7 @@ private:																					\
 	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		EXP::IBaseObject::TypeInfoOrder++, 													\
+		cls_name::TypeInfoOrder++, 															\
 		{&ExTypeInfoCls(base_name), NULL, NULL}, 											\
 		pfn_new																				\
 	};
@@ -293,7 +299,7 @@ private:																					\
 	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		EXP::IBaseObject::TypeInfoOrder++, 													\
+		cls_name::TypeInfoOrder++, 															\
 		{&ExTypeInfoCls(base_name), &ExTypeInfoCls(base_name2), NULL}, 						\
 		pfn_new																				\
 	};
@@ -303,7 +309,7 @@ private:																					\
 	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		EXP::IBaseObject::TypeInfoOrder++, 													\
+		cls_name::TypeInfoOrder++, 															\
 		{&ExTypeInfoCls(base_name), &ExTypeInfoCls(base_name2), &ExTypeInfoCls(base_name3)}, \
 		pfn_new																				\
 	};
@@ -313,16 +319,10 @@ private:																					\
 	EXP::_TypeInfo cls_name::EXP_TYPEINFO_MEMBER =											\
 	{																						\
 		_T(#cls_name), 																		\
-		EXP::IBaseObject::TypeInfoOrder++, 													\
+		cls_name::TypeInfoOrder++, 															\
 		{NULL, NULL, NULL}, 																\
 		pfn_new																				\
-	};																						\
-	tmp																						\
-	BOOL cls_name::IsKindOf(_TypeInfo& cls)													\
-	{																						\
-		EXP::_TypeInfo* p = &(this->GetTypeInfo());											\
-		return (p ? p->IsKindOf(cls) : FALSE);												\
-	}
+	};
 
 // dynamically typeinfo
 
@@ -374,14 +374,19 @@ private:																					\
 //////////////////////////////////////////////////////////////////
 
 // RTTI 起始类
-interface IBaseObject
+template <int OrderT>
+interface IBaseObjectT
 {
-	EXP_DECLARE_DYNCREATE_NULL(IBaseObject)
+	EXP_DECLARE_TYPEINFO_NULL(IBaseObjectT)
 
 public:
 	// type_id 自增量
 	static int TypeInfoOrder;
 };
+
+EXP_IMPLEMENT_TYPEINFO_NULL(IBaseObjectT<OrderT>, NULL, template <int OrderT>)
+template <int OrderT>
+int IBaseObjectT<OrderT>::TypeInfoOrder = OrderT;
 
 //////////////////////////////////////////////////////////////////
 

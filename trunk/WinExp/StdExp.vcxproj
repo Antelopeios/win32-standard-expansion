@@ -202,7 +202,6 @@
     <ClCompile Include="StdExp\Debugging\CrashHandler.cpp" />
     <ClCompile Include="StdExp\Debugging\XZip\XUnzip.cpp" />
     <ClCompile Include="StdExp\Debugging\XZip\XZip.cpp" />
-    <ClCompile Include="StdExp\Algorithm\RTTI.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

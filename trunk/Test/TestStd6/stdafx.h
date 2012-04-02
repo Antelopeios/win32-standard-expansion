@@ -5,5 +5,5 @@
 
 #pragma once
 
+#define EXP_CHECK_CRASH
 #include "StdExp.h"
-#pragma comment(lib, "StdExp.lib")

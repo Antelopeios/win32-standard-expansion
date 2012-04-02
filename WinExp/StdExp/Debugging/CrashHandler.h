@@ -76,10 +76,10 @@ interface ICrashHandler
 
 	virtual void OnCrash() = 0;
 
-	const CString& GetCrashPath();
-	const CString& GetCrashDmp();
-	const CString& GetCrashLog();
-	CString GetCrashZip(LPCTSTR sPath = NULL);
+	LPCTSTR GetCrashPath();
+	LPCTSTR GetCrashDmp();
+	LPCTSTR GetCrashLog();
+	LPCTSTR GetCrashZip(LPCTSTR sPath = NULL);
 };
 
 //////////////////////////////////////////////////////////////////

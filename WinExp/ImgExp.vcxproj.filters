@@ -405,9 +405,6 @@
     <ClCompile Include="ImgExp\ImgCoder\zlib\zutil.c">
       <Filter>ImgCoder\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="ImgExp\ImgCommon\ImgCommon.cpp">
-      <Filter>ImgCommon</Filter>
-    </ClCompile>
     <ClCompile Include="ImgExp\ImgTypes\Image.cpp">
       <Filter>ImgTypes</Filter>
     </ClCompile>

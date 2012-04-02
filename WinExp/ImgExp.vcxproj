@@ -270,7 +270,6 @@
     <ClCompile Include="ImgExp\ImgCoder\zlib\trees.c" />
     <ClCompile Include="ImgExp\ImgCoder\zlib\uncompr.c" />
     <ClCompile Include="ImgExp\ImgCoder\zlib\zutil.c" />
-    <ClCompile Include="ImgExp\ImgCommon\ImgCommon.cpp" />
     <ClCompile Include="ImgExp\ImgTypes\Image.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

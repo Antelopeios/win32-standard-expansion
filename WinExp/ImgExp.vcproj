@@ -718,10 +718,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ImgExp\ImgCommon\ImgCommon.cpp"
-				>
-			</File>
-			<File
 				RelativePath="ImgExp\ImgCommon\ImgCommon.h"
 				>
 			</File>

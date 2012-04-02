@@ -123,11 +123,8 @@ ICrashHandler::~ICrashHandler()
 	SetUnhandledExceptionFilter(g_OldCrashFilter);
 }
 
-const CString& ICrashHandler::GetCrashPath()
+LPCTSTR ICrashHandler::GetCrashPath()
 {
-	static CString path;
-	if (!path.Empty()) return path;
-
 	TCHAR app_path[MAX_PATH];
 	::GetModuleFileName(NULL, app_path, MAX_PATH);
 	_tcsrchr(app_path, _T('.'))[0] = _T('\0');
@@ -135,18 +132,18 @@ const CString& ICrashHandler::GetCrashPath()
 	TCHAR tmp_path[MAX_PATH]; size_t r_s = 0;
 	_tgetenv_s(&r_s, tmp_path, _T("TEMP"));
 
-	path.Format(_T("%s\\%s"), tmp_path, _tcsrchr(app_path, _T('\\')) + 1);
+	static TCHAR path[MAX_PATH];
+	_tprintf_s(path, _T("%s\\%s"), tmp_path, _tcsrchr(app_path, _T('\\')) + 1);
 	return path;
 }
 
-const CString& ICrashHandler::GetCrashDmp()
+LPCTSTR ICrashHandler::GetCrashDmp()
 {
-	static CString path;
-	if (!path.Empty()) return path;
+	static TCHAR path[MAX_PATH];
+	_tprintf_s(path, _T("%s.dmp"), GetCrashPath());
 
-	path.Format(_T("%s.dmp"), (LPCTSTR)GetCrashPath());
 	CIOFile file;
-	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return (path = _T(""));
+	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return _T("");
 
 	MINIDUMP_EXCEPTION_INFORMATION info;
 	info.ThreadId = ::GetCurrentThreadId();
@@ -175,14 +172,13 @@ const CString& ICrashHandler::GetCrashDmp()
 	return path;
 }
 
-const CString& ICrashHandler::GetCrashLog()
+LPCTSTR ICrashHandler::GetCrashLog()
 {
-	static CString path;
-	if (!path.Empty()) return path;
+	static TCHAR path[MAX_PATH];
+	_tprintf_s(path, _T("%s.log"), GetCrashPath());
 
-	path.Format(_T("%s.log"), (LPCTSTR)GetCrashPath());
 	CIOFile file;
-	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return (path = _T(""));
+	if (!file.Open(path, CIOFile::modeCreate | CIOFile::modeWrite)) return _T("");
 
 	BOOL cout_time_old = g_Log.SetCoutTime(FALSE);
 
@@ -231,10 +227,14 @@ const CString& ICrashHandler::GetCrashLog()
 	return path;
 }
 
-CString ICrashHandler::GetCrashZip(LPCTSTR sPath/* = NULL*/)
+LPCTSTR ICrashHandler::GetCrashZip(LPCTSTR sPath/* = NULL*/)
 {
-	CString path(sPath);
-	if (path.Empty())
+	static TCHAR path[MAX_PATH];
+	if (sPath)
+		_tcscpy_s(path, sPath);
+	else
+		path[0] = 0;
+	if (_tcslen(path) == 0)
 	{
 		// 得到压缩包文件名
 		TCHAR app_path[MAX_PATH];
@@ -242,7 +242,7 @@ CString ICrashHandler::GetCrashZip(LPCTSTR sPath/* = NULL*/)
 		_tcsrchr(app_path, _T('.'))[0] = _T('\0');
 		SYSTEMTIME sys = {0};
 		GetLocalTime(&sys);
-		path.Format(_T("%s_%4d.%02d.%02d_%02d.%02d.%02d_%03d.zip"), (LPCTSTR)app_path, 
+		_tprintf_s(path, _T("%s_%4d.%02d.%02d_%02d.%02d.%02d_%03d.zip"), (LPCTSTR)app_path, 
 			sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
 	}
 	// 生成压缩包并压缩文件

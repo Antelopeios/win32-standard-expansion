@@ -135,7 +135,7 @@ void CGuiLoader::LoadCtl()
 	IGuiCtl::items_t file_list;
 	for(int i = 0; i < 40; ++i)
 	{
-		IGuiCtl* file = ExGui<IGuiCtl>(_T("CGuiLVItem"), GET_CTL(files)->GetGC());
+		IGuiCtl* file = ExGui<IGuiCtl>(_T("CGuiLVItem"));
 		file->Execute(_T("image"), _T("file_lt,file_t,file_rt,file_l,file_c,file_r,file_lb,file_b,file_rb"));
 		file->SetState(_T("locate"), (void*)1);
 		file->SetState(_T("loc_off"), (void*)5);

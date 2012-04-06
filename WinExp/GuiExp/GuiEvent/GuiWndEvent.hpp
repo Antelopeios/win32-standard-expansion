@@ -248,20 +248,18 @@ protected:
 		return lrDef;
 	}
 	// 控件消息转发
-	LRESULT CtlSend(IGuiBase* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
+	LRESULT CtlSend(IGuiCtl* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
-		if (!pGui) return NULL;
-		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!pGui || !pGui->IsVisible()) return lrDef;
 		// 向控件转发消息
 		if (nMessage == WM_SIZE)
 		{
-			if (!ctl || !ctl->IsVisible()) goto EndCtlSend;
 			CSize all_line, fra_line;
-			ctl->GetAllRect(all_line);
-			ctl->GetFraRect(fra_line);
-			if (ctl->GetScroll(TRUE))
+			pGui->GetAllRect(all_line);
+			pGui->GetFraRect(fra_line);
+			if (pGui->GetScroll(TRUE))
 			{
-				IGuiCtl* scr = ctl->GetScroll(TRUE);
+				IGuiCtl* scr = pGui->GetScroll(TRUE);
 				if (all_line.cy > fra_line.cy)
 				{
 					if(!scr->IsVisible())
@@ -273,9 +271,9 @@ protected:
 						scr->SetVisible(FALSE);
 				}
 			}
-			if (ctl->GetScroll(FALSE))
+			if (pGui->GetScroll(FALSE))
 			{
-				IGuiCtl* scr = ctl->GetScroll(FALSE);
+				IGuiCtl* scr = pGui->GetScroll(FALSE);
 				if (all_line.cx > fra_line.cx)
 				{
 					if(!scr->IsVisible())
@@ -291,15 +289,13 @@ protected:
 		else
 		if (nMessage == WM_MOUSEWHEEL)
 		{
-			if (!ctl || !ctl->IsVisible()) goto EndCtlSend;
-			if (ctl->GetScroll(TRUE))
-				ctl->GetScroll(TRUE)->SendMessage(nMessage, wParam, lParam);
-			if (ctl->GetScroll(FALSE))
-				ctl->GetScroll(FALSE)->SendMessage(nMessage, wParam, lParam);
+			if (pGui->GetScroll(TRUE))
+				pGui->GetScroll(TRUE)->SendMessage(nMessage, wParam, lParam);
+			if (pGui->GetScroll(FALSE))
+				pGui->GetScroll(FALSE)->SendMessage(nMessage, wParam, lParam);
 		}
 		else
 			lrDef = BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
-	EndCtlSend:
 		return lrDef;
 	}
 	// 基础全局消息转发
@@ -340,15 +336,15 @@ protected:
 			// 遍历控件列表
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
-				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
-				if (!ctl) continue;
-				// 初始化返回值
-				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
+				IGuiCtl* ctl = (IGuiCtl*)(*ite);
+				if(!ctl) continue;
 				// 转发消息
-				ctl->SetClipBox(clp_rct);
 				if (ctl->IsVisible() && ctl->IsDisplayed())
 				{
+					// 初始化返回值
+					ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 					// 获取控件区域
+					ctl->SetClipBox(clp_rct);
 					CRect ctl_rct; CPoint clp_pnt;
 					ctl->GetWindowRect(ctl_rct);
 					clp_pnt = ctl_rct.pt1;
@@ -374,6 +370,8 @@ protected:
 							if(!ctl->IsValid()) return NULL;
 						}
 					}
+					// 判断返回值
+					lrDef = ctl->GetResult(lrDef);
 				}
 				else
 				{
@@ -381,30 +379,15 @@ protected:
 					IGuiEffect* eff = ctl->GetEffect();
 					if (eff) eff->KillTimer(pGui->GethWnd());
 				}
-				// 判断返回值
-				lrDef = ctl->GetResult(lrDef);
 			}
 		}
 		else
 		if (nMessage == WM_SHOWWINDOW)
 		{
-			IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-			if (ctl && ctl->GetScroll())
-			{
-				if (wParam)
-				{
-					CRect rc;
-					ctl->GetWindowRect(rc);
-					ctl->SendMessage(WM_SIZE, SIZE_RESTORED, ExMakeLong(rc.Width(), rc.Height()));
-				}
-				else
-					ctl->GetScroll()->SetVisible(FALSE);
-			}
-			else
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
-				ctl = ExDynCast<IGuiCtl>(*ite);
+				IGuiCtl* ctl = (IGuiCtl*)(*ite);
 				if (!ctl || !ctl->IsVisible()) continue;
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
@@ -420,8 +403,8 @@ protected:
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
-				IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
-				if (!ctl || !ctl->IsEnabled()) continue;
+				IGuiCtl* ctl = (IGuiCtl*)(*ite);
+				if (!ctl || !ctl->IsVisible() || !ctl->IsEnabled()) continue;
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息
@@ -448,8 +431,6 @@ public:
 
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiBase* base = ExDynCast<IGuiBase>(pGui);
-		if (!base) return;
 		// 筛选消息
 		LRESULT ret = 0;
 		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
@@ -506,7 +487,7 @@ public:
 			}
 		}
 		else
-			ret = CtlSend(base, nMessage, wParam, lParam);
+			ret = CtlSend(ExDynCast<IGuiCtl>(pGui), nMessage, wParam, lParam);
 		SetResult(ret);
 	}
 };

@@ -403,8 +403,8 @@ public:
 		if(!IsValid()) return;
 		for(evt_iter_t ite = GetEvent().Head(); ite != GetEvent().Tail(); ++ite)
 		{
-			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
-			if (!evt) continue;
+			IGuiEvent* evt = (IGuiEvent*)(*ite);
+			ExAssert(evt);
 			evt->SetResult(lrRet);
 		}
 	}
@@ -416,12 +416,12 @@ public:
 		evt_iter_t ite = GetEvent().Last();
 		for(; ite != GetEvent().Head(); --ite)
 		{
-			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+			IGuiEvent* evt = (IGuiEvent*)(*ite);
 			if (!evt) continue;
 			LRESULT r = evt->GetResult();
 			if (r != 0 && lrDef != r) lrDef = r;
 		}
-		IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+		IGuiEvent* evt = (IGuiEvent*)(*ite);
 		if (evt)
 		{
 			LRESULT r = evt->GetResult();
@@ -449,7 +449,7 @@ public:
 				SetResult(ret);
 				return;
 			}
-			IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+			IGuiEvent* evt = (IGuiEvent*)(*ite);
 			if (!evt) continue;
 			evt->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
 			evt->OnMessage(gui, nMessage, wParam, lParam);
@@ -463,7 +463,7 @@ public:
 			SetResult(ret);
 			return;
 		}
-		IGuiEvent* evt = ExDynCast<IGuiEvent>(*ite);
+		IGuiEvent* evt = (IGuiEvent*)(*ite);
 		if (evt)
 		{
 			evt->SetResult(ret); // 发送消息时,让事件对象收到上一个事件的处理结果
@@ -678,7 +678,7 @@ public:
 		{
 			for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
 			{
-				IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+				IGuiSet* set = (IGuiSet*)(*ite);
 				if(!set || !set->Key(key)) continue;
 				return set;
 			}
@@ -692,20 +692,20 @@ public:
 				if (bSearch)
 				for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
 				{
-					IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+					IGuiSet* set = (IGuiSet*)(*ite);
 					if(!set || !set->Key(key)) continue;
 					return set;
 				}
 				return NULL;
 			}
-			return ExDynCast<IGuiSet>(*(*it));
+			return (IGuiSet*)(*(*it));
 		}
 	}
 
 	// 组合接口
 	virtual BOOL AddSet(void* p)
 	{
-		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		IGuiSet* set = (IGuiSet*)(p);
 		if (!set) return FALSE;
 		CString str(set->GetKey());
 		if (str.Empty()) return Add(p);
@@ -721,7 +721,7 @@ public:
 			Del(key)/*不删除m_KeyMap的映射*/;
 		if (!Add(key)) return FALSE;
 		set_list_t::iterator_t ite = GetSet().Last();
-		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		IGuiSet* set = (IGuiSet*)(*ite);
 		if (!set)
 		{
 			DelSet(key)/*删除m_KeyMap的映射*/;
@@ -737,7 +737,7 @@ public:
 	}
 	virtual BOOL InsSet(void* p)
 	{
-		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		IGuiSet* set = (IGuiSet*)(p);
 		if (!set) return FALSE;
 		CString str(set->GetKey());
 		if (str.Empty()) return Ins(p);
@@ -753,7 +753,7 @@ public:
 			Del(key)/*不删除m_KeyMap的映射*/; // 替换掉当前已有的属性
 		if (!Ins(key)) return FALSE;
 		set_list_t::iterator_t ite = GetSet().Head();
-		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		IGuiSet* set = (IGuiSet*)(*ite);
 		if (!set)
 		{
 			DelSet(key)/*删除m_KeyMap的映射*/;
@@ -769,7 +769,7 @@ public:
 	}
 	virtual BOOL DelSet(void* p)
 	{
-		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		IGuiSet* set = (IGuiSet*)(p);
 		if (!set) return FALSE;
 		CString str(set->GetKey());
 		if (!str.Empty()) m_KeyMap.Del(str);
@@ -778,7 +778,7 @@ public:
 	virtual BOOL DelSet(LPCTSTR key)
 	{
 		set_list_t::iterator_t ite = FindSet(key);
-		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		IGuiSet* set = (IGuiSet*)(*ite);
 		if (!set) return Del(key);
 		CString str(set->GetKey());
 		if (!str.Empty()) m_KeyMap.Del(str);
@@ -792,7 +792,7 @@ public:
 			ite = GetSet().Last();
 		else
 			ite = GetSet().Head();
-		IGuiSet* set = ExDynCast<IGuiSet>(*ite);
+		IGuiSet* set = (IGuiSet*)(*ite);
 		if (!set) return Pop(bLast);
 		CString str(set->GetKey());
 		if (!str.Empty()) m_KeyMap.Del(str);

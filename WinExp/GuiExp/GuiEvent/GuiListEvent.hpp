@@ -235,6 +235,7 @@ public:
 		ExAssert(m_Ctrl);
 
 		typedef IGuiCtl::items_t items_t;
+		static BOOL first_time = TRUE;
 
 		// 获得属性
 		items_t* items = GetItems();
@@ -246,27 +247,48 @@ public:
 
 		// 遍历列表项
 		LONG all_line = 0;
-		CSize old_sz;
 		CRect itm_rc;
-		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
+		CSize old_sz;
+		if (first_time)
 		{
-			IGuiCtl* item = *ite;
-			if (!item) continue;
-			// 获取当前项的区域
-			item->GetRect(itm_rc);
-			// 调整区域
-			itm_rc.MoveTo(CPoint(old_sz.cx, old_sz.cy + space));
-			itm_rc.Width(rect.Width());
-			// 设置当前项区域
-			item->SetRect(itm_rc);
-			// 存储区域
-			old_sz.cy = itm_rc.Bottom();
+			first_time = FALSE;
+
+			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item || !item->IsVisible()) continue;
+				// 获取当前项的区域
+				item->GetRect(itm_rc);
+				// 调整区域
+				itm_rc.MoveTo(CPoint(old_sz.cx, old_sz.cy + space));
+				itm_rc.Width(rect.Width());
+				// 设置当前项区域
+				item->SetRect(itm_rc);
+				// 存储区域
+				old_sz.cy = itm_rc.Bottom();
+			}
+
+			// 设置滚动区域
+			old_sz.cy += space;
+			m_Ctrl->SetAllRect(CSize(0, old_sz.cy));
+		}
+		else
+		{
+			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
+			{
+				IGuiCtl* item = *ite;
+				if (!item || !item->IsVisible()) continue;
+				// 获取当前项的区域
+				item->GetRect(itm_rc);
+				// 调整区域
+				itm_rc.Width(rect.Width());
+				// 设置当前项区域
+				item->SetRect(itm_rc);
+			}
 		}
 
 		// 设置滚动区域
-		old_sz.cy += space;
 		m_Ctrl->SetFraRect(CSize(0, rect.Height()));
-		m_Ctrl->SetAllRect(CSize(0, old_sz.cy));
 	}
 	virtual void ShowItem(IGuiCtl* pItem)
 	{
@@ -286,8 +308,6 @@ public:
 		// 处理消息
 		switch( nMessage )
 		{
-		case WM_SHOWWINDOW:
-			if (!wParam) break;
 		case WM_SIZE:
 			FormatItems();
 			break;

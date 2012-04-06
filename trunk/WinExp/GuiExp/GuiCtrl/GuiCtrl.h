@@ -138,8 +138,8 @@ public:
 	{
 		for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
 		{
-			IGuiSet* set = ExDynCast<IGuiSet>(*ite);
-			if(!set) continue;
+			IGuiSet* set = (IGuiSet*)(*ite);
+			ExAssert(set);
 			set->Msg(nMessage, wParam, lParam);
 		}
 	}
@@ -158,7 +158,7 @@ public:
 	// 控件设置对象管理
 	BOOL AddSet(void* p)
 	{
-		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		IGuiSet* set = (IGuiSet*)(p);
 		if (!set) return FALSE;
 		set->Ctl() = this;
 		return IGuiSetMgr::AddSet(p);
@@ -166,7 +166,7 @@ public:
 	BOOL AddSet(LPCTSTR key)
 	{
 		if (!IGuiSetMgr::AddSet(key)) return FALSE;
-		IGuiSet* set = ExDynCast<IGuiSet>(GetSet().LastItem());
+		IGuiSet* set = (IGuiSet*)(GetSet().LastItem());
 		if (!set)
 		{
 			DelSet(key);
@@ -177,7 +177,7 @@ public:
 	}
 	BOOL InsSet(void* p)
 	{
-		IGuiSet* set = ExDynCast<IGuiSet>(p);
+		IGuiSet* set = (IGuiSet*)(p);
 		if (!set) return FALSE;
 		set->Ctl() = this;
 		return IGuiSetMgr::InsSet(p);
@@ -185,7 +185,7 @@ public:
 	BOOL InsSet(LPCTSTR key)
 	{
 		if (!IGuiSetMgr::InsSet(key)) return FALSE;
-		IGuiSet* set = ExDynCast<IGuiSet>(GetSet().HeadItem());
+		IGuiSet* set = (IGuiSet*)(GetSet().HeadItem());
 		if (!set)
 		{
 			DelSet(key);

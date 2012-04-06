@@ -117,9 +117,8 @@ public:
 	}
 	void Msg(UINT nMessage, WPARAM wParam, LPARAM lParam)
 	{
-		if (nMessage == WM_SHOWWINDOW || nMessage == WM_SIZE)
+		if (nMessage == WM_SIZE)
 		{
-			if (nMessage == WM_SHOWWINDOW && !wParam) return;
 			if (!m_Val) return;
 			CString* str = (CString*)Ctl()->GetState(_T("text"));
 			if (!str) return;

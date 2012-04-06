@@ -57,7 +57,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// 创建窗口对象并设置
 	IGuiWnd* wnd = ExGui<IGuiWnd>(_T("CGuiWnd"), &gc);
-	wnd->Create(_T("TestGui2"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
+	wnd->Create(_T("TestGui3"), rc_wnd, SW_HIDE, WS_OVERLAPPEDWINDOW);
 	wnd->CenterWindow();
 	//wnd->SetLayered(TRUE);
 	wnd->ShowWindow(SW_SHOW);

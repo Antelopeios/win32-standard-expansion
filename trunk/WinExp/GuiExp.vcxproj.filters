@@ -154,6 +154,9 @@
     <ClInclude Include="GuiExp\GuiEffect\GuiEffect.hpp">
       <Filter>GuiEffect</Filter>
     </ClInclude>
+    <ClInclude Include="GuiExp\GuiEvent\GuiTreeEvent.hpp">
+      <Filter>GuiEvent</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GuiExp\GuiExp.rc" />

@@ -217,6 +217,7 @@
     <ClInclude Include="GuiExp\GuiEvent\GuiMenuEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiProgressEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiScrollEvent.hpp" />
+    <ClInclude Include="GuiExp\GuiEvent\GuiTreeEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEvent\GuiWndEvent.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiEffectBase.hpp" />
     <ClInclude Include="GuiExp\GuiEffect\GuiFade.hpp" />

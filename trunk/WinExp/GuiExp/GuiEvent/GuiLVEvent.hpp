@@ -138,7 +138,7 @@ public:
 		typedef IGuiCtl::items_t items_t;
 
 		// »ñµÃÊôÐÔ
-		items_t* items = GetItems();
+		items_t* items = (items_t*)GetItems();
 		if (items->Empty()) m_FocItm = NULL;
 		LONG space = GetSpace();
 		BOOL b_top = (BOOL)(LONG_PTR)m_Ctrl->GetState(_T("align_top"));

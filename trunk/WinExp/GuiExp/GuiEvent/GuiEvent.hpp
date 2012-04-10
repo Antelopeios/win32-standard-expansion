@@ -61,6 +61,7 @@
 #include "GuiEvent/GuiScrollEvent.hpp"
 #include "GuiEvent/GuiMenuEvent.hpp"
 #include "GuiEvent/GuiProgressEvent.hpp"
+#include "GuiEvent/GuiTreeEvent.hpp"
 
 //////////////////////////////////////////////////////////////////
 

@@ -216,9 +216,9 @@ public:
 	{
 		return (IGuiCtl*)m_Ctrl->GetState(_T("foc"));
 	}
-	IGuiCtl::items_t* GetItems()
+	void* GetItems()
 	{
-		return (IGuiCtl::items_t*)(m_Ctrl->GetState(_T("items")));
+		return m_Ctrl->GetState(_T("items"));
 	}
 	LONG GetSpace()
 	{
@@ -238,7 +238,7 @@ public:
 		static BOOL first_time = TRUE;
 
 		// »ñµÃÊôÐÔ
-		items_t* items = GetItems();
+		items_t* items = (items_t*)GetItems();
 		if (items->Empty()) m_FocItm = NULL;
 		LONG space = GetSpace();
 
@@ -314,7 +314,7 @@ public:
 		case WM_SETFOCUS:
 			if (m_Ctrl == IGuiCtl::GetFocus())
 			{
-				IGuiCtl::items_t* items = GetItems();
+				IGuiCtl::items_t* items = (IGuiCtl::items_t*)GetItems();
 				if (items->Empty()) break;
 				if(!m_FocItm)
 					m_FocItm = items->HeadItem();
@@ -326,8 +326,8 @@ public:
 				m_FocItm->GetWindowRect(foc_rct);
 				pic->SetWindowRect(foc_rct);
 				pic->SetVisible(TRUE);
-				break;
 			}
+			break;
 		case WM_KILLFOCUS:
 			{
 				IGuiCtl* pic = GetFocPic();

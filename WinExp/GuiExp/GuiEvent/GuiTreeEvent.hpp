@@ -28,20 +28,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////
-// GuiMenuEvent - 菜单事件逻辑
+// GuiTreeEvent - 树控件事件
 //
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-02-27
-// Version:	1.0.0000.1100
+// Date:	2012-04-10
+// Version:	1.0.0000.1430
 //
 // History:
-//	- 1.0.0000.1100(2012-02-27)	@ 开始构建GuiMenuEvent
+//	- 1.0.0000.1430(2012-04-10)	@ 准备构建GuiTreeEvent
 //////////////////////////////////////////////////////////////////
 
-#ifndef __GuiMenuEvent_hpp__
-#define __GuiMenuEvent_hpp__
+#ifndef __GuiTreeEvent_hpp__
+#define __GuiTreeEvent_hpp__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -51,43 +51,62 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiMenuEvent : public IGuiEvent
+class CGuiTreeEvent : public CGuiListEvent
 {
-	EXP_DECLARE_DYNCREATE_CLS(CGuiMenuEvent, IGuiEvent)
+	EXP_DECLARE_DYNCREATE_CLS(CGuiTreeEvent, CGuiListEvent)
 
 public:
+	typedef IGuiCtl::itree_t items_t;
+
+public:
+	void FormatItems()
+	{
+		ExAssert(m_Ctrl);
+
+		// 获得属性
+		items_t* items = (items_t*)GetItems();
+		if (items->Empty()) m_FocItm = NULL;
+		LONG space = GetSpace();
+
+		CRect rect;
+		m_Ctrl->GetClientRect(rect);
+
+		// 遍历列表项
+	}
+
+	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		IGuiWnd* wnd = ExDynCast<IGuiWnd>(pGui);
-		if (!wnd) return;
+		EXP_BASE::OnMessage(pGui, nMessage, wParam, lParam);
 
 		// 处理消息
 		switch( nMessage )
 		{
-		case WM_MOUSEACTIVATE:
+		case WM_SETFOCUS:
+			if (m_Ctrl == IGuiCtl::GetFocus())
 			{
-				SetResult(MA_NOACTIVATE);
-				SetState(return_next);
-			}
-			break;
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-			{
-				CPoint pt(ExLoWord(lParam), ExHiWord(lParam));
-				CRect rc;
-				wnd->GetClientRect(rc);
-				if(!rc.PtInRect(pt))
-					wnd->ShowWindow(SW_HIDE);
+				items_t* items = (items_t*)GetItems();
+				if (items->Empty()) break;
+				if(!m_FocItm)
+					m_FocItm = items->HeadItem();
+				if(!m_FocItm) break;
+				IGuiCtl* pic = GetFocPic();
+				if(!pic) break;
+
+				CRect foc_rct;
+				m_FocItm->GetWindowRect(foc_rct);
+				pic->SetWindowRect(foc_rct);
+				pic->SetVisible(TRUE);
 			}
 			break;
 		}
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_CLS(CGuiMenuEvent, IGuiEvent)
+EXP_IMPLEMENT_DYNCREATE_CLS(CGuiTreeEvent, CGuiListEvent)
 
 //////////////////////////////////////////////////////////////////
 
 EXP_END
 
-#endif/*__GuiMenuEvent_hpp__*/
+#endif/*__GuiTreeEvent_hpp__*/

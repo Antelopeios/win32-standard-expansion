@@ -442,6 +442,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiExp\GuiEvent\GuiTreeEvent.hpp"
+				>
+			</File>
+			<File
 				RelativePath="GuiExp\GuiEvent\GuiWndEvent.hpp"
 				>
 			</File>

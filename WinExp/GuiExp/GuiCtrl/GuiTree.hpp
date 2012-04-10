@@ -71,7 +71,8 @@ class CGuiTreeItem : public IGuiCtrlBase /*CGuiTree内部使用的列表项*/
 	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, IGuiCtrlBase)
 
 protected:
-	CGuiButton m_Ind, m_Itm;
+	CGuiPushBtn m_Ind;
+	CGuiSimpBtn m_Itm;
 
 public:
 	CGuiTreeItem()
@@ -161,21 +162,72 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_tre_items, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiTree : public CGuiPicture
+class CGuiTree : public CGuiList
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiTree, CGuiPicture)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiTree, CGuiList)
+
+protected:
+	CGuiStatic m_FocPic;
 
 public:
 	CGuiTree()
 	{
 		// 添加逻辑对象
 		AddSet(_T("_tre_items"));
+		// 添加事件对象
+		PopEvent(FALSE);
+		InsEvent(_T("CGuiTreeEvent")); /*先让基类绘图*/
 		// 设置默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
+		AddComp(&m_FocPic);
+	}
+	~CGuiTree()
+	{
+		DelComp(&m_FocPic, FALSE);
+	}
+
+public:
+	BOOL Execute(const CString& key, const CString& val)
+	{
+		if (key.Left(4) == _T("foc_"))
+		{
+			CString type(key);
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.Execute(type, val);
+		}
+		else
+			return EXP_BASE::Execute(key, val);
+	}
+
+	// 获得控件状态
+	void* GetState(const CString& sType, void* pParam = NULL)
+	{
+		if (sType.Left(4) == _T("foc_"))
+		{
+			CString type(sType);
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.GetState(type);
+		}
+		else
+		if (sType == _T("foc"))
+			return (void*)(&m_FocPic);
+		else
+			return EXP_BASE::GetState(sType);
+	}
+	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
+	{
+		CString type(sType);
+		if (type.Left(4) == _T("foc_"))
+		{
+			type.TrimLeft(_T("foc_"));
+			return m_FocPic.SetState(type, pState);
+		}
+		else
+			return EXP_BASE::SetState(sType, pState);
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTree, CGuiPicture)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTree, CGuiList)
 
 //////////////////////////////////////////////////////////////////
 

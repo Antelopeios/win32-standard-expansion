@@ -390,6 +390,7 @@ protected:
 	items_t m_ItemList;
 
 public:
+	CString GetKey() const { return _T("items"); }
 	BOOL Key(const CString& key)
 	{
 		if (key == _T("items") || 

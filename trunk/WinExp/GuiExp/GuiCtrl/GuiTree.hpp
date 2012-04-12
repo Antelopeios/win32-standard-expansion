@@ -53,101 +53,18 @@ EXP_BEG
 // CGuiTreeItem
 //////////////////////////////////////////////////////////////////
 
-// 树结点是否展开
-class _tre_itm_expand : public ICtrlSetT<BOOL>
+class CGuiTreeItem : public CGuiButton /*CGuiTree内部使用的列表项*/
 {
-	EXP_DECLARE_DYNCREATE_CLS(_tre_itm_expand, IGuiSet)
-
-public:
-	CString GetKey() const { return _T("expand"); }
-};
-
-EXP_IMPLEMENT_DYNCREATE_CLS(_tre_itm_expand, IGuiSet)
-
-//////////////////////////////////////////////////////////////////
-
-class CGuiTreeItem : public IGuiCtrlBase /*CGuiTree内部使用的列表项*/
-{
-	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, IGuiCtrlBase)
-
-protected:
-	CGuiPushBtn m_Ind;
-	CGuiSimpBtn m_Itm;
+	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
 
 public:
 	CGuiTreeItem()
 	{
-		// 添加逻辑对象
-		AddSet(_T("_tre_itm_expand"));
-		// 添加控件对象
-		InsComp(&m_Ind);
-		InsComp(&m_Itm);
-	}
-	~CGuiTreeItem()
-	{
-		DelComp(&m_Ind, FALSE);
-		DelComp(&m_Itm, FALSE);
-	}
-
-public:
-	BOOL Execute(const CString& key, const CString& val)
-	{
-		if (key.Left(4) == _T("ind_"))
-		{
-			CString type(key);
-			type.TrimLeft(_T("ind_"));
-			m_Ind.Execute(type, val);
-		}
-		else
-		if (key.Left(4) == _T("itm_"))
-		{
-			CString type(key);
-			type.TrimLeft(_T("itm_"));
-			m_Itm.Execute(type, val);
-		}
-		else
-			return EXP_BASE::Execute(key, val);
-		return IGuiCtrlBase::Execute(key, val);
-	}
-	void* GetState(const CString& sType, void* pParam = NULL)
-	{
-		if (sType.Left(4) == _T("ind_"))
-		{
-			CString type(sType);
-			type.TrimLeft(_T("ind_"));
-			return m_Ind.GetState(type);
-		}
-		else
-		if (sType.Left(4) == _T("itm_"))
-		{
-			CString type(sType);
-			type.TrimLeft(_T("itm_"));
-			return m_Itm.GetState(type);
-		}
-		else
-			return EXP_BASE::GetState(sType);
-	}
-	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
-	{
-		if (sType.Left(4) == _T("ind_"))
-		{
-			CString type(sType);
-			type.TrimLeft(_T("ind_"));
-			return m_Ind.SetState(type, pState);
-		}
-		else
-		if (sType.Left(4) == _T("itm_"))
-		{
-			CString type(sType);
-			type.TrimLeft(_T("itm_"));
-			return m_Itm.SetState(type, pState);
-		}
-		else
-			return EXP_BASE::SetState(sType, pState);
+		SetState(_T("comf"), (void*)TRUE);
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
 
 //////////////////////////////////////////////////////////////////
 // CGuiTree
@@ -159,6 +76,22 @@ class _tre_items : public IItemSetT<IGuiCtl::itree_t>
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_tre_items, IGuiSet)
+	
+//////////////////////////////////////////////////////////////////
+
+// 根结点与子结点间的平移距离
+class _tre_offset : public ICtrlSetT<LONG>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_tre_offset, IGuiSet)
+
+public:
+	_tre_offset() { m_Val = 10; }
+
+public:
+	CString GetKey() const { return _T("offset"); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_tre_offset, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 
@@ -174,12 +107,13 @@ public:
 	{
 		// 添加逻辑对象
 		AddSet(_T("_tre_items"));
-		// 添加事件对象
-		PopEvent(FALSE);
-		InsEvent(_T("CGuiTreeEvent")); /*先让基类绘图*/
+		AddSet(_T("_tre_offset"));
 		// 设置默认属性
 		SetState(_T("color"), (void*)ExRGBA(EXP_CM, EXP_CM, EXP_CM, EXP_CM));
 		AddComp(&m_FocPic);
+		// 添加事件对象
+		PopEvent(FALSE);
+		InsEvent(_T("CGuiTreeEvent")); /*先让基类绘图*/
 	}
 	~CGuiTree()
 	{

@@ -54,22 +54,19 @@ protected:
 		ExReg<CText>(_T("font"), gcnew(gc, CText));
 		ExGet<CText>(_T("font"))->SetFont((font_t)::GetStockObject(DEFAULT_GUI_FONT));
 
+		// 滚动条
 		ExReg<IGuiCtl>(_T("scrl"), ExGui(_T("CGuiScroll")));
 		ExGet<IGuiCtl>(_T("scrl"))->SetVisible(FALSE);
 		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl"))->GetState(_T("up")))->SetWindowRect(CRect());
 		ExDynCast<IGuiCtl>(ExGet<IGuiCtl>(_T("scrl"))->GetState(_T("down")))->SetWindowRect(CRect());
 		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_blk_thr_sta"), (void*)TRUE);
 		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_ori"), (void*)TRUE);
-		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_color"), (void*)ExRGBA(220, 220, 220, 255));
-		pixel_t pix[8] = {0};
-		for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(180, 180, 180, 255);
-		ExGet<IGuiCtl>(_T("scrl"))->SetState(_T("sli_blk_color"), pix);
 		ExGet<IGuiCtl>(_T("scrl"))->AddEvent(dbnew(CScrEvent));
 
+		// 列表框
 		ExReg<IGuiCtl>(_T("list"), ExGui(_T("CGuiList")));
-		ExGet<IGuiCtl>(_T("list"))->AddEvent(dbnew(CLstEvent));
 		IGuiCtl::items_t items;
-		for(int i = 0; i < 100; ++i)
+		for(int i = 0; i < 10; ++i)
 		{
 			IGuiCtl* btn = ExGui<IGuiCtl>(_T("CGuiListItem"));
 			btn->SetState(_T("icon"), ExGet<CImage>(_T("icon")));
@@ -96,7 +93,9 @@ protected:
 		ExGet<IGuiCtl>(_T("list"))->SetState(_T("items"), &items);
 		ExGet<IGuiCtl>(_T("list"))->SetState(_T("space"), (void*)5);
 		ExGet<IGuiCtl>(_T("list"))->SetScroll(ExGet<IGuiCtl>(_T("scrl")));
+		ExGet<IGuiCtl>(_T("list"))->AddEvent(ExGui(_T("CScrollEvent")));
 
+		// 主窗口
 		ExReg<IGuiWnd>(_T("main"), ExGui(_T("CGuiWnd"), &gc));
 		ExGet<IGuiWnd>(_T("main"))->Create(_T("TestGui7"), CRect(0, 0, 800, 500), SW_HIDE, WS_OVERLAPPEDWINDOW);
 		ExGet<IGuiWnd>(_T("main"))->CenterWindow();

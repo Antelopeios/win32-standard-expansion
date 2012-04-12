@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-11
-// Version:	1.0.0011.1931
+// Date:	2012-04-11
+// Version:	1.0.0012.1700
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -52,6 +52,7 @@
 //	- 1.0.0010.1443(2012-03-08) ^ 将CGuiPushBtn继承于GuiButton,其中的特殊处理一并放入GuiButton中
 //	- 1.0.0011.1931(2012-03-11) ^ 优化GuiButton的内部设定,Execute的某些设置项支持直接用中文定义整型属性
 //								+ GuiButton支持勾选按钮
+//	- 1.0.0012.1700(2012-04-11) + 添加comf属性,支持设置文字与字体时自动调整按钮大小以符合文字内容
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -129,11 +130,57 @@ public:
 			for(int i = 0; i < _countof(m_Text); ++i)
 				m_Text[i] = (CText*)sta + i;
 		}
+		BOOL comf = (BOOL)Ctl()->GetState(_T("comf"));
+		if (comf)
+		{
+			DWORD status = (DWORD)Ctl()->GetState(_T("status"));
+			CText* text = m_Text[status];
+			CString* str = (CString*)Ctl()->GetState(_T("text"));
+			if (!text || !str) return TRUE;
+			CSize sz;
+			text->GetSize(*str, sz);
+			CRect rc;
+			Ctl()->GetRect(rc);
+			rc.Width(sz.cx + 4);
+			rc.Height(sz.cy + 4);
+			Ctl()->SetRect(rc);
+		}
 		return TRUE;
 	}
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_font, IGuiSet)
+	
+//////////////////////////////////////////////////////////////////
+
+class _btn_text : public _pic_text
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_text, _pic_text)
+
+public:
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		_pic_text::Set(sta, par);
+		BOOL comf = (BOOL)Ctl()->GetState(_T("comf"));
+		if (comf)
+		{
+			DWORD status = (DWORD)Ctl()->GetState(_T("status"));
+			CText* text = ((CText**)Ctl()->GetState(_T("font")))[status];
+			CString* str = &m_Val;
+			if (!text || !str) return TRUE;
+			CSize sz;
+			text->GetSize(*str, sz);
+			CRect rc;
+			Ctl()->GetRect(rc);
+			rc.Width(sz.cx + 4);
+			rc.Height(sz.cy + 4);
+			Ctl()->SetRect(rc);
+		}
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_text, _pic_text)
 
 //////////////////////////////////////////////////////////////////
 
@@ -260,7 +307,60 @@ public:
 	}
 	void* Get(void* par = NULL)
 	{
-		return (void*)m_Status;
+		int btn_sty = (int)Ctl()->GetState(_T("btn_sty"));
+		if (btn_sty < 0 || btn_sty > 2) return NULL;
+		LONG sta_tim = (btn_sty == 1 ? 10 : 8), nfc_tim = sta_tim >> 1;
+		UINT thr_sta = (UINT)Ctl()->GetState(_T("thr_sta"));
+		if (thr_sta & 0x01)				// ove
+			nfc_tim -= 1;
+		if (thr_sta & 0x02)				// prs
+			nfc_tim -= 1;
+		if (thr_sta & 0x04)				// dis
+			nfc_tim -= 1;
+		if (thr_sta & 0x08)				// foc
+			sta_tim = nfc_tim;
+		else
+			sta_tim = nfc_tim << 1;
+		DWORD status = (DWORD)m_Status;
+		if(!Ctl()->IsEnabled())			// dis
+		{
+			if (thr_sta & 0x04)
+				status = 0;
+			else
+				status = nfc_tim;
+		}
+		else
+		if (status == 1)				// ove
+		{
+			if (thr_sta & 0x01)
+				status = 0;
+		}
+		else
+		if (status == 2)				// prs
+		{
+			if (thr_sta & 0x02)
+				status = 0;
+			else
+			if (thr_sta & 0x01)
+				status = 1;
+		}
+		else
+		if (status == 3)				// psh
+		{
+			status = 4;
+			if (thr_sta & 0x04)
+				--status;
+			if (thr_sta & 0x02)
+				--status;
+			if (thr_sta & 0x01)
+				--status;
+		}
+		if (Ctl()->IsFocus())			// foc
+		{
+			if(!(thr_sta & 0x08))
+				status += nfc_tim;
+		}
+		return (void*)status;
 	}
 	BOOL Set(void* sta, void* par = NULL)
 	{
@@ -566,6 +666,38 @@ public:
 };
 
 EXP_IMPLEMENT_DYNCREATE_CLS(_btn_ico_off, IGuiSet)
+	
+//////////////////////////////////////////////////////////////////
+
+// 让按钮控件的大小与文字内容一致
+class _btn_comf : public ICtrlSetT<BOOL>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_btn_comf, IGuiSet)
+
+public:
+	CString GetKey() const { return _T("comf"); }
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		ICtrlSetT<BOOL>::Set(sta, par);
+		if (m_Val)
+		{
+			DWORD status = (DWORD)Ctl()->GetState(_T("status"));
+			CText* text = ((CText**)Ctl()->GetState(_T("font")))[status];
+			CString* str = (CString*)Ctl()->GetState(_T("text"));
+			if (!text || !str) return TRUE;
+			CSize sz;
+			text->GetSize(*str, sz);
+			CRect rc;
+			Ctl()->GetRect(rc);
+			rc.Width(sz.cx + 4);
+			rc.Height(sz.cy + 4);
+			Ctl()->SetRect(rc);
+		}
+		return TRUE;
+	}
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_btn_comf, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 // 按钮对象
@@ -579,11 +711,12 @@ public:
 	CGuiButton()
 	{
 		// 添加逻辑对象
+		AddSet(_T("_btn_comf"));
 		AddSet(_T("_btn_style"));
 		AddSet(_T("_btn_color"));
 		AddSet(_T("_btn_image"));
 		AddSet(_T("_btn_font"));
-		AddSet(_T("_pic_text"));
+		AddSet(_T("_btn_text"));
 		AddSet(_T("_btn_status"));
 		AddSet(_T("_btn_locate"));
 		AddSet(_T("_btn_loc_off"));

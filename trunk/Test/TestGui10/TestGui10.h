@@ -61,51 +61,6 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-class CTreEvent : public IGuiEvent
-{
-public:
-	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
-		if (!ctl) return;
-
-		switch( nMessage )
-		{
-		case WM_SHOWWINDOW:
-			if (wParam)
-			{
-				IGuiWnd* wnd = ctl->GetWnd();
-				if (wnd)
-				{
-					CRect rc_wnd;
-					wnd->GetClientRect(rc_wnd);
-					ctl->SetWindowRect(rc_wnd);
-					BOOL nd_sc = FALSE;
-					if (ctl->IsNeedScroll(TRUE))
-					{
-						CRect rc_scr;
-						ctl->GetScroll(TRUE)->GetWindowRect(rc_scr);
-						rc_wnd.Right(rc_wnd.Right() - rc_scr.Width());
-						nd_sc = TRUE;
-					}
-					if (ctl->IsNeedScroll(FALSE))
-					{
-						CRect rc_scr;
-						ctl->GetScroll(FALSE)->GetWindowRect(rc_scr);
-						rc_wnd.Bottom(rc_wnd.Bottom() - rc_scr.Height());
-						nd_sc = TRUE;
-					}
-					if (nd_sc)
-						ctl->SetWindowRect(rc_wnd);
-				}
-			}
-			break;
-		}
-	}
-};
-
-//////////////////////////////////////////////////////////////////
-
 class CWndEvent : public IGuiEvent
 {
 public:

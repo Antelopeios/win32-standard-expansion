@@ -220,45 +220,6 @@ protected:
 			sta_tim = nfc_tim << 1;
 
 		DWORD status = (DWORD)pCtl->GetState(_T("status"));
-		if(!pCtl->IsEnabled())			// dis
-		{
-			if (thr_sta & 0x04)
-				status = 0;
-			else
-				status = nfc_tim;
-		}
-		else
-		if (status == 1)				// ove
-		{
-			if (thr_sta & 0x01)
-				status = 0;
-		}
-		else
-		if (status == 2)				// prs
-		{
-			if (thr_sta & 0x02)
-				status = 0;
-			else
-			if (thr_sta & 0x01)
-				status = 1;
-		}
-		else
-		if (status == 3)				// psh
-		{
-			status = 4;
-			if (thr_sta & 0x04)
-				--status;
-			if (thr_sta & 0x02)
-				--status;
-			if (thr_sta & 0x01)
-				--status;
-		}
-		if (pCtl->IsFocus())			// foc
-		{
-			if(!(thr_sta & 0x08))
-				status += nfc_tim;
-		}
-
 		BOOL shake_ico = (BOOL)pCtl->GetState(_T("shake_ico"));
 
 		CImage** image = (CImage**)pCtl->GetState(_T("image"));

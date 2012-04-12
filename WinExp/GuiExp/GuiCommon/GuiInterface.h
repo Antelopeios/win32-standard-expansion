@@ -698,7 +698,9 @@ public:
 				}
 				return NULL;
 			}
-			return (IGuiSet*)(*(*it));
+			IGuiSet* set = (IGuiSet*)(*(*it));
+			set->Key(key);
+			return set;
 		}
 	}
 

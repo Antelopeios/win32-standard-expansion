@@ -56,6 +56,7 @@ protected:
 		//btn->SetState(_T("locate"), (void*)4);
 		//btn->SetState(_T("loc_off"), (void*)10);
 		btn->SetWindowRect(CRect(70, 100, 180, 140));
+		//btn->SetState(_T("comf"), (void*)TRUE);
 		//btn->SetEffect(ExGui(_T("CGuiFade")));
 
 		// 创建图片控件对象并设置

@@ -59,6 +59,27 @@ public:
 	typedef IGuiCtl::itree_t items_t;
 
 public:
+	void FormatItems(items_t::iterator_t ite, LONG space, LONG offst, CPoint& pt, LONG& w)
+	{
+		IGuiCtl* itm = *ite;
+		CRect rc;
+		itm->GetRect(rc);
+		rc.MoveTo(pt);
+		itm->SetRect(rc);
+
+		if (w < rc.Right()) w = rc.Right();
+
+		pt.x += offst;
+		pt.y = rc.Bottom() + space;
+
+		// 遍历列表项
+		items_t::ite_list_t ite_lst = ite->Children();
+		items_t::ite_list_t::iterator_t ite_ite = ite_lst.Head();
+		for(; ite_ite != ite_lst.Tail(); ++ite_ite)
+			FormatItems(*ite_ite, space, offst, pt, w);
+
+		pt.x -= offst;
+	}
 	void FormatItems()
 	{
 		ExAssert(m_Ctrl);
@@ -67,19 +88,29 @@ public:
 		items_t* items = (items_t*)GetItems();
 		if (items->Empty()) m_FocItm = NULL;
 		LONG space = GetSpace();
+		LONG offst = (LONG)(LONG_PTR)m_Ctrl->GetState(_T("offset"));
 
 		CRect rect;
 		m_Ctrl->GetClientRect(rect);
 
+		CPoint pt;
+		LONG w = 0;
+
 		// 遍历列表项
+		items_t::iterator_t ite = items->Head();
+		items_t::ite_list_t ite_lst = ite->Children();
+		items_t::ite_list_t::iterator_t ite_ite = ite_lst.Head();
+		for(; ite_ite != ite_lst.Tail(); ++ite_ite)
+			FormatItems(*ite_ite, space, offst, pt, w);
+
+		// 设置滚动区域
+		m_Ctrl->SetAllRect(CSize(w, pt.y));
+		m_Ctrl->SetFraRect(CSize(rect.Width(), rect.Height()));
 	}
 
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		EXP_BASE::OnMessage(pGui, nMessage, wParam, lParam);
-
-		// 处理消息
 		switch( nMessage )
 		{
 		case WM_SETFOCUS:
@@ -99,6 +130,8 @@ public:
 				pic->SetVisible(TRUE);
 			}
 			break;
+		default:
+			EXP_BASE::OnMessage(pGui, nMessage, wParam, lParam);
 		}
 	}
 };

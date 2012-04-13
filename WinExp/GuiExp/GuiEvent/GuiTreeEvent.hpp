@@ -62,6 +62,8 @@ public:
 	void FormatItems(items_t::iterator_t ite, LONG space, LONG offst, CPoint& pt, LONG& w)
 	{
 		IGuiCtl* itm = *ite;
+		if(!itm->IsVisible()) return;
+
 		CRect rc;
 		itm->GetRect(rc);
 		rc.MoveTo(pt);

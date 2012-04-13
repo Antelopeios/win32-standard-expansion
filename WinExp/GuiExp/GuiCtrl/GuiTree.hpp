@@ -53,6 +53,15 @@ EXP_BEG
 // CGuiTreeItem
 //////////////////////////////////////////////////////////////////
 
+class _tre_iter : public IIterSetT<IGuiCtl::itree_t>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_tre_iter, IGuiSet)
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_tre_iter, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
 class CGuiTreeItem : public CGuiButton /*CGuiTree内部使用的列表项*/
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiTreeItem, CGuiButton)
@@ -60,6 +69,9 @@ class CGuiTreeItem : public CGuiButton /*CGuiTree内部使用的列表项*/
 public:
 	CGuiTreeItem()
 	{
+		// 添加逻辑对象
+		AddSet(_T("_tre_iter"));
+		// 设置默认属性
 		SetState(_T("comf"), (void*)TRUE);
 	}
 };

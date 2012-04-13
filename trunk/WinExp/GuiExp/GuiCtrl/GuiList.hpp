@@ -54,6 +54,15 @@ EXP_BEG
 // CGuiListItem
 //////////////////////////////////////////////////////////////////
 
+class _lst_iter : public IIterSetT<IGuiCtl::items_t>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_lst_iter, IGuiSet)
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_lst_iter, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
 class CGuiListItem : public CGuiButton /*CGuiList内部使用的列表项*/
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiListItem, CGuiButton)
@@ -61,6 +70,8 @@ class CGuiListItem : public CGuiButton /*CGuiList内部使用的列表项*/
 public:
 	CGuiListItem()
 	{
+		// 添加逻辑对象
+		AddSet(_T("_lst_iter"));
 		// 添加事件对象
 		InsEvent(_T("CGuiListItemEvent")); /*先让基类绘图*/
 	}

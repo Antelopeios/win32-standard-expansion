@@ -379,6 +379,29 @@ public:
 };
 
 template <typename TypeT>
+class IIterSetT : public IGuiSet
+{
+public:
+	typedef TypeT items_t;
+	typedef typename items_t::iterator_t iter_t;
+
+protected:
+	iter_t m_Val;
+
+public:
+	CString GetKey() const { return _T("iter"); }
+	void* Get(void* par = NULL)
+	{
+		return (void*)(&m_Val);
+	}
+	BOOL Set(void* sta, void* par = NULL)
+	{
+		m_Val = *(iter_t*)sta;
+		return TRUE;
+	}
+};
+
+template <typename TypeT>
 class IItemSetT : public IGuiSet
 {
 public:
@@ -433,6 +456,7 @@ public:
 				IGuiCtl* item = *ite;
 				if (!item) continue;
 				Ctl()->AddComp(item);
+				item->SetState(_T("iter"), (void*)&ite);
 			}
 			Ctl()->SendMessage(WM_SIZE);
 		}
@@ -444,6 +468,8 @@ public:
 			IGuiCtl* item = (IGuiCtl*)par;
 			Ctl()->AddComp(item);
 			m_ItemList.Add(item, ite);
+			if (items_t::SimpleCon == 1) --ite;
+			item->SetState(_T("iter"), (void*)&ite);
 			Ctl()->SendMessage(WM_SIZE);
 		}
 		else

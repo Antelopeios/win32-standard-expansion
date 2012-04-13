@@ -62,6 +62,8 @@ template <typename TypeT, typename PolicyT, typename ContainerT>
 interface IContainerObjectT
 {
 public:
+	enum { SimpleCon = 1 };
+
 	typedef TypeT		type_t;
 	typedef PolicyT		policy_t;
 	typedef ContainerT	container_t;

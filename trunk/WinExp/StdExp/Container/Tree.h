@@ -153,6 +153,9 @@ template <typename TypeT, typename PolicyT = _TreePolicy>
 class CTreeT : public IContainerObjectT<TypeT, PolicyT, CTreeT<TypeT, PolicyT> >
 {
 public:
+	enum { SimpleCon = 0 };
+
+public:
 	typedef struct _Item
 	{
 		typedef CListT<_Item*> list_t;

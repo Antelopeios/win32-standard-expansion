@@ -61,6 +61,43 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
+class CBtnEvent : public IGuiEvent
+{
+public:
+	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
+	{
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(pGui);
+		if (!ctl) return;
+
+		switch( nMessage )
+		{
+		case BM_CLICK:
+			{
+				IGuiCtl::itree_t::iterator_t* pite = 
+					(IGuiCtl::itree_t::iterator_t*)ctl->GetState(_T("iter"));
+				if (!pite) break;
+				typedef IGuiCtl::itree_t::ite_list_t ite_list_t;
+				ite_list_t list = (*pite)->Children();
+				if (list.Empty()) break;
+				for(ite_list_t::iterator_t ite = list.Head(); ite != list.Tail(); ++ite)
+				{
+					IGuiCtl* cld = (*(*ite));
+					cld->SendMessage(BM_CLICK, 1);
+					cld->SetVisible(!cld->IsVisible());
+				}
+				if (wParam == 0)
+				{
+					IGuiWnd* wnd = ctl->GetWnd();
+					wnd->SendMessage(WM_SIZE, SIZE_RESTORED);
+				}
+			}
+			break;
+		}
+	}
+};
+
+//////////////////////////////////////////////////////////////////
+
 class CWndEvent : public IGuiEvent
 {
 public:

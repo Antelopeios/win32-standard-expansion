@@ -62,17 +62,20 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiLVItem : public CGuiButton /*CGuiListView内部使用的列表项*/
+class CGuiLVItem : public CGuiListItem /*CGuiListView内部使用的列表项*/
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiLVItem, CGuiButton)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiLVItem, CGuiListItem)
 
 public:
 	CGuiLVItem()
 	{
 		// 添加事件对象
+		PopEvent(FALSE);
 		InsEvent(_T("CGuiLVItemEvent")); /*先让基类绘图*/
 	}
 };
+
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiLVItem, CGuiListItem)
 
 //////////////////////////////////////////////////////////////////
 
@@ -131,9 +134,6 @@ public:
 	}
 };
 
-//////////////////////////////////////////////////////////////////
-
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiLVItem, CGuiButton)
 EXP_IMPLEMENT_DYNCREATE_MULT(CGuiListView, CGuiList)
 
 //////////////////////////////////////////////////////////////////

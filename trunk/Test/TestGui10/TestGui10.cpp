@@ -98,6 +98,7 @@ protected:
 			btn->SetState(_T("ico_off"), (void*)5);
 			btn->SetState(_T("shake_ico"), (void*)TRUE);
 			btn->SetWindowRect(CRect(0, 0, 260, 60));
+			btn->AddEvent(dbnew(CBtnEvent));
 			IGuiCtl::itree_t::iterator_t it = ite;
 			items.Add(btn, it);
 		}
@@ -124,6 +125,7 @@ protected:
 			btn->SetState(_T("ico_off"), (void*)5);
 			btn->SetState(_T("shake_ico"), (void*)TRUE);
 			btn->SetWindowRect(CRect(0, 0, 260, 60));
+			btn->AddEvent(dbnew(CBtnEvent));
 			IGuiCtl::itree_t::iterator_t it = ite;
 			items.Add(btn, it);
 		}
@@ -150,6 +152,7 @@ protected:
 			btn->SetState(_T("ico_off"), (void*)5);
 			btn->SetState(_T("shake_ico"), (void*)TRUE);
 			btn->SetWindowRect(CRect(0, 0, 260, 60));
+			btn->AddEvent(dbnew(CBtnEvent));
 			IGuiCtl::itree_t::iterator_t it = ite;
 			items.Add(btn, it);
 		}

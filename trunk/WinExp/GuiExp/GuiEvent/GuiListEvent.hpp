@@ -201,7 +201,7 @@ class CGuiListEvent : public IGuiEvent
 	EXP_DECLARE_DYNCREATE_CLS(CGuiListEvent, IGuiEvent)
 
 protected:
-	IGuiCtrlBase* m_Ctrl;
+	IGuiCtl* m_Ctrl;
 	IGuiCtl* m_FocItm;
 
 public:
@@ -302,7 +302,7 @@ public:
 	// 消息响应
 	void OnMessage(IGuiObject* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
 	{
-		m_Ctrl = ExDynCast<IGuiCtrlBase>(pGui);
+		m_Ctrl = ExDynCast<IGuiCtl>(pGui);
 		if (!m_Ctrl) return;
 
 		// 处理消息

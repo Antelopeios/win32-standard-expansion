@@ -201,9 +201,9 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_pic_text, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiPicture : public IGuiCtrlBase
+class CGuiPicture : public IGuiCtl
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiPicture, IGuiCtl)
 
 public:
 	CGuiPicture()
@@ -217,7 +217,7 @@ public:
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPicture, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiPicture, IGuiCtl)
 
 //////////////////////////////////////////////////////////////////
 

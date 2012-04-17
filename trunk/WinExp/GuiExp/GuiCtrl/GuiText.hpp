@@ -64,7 +64,7 @@ protected:
 	CString m_StrTmp;
 
 public:
-	BOOL FmtTxtRect(CRect rect, CText* text, CString* str, IGuiCtrlBase* ctl)
+	BOOL FmtTxtRect(CRect rect, CText* text, CString* str, IGuiCtl* ctl)
 	{
 		if (!text || !str)
 		{
@@ -126,7 +126,7 @@ public:
 			CRect rect;
 			Ctl()->GetClientRect(rect);
 
-			FmtTxtRect(rect, m_Val, str, (IGuiCtrlBase*)Ctl());
+			FmtTxtRect(rect, m_Val, str, (IGuiCtl*)Ctl());
 		}
 		else
 		if (nMessage == WM_PAINT)
@@ -138,7 +138,7 @@ public:
 			CRect rect;
 			Ctl()->GetClientRect(rect);
 
-			if (!FmtTxtRect(rect, m_Val, str, (IGuiCtrlBase*)Ctl())) return;
+			if (!FmtTxtRect(rect, m_Val, str, (IGuiCtl*)Ctl())) return;
 
 			CGraph* mem_img = (CGraph*)lParam;
 			if (!mem_img || mem_img->IsNull()) return;

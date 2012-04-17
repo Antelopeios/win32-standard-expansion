@@ -123,7 +123,7 @@ public:
 		}
 		else
 			return EXP_BASE::Execute(key, val);
-		return IGuiCtrlBase::Execute(key, val);
+		return IGuiCtl::Execute(key, val);
 	}
 
 	void* GetState(const CString& sType, void* pParam = NULL)
@@ -132,7 +132,7 @@ public:
 		{
 			CString type(sType);
 			type.TrimLeft(_T("blk_"));
-			return m_Slider.GetState(type);
+			return m_Slider.GetState(type, pParam);
 		}
 		else
 		if (sType == _T("slider"))
@@ -149,7 +149,7 @@ public:
 		if (sType == _T("ori"))
 			return (void*)m_Ori;
 		else
-			return EXP_BASE::GetState(sType);
+			return EXP_BASE::GetState(sType, pParam);
 	}
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
@@ -169,10 +169,10 @@ public:
 		{
 			CString type(sType);
 			type.TrimLeft(_T("blk_"));
-			return m_Slider.SetState(type, pState);
+			return m_Slider.SetState(type, pState, pParam);
 		}
 		else
-			return EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState, pParam);
 	}
 };
 
@@ -182,9 +182,9 @@ EXP_IMPLEMENT_DYNCREATE_MULT(CGuiSlider, CGuiPicture)
 // CGuiScroll - ¹ö¶¯Ìõ
 //////////////////////////////////////////////////////////////////
 
-class CGuiScroll : public IGuiCtrlBase
+class CGuiScroll : public IGuiCtl
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiScroll, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiScroll, IGuiCtl)
 
 protected:
 	CGuiSlider m_Slider;
@@ -259,19 +259,19 @@ public:
 		if (sType.Left(4) == _T("sli_"))
 		{
 			type.TrimLeft(_T("sli_"));
-			return m_Slider.GetState(type);
+			return m_Slider.GetState(type, pParam);
 		}
 		else
 		if (sType.Left(3) == _T("up_"))
 		{
 			type.TrimLeft(_T("up_"));
-			return m_Up.GetState(type);
+			return m_Up.GetState(type, pParam);
 		}
 		else
 		if (sType.Left(3) == _T("dn_"))
 		{
 			type.TrimLeft(_T("dn_"));
-			return m_Down.GetState(type);
+			return m_Down.GetState(type, pParam);
 		}
 		else
 		if (sType == _T("main"))
@@ -286,7 +286,7 @@ public:
 		if (sType == _T("down"))
 			return (void*)(&m_Down);
 		else
-			return EXP_BASE::GetState(sType);
+			return EXP_BASE::GetState(sType, pParam);
 	}
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
@@ -297,25 +297,25 @@ public:
 		if (type.Left(4) == _T("sli_"))
 		{
 			type.TrimLeft(_T("sli_"));
-			return m_Slider.SetState(type, pState);
+			return m_Slider.SetState(type, pState, pParam);
 		}
 		else
 		if (type.Left(3) == _T("up_"))
 		{
 			type.TrimLeft(_T("up_"));
-			return m_Up.SetState(type, pState);
+			return m_Up.SetState(type, pState, pParam);
 		}
 		else
 		if (type.Left(3) == _T("dn_"))
 		{
 			type.TrimLeft(_T("dn_"));
-			return m_Down.SetState(type, pState);
+			return m_Down.SetState(type, pState, pParam);
 		}
 		return FALSE;
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiScroll, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiScroll, IGuiCtl)
 
 //////////////////////////////////////////////////////////////////
 

@@ -52,9 +52,9 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-interface IGuiThunk : public IGuiBoardBase
+interface IGuiThunk : public IGuiWnd
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiThunk, IGuiBoardBase)
+	EXP_DECLARE_DYNAMIC_MULT(IGuiThunk, IGuiWnd)
 
 protected:
 	WNDPROC m_WndProc;	// 原始的窗口过程
@@ -99,13 +99,13 @@ public:
 		BOOL bHook = ( pid_cur != pid_wnd );
 		if( bHook )
 		{
-			IGuiBoardBase::Attach(hWnd);
+			IGuiWnd::Attach(hWnd);
 			m_bHook = bHook;
 		}
 		else
 		{
 			if (Get() || m_WndProc) Detach();
-			IGuiBoardBase::Attach(hWnd);
+			IGuiWnd::Attach(hWnd);
 			m_bHook = bHook;
 			m_WndProc = (WNDPROC)SetWindowLong(GWL_WNDPROC, (LONG)ThunkWndProc);
 			if (!m_WndProc) return FALSE;
@@ -118,12 +118,12 @@ public:
 	{
 		wnd_t ret = NULL;
 		if (m_bHook)
-			ret = IGuiBoardBase::Detach();
+			ret = IGuiWnd::Detach();
 		else
 		if (SetWindowLong(GWL_WNDPROC, (LONG)m_WndProc))
 		{
 			SetWindowLong(GWL_USERDATA, 0);
-			ret = IGuiBoardBase::Detach();
+			ret = IGuiWnd::Detach();
 		}
 		m_bHook = FALSE;
 		return ret;
@@ -132,7 +132,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiThunk, IGuiBoardBase)
+EXP_IMPLEMENT_DYNAMIC_MULT(IGuiThunk, IGuiWnd)
 
 //////////////////////////////////////////////////////////////////
 

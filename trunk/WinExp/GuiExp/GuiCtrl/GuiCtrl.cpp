@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-16
-// Version:	1.0.0024.2356
+// Date:	2012-04-17
+// Version:	1.0.0026.1449
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -52,73 +52,229 @@ IGuiCtl* IGuiCtl::m_Focus = NULL;
 
 //////////////////////////////////////////////////////////////////
 
-// GUI 控件对象接口
-EXP_IMPLEMENT_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtl)
-
-IGuiCtrlBase::IGuiCtrlBase()
-	: m_bEnable(TRUE)
+IGuiCtl::IGuiCtl()
+	: m_Effect(NULL)
+	, m_bTruEff(TRUE)
+	, m_bEnable(TRUE)
 	, m_bVisible(TRUE)
 	, m_Updated(TRUE)
-{}
+	, m_bThrough(FALSE)
+{
+	m_Scroll[1] = m_Scroll[0] = NULL;
+}
+
+BOOL IGuiCtl::IsValid() const
+{
+	return EXP_BASE::IsValid();
+}
+
+void IGuiCtl::Init(IGuiComp* pComp)
+{
+	EXP_BASE::Init(pComp);
+	if (IsVisible())
+	{
+		SendMessage(WM_SHOWWINDOW, 1);
+		SetFocus();
+	}
+	else
+		SendMessage(WM_SHOWWINDOW, 0);
+}
+
+void IGuiCtl::Fina()
+{
+	if (m_bTruEff && m_Effect)
+		del(m_Effect);
+	m_Focus = NULL;
+	EXP_BASE::Fina();
+}
+
+void IGuiCtl::SetTrust(BOOL bTruCldr)
+{
+	IGuiBase::SetTrust(bTruCldr);
+}
+
+BOOL IGuiCtl::IsTrust() const
+{
+	return IGuiBase::IsTrust();
+}
+
+void IGuiCtl::SetThrough(BOOL bThrough)
+{
+	m_bThrough = bThrough;
+}
+BOOL IGuiCtl::IsThrough() const
+{
+	return m_bThrough;
+}
+
+void IGuiCtl::SendSet(UINT nMessage, WPARAM wParam, LPARAM lParam)
+{
+	for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
+	{
+		IGuiSet* set = (IGuiSet*)(*ite);
+		ExAssert(set);
+		set->Msg(nMessage, wParam, lParam);
+	}
+}
+
+void IGuiCtl::SendMsg(void* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam)
+{
+	IGuiSender::Send(pGui, nMessage, wParam, lParam);
+}
+
+void IGuiCtl::Send(void* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam)
+{
+	if(!GetParent()) return;
+	SendSet(nMessage, wParam, lParam);
+	SendMsg(pGui, nMessage, wParam, lParam);
+}
+
+void IGuiCtl::SendMessage(UINT nMessage, WPARAM wParam, LPARAM lParam)
+{
+	Send(this, nMessage, wParam, lParam);
+}
+
+// 控件设置对象管理
+BOOL IGuiCtl::AddSet(void* p)
+{
+	IGuiSet* set = (IGuiSet*)(p);
+	if (!set) return FALSE;
+	set->Ctl() = this;
+	return IGuiSetMgr::AddSet(p);
+}
+BOOL IGuiCtl::AddSet(LPCTSTR key)
+{
+	if (!IGuiSetMgr::AddSet(key)) return FALSE;
+	IGuiSet* set = (IGuiSet*)(GetSet().LastItem());
+	if (!set)
+	{
+		DelSet(key);
+		return FALSE;
+	}
+	set->Ctl() = this;
+	return TRUE;
+}
+BOOL IGuiCtl::InsSet(void* p)
+{
+	IGuiSet* set = (IGuiSet*)(p);
+	if (!set) return FALSE;
+	set->Ctl() = this;
+	return IGuiSetMgr::InsSet(p);
+}
+BOOL IGuiCtl::InsSet(LPCTSTR key)
+{
+	if (!IGuiSetMgr::InsSet(key)) return FALSE;
+	IGuiSet* set = (IGuiSet*)(GetSet().HeadItem());
+	if (!set)
+	{
+		DelSet(key);
+		return FALSE;
+	}
+	set->Ctl() = this;
+	return TRUE;
+}
 
 // 更新状态
-BOOL IGuiCtrlBase::Execute(const CString& key, const CString& val)
+BOOL IGuiCtl::Execute(const CString& key, const CString& val)
 {
 	IGuiSet* set = FindKeySet(key);
 	if (set) return set->Exc(val);
 	return TRUE;
 }
-void* IGuiCtrlBase::GetState(const CString& sType, void* pParam/* = NULL*/)
+void* IGuiCtl::Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
+{
+	return IGuiBase::Execute(xml, ite, parent);
+}
+void* IGuiCtl::GetState(const CString& sType, void* pParam/* = NULL*/)
 {
 	IGuiSet* set = FindKeySet(sType);
 	if (set) return set->Get(pParam);
 	return NULL;
 }
-BOOL IGuiCtrlBase::SetState(const CString& sType, void* pState, void* pParam/* = NULL*/)
+BOOL IGuiCtl::SetState(const CString& sType, void* pState, void* pParam/* = NULL*/)
 {
 	IGuiSet* set = FindKeySet(sType);
 	if (set) set->Set(pState, pParam);
 	UpdateState();
 	return TRUE;
 }
-void IGuiCtrlBase::UpdateState(BOOL bRefreshSelf/* = TRUE*/)
+void IGuiCtl::UpdateState(BOOL bRefreshSelf/* = TRUE*/)
 {
 	m_Updated = TRUE;
 	Refresh(bRefreshSelf);
 }
-BOOL IGuiCtrlBase::IsUpdated()
+BOOL IGuiCtl::IsUpdated()
 {
 	BOOL updt = m_Updated;
 	m_Updated = FALSE; // 外部一旦获知当前状态,则更新状态自动复位
 	return updt;
 }
 
+// 设置效果对象
+void IGuiCtl::SetEffectTrust(BOOL bTru)
+{
+	m_bTruEff = bTru;
+}
+void IGuiCtl::SetEffect(void* p)
+{
+	if (m_bTruEff && m_Effect)
+		del(m_Effect);
+	m_Effect = ExDynCast<IGuiEffect>(p);
+	Refresh(FALSE);
+}
+IGuiEffect* IGuiCtl::GetEffect()
+{
+	return m_Effect;
+}
+
+// 获得绘图板
+IGuiBase* IGuiCtl::GetParent() const
+{
+	return ExDynCast<IGuiBase>(m_Pare);
+}
+IGuiWnd* IGuiCtl::GetWnd() const
+{
+	if (m_Pare)
+	{
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(m_Pare);
+		if (ctl) return ctl->GetWnd();
+		IGuiWnd* wnd = ExDynCast<IGuiWnd>(m_Pare);
+		if (wnd) return wnd;
+	}
+	return NULL;
+}
+wnd_t IGuiCtl::GethWnd() const
+{
+	IGuiWnd* wnd = GetWnd();
+	return wnd ? wnd->GethWnd() : NULL;
+}
+
 // 区域控制
-BOOL IGuiCtrlBase::GetRect(CRect& rc) const
+BOOL IGuiCtl::GetRect(CRect& rc) const
 {
 	rc = m_Rect;
 	return TRUE;
 }
-BOOL IGuiCtrlBase::SetRect(const CRect& rc)
+BOOL IGuiCtl::SetRect(const CRect& rc)
 {
 	m_Rect = rc;
 	return TRUE;
 }
-BOOL IGuiCtrlBase::P2C(CRect& rc) const
+BOOL IGuiCtl::P2C(CRect& rc) const
 {
 	CRect rc_wnd;
 	if (!GetWindowRect(rc_wnd)) return FALSE;
 	rc.Offset(-(rc_wnd.pt1));
 	return TRUE;
 }
-BOOL IGuiCtrlBase::C2P(CRect& rc) const
+BOOL IGuiCtl::C2P(CRect& rc) const
 {
 	CRect rc_wnd;
 	if (!GetWindowRect(rc_wnd)) return FALSE;
 	rc.Offset(rc_wnd.pt1);
 	return TRUE;
 }
-BOOL IGuiCtrlBase::B2C(CRect& rc) const
+BOOL IGuiCtl::B2C(CRect& rc) const
 {
 	if (!m_Pare) return FALSE;
 	if (!P2C(rc)) return FALSE;
@@ -126,7 +282,7 @@ BOOL IGuiCtrlBase::B2C(CRect& rc) const
 	if (ctl) return ctl->B2C(rc);
 	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
-BOOL IGuiCtrlBase::C2B(CRect& rc) const
+BOOL IGuiCtl::C2B(CRect& rc) const
 {
 	if (!m_Pare) return FALSE;
 	if (!C2P(rc)) return FALSE;
@@ -134,7 +290,7 @@ BOOL IGuiCtrlBase::C2B(CRect& rc) const
 	if (ctl) return ctl->C2B(rc);
 	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
-BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
+BOOL IGuiCtl::SetWindowRect(const CRect& rc)
 {
 	IGuiBase* pare = GetParent();
 	if (!pare) return SetRect(rc);
@@ -156,7 +312,7 @@ BOOL IGuiCtrlBase::SetWindowRect(const CRect& rc)
 	Refresh(FALSE);
 	return TRUE;
 }
-BOOL IGuiCtrlBase::GetWindowRect(CRect& rc) const
+BOOL IGuiCtl::GetWindowRect(CRect& rc) const
 {
 	IGuiBase* pare = GetParent();
 	if (!pare) return GetRect(rc);
@@ -172,13 +328,13 @@ BOOL IGuiCtrlBase::GetWindowRect(CRect& rc) const
 	else
 		return GetRect(rc);
 }
-BOOL IGuiCtrlBase::SetRealRect(const CRect& rc)
+BOOL IGuiCtl::SetRealRect(const CRect& rc)
 {
 	CRect rc_tmp(rc);
 	if (!B2C(rc_tmp)) return FALSE;
 	return SetWindowRect(rc_tmp);
 }
-BOOL IGuiCtrlBase::GetRealRect(CRect& rc) const
+BOOL IGuiCtl::GetRealRect(CRect& rc) const
 {
 	if (!m_Pare) return FALSE;
 	if (!GetWindowRect(rc)) return FALSE;
@@ -186,14 +342,14 @@ BOOL IGuiCtrlBase::GetRealRect(CRect& rc) const
 	if (ctl) return ctl->C2B(rc);
 	return ExDynCast<IGuiWnd>(m_Pare) ? TRUE : FALSE;
 }
-BOOL IGuiCtrlBase::GetClientRect(CRect& rc) const
+BOOL IGuiCtl::GetClientRect(CRect& rc) const
 {
 	if (!GetRect(rc)) return FALSE;
 	rc.MoveTo(CPoint());
 	return TRUE;
 }
 
-BOOL IGuiCtrlBase::SetAllRect(const CSize& sz)
+BOOL IGuiCtl::SetAllRect(const CSize& sz)
 {
 	if (m_AllRect == sz) return TRUE;
 	m_AllRect = sz;
@@ -207,12 +363,12 @@ BOOL IGuiCtrlBase::SetAllRect(const CSize& sz)
 	}
 	return TRUE;
 }
-BOOL IGuiCtrlBase::GetAllRect(CSize& sz) const
+BOOL IGuiCtl::GetAllRect(CSize& sz) const
 {
 	sz = m_AllRect;
 	return TRUE;
 }
-BOOL IGuiCtrlBase::SetFraRect(const CSize& sz)
+BOOL IGuiCtl::SetFraRect(const CSize& sz)
 {
 	if (m_FraRect == sz) return TRUE;
 	m_FraRect = sz;
@@ -226,14 +382,117 @@ BOOL IGuiCtrlBase::SetFraRect(const CSize& sz)
 	}
 	return TRUE;
 }
-BOOL IGuiCtrlBase::GetFraRect(CSize& sz) const
+BOOL IGuiCtl::GetFraRect(CSize& sz) const
 {
 	sz = m_FraRect;
 	return TRUE;
 }
 
+BOOL IGuiCtl::GetScrollSize(CSize& sz) const
+{
+	sz = m_szScroll;
+	return TRUE;
+}
+BOOL IGuiCtl::SetScrollSize(const CSize& sz, BOOL bWheel)
+{
+	if ((m_Scroll[0] || m_Scroll[1]) && bWheel)
+	{
+		if (m_Scroll[0])
+			m_Scroll[0]->SendMessage(WM_MOUSEWHEEL, 
+				ExMakeLong(-sz.cx, -sz.cy), 
+				ExMakeLong(-1, -1));
+		if (m_Scroll[1])
+			m_Scroll[1]->SendMessage(WM_MOUSEWHEEL, 
+				ExMakeLong(-sz.cx, -sz.cy), 
+				ExMakeLong(-1, -1));
+	}
+	else
+	{
+		if (m_szScroll == sz) return TRUE;
+		m_szScroll = sz;
+		CRect rc;
+		GetRect(rc);
+		SendMessage(WM_SIZE, SIZE_RESTORED, 
+			(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
+		Refresh(FALSE);
+	}
+	return TRUE;
+}
+IGuiCtl* IGuiCtl::GetScroll(BOOL bLine) const
+{
+	return m_Scroll[bLine ? 0 : 1];
+}
+void IGuiCtl::SetScroll(void* p, BOOL bLine)
+{
+	int inx = bLine ? 0 : 1;
+	IGuiCtl* old_scr = m_Scroll[inx];
+	m_Scroll[inx] = ExDynCast<IGuiCtl>(p);
+	if (m_Scroll[inx] && old_scr != m_Scroll[inx])
+	{
+		m_Scroll[inx]->SetState(_T("main"), this);
+		SetScrollSize(CSize(), TRUE);
+	}
+}
+BOOL IGuiCtl::IsNeedScroll(BOOL bLine)
+{
+	CSize all_line, fra_line;
+	GetAllRect(all_line);
+	GetFraRect(fra_line);
+	LONG all = 0, fra = 0;
+	if (bLine)
+	{
+		all = all_line.cy;
+		fra = fra_line.cy;
+	}
+	else
+	{
+		all = all_line.cx;
+		fra = fra_line.cx;
+	}
+	return (GetScroll(bLine) ? (all > fra) : FALSE);
+}
+
+// 判断是否可视(如控件在父控件窗口外)
+BOOL IGuiCtl::IsDisplayed() const
+{
+	CRect rc_slf;
+	if (!GetWindowRect(rc_slf)) return FALSE;
+	CRect rc_prt;
+	if (!GetParent()->GetClientRect(rc_prt)) return FALSE;
+	return (!rc_slf.Inter(rc_prt).IsEmpty());
+}
+BOOL IGuiCtl::GetDisplaySize(CSize& sz) const
+{
+	sz.CSizeT::CSizeT();
+	CRect rc_slf;
+	if (!GetWindowRect(rc_slf)) return FALSE;
+	CRect rc_prt;
+	if (!GetParent()->GetClientRect(rc_prt)) return FALSE;
+	CRect rc_int(rc_slf);
+	if (rc_int.Inter(rc_prt) != rc_slf)
+	{
+		if (rc_int.Left() == rc_slf.Left() || 
+			rc_int.Right() == rc_slf.Right())
+		{
+			if (rc_int.Left() > rc_slf.Left())
+				sz.cx = rc_slf.Left() - rc_int.Left();
+			if (rc_int.Right() < rc_slf.Right())
+				sz.cx = rc_slf.Right() - rc_int.Right();
+		}
+		if (rc_int.Top() == rc_slf.Top() || 
+			rc_int.Bottom() == rc_slf.Bottom())
+		{
+			if (rc_int.Top() > rc_slf.Top())
+				sz.cy = rc_slf.Top() - rc_int.Top();
+			if (rc_int.Bottom() < rc_slf.Bottom())
+				sz.cy = rc_slf.Bottom() - rc_int.Bottom();
+		}
+	}
+	return TRUE;
+}
+
 // 刷新绘图
-void IGuiCtrlBase::Refresh(BOOL bSelf/* = TRUE*/)
+void IGuiCtl::Refresh(BOOL bSelf/* = TRUE*/)
 {
 	IGuiWnd* wnd = GetWnd();
 	if (!wnd) return;
@@ -248,7 +507,7 @@ void IGuiCtrlBase::Refresh(BOOL bSelf/* = TRUE*/)
 }
 
 // 设置可用性
-BOOL IGuiCtrlBase::SetEnable(BOOL bEnable/* = TRUE*/)
+BOOL IGuiCtl::SetEnable(BOOL bEnable/* = TRUE*/)
 {
 	if (m_bEnable == bEnable) return m_bEnable;
 	BOOL old = m_bEnable;
@@ -256,13 +515,13 @@ BOOL IGuiCtrlBase::SetEnable(BOOL bEnable/* = TRUE*/)
 	UpdateState();
 	return old;
 }
-BOOL IGuiCtrlBase::IsEnabled() const
+BOOL IGuiCtl::IsEnabled() const
 {
 	return m_bEnable;
 }
 
 // 设置可见性
-BOOL IGuiCtrlBase::SetVisible(BOOL bVisible/* = TRUE*/)
+BOOL IGuiCtl::SetVisible(BOOL bVisible/* = TRUE*/)
 {
 	if (m_bVisible == bVisible) return m_bVisible;
 	BOOL old = m_bVisible;
@@ -274,9 +533,68 @@ BOOL IGuiCtrlBase::SetVisible(BOOL bVisible/* = TRUE*/)
 	}
 	return old;
 }
-BOOL IGuiCtrlBase::IsVisible() const
+BOOL IGuiCtl::IsVisible() const
 {
 	return m_bVisible;
+}
+
+// 判断有效性
+BOOL IGuiCtl::IsEffect(const IGuiCtl* pCtrl)
+{
+	return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible());
+}
+
+// 焦点控制
+IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
+{
+	if (pFoc && !IsEffect(pFoc)) return NULL;
+	// 设置控件焦点
+	IGuiCtl* old_fc = m_Focus;
+	m_Focus = pFoc;
+	if (old_fc == m_Focus) return NULL;
+	// 设置窗口焦点
+	if (m_Focus)
+	{
+		IGuiWnd* wnd = m_Focus->GetWnd();
+		if (wnd) wnd->SetFocus();
+	}
+	// 发送焦点改变消息
+	if (old_fc)
+	{
+		old_fc->SendMessage(WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
+		old_fc->UpdateState();
+	}
+	if (m_Focus)
+	{
+		m_Focus->SendMessage(WM_SETFOCUS, 0, (LPARAM)old_fc);
+		m_Focus->UpdateState();
+	}
+	return old_fc;
+}
+IGuiCtl* IGuiCtl::SetFocus()
+{
+	return SetFocus(this);
+}
+IGuiCtl* IGuiCtl::GetFocus()
+{
+	return m_Focus;
+}
+BOOL IGuiCtl::IsFocus() const
+{
+	IGuiWnd* wnd = GetWnd();
+	if (wnd && !wnd->IsFocus())
+		return FALSE;
+	if (!m_Focus) return FALSE;
+	IGuiCtl* foc = m_Focus;
+	if (foc == this)
+		return IsEffect(this);
+	for(list_t::iterator_t ite = GetComp().Head(); ite != GetComp().Tail(); ++ite)
+	{
+		IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
+		if (!ctl) continue;
+		if (ctl->IsFocus()) return TRUE;
+	}
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -506,7 +824,7 @@ public:
 		{ \
 			val = (type)(LONG_PTR)pState; \
 			scp; \
-			return EXP_BASE::SetState(sType, pState); \
+			return EXP_BASE::SetState(sType, pState, pParam); \
 		} \
 		else \
 			return TRUE; \

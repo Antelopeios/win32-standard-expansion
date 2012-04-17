@@ -703,9 +703,9 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_btn_comf, IGuiSet)
 // ∞¥≈•∂‘œÛ
 //////////////////////////////////////////////////////////////////
 
-class CGuiButton : public IGuiCtrlBase
+class CGuiButton : public IGuiCtl
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiButton, IGuiCtl)
 
 public:
 	CGuiButton()
@@ -731,7 +731,7 @@ public:
 	}
 };
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiButton, IGuiCtl)
 
 //////////////////////////////////////////////////////////////////
 

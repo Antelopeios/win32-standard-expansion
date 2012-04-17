@@ -93,7 +93,7 @@ public:
 			SetState(_T("max"), (void*)_ttol(val));
 		else
 			return EXP_BASE::Execute(key, val);
-		return IGuiCtrlBase::Execute(key, val);
+		return IGuiCtl::Execute(key, val);
 	}
 
 	void* GetState(const CString& sType, void* pParam = NULL)
@@ -102,7 +102,7 @@ public:
 		if (sType.Left(3) == _T("pg_"))
 		{
 			type.TrimLeft(_T("pg_"));
-			return m_Prog.GetState(type);
+			return m_Prog.GetState(type, pParam);
 		}
 		if (sType == _T("pg"))
 			return (void*)(&m_Prog);
@@ -113,7 +113,7 @@ public:
 		if (sType == _T("max"))
 			return (void*)m_nMax;
 		else
-			return EXP_BASE::GetState(sType);
+			return EXP_BASE::GetState(sType, pParam);
 	}
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
@@ -121,7 +121,7 @@ public:
 		if (type.Left(3) == _T("pg_"))
 		{
 			type.TrimLeft(_T("pg_"));
-			return m_Prog.SetState(type, pState);
+			return m_Prog.SetState(type, pState, pParam);
 		}
 		else
 		if (sType == _T("val"))
@@ -136,7 +136,7 @@ public:
 				SendMessage(WM_SIZE, SIZE_RESTORED, (LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height())))
 		}
 		else
-			return EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState, pParam);
 	}
 };
 

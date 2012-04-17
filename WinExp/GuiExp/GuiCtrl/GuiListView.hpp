@@ -113,7 +113,7 @@ public:
 		}
 		else
 			return EXP_BASE::Execute(key, val);
-		return IGuiCtrlBase::Execute(key, val);
+		return IGuiCtl::Execute(key, val);
 	}
 
 	// »ñµÃ¿Ø¼þ×´Ì¬
@@ -122,7 +122,7 @@ public:
 		if (sType == _T("align_top"))
 			return (void*)m_AlignTop;
 		else
-			return EXP_BASE::GetState(sType);
+			return EXP_BASE::GetState(sType, pParam);
 	}
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
@@ -130,7 +130,7 @@ public:
 		if (sType == _T("align_top"))
 			SET_STATE(BOOL, m_AlignTop, SendMessage(WM_SIZE))
 		else
-			return EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState, pParam);
 	}
 };
 

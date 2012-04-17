@@ -152,13 +152,13 @@ public:
 		{
 			CString type(sType);
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic.GetState(type);
+			return m_FocPic.GetState(type, pParam);
 		}
 		else
 		if (sType == _T("foc"))
 			return (void*)(&m_FocPic);
 		else
-			return EXP_BASE::GetState(sType);
+			return EXP_BASE::GetState(sType, pParam);
 	}
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL)
 	{
@@ -166,10 +166,10 @@ public:
 		if (type.Left(4) == _T("foc_"))
 		{
 			type.TrimLeft(_T("foc_"));
-			return m_FocPic.SetState(type, pState);
+			return m_FocPic.SetState(type, pState, pParam);
 		}
 		else
-			return EXP_BASE::SetState(sType, pState);
+			return EXP_BASE::SetState(sType, pState, pParam);
 	}
 };
 

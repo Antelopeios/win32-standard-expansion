@@ -151,9 +151,9 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_grp_items, IGuiSet)
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiGroup : public IGuiCtrlBase
+class CGuiGroup : public IGuiCtl
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiGroup, IGuiCtrlBase)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiGroup, IGuiCtl)
 
 public:
 	CGuiGroup()
@@ -165,7 +165,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiGroup, IGuiCtrlBase)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiGroup, IGuiCtl)
 
 //////////////////////////////////////////////////////////////////
 

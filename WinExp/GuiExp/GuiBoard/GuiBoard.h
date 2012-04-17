@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-02
-// Version:	1.0.0014.2230
+// Date:	2012-04-17
+// Version:	1.0.0015.1449
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -52,6 +52,7 @@
 //	- 1.0.0012.1200(2012-02-22)	= 将IGuiBoard改名为IGuiWnd
 //	- 1.0.0013.1558(2012-02-27)	+ 添加支持仅移动窗口位置而不改变大小的MoveWindow方法
 //	- 1.0.0014.2230(2012-03-02)	+ 窗口支持通过DoModal方法进行模态调用
+//	- 1.0.0015.1449(2012-04-17)	^ 简化窗口对象的层次结构,移除IGuiBoardBase接口,将其所有功能并入IGuiWnd
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -67,111 +68,7 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-// GUI 窗口对象接口
-EXP_INTERFACE IGuiWnd : public IGuiBase
-{
-	EXP_DECLARE_DYNAMIC_MULT(IGuiWnd, IGuiBase)
-
-public:
-	IGuiWnd(void) {}
-	virtual ~IGuiWnd(void) {}
-
-	static BOOL GetDesktopRect(CRect& rc, const CPoint& pt = CPoint(), BOOL bWork = FALSE)
-	{
-		MONITORINFO info = {0};
-		info.cbSize = sizeof(MONITORINFO);
-		if (::GetMonitorInfo(::MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST), &info))
-		{
-			if (bWork)
-				rc = info.rcWork;
-			else
-				rc = info.rcMonitor;
-			return TRUE;
-		}
-		else
-			return FALSE;
-	}
-
-public:
-	virtual BOOL Create(LPCTSTR sWndName, CRect& rcWnd, 
-						int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
-						wnd_t wndParent = NULL, UINT uStyle = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW) = 0;
-	virtual BOOL Create() = 0;
-	virtual BOOL IsNull() const = 0;
-
-	virtual BOOL IsModalLoop() = 0;
-	virtual int RunModalLoop() = 0;
-	virtual void EndModalLoop(int nResult) = 0;
-	virtual int DoModal() = 0;
-	virtual void EndModal(int nResult) = 0;
-
-	virtual BOOL Attach(wnd_t hWnd) = 0;
-	virtual wnd_t Detach() = 0;
-
-	// 是否绘图
-	virtual void SetCusPaint(BOOL bPaint) = 0;
-	virtual BOOL IsCusPaint() const = 0;
-
-	// 窗口消息
-	virtual LRESULT DefProc(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
-	virtual LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
-	virtual BOOL PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
-
-	// 窗口属性修改
-	virtual DWORD GetStyle() const = 0;
-	virtual DWORD GetExStyle() const = 0;
-	virtual BOOL ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0) = 0;
-	virtual BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE) = 0;
-	virtual LONG SetWindowLong(int nIndex, LONG dwNewLong) = 0;
-	virtual LONG GetWindowLong(int nIndex) const = 0;
-
-	// 窗口刷新
-	virtual void Invalidate() = 0;
-	virtual void InvalidateRect(CRect& rcInv) = 0;
-	virtual void InvalidateRgn(HRGN hRgn) = 0;
-	virtual BOOL ShowWindow(int nCmdShow = SW_SHOW) = 0;
-	virtual BOOL UpdateWindow() = 0;
-
-	// 窗口DC
-	virtual dc_t GetDC() const = 0;
-	virtual BOOL ReleaseDC(dc_t hdc) = 0;
-
-	// 获得窗口大小
-	virtual BOOL GetRealRect(CRect& rc) const { return GetClientRect(rc); }
-
-	// 窗口移动
-	virtual void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE) = 0;
-	virtual void MoveWindow(CRect& lpRect, BOOL bRepaint = TRUE) = 0;
-	virtual void MoveWindow(int x, int y, BOOL bRepaint = TRUE) = 0;
-	virtual void MoveWindow(CPoint& lpPoint, BOOL bRepaint = TRUE) = 0;
-	virtual void CenterWindow(wnd_t hWndCenter = NULL) = 0;
-
-	// 窗口坐标转换
-	virtual void ClientToScreen(CPoint& lpPoint) const = 0;
-	virtual void ClientToScreen(CRect& lpRect) const = 0;
-	virtual void ScreenToClient(CPoint& lpPoint) const = 0;
-	virtual void ScreenToClient(CRect& lpRect) const = 0;
-
-	// 窗口关系控制
-	virtual wnd_t GetParent() const = 0;
-	virtual wnd_t SetParent(wnd_t wndParent = NULL) = 0;
-
-	// 设置焦点
-	virtual wnd_t SetFocus() = 0;
-	static wnd_t GetFocus() { return (wnd_t)::GetFocus(); }
-	virtual BOOL IsFocus() const = 0;
-
-	// 窗口图层化
-	virtual void SetLayered(BOOL bLayered = TRUE, BOOL bColorKey = TRUE, pixel_t crKey = ExRGB(255, 0, 255)) = 0;
-	virtual BOOL IsLayered() const = 0;
-	virtual BOOL IsColorKey() const = 0;
-	virtual pixel_t GetColorKey() const = 0;
-	virtual void LayeredWindow(HDC hDC, HDC hdc) = 0;
-};
-
-//////////////////////////////////////////////////////////////////
-
-// 自定义的内存分配器
+// 自定义的对象分配器
 struct _GuiBoardAlloc
 {
 	EXP_INLINE static void Free(void* pPtr)
@@ -181,11 +78,12 @@ struct _GuiBoardAlloc
 	}
 };
 
-// GUI 窗口对象
-EXP_INTERFACE IGuiBoardBase : public IGuiWnd, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
+// GUI 窗口对象接口
+EXP_INTERFACE IGuiWnd : public IGuiBase, public ITypeObjectT<wnd_t, _GuiBoardAlloc>
 {
-	EXP_DECLARE_DYNAMIC_MULT(IGuiBoardBase, IGuiWnd)
-
+	EXP_DECLARE_DYNAMIC_MULT(IGuiWnd, IGuiBase)
+		
+public:
 	typedef ITypeObjectT<wnd_t, _GuiBoardAlloc> type_base_t;
 
 protected:
@@ -202,9 +100,12 @@ protected:
 	BOOL m_IsModalLoop;
 
 public:
-	IGuiBoardBase(void);
-	IGuiBoardBase(wnd_t hWnd);
-	virtual ~IGuiBoardBase(void);
+	IGuiWnd(void);
+	IGuiWnd(wnd_t hWnd);
+
+public:
+	// 全局工具接口
+	static BOOL GetDesktopRect(CRect& rc, const CPoint& pt = CPoint(), BOOL bWork = FALSE);
 
 protected:
 	static LRESULT CALLBACK BoardProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam);
@@ -214,10 +115,10 @@ public:
 	BOOL Create(LPCTSTR sWndName, CRect& rcWnd, 
 				int nCmdShow = SW_SHOWNORMAL, DWORD dwStyle = WS_POPUP, DWORD dwExStyle = NULL, 
 				wnd_t wndParent = NULL, UINT uStyle = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW);
-	BOOL Create() { return Create(NULL, CRect(), SW_HIDE); }
-
+	BOOL Create();
 	BOOL IsNull() const;
-	
+	wnd_t GethWnd() const;
+
 	BOOL IsModalLoop();
 	int RunModalLoop();
 	void EndModalLoop(int nResult);
@@ -226,17 +127,17 @@ public:
 
 	wnd_t operator=(wnd_t tType);
 
-	BOOL Attach(wnd_t hWnd);
-	wnd_t Detach();
-	wnd_t GethWnd() const;
-
-	// 窗口消息
-	LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
-	BOOL PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+	virtual BOOL Attach(wnd_t hWnd);
+	virtual wnd_t Detach();
 
 	// 是否绘图
 	void SetCusPaint(BOOL bPaint);
 	BOOL IsCusPaint() const;
+
+	// 窗口消息
+	virtual LRESULT DefProc(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) = 0;
+	LRESULT SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+	BOOL PostMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
 
 	// 窗口属性修改
 	DWORD GetStyle() const;
@@ -245,19 +146,6 @@ public:
 	BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0, int nStyleOffset = GWL_EXSTYLE);
 	LONG SetWindowLong(int nIndex, LONG dwNewLong);
 	LONG GetWindowLong(int nIndex) const;
-
-	// 窗口移动
-	void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE);
-	void MoveWindow(CRect& lpRect, BOOL bRepaint = TRUE);
-	void MoveWindow(int x, int y, BOOL bRepaint = TRUE);
-	void MoveWindow(CPoint& lpPoint, BOOL bRepaint = TRUE);
-	void CenterWindow(wnd_t hWndCenter = NULL);
-
-	// 窗口坐标转换
-	void ClientToScreen(CPoint& lpPoint) const;
-	void ClientToScreen(CRect& lpRect) const;
-	void ScreenToClient(CPoint& lpPoint) const;
-	void ScreenToClient(CRect& lpRect) const;
 
 	// 窗口刷新
 	void Invalidate();
@@ -274,14 +162,29 @@ public:
 	// 获得窗口大小
 	BOOL GetWindowRect(CRect& lpRect) const;
 	BOOL GetClientRect(CRect& lpRect) const;
+	BOOL GetRealRect(CRect& rc) const;
+
+	// 窗口移动
+	void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE);
+	void MoveWindow(CRect& lpRect, BOOL bRepaint = TRUE);
+	void MoveWindow(int x, int y, BOOL bRepaint = TRUE);
+	void MoveWindow(CPoint& lpPoint, BOOL bRepaint = TRUE);
+	void CenterWindow(wnd_t hWndCenter = NULL);
+
+	// 窗口坐标转换
+	void ClientToScreen(CPoint& lpPoint) const;
+	void ClientToScreen(CRect& lpRect) const;
+	void ScreenToClient(CPoint& lpPoint) const;
+	void ScreenToClient(CRect& lpRect) const;
 
 	// 窗口关系控制
 	wnd_t GetParent() const;
 	wnd_t SetParent(wnd_t wndParent = NULL);
 
 	// 设置焦点
-	wnd_t SetFocus();
-	BOOL IsFocus() const;
+	virtual wnd_t SetFocus();
+	static wnd_t GetFocus();
+	virtual BOOL IsFocus() const;
 
 	// 窗口图层化
 	void SetLayered(BOOL bLayered = TRUE, BOOL bColorKey = TRUE, pixel_t crKey = ExRGB(255, 0, 255));

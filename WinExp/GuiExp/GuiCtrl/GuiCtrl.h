@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-24
-// Version:	1.0.0025.1515
+// Date:	2012-04-17
+// Version:	1.0.0026.1449
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -69,6 +69,7 @@
 //	- 1.0.0024.2356(2012-03-16)	^ 移除IGuiCtl::set_ins_t,在IGuiCtl::GetState()与IGuiCtl::SetState()接口上添加额外的param,可支持更为通用的属性设定
 //								- 移除IGuiCtl::GetClipRect(),关于剪切区的控制全部交给绘图逻辑层负责
 //	- 1.0.0025.1515(2012-03-24)	+ 添加控件设置对象管理的相关接口,支持通过控件设置对象对控件的属性做动态管理
+//	- 1.0.0026.1449(2012-04-17)	^ 简化控件对象的层次结构,移除IGuiCtrlBase接口,将其所有功能并入IGuiCtl
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -95,340 +96,6 @@ public:
 	typedef CTreeT<IGuiCtl*> itree_t;
 
 protected:
-	static IGuiCtl* m_Focus;
-	IGuiEffect* m_Effect;
-	BOOL m_bTruEff;
-	CSize m_szScroll;
-	IGuiCtl* (m_Scroll[2]);
-
-public:
-	IGuiCtl()
-		: m_Effect(NULL)
-		, m_bTruEff(TRUE)
-	{
-		m_Scroll[1] = m_Scroll[0] = NULL;
-	}
-	BOOL IsValid() const { return EXP_BASE::IsValid(); }
-
-protected:
-	void Init(IGuiComp* pComp)
-	{
-		EXP_BASE::Init(pComp);
-		if (IsVisible())
-		{
-			SendMessage(WM_SHOWWINDOW, 1);
-			SetFocus();
-		}
-		else
-			SendMessage(WM_SHOWWINDOW, 0);
-	}
-	void Fina()
-	{
-		if (m_bTruEff && m_Effect)
-			del(m_Effect);
-		m_Focus = NULL;
-		EXP_BASE::Fina();
-	}
-
-public:
-	void SetTrust(BOOL bTruCldr = TRUE) { IGuiBase::SetTrust(bTruCldr); }
-	BOOL IsTrust() const { return IGuiBase::IsTrust(); }
-
-	virtual void SendSet(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		for(set_list_t::iterator_t ite = GetSet().Head(); ite != GetSet().Tail(); ++ite)
-		{
-			IGuiSet* set = (IGuiSet*)(*ite);
-			ExAssert(set);
-			set->Msg(nMessage, wParam, lParam);
-		}
-	}
-	virtual void SendMsg(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		IGuiSender::Send(pGui, nMessage, wParam, lParam);
-	}
-	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0)
-	{
-		if(!GetParent()) return;
-		SendSet(nMessage, wParam, lParam);
-		SendMsg(pGui, nMessage, wParam, lParam);
-	}
-	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0) { Send(this, nMessage, wParam, lParam); }
-
-	// 控件设置对象管理
-	BOOL AddSet(void* p)
-	{
-		IGuiSet* set = (IGuiSet*)(p);
-		if (!set) return FALSE;
-		set->Ctl() = this;
-		return IGuiSetMgr::AddSet(p);
-	}
-	BOOL AddSet(LPCTSTR key)
-	{
-		if (!IGuiSetMgr::AddSet(key)) return FALSE;
-		IGuiSet* set = (IGuiSet*)(GetSet().LastItem());
-		if (!set)
-		{
-			DelSet(key);
-			return FALSE;
-		}
-		set->Ctl() = this;
-		return TRUE;
-	}
-	BOOL InsSet(void* p)
-	{
-		IGuiSet* set = (IGuiSet*)(p);
-		if (!set) return FALSE;
-		set->Ctl() = this;
-		return IGuiSetMgr::InsSet(p);
-	}
-	BOOL InsSet(LPCTSTR key)
-	{
-		if (!IGuiSetMgr::InsSet(key)) return FALSE;
-		IGuiSet* set = (IGuiSet*)(GetSet().HeadItem());
-		if (!set)
-		{
-			DelSet(key);
-			return FALSE;
-		}
-		set->Ctl() = this;
-		return TRUE;
-	}
-
-	// 获得控件状态
-	virtual void* GetState(const CString& sType, void* pParam = NULL) = 0;
-	virtual BOOL SetState(const CString& sType, void* pState, void* pParam = NULL) = 0;
-	virtual void UpdateState(BOOL bRefreshSelf = TRUE) = 0;
-	virtual BOOL IsUpdated() = 0;
-
-	// 设置效果对象
-	void SetEffectTrust(BOOL bTru = TRUE)
-	{
-		m_bTruEff = bTru;
-	}
-	void SetEffect(void* p)
-	{
-		if (m_bTruEff && m_Effect)
-			del(m_Effect);
-		m_Effect = ExDynCast<IGuiEffect>(p);
-		Refresh(FALSE);
-	}
-	IGuiEffect* GetEffect()
-	{
-		return m_Effect;
-	}
-
-	// 获得绘图板
-	IGuiBase* GetParent() const { return ExDynCast<IGuiBase>(m_Pare); }
-	IGuiWnd* GetWnd() const
-	{
-		if (m_Pare)
-		{
-			IGuiCtl* ctl = ExDynCast<IGuiCtl>(m_Pare);
-			if (ctl) return ctl->GetWnd();
-			IGuiWnd* wnd = ExDynCast<IGuiWnd>(m_Pare);
-			if (wnd) return wnd;
-		}
-		return NULL;
-	}
-	wnd_t GethWnd() const
-	{
-		IGuiWnd* wnd = GetWnd();
-		return wnd ? wnd->GethWnd() : NULL;
-	}
-
-	// 区域控制
-	virtual BOOL GetRect(CRect& rc) const = 0;
-	virtual BOOL SetRect(const CRect& rc) = 0;
-
-	virtual BOOL P2C(CRect& rc) const = 0;
-	virtual BOOL C2P(CRect& rc) const = 0;
-	virtual BOOL B2C(CRect& rc) const = 0;
-	virtual BOOL C2B(CRect& rc) const = 0;
-	virtual BOOL SetWindowRect(const CRect& rc) = 0;
-	virtual BOOL SetRealRect(const CRect& rc) = 0;
-	virtual BOOL GetAllRect(CSize& sz) const = 0;
-	virtual BOOL GetFraRect(CSize& sz) const = 0;
-
-	BOOL GetScrollSize(CSize& sz) const
-	{
-		sz = m_szScroll;
-		return TRUE;
-	}
-	BOOL SetScrollSize(const CSize& sz, BOOL bWheel = FALSE)
-	{
-		if ((m_Scroll[0] || m_Scroll[1]) && bWheel)
-		{
-			if (m_Scroll[0])
-				m_Scroll[0]->SendMessage(WM_MOUSEWHEEL, 
-					ExMakeLong(-sz.cx, -sz.cy), 
-					ExMakeLong(-1, -1));
-			if (m_Scroll[1])
-				m_Scroll[1]->SendMessage(WM_MOUSEWHEEL, 
-					ExMakeLong(-sz.cx, -sz.cy), 
-					ExMakeLong(-1, -1));
-		}
-		else
-		{
-			if (m_szScroll == sz) return TRUE;
-			m_szScroll = sz;
-			CRect rc;
-			GetRect(rc);
-			SendMessage(WM_SIZE, SIZE_RESTORED, 
-				(LPARAM)ExMakeLong(rc.Width(), rc.Height()));
-			Refresh(FALSE);
-		}
-		return TRUE;
-	}
-	IGuiCtl* GetScroll(BOOL bLine = TRUE) const
-	{
-		return m_Scroll[bLine ? 0 : 1];
-	}
-	void SetScroll(void* p, BOOL bLine = TRUE)
-	{
-		int inx = bLine ? 0 : 1;
-		IGuiCtl* old_scr = m_Scroll[inx];
-		m_Scroll[inx] = ExDynCast<IGuiCtl>(p);
-		if (m_Scroll[inx] && old_scr != m_Scroll[inx])
-		{
-			m_Scroll[inx]->SetState(_T("main"), this);
-			SetScrollSize(CSize(), TRUE);
-		}
-	}
-	BOOL IsNeedScroll(BOOL bLine = TRUE)
-	{
-		CSize all_line, fra_line;
-		GetAllRect(all_line);
-		GetFraRect(fra_line);
-		LONG all = 0, fra = 0;
-		if (bLine)
-		{
-			all = all_line.cy;
-			fra = fra_line.cy;
-		}
-		else
-		{
-			all = all_line.cx;
-			fra = fra_line.cx;
-		}
-		return (GetScroll(bLine) ? (all > fra) : FALSE);
-	}
-
-	// 判断是否可视(如控件在父控件窗口外)
-	BOOL IsDisplayed() const
-	{
-		CRect rc_slf;
-		if (!GetWindowRect(rc_slf)) return FALSE;
-		CRect rc_prt;
-		if (!GetParent()->GetClientRect(rc_prt)) return FALSE;
-		return (!rc_slf.Inter(rc_prt).IsEmpty());
-	}
-	BOOL GetDisplaySize(CSize& sz) const
-	{
-		sz.CSizeT::CSizeT();
-		CRect rc_slf;
-		if (!GetWindowRect(rc_slf)) return FALSE;
-		CRect rc_prt;
-		if (!GetParent()->GetClientRect(rc_prt)) return FALSE;
-		CRect rc_int(rc_slf);
-		if (rc_int.Inter(rc_prt) != rc_slf)
-		{
-			if (rc_int.Left() == rc_slf.Left() || 
-				rc_int.Right() == rc_slf.Right())
-			{
-				if (rc_int.Left() > rc_slf.Left())
-					sz.cx = rc_slf.Left() - rc_int.Left();
-				if (rc_int.Right() < rc_slf.Right())
-					sz.cx = rc_slf.Right() - rc_int.Right();
-			}
-			if (rc_int.Top() == rc_slf.Top() || 
-				rc_int.Bottom() == rc_slf.Bottom())
-			{
-				if (rc_int.Top() > rc_slf.Top())
-					sz.cy = rc_slf.Top() - rc_int.Top();
-				if (rc_int.Bottom() < rc_slf.Bottom())
-					sz.cy = rc_slf.Bottom() - rc_int.Bottom();
-			}
-		}
-		return TRUE;
-	}
-
-	// 刷新绘图
-	virtual void Refresh(BOOL bSelf = TRUE) = 0;
-
-	// 设置可用性
-	virtual BOOL SetEnable(BOOL bEnable = TRUE) = 0;
-	virtual BOOL IsEnabled() const = 0;
-
-	// 设置可见性
-	virtual BOOL SetVisible(BOOL bVisible = TRUE) = 0;
-	virtual BOOL IsVisible() const = 0;
-
-	// 判断有效性
-	static BOOL IsEffect(const IGuiCtl* pCtrl)
-	{ return (pCtrl && pCtrl->IsEnabled() && pCtrl->IsVisible()); }
-
-	static IGuiCtl* SetFocus(IGuiCtl* pFoc)
-	{
-		if (pFoc && !IsEffect(pFoc)) return NULL;
-		// 设置控件焦点
-		IGuiCtl* old_fc = m_Focus;
-		m_Focus = pFoc;
-		if (old_fc == m_Focus) return NULL;
-		// 设置窗口焦点
-		if (m_Focus)
-		{
-			IGuiWnd* wnd = m_Focus->GetWnd();
-			if (wnd) wnd->SetFocus();
-		}
-		// 发送焦点改变消息
-		if (old_fc)
-		{
-			old_fc->SendMessage(WM_KILLFOCUS, 0, (LPARAM)(m_Focus));
-			old_fc->UpdateState();
-		}
-		if (m_Focus)
-		{
-			m_Focus->SendMessage(WM_SETFOCUS, 0, (LPARAM)old_fc);
-			m_Focus->UpdateState();
-		}
-		return old_fc;
-	}
-	virtual IGuiCtl* SetFocus()
-	{
-		return SetFocus(this);
-	}
-	static IGuiCtl* GetFocus()
-	{
-		return m_Focus;
-	}
-	virtual BOOL IsFocus() const
-	{
-		IGuiWnd* wnd = GetWnd();
-		if (wnd && !wnd->IsFocus())
-			return FALSE;
-		if (!m_Focus) return FALSE;
-		IGuiCtl* foc = m_Focus;
-		if (foc == this)
-			return IsEffect(this);
-		for(list_t::iterator_t ite = GetComp().Head(); ite != GetComp().Tail(); ++ite)
-		{
-			IGuiCtl* ctl = ExDynCast<IGuiCtl>(*ite);
-			if (!ctl) continue;
-			if (ctl->IsFocus()) return TRUE;
-		}
-		return FALSE;
-	}
-};
-
-//////////////////////////////////////////////////////////////////
-
-// GUI 控件对象接口
-EXP_INTERFACE IGuiCtrlBase : public IGuiCtl
-{
-	EXP_DECLARE_DYNAMIC_MULT(IGuiCtrlBase, IGuiCtl)
-
-protected:
 	BOOL m_bEnable;		// 是否可用
 	BOOL m_bVisible;	// 是否可见
 
@@ -439,16 +106,57 @@ protected:
 	// 窗口区域
 	CSize m_AllRect, m_FraRect;
 
-public:
-	IGuiCtrlBase();
+	static IGuiCtl* m_Focus;
+	IGuiEffect* m_Effect;
+	BOOL m_bTruEff;
+	CSize m_szScroll;
+	IGuiCtl* (m_Scroll[2]);
+
+	BOOL m_bThrough;
 
 public:
-	// 更新状态
+	IGuiCtl();
+	BOOL IsValid() const;
+
+protected:
+	void Init(IGuiComp* pComp);
+	void Fina();
+
+public:
+	void SetTrust(BOOL bTruCldr = TRUE);
+	BOOL IsTrust() const;
+
+	void SetThrough(BOOL bThrough = TRUE);
+	BOOL IsThrough() const;
+
+	virtual void SendSet(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+	virtual void SendMsg(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+	void Send(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+	void SendMessage(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
+
+	// 控件设置对象管理
+	BOOL AddSet(void* p);
+	BOOL AddSet(LPCTSTR key);
+	BOOL InsSet(void* p);
+	BOOL InsSet(LPCTSTR key);
+
+	// 获得控件状态
 	BOOL Execute(const CString& key, const CString& val);
+	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent);
 	void* GetState(const CString& sType, void* pParam = NULL);
 	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL);
 	void UpdateState(BOOL bRefreshSelf = TRUE);
 	BOOL IsUpdated();
+
+	// 设置效果对象
+	void SetEffectTrust(BOOL bTru = TRUE);
+	void SetEffect(void* p);
+	IGuiEffect* GetEffect();
+
+	// 获得绘图板
+	IGuiBase* GetParent() const;
+	IGuiWnd* GetWnd() const;
+	wnd_t GethWnd() const;
 
 	// 区域控制
 	BOOL GetRect(CRect& rc) const;
@@ -458,16 +166,28 @@ public:
 	BOOL C2P(CRect& rc) const;
 	BOOL B2C(CRect& rc) const;
 	BOOL C2B(CRect& rc) const;
-	BOOL SetWindowRect(const CRect& rc);
+
 	BOOL GetWindowRect(CRect& rc) const;
-	BOOL SetRealRect(const CRect& rc);
-	BOOL GetRealRect(CRect& rc) const;
+	BOOL SetWindowRect(const CRect& rc);
 	BOOL GetClientRect(CRect& rc) const;
 
-	virtual BOOL SetAllRect(const CSize& sz);
+	BOOL GetRealRect(CRect& rc) const;
+	BOOL SetRealRect(const CRect& rc);
+
+	BOOL SetAllRect(const CSize& sz);
 	BOOL GetAllRect(CSize& sz) const;
-	virtual BOOL SetFraRect(const CSize& sz);
+	BOOL SetFraRect(const CSize& sz);
 	BOOL GetFraRect(CSize& sz) const;
+
+	BOOL GetScrollSize(CSize& sz) const;
+	BOOL SetScrollSize(const CSize& sz, BOOL bWheel = FALSE);
+	IGuiCtl* GetScroll(BOOL bLine = TRUE) const;
+	void SetScroll(void* p, BOOL bLine = TRUE);
+	BOOL IsNeedScroll(BOOL bLine = TRUE);
+
+	// 判断是否可视(如控件在父控件窗口外)
+	BOOL IsDisplayed() const;
+	BOOL GetDisplaySize(CSize& sz) const;
 
 	// 刷新绘图
 	void Refresh(BOOL bSelf = TRUE);
@@ -479,6 +199,15 @@ public:
 	// 设置可见性
 	BOOL SetVisible(BOOL bVisible = TRUE);
 	BOOL IsVisible() const;
+
+	// 判断有效性
+	static BOOL IsEffect(const IGuiCtl* pCtrl);
+
+	// 焦点控制
+	static IGuiCtl* SetFocus(IGuiCtl* pFoc);
+	virtual IGuiCtl* SetFocus();
+	static IGuiCtl* GetFocus();
+	virtual BOOL IsFocus() const;
 };
 
 //////////////////////////////////////////////////////////////////

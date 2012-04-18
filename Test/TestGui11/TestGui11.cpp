@@ -77,9 +77,9 @@ protected:
 			btn_bg_bottom_right"));
 		btn->Execute(_T("font"), 
 			_T("font,font,font,font,font,font,font,font"));
-		btn->SetState(_T("text"), &CString(_T("这是第一排文字")));
-		btn->SetState(_T("text2"), &CString(_T("这是第二排文字")));
-		btn->SetState(_T("text3"), &CString(_T("这是第三排文字")));
+		btn->SetState(_T("text"), &CString(_T("这是第一排文字 这是第一排文字 这是第一排文字")));
+		btn->SetState(_T("text2"), &CString(_T("这是第二排文字 这是第二排文字 这是第二排文字")));
+		btn->SetState(_T("text3"), &CString(_T("这是第三排文字 这是第三排文字 这是第三排文字")));
 		btn->AddEvent(dbnew(CBtnEvent));
 
 		// 主窗口

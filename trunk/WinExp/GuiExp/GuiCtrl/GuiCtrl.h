@@ -143,10 +143,10 @@ public:
 	// 获得控件状态
 	BOOL Execute(const CString& key, const CString& val);
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent);
-	void* GetState(const CString& sType, void* pParam = NULL);
-	BOOL SetState(const CString& sType, void* pState, void* pParam = NULL);
-	void UpdateState(BOOL bRefreshSelf = TRUE);
-	BOOL IsUpdated();
+	virtual void* GetState(const CString& sType, void* pParam = NULL);
+	virtual BOOL SetState(const CString& sType, void* pState, void* pParam = NULL);
+	virtual void UpdateState(BOOL bRefreshSelf = TRUE);
+	virtual BOOL IsUpdated();
 
 	// 设置效果对象
 	void SetEffectTrust(BOOL bTru = TRUE);

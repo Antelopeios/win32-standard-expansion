@@ -264,7 +264,6 @@ public:
 	void Clear()
 	{
 		m_Cache.Clear();
-		m_LogTM = 0;
 	}
 };
 

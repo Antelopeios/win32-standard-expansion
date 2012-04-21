@@ -69,8 +69,11 @@ protected:
 
 	CRect m_rcClip;
 
+	BOOL m_bThrough;
+
 public:
 	IGuiBase()
+		: m_bThrough(FALSE)
 	{
 		// 添加事件对象
 		InsEvent(_T("CGuiWndEvent"));
@@ -83,6 +86,9 @@ public:
 
 	void SetTrust(BOOL bTruCldr = TRUE) { IGuiComp::SetTrust(bTruCldr); }
 	BOOL IsTrust() const { return IGuiComp::IsTrust(); }
+
+	void SetThrough(BOOL bThrough) { m_bThrough = bThrough; }
+	BOOL IsThrough() const { return m_bThrough; }
 
 	virtual BOOL Execute(const CString& key, const CString& val)
 	{
@@ -160,7 +166,7 @@ public:
 			for(list_t::iterator_t ite = GetComp().Last(); ite != GetComp().Head(); --ite)
 			{
 				IGuiBase* base = ExDynCast<IGuiBase>(*ite);
-				if (!base) continue;
+				if (!base || base->IsThrough()) continue;
 				base = base->GetPtCtrl(pt);
 				if (base) return base;
 			}

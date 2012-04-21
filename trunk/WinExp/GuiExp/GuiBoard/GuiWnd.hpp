@@ -60,11 +60,15 @@ class CGuiWnd : public IGuiThunk
 public:
 	void* Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 	{
+		int n_show = SW_HIDE;
+		CString t = xml.GetAttr(_T("visible"), ite); t.Lower();
+		if (t == _T("true")) n_show = SW_SHOW;
+
 		Create(
 			xml.GetAttr(_T("text"), ite), 
-			ExStringToRect(xml.GetAttr(_T("rect"), ite)), SW_HIDE);
+			ExStringToRect(xml.GetAttr(_T("rect"), ite)), n_show);
 
-		CString t = xml.GetAttr(_T("style"), ite); t.Upper();
+		t = xml.GetAttr(_T("style"), ite); t.Upper();
 		CArrayT<CString> sa;
 		ExStringToArray(t, sa);
 		for(int i = 0; i < (int)sa.GetCount(); ++i)
@@ -174,13 +178,6 @@ public:
 		else
 		if (t == _T("true"))
 			SetLayered(TRUE, clr_key, key);
-
-		t = xml.GetAttr(_T("visible"), ite); t.Lower();
-		if (t == _T("false"))
-			ShowWindow(SW_HIDE);
-		else
-		if (t == _T("true"))
-			ShowWindow(SW_SHOW);
 
 		return this;
 	}

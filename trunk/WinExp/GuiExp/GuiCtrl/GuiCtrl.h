@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-04-17
-// Version:	1.0.0026.1449
+// Date:	2012-04-21
+// Version:	1.0.0027.2235
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -70,6 +70,7 @@
 //								- 移除IGuiCtl::GetClipRect(),关于剪切区的控制全部交给绘图逻辑层负责
 //	- 1.0.0025.1515(2012-03-24)	+ 添加控件设置对象管理的相关接口,支持通过控件设置对象对控件的属性做动态管理
 //	- 1.0.0026.1449(2012-04-17)	^ 简化控件对象的层次结构,移除IGuiCtrlBase接口,将其所有功能并入IGuiCtl
+//	- 1.0.0027.2235(2012-04-21)	# 修正当窗口不可见时,控件的焦点设置仍然有效,导致界面响应的异常问题
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -112,8 +113,6 @@ protected:
 	CSize m_szScroll;
 	IGuiCtl* (m_Scroll[2]);
 
-	BOOL m_bThrough;
-
 public:
 	IGuiCtl();
 	BOOL IsValid() const;
@@ -125,9 +124,6 @@ protected:
 public:
 	void SetTrust(BOOL bTruCldr = TRUE);
 	BOOL IsTrust() const;
-
-	void SetThrough(BOOL bThrough = TRUE);
-	BOOL IsThrough() const;
 
 	virtual void SendSet(UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);
 	virtual void SendMsg(void* pGui, UINT nMessage, WPARAM wParam = 0, LPARAM lParam = 0);

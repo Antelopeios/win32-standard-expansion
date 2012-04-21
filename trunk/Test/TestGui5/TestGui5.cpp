@@ -14,15 +14,20 @@ protected:
 	{
 		DWORD ret = IApp::OnInit();
 
-		CIOFile file(_T("TestGui5\\test.xml"));
+		CIOFile file(_T("TestGui5\\user.xml"));
 		if (file.Error() || file.Size() == 0)
 		{
 			::PostQuitMessage(0);
 			return 0;
 		}
 		CGuiSkin::Parse(&file);
+		file.Open(_T("TestGui5\\test.xml"));
+		CGuiSkin::Parse(&file);
 
-		ExGet<IGuiWnd>(_T("wnd"))->CenterWindow();
+		if (ExGet<IGuiWnd>(_T("wnd")))
+			ExGet<IGuiWnd>(_T("wnd"))->CenterWindow();
+		if (ExGet<IGuiWnd>(_T("user")))
+			ExGet<IGuiWnd>(_T("user"))->CenterWindow();
 
 	/*	unsigned int tStart = 0, tEnd = 0;
 

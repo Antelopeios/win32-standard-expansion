@@ -458,6 +458,12 @@ public:
 					else
 					if (t == _T("true"))
 						ctl->SetVisible(TRUE);
+					t = xml.GetAttr(_T("through"), ite); t.Lower();
+					if (t == _T("false"))
+						ctl->SetThrough(FALSE);
+					else
+					if (t == _T("true"))
+						ctl->SetThrough(TRUE);
 					IGuiBase* pare = ExDynCast<IGuiBase>(parent);
 					if (pare)
 						pare->AddComp(ctl);

@@ -251,24 +251,6 @@ protected:
 	LRESULT CtlSend(IGuiCtl* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui || !pGui->IsVisible()) return lrDef;
-		// 当控件可透过时过滤消息
-		if (pGui->IsThrough())
-		{
-			if (nMessage >= WM_MOUSEFIRST && 
-				nMessage <= WM_MOUSELAST || 
-				nMessage >= WM_NCMOUSEMOVE && 
-				nMessage <= WM_NCMBUTTONDBLCLK || 
-				nMessage >= WM_KEYFIRST && 
-				nMessage <= WM_KEYLAST || 
-				nMessage == WM_SETFOCUS || 
-				nMessage == WM_KILLFOCUS || 
-				nMessage == WM_NCHITTEST || 
-				nMessage == WM_COMMAND || 
-				nMessage == WM_NOTIFY)
-			{
-				return lrDef;
-			}
-		}
 		// 向控件转发消息
 		if (nMessage == WM_SIZE)
 		{

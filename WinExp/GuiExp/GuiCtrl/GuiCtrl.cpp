@@ -58,7 +58,6 @@ IGuiCtl::IGuiCtl()
 	, m_bEnable(TRUE)
 	, m_bVisible(TRUE)
 	, m_Updated(TRUE)
-	, m_bThrough(FALSE)
 {
 	m_Scroll[1] = m_Scroll[0] = NULL;
 }
@@ -96,15 +95,6 @@ void IGuiCtl::SetTrust(BOOL bTruCldr)
 BOOL IGuiCtl::IsTrust() const
 {
 	return IGuiBase::IsTrust();
-}
-
-void IGuiCtl::SetThrough(BOOL bThrough)
-{
-	m_bThrough = bThrough;
-}
-BOOL IGuiCtl::IsThrough() const
-{
-	return m_bThrough;
 }
 
 void IGuiCtl::SendSet(UINT nMessage, WPARAM wParam, LPARAM lParam)
@@ -535,7 +525,9 @@ BOOL IGuiCtl::SetVisible(BOOL bVisible/* = TRUE*/)
 }
 BOOL IGuiCtl::IsVisible() const
 {
-	return m_bVisible;
+	IGuiWnd* wnd = GetWnd();
+	if(!wnd) return FALSE;
+	return m_bVisible && wnd->IsVisible();
 }
 
 // 判断有效性
@@ -548,6 +540,7 @@ BOOL IGuiCtl::IsEffect(const IGuiCtl* pCtrl)
 IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
 {
 	if (pFoc && !IsEffect(pFoc)) return NULL;
+	if (pFoc && !pFoc->IsVisible()) return NULL;
 	// 设置控件焦点
 	IGuiCtl* old_fc = m_Focus;
 	m_Focus = pFoc;

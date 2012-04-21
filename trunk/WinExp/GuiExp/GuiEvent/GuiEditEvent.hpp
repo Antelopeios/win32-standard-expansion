@@ -528,6 +528,14 @@ public:
 		CString* edit = (CString*)m_Ctrl->GetState(_T("text"));
 		CText* empt = (CText*)m_Ctrl->GetState(_T("empty_font"));
 		CString* empt_str = (CString*)m_Ctrl->GetState(_T("empty_text"));
+		BOOL is_pass = (BOOL)m_Ctrl->GetState(_T("password"));
+		CString pass;
+		if (is_pass)
+		{
+			for(DWORD i = 0; i < edit->GetLength(); ++i)
+				pass += _T('*');
+			*edit = pass;
+		}
 
 		pixel_t txt_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("txt_sel_color")))[no_foc];
 		pixel_t bkg_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("bkg_sel_color")))[no_foc];

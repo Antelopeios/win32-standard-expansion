@@ -146,6 +146,19 @@ EXP_IMPLEMENT_DYNCREATE_CLS(_edt_bkg_sel_color, _edt_txt_sel_color)
 
 //////////////////////////////////////////////////////////////////
 
+// 是否是密码框
+class _edt_password : public ICtrlSetT<BOOL>
+{
+	EXP_DECLARE_DYNCREATE_CLS(_edt_password, IGuiSet)
+
+public:
+	CString GetKey() const { return _T("password"); }
+};
+
+EXP_IMPLEMENT_DYNCREATE_CLS(_edt_password, IGuiSet)
+
+//////////////////////////////////////////////////////////////////
+
 class CGuiEdit : public CGuiPicture
 {
 	EXP_DECLARE_DYNCREATE_MULT(CGuiEdit, CGuiPicture)
@@ -179,6 +192,7 @@ public:
 		AddSet(_T("_edt_empty_text"));
 		AddSet(_T("_edt_txt_sel_color"));
 		AddSet(_T("_edt_bkg_sel_color"));
+		AddSet(_T("_edt_password"));
 		// 添加事件对象
 		AddEvent(_T("CGuiEditEvent"));
 		// 设置默认属性

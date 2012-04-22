@@ -533,7 +533,7 @@ public:
 		if (is_pass)
 		{
 			for(DWORD i = 0; i < edit->GetLength(); ++i)
-				pass += _T('*');
+				pass += _T('¡ñ');
 			*edit = pass;
 		}
 

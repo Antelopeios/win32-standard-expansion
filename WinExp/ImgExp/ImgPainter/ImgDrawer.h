@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-28
-// Version:	1.0.0006.1142
+// Date:	2012-04-22
+// Version:	1.0.0007.1042
 //
 // History:
 //	- 1.0.0000.1627(2011-06-20)	@ 重新构建ImgDrawer,作为ImgPainter的子模块,用于绘制基本图形
@@ -44,6 +44,7 @@
 //	- 1.0.0004.1646(2012-01-04)	+ CImgDrawer添加Cover()与Draw()系列接口,用于方便绘图调用
 //	- 1.0.0005.2325(2012-03-16)	+ CImgDrawer支持通过CGraph进行带独立剪切区与坐标的图像绘制
 //	- 1.0.0006.1142(2012-03-28)	+ CImgDrawer::Line()支持通过CGraph进行带独立坐标的图像绘制
+//	- 1.0.0007.1042(2012-04-22)	# 修正CImgDrawer::Fill()可能超出CGraph的限定范围进行颜色填充的bug
 //////////////////////////////////////////////////////////////////
 
 #ifndef __ImgDrawer_h__
@@ -138,6 +139,14 @@ public:
 		if (rc_des.IsNull())
 			rc_des = imgDes.GetRect();
 		imgDes.Transform(rc_des);
+		if (rc_des.Left() < imgDes.GetRect().Left())
+			rc_des.Left(imgDes.GetRect().Left());
+		if (rc_des.Top() < imgDes.GetRect().Top())
+			rc_des.Top(imgDes.GetRect().Top());
+		if (rc_des.Right() > imgDes.GetRect().Right())
+			rc_des.Right(imgDes.GetRect().Right());
+		if (rc_des.Bottom() > imgDes.GetRect().Bottom())
+			rc_des.Bottom(imgDes.GetRect().Bottom());
 		return CImgFilter::Filter(imgDes, rc_des, &CFilterFill(pixSrc));
 	}
 	EXP_INLINE static BOOL Fill(const CGraph& imgDes, pixel_t pixSrc)

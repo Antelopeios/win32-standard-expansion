@@ -149,21 +149,21 @@ int IGuiWnd::RunModalLoop()
 
 	m_IsModalLoop = TRUE;
 
-	MSG* p_msg = IApp::GetMSG();
+	MSG msg = {0};
 	while(m_IsModalLoop)
 	{
-		for(;!::PeekMessage(p_msg, NULL, NULL, NULL, PM_NOREMOVE););
+		for(;!::PeekMessage(&msg, NULL, NULL, NULL, PM_NOREMOVE););
 
 		do
 		{
-			if(!::GetMessage(p_msg, NULL, NULL, NULL))
+			if(!::GetMessage(&msg, NULL, NULL, NULL))
 			{
 				::PostQuitMessage(0);
 				return -1;
 			}
-			::TranslateMessage(p_msg);
-			::DispatchMessage(p_msg);
-		} while(m_IsModalLoop && ::PeekMessage(p_msg, NULL, NULL, NULL, PM_NOREMOVE));
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		} while(m_IsModalLoop && ::PeekMessage(&msg, NULL, NULL, NULL, PM_NOREMOVE));
 
 		Sleep(5);
 	}
@@ -200,7 +200,7 @@ int IGuiWnd::DoModal()
 	if (pare != NULL && ::GetActiveWindow() == Get())
 		::SetActiveWindow(pare);
 
-	Delete();
+	ShowWindow(SW_HIDE);
 	return m_ModalResult;
 }
 void IGuiWnd::EndModal(int nResult)

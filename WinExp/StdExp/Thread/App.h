@@ -70,15 +70,12 @@ protected:
 	LPVOID m_lpParam;
 	DWORD m_nIDThread;
 
-	MSG* m_pMsg;
-
 public:
 	IThreadT()
 		: ISyncObject()
 		, m_bUIThread(FALSE)
 		, m_lpParam(NULL)
 		, m_nIDThread(0)
-		, m_pMsg(NULL)
 	{}
 	IThreadT(_IN_ BOOL bUIThread, 
 			 _IN_ LPVOID lpParam = NULL, 
@@ -101,7 +98,6 @@ protected:
 			_this->OnThread(_this->GetParam());
 			// 开启UI消息循环
 			MSG msg = {0}; BOOL ret = FALSE;
-			_this->m_pMsg = &msg;
 			while ((ret = ::GetMessage(&msg, NULL, 0, 0)) != 0)
 			{
 				if (ret == -1)
@@ -113,7 +109,6 @@ protected:
 						::DispatchMessage(&msg);
 				}
 			}
-			_this->m_pMsg = NULL;
 			return _this->OnExit((DWORD)msg.wParam);
 		}
 		else
@@ -140,9 +135,6 @@ public:
 		if (m_hSync == INVALID_HANDLE_VALUE) return FALSE;
 		return TRUE;
 	}
-
-	MSG* GetMSG() const
-	{ return m_pMsg; }
 
 	BOOL IsUIThread() const
 	{ return m_bUIThread; }
@@ -185,7 +177,6 @@ private:
 
 public:
 	static int Run() { return (int)ProxyProc(GetApp()); }
-	static MSG* GetMSG() { return GetApp()->IThread::GetMSG(); }
 
 	BOOL m_IsSingle;
 	TCHAR m_Full[MAX_PATH];

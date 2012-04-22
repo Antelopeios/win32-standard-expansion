@@ -188,35 +188,29 @@ protected:
 					IGuiComp* comp = ctl->GetParent();
 					IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctl));
 					if (ite == comp->GetComp().Tail()) goto EndWndSend;
+					IGuiCtl* next = NULL;
 					if (m_ShiftDown)
 					{
-						if (ite == comp->GetComp().Head())
-							ite = comp->GetComp().Last();
-						else
-							--ite;
-						if (!IGuiCtl::IsEffect(ExDynCast<IGuiCtl>(*ite)))
+						do 
 						{
 							if (ite == comp->GetComp().Head())
 								ite = comp->GetComp().Last();
 							else
 								--ite;
-						}
+							next = ExDynCast<IGuiCtl>(*ite);
+						} while (next != ctl && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
 					}
 					else
 					{
-						if (ite == comp->GetComp().Last())
-							ite = comp->GetComp().Head();
-						else
-							++ite;
-						if (!IGuiCtl::IsEffect(ExDynCast<IGuiCtl>(*ite)))
+						do 
 						{
 							if (ite == comp->GetComp().Last())
 								ite = comp->GetComp().Head();
 							else
 								++ite;
-						}
+							next = ExDynCast<IGuiCtl>(*ite);
+						} while (next != ctl && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
 					}
-					IGuiCtl* next = ExDynCast<IGuiCtl>(*ite);
 					if (!next) goto EndWndSend;
 					next->SetFocus();
 				}
@@ -232,6 +226,8 @@ protected:
 		else
 		if (nMessage == WM_SETFOCUS)
 		{
+			IGuiCtl* foc = IGuiCtl::GetFocus();
+			if (foc && foc->GetWnd() == pGui) m_pOldFoc = foc;
 			IGuiCtl::SetFocus(m_pOldFoc);
 			pGui->Invalidate();
 		}

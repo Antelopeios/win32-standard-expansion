@@ -534,7 +534,7 @@ public:
 		{
 			for(DWORD i = 0; i < edit->GetLength(); ++i)
 				pass += _T('¡ñ');
-			*edit = pass;
+			edit = &pass;
 		}
 
 		pixel_t txt_sel_color = ((pixel_t*)m_Ctrl->GetState(_T("txt_sel_color")))[no_foc];

@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,1203,1623
- PRODUCTVERSION 1,0,0,11
+ FILEVERSION 1,0,12,1900
+ PRODUCTVERSION 1,0,0,12
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -68,12 +68,12 @@ BEGIN
         BLOCK "080404b0"
         BEGIN
             VALUE "FileDescription", "GuiExp - 界面拓展库(GUI Expansion)"
-            VALUE "FileVersion", "1.0.1203.1623"
+            VALUE "FileVersion", "1.0.12.1900"
             VALUE "InternalName", "GuiExp"
             VALUE "LegalCopyright", "Copyright (C) 2011 木头云"
             VALUE "OriginalFilename", "GuiExp.dll"
             VALUE "ProductName", "GuiExp - 界面拓展库(GUI Expansion)"
-            VALUE "ProductVersion", "1.0.0.11"
+            VALUE "ProductVersion", "1.0.0.12"
         END
     END
     BLOCK "VarFileInfo"

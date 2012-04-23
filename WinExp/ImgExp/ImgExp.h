@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-16
-// Version:	0.1.0006.2356
+// Date:	2012-04-22
+// Version:	0.1.0007.1900
 //
 // History:
 //	- 0.1.0001.2300(2011-04-19)	@ 完成ImgCoder部分所有类的构建

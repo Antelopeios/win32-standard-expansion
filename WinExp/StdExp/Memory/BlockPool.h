@@ -134,9 +134,10 @@ public:
 		DWORD diff_size = 0;
 		{
 			ExLock(m_Mutex, FALSE, mutex_t);
-			if( nSize > m_nMaxSize )
+			if (m_nObjSize == 0) return;
+			if (nSize > m_nMaxSize)
 				nSize = m_nMaxSize;
-			if( m_nFreSize >= nSize ) return;
+			if (m_nFreSize >= nSize) return;
 			diff_size = nSize - m_nFreSize;
 		}
 		for(DWORD i = 0; i < diff_size; ++i)
@@ -158,7 +159,10 @@ public:
 		m_nMaxSize = nMaxSize;
 	}
 	DWORD GetObjSize()
-	{ return m_nObjSize; }
+	{
+		ExLock(m_Mutex, TRUE, mutex_t);
+		return m_nObjSize;
+	}
 	void SetObjSize(DWORD nObjSize)
 	{
 		ExLock(m_Mutex, TRUE, mutex_t);

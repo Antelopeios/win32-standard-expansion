@@ -342,14 +342,11 @@ public:
 				status = 0;
 			else
 			if (thr_sta & 0x01)
-				status = 1;
+				--status;
 		}
 		else
 		if (status == 3)				// psh
 		{
-			status = 4;
-			if (thr_sta & 0x04)
-				--status;
 			if (thr_sta & 0x02)
 				--status;
 			if (thr_sta & 0x01)

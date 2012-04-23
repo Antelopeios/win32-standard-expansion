@@ -255,11 +255,12 @@ public:
 };
 
 typedef CRegistAllocT<> CRegistAlloc;
-typedef CRegistAlloc ExMem;
 
 #ifndef EXP_MEMORY_ALLOC
 #define EXP_MEMORY_ALLOC CRegistAlloc
 #endif/*EXP_MEMORY_ALLOC*/
+
+typedef EXP_MEMORY_ALLOC ExMem;
 
 //////////////////////////////////////////////////////////////////
 

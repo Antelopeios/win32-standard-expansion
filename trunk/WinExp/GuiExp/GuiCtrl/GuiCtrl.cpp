@@ -70,7 +70,9 @@ BOOL IGuiCtl::IsValid() const
 void IGuiCtl::Init(IGuiComp* pComp)
 {
 	EXP_BASE::Init(pComp);
-	if (IsVisible())
+	IGuiWnd* wnd = GetWnd();
+	if (!wnd) return;
+	if (IsVisible() && wnd->IsVisible())
 	{
 		SendMessage(WM_SHOWWINDOW, 1);
 		SetFocus();
@@ -525,9 +527,7 @@ BOOL IGuiCtl::SetVisible(BOOL bVisible/* = TRUE*/)
 }
 BOOL IGuiCtl::IsVisible() const
 {
-	IGuiWnd* wnd = GetWnd();
-	if(!wnd) return FALSE;
-	return m_bVisible && wnd->IsVisible();
+	return m_bVisible;
 }
 
 // 判断有效性
@@ -541,6 +541,11 @@ IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
 {
 	if (pFoc && !IsEffect(pFoc)) return NULL;
 	if (pFoc && !pFoc->IsVisible()) return NULL;
+	if (pFoc)
+	{
+		IGuiWnd* wnd = pFoc->GetWnd();
+		if (!wnd || !wnd->IsVisible()) return NULL;
+	}
 	// 设置控件焦点
 	IGuiCtl* old_fc = m_Focus;
 	m_Focus = pFoc;

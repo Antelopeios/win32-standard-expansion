@@ -327,7 +327,13 @@ public:
 			if (thr_sta & 0x04)
 				status = 0;
 			else
-				status = nfc_tim;
+			{
+				status = nfc_tim - 1;
+				if (thr_sta & 0x02)
+					--status;
+				if (thr_sta & 0x01)
+					--status;
+			}
 		}
 		else
 		if (status == 1)				// ove

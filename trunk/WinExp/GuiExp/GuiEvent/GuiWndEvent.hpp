@@ -320,15 +320,6 @@ protected:
 			// 得到全局图片
 			CGraph* mem_img = (CGraph*)lParam;
 			if (!mem_img || mem_img->IsNull()) goto EndBaseSend;
-			// 调校剪切区
-			CRect clp_rct, rect;
-			pGui->GetClipBox(clp_rct);
-			if (ExDynCast<IGuiCtl>(pGui))
-			{
-				pGui->GetWindowRect(rect);
-				clp_rct.Offset(-rect.pt1);
-			}
-			pGui->GetClientRect(rect);
 			// 遍历控件列表
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
@@ -339,18 +330,16 @@ protected:
 				{
 					// 初始化返回值
 					ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
-					// 获取控件区域
-					ctl->SetClipBox(clp_rct);
-					CRect ctl_rct; CPoint clp_pnt;
-					ctl->GetWindowRect(ctl_rct);
-					clp_pnt = ctl_rct.pt1;
-					clp_pnt.Offset(-clp_rct.pt1);
-					ctl_rct.Inter(rect);
-					ctl_rct.Offset(-clp_rct.pt1);
-					if (ctl_rct.Width() > 0 && ctl_rct.Height() > 0)
+					// 获取控件剪切区域
+					CRect ctl_rct, rc;
+					ctl->GetRealRect(ctl_rct);
+					rc = ctl_rct;
+					rc.Inter(mem_img->GetRect());
+					// 判断剪切区
+					if (rc.Width() > 0 && rc.Height() > 0)
 					{
 						// 创建控件图片
-						CGraph ctl_img(mem_img->GetImage(), ctl_rct, clp_pnt);
+						CGraph ctl_img(mem_img->GetImage(), rc, ctl_rct.LeftTop());
 						// 控件绘图
 						IGuiEffect* eff = ctl->GetEffect();
 						if (eff)

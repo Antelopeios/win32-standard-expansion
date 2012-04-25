@@ -57,30 +57,23 @@ EXP_BEG
 #undef sub
 
 #define add(ite) \
-	if (ite == items->Last()) \
-		ite = items->Head(); \
-	else \
-		++ite; \
-	if (!IGuiCtl::IsEffect(*ite)) \
+	do \
 	{ \
 		if (ite == items->Last()) \
 			ite = items->Head(); \
 		else \
 			++ite; \
-	}
+	} while (!IGuiCtl::IsEffect(*ite))
 //#define add()
+
 #define sub(ite) \
-	if (ite == items->Head()) \
-		ite = items->Last(); \
-	else \
-		--ite; \
-	if (!IGuiCtl::IsEffect(*ite)) \
+	do \
 	{ \
 		if (ite == items->Head()) \
 			ite = items->Last(); \
 		else \
 			--ite; \
-	}
+	} while (!IGuiCtl::IsEffect(*ite))
 //#define sub()
 
 class CGuiListItemEvent : public IGuiEvent /*CGuiList内部使用的列表项*/
@@ -107,6 +100,7 @@ public:
 					{
 						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
 						items_t* items = (items_t*)comp->GetState(_T("items"));
+						if (!items) break;
 
 						CRect rc_me, rc_it;
 						ctl->GetWindowRect(rc_me);
@@ -146,6 +140,7 @@ public:
 					{
 						IGuiCtl* comp = ExDynCast<IGuiCtl>(ctl->GetParent());
 						items_t* items = (items_t*)comp->GetState(_T("items"));
+						if (!items) break;
 
 						CRect rc_me, rc_it;
 						ctl->GetWindowRect(rc_me);
@@ -203,13 +198,11 @@ class CGuiListEvent : public IGuiEvent
 protected:
 	IGuiCtl* m_Ctrl;
 	IGuiCtl* m_FocItm;
-	BOOL m_FirstTime;
 
 public:
 	CGuiListEvent()
 		: m_Ctrl(NULL)
 		, m_FocItm(NULL)
-		, m_FirstTime(TRUE)
 	{}
 
 public:
@@ -247,48 +240,25 @@ public:
 		m_Ctrl->GetClientRect(rect);
 
 		// 遍历列表项
-		LONG all_line = 0;
-		CRect itm_rc;
-		CSize old_sz;
-		if (m_FirstTime)
+		LONG all_line = 0; CRect itm_rc; CSize old_sz;
+		for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 		{
-			m_FirstTime = FALSE;
-
-			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
-			{
-				IGuiCtl* item = *ite;
-				if (!item || !item->IsVisible()) continue;
-				// 获取当前项的区域
-				item->GetRect(itm_rc);
-				// 调整区域
-				itm_rc.MoveTo(CPoint(old_sz.cx, old_sz.cy + space));
-				itm_rc.Width(rect.Width());
-				// 设置当前项区域
-				item->SetRect(itm_rc);
-				// 存储区域
-				old_sz.cy = itm_rc.Bottom();
-			}
-
-			// 设置滚动区域
-			old_sz.cy += space;
-			m_Ctrl->SetAllRect(CSize(0, old_sz.cy));
-		}
-		else
-		{
-			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
-			{
-				IGuiCtl* item = *ite;
-				if (!item || !item->IsVisible()) continue;
-				// 获取当前项的区域
-				item->GetRect(itm_rc);
-				// 调整区域
-				itm_rc.Width(rect.Width());
-				// 设置当前项区域
-				item->SetRect(itm_rc);
-			}
+			IGuiCtl* item = *ite;
+			if (!item || !item->IsVisible()) continue;
+			// 获取当前项的区域
+			item->GetRect(itm_rc);
+			// 调整区域
+			itm_rc.MoveTo(CPoint(old_sz.cx, old_sz.cy + space));
+			itm_rc.Width(rect.Width());
+			// 设置当前项区域
+			item->SetRect(itm_rc);
+			// 存储区域
+			old_sz.cy = itm_rc.Bottom();
 		}
 
 		// 设置滚动区域
+		old_sz.cy += space;
+		m_Ctrl->SetAllRect(CSize(0, old_sz.cy));
 		m_Ctrl->SetFraRect(CSize(0, rect.Height()));
 	}
 	virtual void ShowItem(IGuiCtl* pItem)

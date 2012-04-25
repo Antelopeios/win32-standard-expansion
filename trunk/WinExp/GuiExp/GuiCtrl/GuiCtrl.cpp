@@ -250,6 +250,8 @@ BOOL IGuiCtl::GetRect(CRect& rc) const
 BOOL IGuiCtl::SetRect(const CRect& rc)
 {
 	m_Rect = rc;
+	SendMessage(WM_SIZE, SIZE_RESTORED, 
+		(LPARAM)ExMakeLong(m_Rect.Width(), m_Rect.Height()));
 	return TRUE;
 }
 BOOL IGuiCtl::P2C(CRect& rc) const

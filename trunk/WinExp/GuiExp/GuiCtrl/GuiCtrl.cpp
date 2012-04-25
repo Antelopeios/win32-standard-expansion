@@ -779,9 +779,9 @@ public:
 		else
 		if (m_Key == _T("insert"))
 		{
-			if (!sta || !par) return TRUE;
-			iter_t ite = *(iter_t*)sta;
-			IGuiCtl* item = (IGuiCtl*)par;
+			if (!sta) return TRUE;
+			IGuiCtl* item = (IGuiCtl*)sta;
+			iter_t ite = par ? *(iter_t*)par : m_ItemList.Tail();
 			Ctl()->AddComp(item);
 			m_ItemList.Add(item, ite);
 			if (items_t::SimpleCon == 1) --ite;

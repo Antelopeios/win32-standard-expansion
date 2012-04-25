@@ -5,7 +5,7 @@
 class CCusButton : public IGuiCtl
 {
 	EXP_DECLARE_DYNCREATE_MULT(CCusButton, IGuiCtl)
-		
+
 protected:
 	IGuiCtl* m_Grd;
 	IGuiCtl* m_Txt1;

@@ -203,11 +203,13 @@ class CGuiListEvent : public IGuiEvent
 protected:
 	IGuiCtl* m_Ctrl;
 	IGuiCtl* m_FocItm;
+	BOOL m_FirstTime;
 
 public:
 	CGuiListEvent()
 		: m_Ctrl(NULL)
 		, m_FocItm(NULL)
+		, m_FirstTime(TRUE)
 	{}
 
 public:
@@ -235,7 +237,6 @@ public:
 		ExAssert(m_Ctrl);
 
 		typedef IGuiCtl::items_t items_t;
-		static BOOL first_time = TRUE;
 
 		// »ñµÃÊôĞÔ
 		items_t* items = (items_t*)GetItems();
@@ -249,9 +250,9 @@ public:
 		LONG all_line = 0;
 		CRect itm_rc;
 		CSize old_sz;
-		if (first_time)
+		if (m_FirstTime)
 		{
-			first_time = FALSE;
+			m_FirstTime = FALSE;
 
 			for(items_t::iterator_t ite = items->Head(); ite != items->Tail(); ++ite)
 			{

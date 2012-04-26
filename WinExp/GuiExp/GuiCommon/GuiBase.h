@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-13
-// Version:	1.0.0008.1417
+// Date:	2012-04-26
+// Version:	1.0.0009.1716
 //
 // History:
 //	- 1.0.0002.0047(2011-06-08)	@ 完善IGuiBase,添加全局通用消息预处理并统一GC
@@ -44,6 +44,8 @@
 //	- 1.0.0006.2000(2011-07-16)	+ 在IGuiBase中添加绘图剪切区的相关接口
 //	- 1.0.0007.1712(2012-01-20)	= IGuiBase::GetGC()默认返回空GC
 //	- 1.0.0008.1417(2012-03-13)	+ 添加IGuiBase::ExcState()接口,方便外部调用时的名称统一(与调用IGuiBase::Execute()同义)
+//	- 1.0.0009.1346(2012-04-26)	+ IGuiBase的消息穿透接口支持重写
+//								+ IGuiBase支持保存一个额外的void*指针
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBase_h__
@@ -67,13 +69,16 @@ EXP_INTERFACE IGuiBase : public IGuiComp, public IGuiSender, public IExecutor
 protected:
 	static IGuiBase* s_pCapture;
 
+	void* m_Param;
+
 	CRect m_rcClip;
 
 	BOOL m_bThrough;
 
 public:
 	IGuiBase()
-		: m_bThrough(FALSE)
+		: m_Param(NULL)
+		, m_bThrough(FALSE)
 	{
 		// 添加事件对象
 		InsEvent(_T("CGuiWndEvent"));
@@ -84,11 +89,19 @@ public:
 public:
 	BOOL IsValid() const { return EXP_MULT::IsValid(); }
 
+	void*& Param() { return m_Param; }
+
 	void SetTrust(BOOL bTruCldr = TRUE) { IGuiComp::SetTrust(bTruCldr); }
 	BOOL IsTrust() const { return IGuiComp::IsTrust(); }
 
-	void SetThrough(BOOL bThrough) { m_bThrough = bThrough; }
-	BOOL IsThrough() const { return m_bThrough; }
+	virtual BOOL SetThrough(BOOL bThrough = TRUE)
+	{
+		if (m_bThrough == bThrough) return m_bThrough;
+		BOOL old = m_bThrough;
+		m_bThrough = bThrough;
+		return old;
+	}
+	virtual BOOL IsThrough() const { return m_bThrough; }
 
 	virtual BOOL Execute(const CString& key, const CString& val)
 	{

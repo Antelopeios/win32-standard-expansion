@@ -33,8 +33,8 @@
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-12
-// Version:	1.0.0002.1603
+// Date:	2012-04-26
+// Version:	1.0.0003.1346
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiExecutor_hpp__
@@ -451,19 +451,6 @@ public:
 				ctl = (IGuiCtl*)ctl->Execute(xml, ite, parent);
 				if (ctl)
 				{
-					ctl->SetRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
-					CString t = xml.GetAttr(_T("visible"), ite); t.Lower();
-					if (t == _T("false"))
-						ctl->SetVisible(FALSE);
-					else
-					if (t == _T("true"))
-						ctl->SetVisible(TRUE);
-					t = xml.GetAttr(_T("through"), ite); t.Lower();
-					if (t == _T("false"))
-						ctl->SetThrough(FALSE);
-					else
-					if (t == _T("true"))
-						ctl->SetThrough(TRUE);
 					IGuiBase* pare = ExDynCast<IGuiBase>(parent);
 					if (pare)
 						pare->AddComp(ctl);

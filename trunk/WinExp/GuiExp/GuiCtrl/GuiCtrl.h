@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-04-21
-// Version:	1.0.0027.2235
+// Date:	2012-04-26
+// Version:	1.0.0028.1346
 //
 // History:
 //	- 1.0.0001.2236(2011-05-23)	+ IGuiCtrl添加效果对象相关接口
@@ -71,6 +71,8 @@
 //	- 1.0.0025.1515(2012-03-24)	+ 添加控件设置对象管理的相关接口,支持通过控件设置对象对控件的属性做动态管理
 //	- 1.0.0026.1449(2012-04-17)	^ 简化控件对象的层次结构,移除IGuiCtrlBase接口,将其所有功能并入IGuiCtl
 //	- 1.0.0027.2235(2012-04-21)	# 修正当窗口不可见时,控件的焦点设置仍然有效,导致界面响应的异常问题
+//	- 1.0.0028.1346(2012-04-26)	+ 添加控件的无焦点属性接口
+//								+ 添加控件的枚举接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiCtrl_h__
@@ -99,6 +101,7 @@ public:
 protected:
 	BOOL m_bEnable;		// 是否可用
 	BOOL m_bVisible;	// 是否可见
+	BOOL m_bNoFocus;	// 是否无焦点
 
 	CRect m_Rect;		// 控件区域
 
@@ -196,6 +199,13 @@ public:
 	BOOL SetVisible(BOOL bVisible = TRUE);
 	BOOL IsVisible() const;
 
+	// 设置无焦点
+	BOOL SetNoFocus(BOOL bNoFocus = TRUE);
+	BOOL IsNoFocus() const;
+
+	// 设置消息穿透
+	BOOL SetThrough(BOOL bThrough = TRUE);
+
 	// 判断有效性
 	static BOOL IsEffect(const IGuiCtl* pCtrl);
 
@@ -204,6 +214,12 @@ public:
 	virtual IGuiCtl* SetFocus();
 	static IGuiCtl* GetFocus();
 	virtual BOOL IsFocus() const;
+
+	// 控件枚举
+	IGuiCtl* GetHead();
+	IGuiCtl* GetLast();
+	IGuiCtl* GetNext();
+	IGuiCtl* GetPrev();
 };
 
 //////////////////////////////////////////////////////////////////

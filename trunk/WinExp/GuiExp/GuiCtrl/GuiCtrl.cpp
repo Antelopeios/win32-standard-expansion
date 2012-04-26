@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-04-17
-// Version:	1.0.0026.1449
+// Date:	2012-04-26
+// Version:	1.0.0028.1346
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -57,6 +57,7 @@ IGuiCtl::IGuiCtl()
 	, m_bTruEff(TRUE)
 	, m_bEnable(TRUE)
 	, m_bVisible(TRUE)
+	, m_bNoFocus(FALSE)
 	, m_Updated(TRUE)
 {
 	m_Scroll[1] = m_Scroll[0] = NULL;
@@ -175,6 +176,29 @@ BOOL IGuiCtl::Execute(const CString& key, const CString& val)
 }
 void* IGuiCtl::Execute(CGuiXML& xml, CGuiXML::iterator_t& ite, void* parent)
 {
+	// 设置区域
+	SetRect(ExStringToRect(xml.GetAttr(_T("rect"), ite)));
+	// 设置可见性
+	CString t = xml.GetAttr(_T("visible"), ite); t.Lower();
+	if (t == _T("false"))
+		SetVisible(FALSE);
+	else
+	if (t == _T("true"))
+		SetVisible(TRUE);
+	// 设置无焦点
+	t = xml.GetAttr(_T("no_focus"), ite); t.Lower();
+	if (t == _T("false"))
+		SetNoFocus(FALSE);
+	else
+	if (t == _T("true"))
+		SetNoFocus(TRUE);
+	// 设置消息穿透
+	t = xml.GetAttr(_T("through"), ite); t.Lower();
+	if (t == _T("false"))
+		SetThrough(FALSE);
+	else
+	if (t == _T("true"))
+		SetThrough(TRUE);
 	return IGuiBase::Execute(xml, ite, parent);
 }
 void* IGuiCtl::GetState(const CString& sType, void* pParam/* = NULL*/)
@@ -532,6 +556,29 @@ BOOL IGuiCtl::IsVisible() const
 	return m_bVisible;
 }
 
+// 设置无焦点
+BOOL IGuiCtl::SetNoFocus(BOOL bNoFocus/* = TRUE*/)
+{
+	if (m_bNoFocus == bNoFocus) return m_bNoFocus;
+	BOOL old = m_bNoFocus;
+	m_bNoFocus = bNoFocus;
+	if (m_bNoFocus && m_Focus == this) SetFocus();
+	UpdateState();
+	return old;
+}
+BOOL IGuiCtl::IsNoFocus() const
+{
+	return m_bNoFocus;
+}
+
+// 设置消息穿透
+BOOL IGuiCtl::SetThrough(BOOL bThrough/* = TRUE*/)
+{
+	BOOL old = IGuiBase::SetThrough(bThrough);
+	if (IsThrough()) SetNoFocus(TRUE);
+	return old;
+}
+
 // 判断有效性
 BOOL IGuiCtl::IsEffect(const IGuiCtl* pCtrl)
 {
@@ -547,6 +594,20 @@ IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
 	{
 		IGuiWnd* wnd = pFoc->GetWnd();
 		if (!wnd || !wnd->IsVisible()) return NULL;
+		if (pFoc->IsNoFocus())
+		{
+			IGuiCtl* next = pFoc->GetNext();
+			if (next == pFoc)
+			{
+				IGuiCtl* pre = ExDynCast<IGuiCtl>(pFoc->GetParent());
+				if (pre)
+					pre->SetFocus();
+				else
+					return NULL;
+			}
+			else
+				return next->SetFocus();
+		}
 	}
 	// 设置控件焦点
 	IGuiCtl* old_fc = m_Focus;
@@ -595,6 +656,52 @@ BOOL IGuiCtl::IsFocus() const
 		if (ctl->IsFocus()) return TRUE;
 	}
 	return FALSE;
+}
+
+// 控件枚举
+IGuiCtl* IGuiCtl::GetHead()
+{
+	IGuiComp* comp = GetParent();
+	return ExDynCast<IGuiCtl>(comp->GetComp().HeadItem());
+}
+IGuiCtl* IGuiCtl::GetLast()
+{
+	IGuiComp* comp = GetParent();
+	return ExDynCast<IGuiCtl>(comp->GetComp().LastItem());
+}
+IGuiCtl* IGuiCtl::GetNext()
+{
+	IGuiComp* comp = GetParent();
+	IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(this));
+	ExAssert(ite != comp->GetComp().Tail());
+	IGuiCtl* next = NULL;
+	do
+	{
+		if (ite == comp->GetComp().Last())
+			ite = comp->GetComp().Head();
+		else
+			++ite;
+		next = ExDynCast<IGuiCtl>(*ite);
+	} while (next != this && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
+	ExAssert(next);
+	return next;
+}
+IGuiCtl* IGuiCtl::GetPrev()
+{
+	IGuiComp* comp = GetParent();
+	IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(this));
+	ExAssert(ite != comp->GetComp().Tail());
+	IGuiCtl* next = NULL;
+	do
+	{
+		if (ite == comp->GetComp().Head())
+			ite = comp->GetComp().Last();
+		else
+			--ite;
+		next = ExDynCast<IGuiCtl>(*ite);
+	} while (next != this && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
+	ExAssert(next);
+	return next;
 }
 
 //////////////////////////////////////////////////////////////////

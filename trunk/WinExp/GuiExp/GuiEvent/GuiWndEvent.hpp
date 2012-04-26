@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-03-16
-// Version:	1.0.0018.2349
+// Date:	2012-04-26
+// Version:	1.0.0019.1346
 //
 // History:
 //	- 1.0.0001.2202(2011-05-23)	+ 添加控件消息转发时的特殊消息处理(WM_PAINT)
@@ -59,6 +59,7 @@
 //								% 调整并完善CGuiWndEvent中的滚动条控制逻辑
 //	- 1.0.0017.1601(2012-03-01)	- 不再在GuiWndEvent的滚动条逻辑中自动控制滚动条关联窗口的大小
 //	- 1.0.0018.2349(2012-03-16)	^ 绘图时传递的参数由图片对象改为带有独立剪切区与坐标的画布对象,将绘图工作彻底浓缩到一张全局位图上进行
+//	- 1.0.0019.1346(2012-04-26)	= 默认的消息转发将不再自动向下传递
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWndEvent_hpp__
@@ -185,33 +186,11 @@ protected:
 			{
 				if (wParam == VK_TAB)
 				{
-					IGuiComp* comp = ctl->GetParent();
-					IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(ctl));
-					if (ite == comp->GetComp().Tail()) goto EndWndSend;
 					IGuiCtl* next = NULL;
 					if (m_ShiftDown)
-					{
-						do 
-						{
-							if (ite == comp->GetComp().Head())
-								ite = comp->GetComp().Last();
-							else
-								--ite;
-							next = ExDynCast<IGuiCtl>(*ite);
-						} while (next != ctl && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
-					}
+						next = ctl->GetPrev();
 					else
-					{
-						do 
-						{
-							if (ite == comp->GetComp().Last())
-								ite = comp->GetComp().Head();
-							else
-								++ite;
-							next = ExDynCast<IGuiCtl>(*ite);
-						} while (next != ctl && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
-					}
-					if (!next) goto EndWndSend;
+						next = ctl->GetNext();
 					next->SetFocus();
 				}
 				else
@@ -299,7 +278,7 @@ protected:
 	{
 		if (!pGui) return 0;
 		// 向控件转发消息
-		if (nMessage >= WM_MOUSEFIRST && 
+	/*	if (nMessage >= WM_MOUSEFIRST && 
 			nMessage <= WM_MOUSELAST || 
 			nMessage >= WM_NCMOUSEMOVE && 
 			nMessage <= WM_NCMBUTTONDBLCLK || 
@@ -314,7 +293,7 @@ protected:
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			goto EndBaseSend;
 		}
-		else
+		else*/
 		if (nMessage == WM_PAINT)
 		{
 			// 得到全局图片
@@ -335,6 +314,8 @@ protected:
 					ctl->GetRealRect(ctl_rct);
 					rc = ctl_rct;
 					rc.Inter(mem_img->GetRect());
+					// 设置剪切区
+					ctl->SetClipBox(rc);
 					// 判断剪切区
 					if (rc.Width() > 0 && rc.Height() > 0)
 					{
@@ -383,7 +364,7 @@ protected:
 				lrDef = ctl->GetResult(lrDef);
 			}
 		}
-		else
+	/*	else
 		{
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
@@ -398,7 +379,7 @@ protected:
 				// 判断返回值
 				lrDef = ctl->GetResult(lrDef);
 			}
-		}
+		}*/
 	EndBaseSend:
 		return lrDef;
 	}

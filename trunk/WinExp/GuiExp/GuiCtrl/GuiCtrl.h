@@ -218,8 +218,8 @@ public:
 	// ¿Ø¼þÃ¶¾Ù
 	IGuiCtl* GetHead();
 	IGuiCtl* GetLast();
-	IGuiCtl* GetNext();
-	IGuiCtl* GetPrev();
+	IGuiCtl* GetNext(BOOL bCheckThrough = TRUE, BOOL bCheckNoFocus = FALSE);
+	IGuiCtl* GetPrev(BOOL bCheckThrough = TRUE, BOOL bCheckNoFocus = FALSE);
 };
 
 //////////////////////////////////////////////////////////////////

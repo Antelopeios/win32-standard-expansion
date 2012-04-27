@@ -348,13 +348,15 @@ protected:
 			}
 		}
 		else
-		if (nMessage == WM_SHOWWINDOW)
+		if (nMessage == WM_SHOWWINDOW || 
+			nMessage == WM_TIMER)
 		{
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
 				IGuiCtl* ctl = (IGuiCtl*)(*ite);
-				if (!ctl || !ctl->IsVisible()) continue;
+				if (!ctl || !ctl->IsVisible() || 
+					(nMessage != WM_SHOWWINDOW && !ctl->IsEnabled())) continue;
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息

@@ -75,6 +75,7 @@ public:
 	{
 		// 添加事件对象
 		InsEvent(_T("CGuiSliderEvent")); /*先让基类绘图*/
+		m_Slider.SetNoFocus(TRUE);
 		m_Slider.AddEvent(_T("CGuiSliBlkEvent"));
 		// 添加控件对象
 		InsComp(&m_Slider);
@@ -197,7 +198,9 @@ public:
 	{
 		// 添加事件对象
 		InsEvent(_T("CGuiScrollEvent")); /*先让基类绘图*/
+		m_Up.SetNoFocus(TRUE);
 		m_Up.InsEvent(_T("CGuiScrUpEvent"));
+		m_Down.SetNoFocus(TRUE);
 		m_Down.InsEvent(_T("CGuiScrDnEvent"));
 		// 添加控件对象
 		InsComp(&m_Slider);

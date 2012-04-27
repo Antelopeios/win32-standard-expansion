@@ -596,7 +596,7 @@ IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
 		if (!wnd || !wnd->IsVisible()) return NULL;
 		if (pFoc->IsNoFocus())
 		{
-			IGuiCtl* next = pFoc->GetNext();
+			IGuiCtl* next = pFoc->GetNext(TRUE, TRUE);
 			if (next == pFoc)
 			{
 				IGuiCtl* pre = ExDynCast<IGuiCtl>(pFoc->GetParent());
@@ -669,7 +669,7 @@ IGuiCtl* IGuiCtl::GetLast()
 	IGuiComp* comp = GetParent();
 	return ExDynCast<IGuiCtl>(comp->GetComp().LastItem());
 }
-IGuiCtl* IGuiCtl::GetNext()
+IGuiCtl* IGuiCtl::GetNext(BOOL bCheckThrough/* = TRUE*/, BOOL bCheckNoFocus/* = FALSE*/)
 {
 	IGuiComp* comp = GetParent();
 	IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(this));
@@ -682,11 +682,13 @@ IGuiCtl* IGuiCtl::GetNext()
 		else
 			++ite;
 		next = ExDynCast<IGuiCtl>(*ite);
-	} while (next != this && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
+	} while (next != this && (!IGuiCtl::IsEffect(next) || 
+			(bCheckThrough && next->IsThrough()) || 
+			(bCheckNoFocus && next->IsNoFocus()) ));
 	ExAssert(next);
 	return next;
 }
-IGuiCtl* IGuiCtl::GetPrev()
+IGuiCtl* IGuiCtl::GetPrev(BOOL bCheckThrough/* = TRUE*/, BOOL bCheckNoFocus/* = FALSE*/)
 {
 	IGuiComp* comp = GetParent();
 	IGuiComp::list_t::iterator_t ite = comp->FindComp(ExDynCast<IGuiComp>(this));
@@ -699,7 +701,9 @@ IGuiCtl* IGuiCtl::GetPrev()
 		else
 			--ite;
 		next = ExDynCast<IGuiCtl>(*ite);
-	} while (next != this && (!IGuiCtl::IsEffect(next) || next->IsThrough()));
+	} while (next != this && (!IGuiCtl::IsEffect(next) || 
+			(bCheckThrough && next->IsThrough()) || 
+			(bCheckNoFocus && next->IsNoFocus()) ));
 	ExAssert(next);
 	return next;
 }

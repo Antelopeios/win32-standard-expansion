@@ -296,6 +296,11 @@ protected:
 		else*/
 		if (nMessage == WM_PAINT)
 		{
+			// 得到主窗口指针
+			IGuiWnd* wnd = (IGuiWnd*)wParam;
+			if (!wnd) goto EndBaseSend;
+			CRect wnd_clp;
+			wnd->GetClipBox(wnd_clp);
 			// 得到全局图片
 			CGraph* mem_img = (CGraph*)lParam;
 			if (!mem_img || mem_img->IsNull()) goto EndBaseSend;
@@ -310,9 +315,11 @@ protected:
 					// 初始化返回值
 					ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 					// 获取控件剪切区域
-					CRect ctl_rct, rc;
+					CRect ctl_rct;
 					ctl->GetRealRect(ctl_rct);
-					rc = ctl_rct;
+					CRect rc(ctl_rct);
+					rc.Offset(-wnd_clp.LeftTop());
+					CPoint pt(rc.LeftTop());
 					rc.Inter(mem_img->GetRect());
 					// 设置剪切区
 					ctl->SetClipBox(rc);
@@ -320,7 +327,7 @@ protected:
 					if (rc.Width() > 0 && rc.Height() > 0)
 					{
 						// 创建控件图片
-						CGraph ctl_img(mem_img->GetImage(), rc, ctl_rct.LeftTop());
+						CGraph ctl_img(mem_img->GetImage(), rc, pt);
 						// 控件绘图
 						IGuiEffect* eff = ctl->GetEffect();
 						if (eff)
@@ -434,7 +441,7 @@ public:
 						CImgFilter::Filter(mem_img, rect, &CFilterBrush(wnd->GetColorKey()));
 					// 覆盖控件绘图
 					CGraph wnd_img(mem_img);
-					ret = WndSend(wnd, nMessage, wParam, (LPARAM)&wnd_img);
+					ret = WndSend(wnd, nMessage, (WPARAM)wnd, (LPARAM)&wnd_img);
 					// 覆盖缓存绘图
 					CDC mem_dc;
 					mem_dc.Create();

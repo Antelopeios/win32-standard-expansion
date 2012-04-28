@@ -51,12 +51,12 @@ EXP_BEG
 
 //////////////////////////////////////////////////////////////////
 
-class CGuiProgress : public CGuiPicture
+class CGuiProgress : public CGuiStatic
 {
-	EXP_DECLARE_DYNCREATE_MULT(CGuiProgress, CGuiPicture)
+	EXP_DECLARE_DYNCREATE_MULT(CGuiProgress, CGuiStatic)
 
 protected:
-	CGuiPicture m_Prog;
+	CGuiStatic m_Prog;
 	uint32_t m_nVal, m_nMax;
 		
 public:
@@ -66,8 +66,11 @@ public:
 	{
 		// 添加事件对象
 		InsEvent(_T("CGuiProgressEvent")); /*先让基类绘图*/
-		SetState(_T("color"), (void*)ExRGBA(220, 220, 220, EXP_CM));
-		m_Prog.SetState(_T("color"), (void*)ExRGBA(120, 120, 120, EXP_CM));
+		pixel_t pix[10] = {0};
+		for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(220, 220, 220, EXP_CM);
+		SetState(_T("color"), (void*)pix);
+		for(int i = 0; i < _countof(pix); ++i) pix[i] = ExRGBA(120, 120, 120, EXP_CM);
+		m_Prog.SetState(_T("color"), (void*)pix);
 		// 添加控件对象
 		InsComp(&m_Prog);
 	}
@@ -140,9 +143,7 @@ public:
 	}
 };
 
-//////////////////////////////////////////////////////////////////
-
-EXP_IMPLEMENT_DYNCREATE_MULT(CGuiProgress, CGuiPicture)
+EXP_IMPLEMENT_DYNCREATE_MULT(CGuiProgress, CGuiStatic)
 
 //////////////////////////////////////////////////////////////////
 

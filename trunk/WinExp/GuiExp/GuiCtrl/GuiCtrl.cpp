@@ -593,7 +593,7 @@ IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
 	if (pFoc)
 	{
 		IGuiWnd* wnd = pFoc->GetWnd();
-		if (!wnd || !wnd->IsVisible()) return NULL;
+		if (!wnd/* || !wnd->IsVisible()*/) return NULL;
 		if (pFoc->IsNoFocus())
 		{
 			IGuiCtl* next = pFoc->GetNext(TRUE, TRUE);
@@ -601,7 +601,7 @@ IGuiCtl* IGuiCtl::SetFocus(IGuiCtl* pFoc)
 			{
 				IGuiCtl* pre = ExDynCast<IGuiCtl>(pFoc->GetParent());
 				if (pre)
-					pre->SetFocus();
+					return pre->SetFocus();
 				else
 					return NULL;
 			}

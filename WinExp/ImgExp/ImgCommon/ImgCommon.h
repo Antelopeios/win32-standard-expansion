@@ -74,7 +74,10 @@ typedef BYTE		chann_t;
 
 #define ExRGB(r, g, b) RGB(r, g, b)
 #define ExRGBA(r, g, b, a) \
-	( (pixel_t) ((((chann_t)(r) | ((WORD)((chann_t)(g))<<8)) | (((DWORD)(chann_t)(b))<<16)) | (((DWORD)(chann_t)(a))<<24)) )
+	( (EXP::pixel_t) ((((EXP::chann_t)(r) | \
+	((WORD)((EXP::chann_t)(g))<<8)) | \
+	(((DWORD)(EXP::chann_t)(b))<<16)) | \
+	(((DWORD)(EXP::chann_t)(a))<<24)) )
 
 #define ExGetR(pix)	GetRValue(pix)
 #define ExGetG(pix)	GetGValue(pix)
@@ -89,7 +92,7 @@ typedef BYTE		chann_t;
 #define ExIsEqual(a, b)	ExIsZero((a) - (b))
 
 #define EXP_PI		3.14159265
-#define EXP_CM		((chann_t)~0)
+#define EXP_CM		((EXP::chann_t)~0)
 
 #define ExDivCM(x) (((x) + (((x) >> 8) + 1)) >> 8)
 #define ExMulCM(x) (((x) << 8) - (x))

@@ -132,7 +132,10 @@ public:
 	{
 		CArrayT<CString> sa;
 		ExStringToArray(val, sa);
-		Set((void*)ExStringToColor(sa[0]));
+		if (sa.Empty())
+			Set((void*)ExRGBA(0, 0, 0, 0));
+		else
+			Set((void*)ExStringToColor(sa[0]));
 		Ctl()->UpdateState();
 		return TRUE;
 	}

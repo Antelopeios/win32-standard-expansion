@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-04-17
-// Version:	1.0.0015.1449
+// Date:	2012-05-01
+// Version:	1.0.0016.1545
 //
 // History:
 //	- 1.0.0001.1054(2011-05-11)	+ 添加IGuiBoard::Attach()和IGuiBoard::Detach()接口
@@ -53,6 +53,7 @@
 //	- 1.0.0013.1558(2012-02-27)	+ 添加支持仅移动窗口位置而不改变大小的MoveWindow方法
 //	- 1.0.0014.2230(2012-03-02)	+ 窗口支持通过DoModal方法进行模态调用
 //	- 1.0.0015.1449(2012-04-17)	^ 简化窗口对象的层次结构,移除IGuiBoardBase接口,将其所有功能并入IGuiWnd
+//	- 1.0.0016.1545(2012-05-01)	+ 添加控制图层化窗口透明度的接口
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiBoard_h__
@@ -95,6 +96,7 @@ protected:
 	BOOL m_bLayered;
 	BOOL m_bColorKey;
 	pixel_t m_crKey;
+	chann_t m_cAlpha;
 
 	int m_ModalResult;
 	BOOL m_IsModalLoop;
@@ -191,6 +193,8 @@ public:
 	BOOL IsLayered() const;
 	BOOL IsColorKey() const;
 	pixel_t GetColorKey() const;
+	void SetAlpha(chann_t cAlpha);
+	chann_t GetAlpha() const;
 	void LayeredWindow(HDC hDC, HDC hdc);
 };
 

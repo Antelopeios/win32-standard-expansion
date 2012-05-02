@@ -33,8 +33,8 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-04-11
-// Version:	1.0.0012.1700
+// Date:	2012-05-01
+// Version:	1.0.0013.2110
 //
 // History:
 //	- 1.0.0001.2305(2011-05-25)	+ CGuiButton添加状态属性
@@ -53,6 +53,7 @@
 //	- 1.0.0011.1931(2012-03-11) ^ 优化GuiButton的内部设定,Execute的某些设置项支持直接用中文定义整型属性
 //								+ GuiButton支持勾选按钮
 //	- 1.0.0012.1700(2012-04-11) + 添加comf属性,支持设置文字与字体时自动调整按钮大小以符合文字内容
+//	- 1.0.0013.2110(2012-05-01) # 修正当CGuiButton在响应点击事件时出现延迟(如DoModal),将会影响后续的按钮状态显示
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiButton_hpp__
@@ -390,19 +391,17 @@ public:
 		CRect rc;
 		Ctl()->GetRealRect(rc);
 
-		if (m_Status == prs) // 当按下后抬起,视为一次Click
-		{
-			Ctl()->SendMessage(BM_CLICK);
-			if(!Ctl()->IsValid()) return;
-		}
-
-		if (m_Status == psh) return;
-
+		status_t old = m_Status;
 		if (rc.PtInRect(pt))
 			m_Status = ovr;
 		else
 			m_Status = nor;
 
+		if (old == prs) // 当按下后抬起,视为一次Click
+		{
+			Ctl()->SendMessage(BM_CLICK);
+			if(!Ctl()->IsValid()) return;
+		}
 		Ctl()->UpdateState();
 	}
 	void MusMov()

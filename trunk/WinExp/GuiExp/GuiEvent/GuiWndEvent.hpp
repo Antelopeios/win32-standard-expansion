@@ -110,6 +110,8 @@ protected:
 	LRESULT WndSend(IGuiWnd* pGui, UINT nMessage, WPARAM wParam, LPARAM lParam, LRESULT lrDef = 0)
 	{
 		if (!pGui) return NULL;
+		if (!::IsWindowEnabled(pGui->GethWnd()))
+			return BaseSend((IGuiBase*)pGui, nMessage, wParam, lParam, lrDef);
 		// 向控件转发消息
 		if (nMessage >= WM_MOUSEFIRST && 
 			nMessage <= WM_MOUSELAST || 
@@ -356,14 +358,27 @@ protected:
 		}
 		else
 		if (nMessage == WM_SHOWWINDOW || 
-			nMessage == WM_TIMER)
+			nMessage == WM_TIMER || 
+			nMessage == WM_CREATE)
 		{
 		//	ExTrace(_T("0x%04X\n"), nMessage);
 			for(IGuiBase::list_t::iterator_t ite = pGui->GetComp().Head(); ite != pGui->GetComp().Tail(); ++ite)
 			{
 				IGuiCtl* ctl = (IGuiCtl*)(*ite);
-				if (!ctl || !ctl->IsVisible() || 
-					(nMessage != WM_SHOWWINDOW && !ctl->IsEnabled())) continue;
+				if (!ctl) continue;
+				if (nMessage == WM_SHOWWINDOW)
+				{
+					if (!ctl->IsVisible()) continue;
+				}
+				else
+				if (nMessage == WM_CREATE)
+				{
+				}
+				else
+				{
+					if (!ctl->IsVisible() || 
+						!ctl->IsEnabled()) continue;
+				}
 				// 初始化返回值
 				ctl->SetResult(lrDef); // 发送消息时,让控件对象收到上一个控件的处理结果
 				// 转发消息

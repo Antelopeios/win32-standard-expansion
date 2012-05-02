@@ -33,8 +33,8 @@
 // Author:	Ä¾Í·ÔÆ
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2012-04-17
-// Version:	1.0.0015.1449
+// Date:	2012-05-01
+// Version:	1.0.0016.1545
 //////////////////////////////////////////////////////////////////
 
 #include "GuiCommon/GuiCommon.h"
@@ -62,6 +62,7 @@ IGuiWnd::IGuiWnd(void)
 	, m_bLayered(FALSE)
 	, m_bColorKey(FALSE)
 	, m_crKey(ExRGB(255, 0, 255))
+	, m_cAlpha(EXP_CM)
 	, m_ModalResult(0)
 	, m_IsModalLoop(FALSE)
 {}
@@ -563,6 +564,15 @@ pixel_t IGuiWnd::GetColorKey() const
 {
 	return m_crKey;
 }
+void IGuiWnd::SetAlpha(chann_t cAlpha)
+{
+	m_cAlpha = cAlpha;
+	Invalidate();
+}
+chann_t IGuiWnd::GetAlpha() const
+{
+	return m_cAlpha;
+}
 void IGuiWnd::LayeredWindow(HDC hDes, HDC hSrc)
 {
 	if (!hDes || !hSrc) return;
@@ -582,7 +592,7 @@ void IGuiWnd::LayeredWindow(HDC hDes, HDC hSrc)
 
 		BLENDFUNCTION blend		  = {0};
 		blend.AlphaFormat		  = AC_SRC_ALPHA;
-		blend.SourceConstantAlpha = EXP_CM;
+		blend.SourceConstantAlpha = m_cAlpha;
 		::UpdateLayeredWindow(Get(), hDes, &pt_wnd, &sz_wnd, hSrc, &pt_src, 0, &blend, 2);
 	}
 	else

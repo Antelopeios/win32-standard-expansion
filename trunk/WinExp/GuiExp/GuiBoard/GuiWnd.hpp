@@ -33,11 +33,12 @@
 // Author:	木头云
 // Home:	dark-c.at
 // E-Mail:	mark.lonr@tom.com
-// Date:	2011-05-19
-// Version:	1.0.0001.1100
+// Date:	2011-05-01
+// Version:	1.0.0002.1631
 //
 // History:
 //	- 1.0.0001.1100(2011-05-19)	= 将CGuiWnd与事件处理分离,处理过程放入CGuiWndEvent
+//	- 1.0.0002.1631(2011-05-01)	+ 普通窗口添加tool与topmost属性解析
 //////////////////////////////////////////////////////////////////
 
 #ifndef __GuiWnd_hpp__
@@ -178,6 +179,17 @@ public:
 		else
 		if (t == _T("true"))
 			SetLayered(TRUE, clr_key, key);
+
+		t = xml.GetAttr(_T("tool"), ite); t.Lower();
+		if (t == _T("false"))
+			ModifyStyleEx(WS_EX_TOOLWINDOW, NULL);
+		else
+		if (t == _T("true"))
+			ModifyStyleEx(NULL, WS_EX_TOOLWINDOW);
+
+		t = xml.GetAttr(_T("topmost"), ite); t.Lower();
+		if (t == _T("true"))
+			::SetWindowPos(Get(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 		return this;
 	}

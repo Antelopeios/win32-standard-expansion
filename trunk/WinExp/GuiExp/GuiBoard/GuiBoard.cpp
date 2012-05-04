@@ -185,6 +185,7 @@ int IGuiWnd::DoModal()
 {
 	if (IsNull()) Create();
 	ShowWindow();
+	Invalidate();
 
 	wnd_t pare = GetParent();
 	BOOL set_enabled = FALSE;
